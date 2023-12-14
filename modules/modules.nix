@@ -1,0 +1,4 @@
+[
+  ./applications.nix
+  ./nixidy.nix
+]
