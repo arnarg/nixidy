@@ -194,7 +194,10 @@
           ++ (lib.mapAttrsToList (n: v:
             lib.resources.fromHelmChart {
               inherit (v) name chart values includeCRDs;
-              namespace = v.namespace or config.namespace;
+              namespace =
+                if (isNull v.namespace)
+                then config.namespace
+                else v.namespace;
             })
           config.helm.releases));
       };
