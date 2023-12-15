@@ -555,7 +555,7 @@
 <p>See <a href="https://github.com/arnarg/nixidy-demo">nixidy-demo</a>.</p>
 <h2 id="non-goals">Non Goals<a class="headerlink" href="#non-goals" title="Permanent link">#</a></h2>
 <h3 id="typed-resource-definitions">Typed Resource Definitions<a class="headerlink" href="#typed-resource-definitions" title="Permanent link">#</a></h3>
-<p>nixidy does not concern itself with defining typed options for every possible Kubernetes resource like is done with kubenix.
+<p>nixidy does not concern itself with defining typed options for every possible Kubernetes resource like is done with <a href="https://github.com/hall/kubenix">kubenix</a>.
 This approach requires automatic generation from JSON schemas of all supported resources, and needs to be updated for every new release of Kubernetes.</p>
 <p>That also means that it will explicitly need to support every different CRD from applications it wants to deploy.</p>
 <p>Instead it allows for outputing any structure as long as it's under <code>&lt;apiVersion&gt;.&lt;kind&gt;.&lt;name&gt;</code> and let Argo CD surface the error if the data is not a valid Kubernetes manifest.</p>
