@@ -5,6 +5,8 @@
 }: let
   global = config;
 
+  setPriority = pri: resources: lib.mapAttrsRecursive (_: val: lib.mkOverride pri val) resources;
+
   helmOpts = with lib;
     {name, ...}: {
       options = {
@@ -187,18 +189,20 @@
 
       config = {
         resources = lib.mkMerge ([
-            (lib.resources.fromManifestYAMLs config.yamls)
-            (lib.resources.fromManifests config.manifests)
+            (setPriority 500
+              (lib.resources.fromManifests config.manifests))
+            (setPriority 700
+              (lib.resources.fromManifestYAMLs config.yamls))
             (lib.optionalAttrs config.createNamespace {v1.Namespace.${config.namespace} = {};})
           ]
-          ++ (lib.mapAttrsToList (n: v:
-            lib.resources.fromHelmChart {
+          ++ (lib.mapAttrsToList (n: v: (setPriority 900
+            (lib.resources.fromHelmChart {
               inherit (v) name chart values includeCRDs;
               namespace =
                 if (isNull v.namespace)
                 then config.namespace
                 else v.namespace;
-            })
+            })))
           config.helm.releases));
       };
     };
