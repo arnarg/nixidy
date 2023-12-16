@@ -511,15 +511,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#nixidydefaultsyncpolicyautomatedprune" class="md-nav__link">
-    nixidy.defaultSyncPolicy.automated.prune
+  <a href="#nixidydefaultshelmtransformer" class="md-nav__link">
+    nixidy.defaults.helm.transformer
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#nixidydefaultsyncpolicyautomatedselfheal" class="md-nav__link">
-    nixidy.defaultSyncPolicy.automated.selfHeal
+  <a href="#nixidydefaultssyncpolicyautomatedprune" class="md-nav__link">
+    nixidy.defaults.syncPolicy.automated.prune
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidydefaultssyncpolicyautomatedselfheal" class="md-nav__link">
+    nixidy.defaults.syncPolicy.automated.selfHeal
   </a>
   
 </li>
@@ -742,15 +749,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#nixidydefaultsyncpolicyautomatedprune" class="md-nav__link">
-    nixidy.defaultSyncPolicy.automated.prune
+  <a href="#nixidydefaultshelmtransformer" class="md-nav__link">
+    nixidy.defaults.helm.transformer
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#nixidydefaultsyncpolicyautomatedselfheal" class="md-nav__link">
-    nixidy.defaultSyncPolicy.automated.selfHeal
+  <a href="#nixidydefaultssyncpolicyautomatedprune" class="md-nav__link">
+    nixidy.defaults.syncPolicy.automated.prune
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidydefaultssyncpolicyautomatedselfheal" class="md-nav__link">
+    nixidy.defaults.syncPolicy.automated.selfHeal
   </a>
   
 </li>
@@ -897,7 +911,7 @@ null or string</p>
 <p><strong><em>Type:</em></strong>
 null or (function that evaluates to a(n) list of attribute set of anything)</p>
 <p><strong><em>Default:</em></strong>
-<code class="highlight"><span class="no">null</span></code></p>
+<code class="highlight">config<span class="o">.</span>nixidy<span class="o">.</span>defaults<span class="o">.</span>helm<span class="o">.</span>transformer</code></p>
 <p><strong><em>Example:</em></strong>
 <code class="highlight"><span class="nb">map</span> <span class="p">(</span>lib<span class="o">.</span>kube<span class="o">.</span>removeLabels <span class="p">[</span><span class="s2">&quot;helm.sh/chart&quot;</span><span class="p">])</span></code></p>
 <p><strong><em>Declared by:</em></strong></p>
@@ -1024,23 +1038,21 @@ attribute set of attribute set of attribute set of anything</p>
 </ul>
 <h2 id="applicationsnamesyncpolicyautomatedprune">applications.&lt;name&gt;.syncPolicy.automated.prune<a class="headerlink" href="#applicationsnamesyncpolicyautomatedprune" title="Permanent link">#</a></h2>
 <p>Specifies if resources should be pruned during auto-syncing.</p>
-<p>Defaults to <code>config.nixidy.defaultSyncPolicy.automated.prune</code>.</p>
 <p><strong><em>Type:</em></strong>
 boolean</p>
 <p><strong><em>Default:</em></strong>
-<code class="highlight"><span class="no">false</span></code></p>
+<code class="highlight">config<span class="o">.</span>nixidy<span class="o">.</span>defaults<span class="o">.</span>syncPolicy<span class="o">.</span>automated<span class="o">.</span>prune</code></p>
 <p><strong><em>Declared by:</em></strong></p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/applications.nix">&lt;nixidy/modules/applications.nix&gt;</a></li>
 </ul>
 <h2 id="applicationsnamesyncpolicyautomatedselfheal">applications.&lt;name&gt;.syncPolicy.automated.selfHeal<a class="headerlink" href="#applicationsnamesyncpolicyautomatedselfheal" title="Permanent link">#</a></h2>
-<p>Specifies if partial app sync should be executed when resources are changed only in target
-Kubernetes cluster and no git change detected.</p>
-<p>Defaults to <code>config.nixidy.defaultSyncPolicy.automated.selfHeal</code>.</p>
+<p>Specifies if partial app sync should be executed when resources are changed only in
+target Kubernetes cluster and no git change detected.</p>
 <p><strong><em>Type:</em></strong>
 boolean</p>
 <p><strong><em>Default:</em></strong>
-<code class="highlight"><span class="no">false</span></code></p>
+<code class="highlight">config<span class="o">.</span>nixidy<span class="o">.</span>defaults<span class="o">.</span>syncPolicy<span class="o">.</span>automated<span class="o">.</span>selfHeal</code></p>
 <p><strong><em>Declared by:</em></strong></p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/applications.nix">&lt;nixidy/modules/applications.nix&gt;</a></li>
@@ -1087,8 +1099,23 @@ string</p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
 </ul>
-<h2 id="nixidydefaultsyncpolicyautomatedprune">nixidy.defaultSyncPolicy.automated.prune<a class="headerlink" href="#nixidydefaultsyncpolicyautomatedprune" title="Permanent link">#</a></h2>
-<p>Specifies if resources should be pruned during auto-syncing. This is the default value for all applications if not explicitly set.</p>
+<h2 id="nixidydefaultshelmtransformer">nixidy.defaults.helm.transformer<a class="headerlink" href="#nixidydefaultshelmtransformer" title="Permanent link">#</a></h2>
+<p>Function that will be applied to the list of rendered manifests after the helm templating.
+This option applies to all helm releases in all applications unless explicitly specified
+there.</p>
+<p><strong><em>Type:</em></strong>
+null or (function that evaluates to a(n) list of attribute set of anything)</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="no">null</span></code></p>
+<p><strong><em>Example:</em></strong>
+<code class="highlight"><span class="nb">map</span> <span class="p">(</span>lib<span class="o">.</span>kube<span class="o">.</span>removeLabels <span class="p">[</span><span class="s2">&quot;helm.sh/chart&quot;</span><span class="p">])</span></code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
+</ul>
+<h2 id="nixidydefaultssyncpolicyautomatedprune">nixidy.defaults.syncPolicy.automated.prune<a class="headerlink" href="#nixidydefaultssyncpolicyautomatedprune" title="Permanent link">#</a></h2>
+<p>Specifies if resources should be pruned during auto-syncing.
+This is the default value for all applications if not explicitly set.</p>
 <p><strong><em>Type:</em></strong>
 boolean</p>
 <p><strong><em>Default:</em></strong>
@@ -1097,8 +1124,10 @@ boolean</p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
 </ul>
-<h2 id="nixidydefaultsyncpolicyautomatedselfheal">nixidy.defaultSyncPolicy.automated.selfHeal<a class="headerlink" href="#nixidydefaultsyncpolicyautomatedselfheal" title="Permanent link">#</a></h2>
-<p>Specifies if partial app sync should be executed when resources are changed only in target Kubernetes cluster and no git change detected. This is the default value for all applications if not explicitly set.</p>
+<h2 id="nixidydefaultssyncpolicyautomatedselfheal">nixidy.defaults.syncPolicy.automated.selfHeal<a class="headerlink" href="#nixidydefaultssyncpolicyautomatedselfheal" title="Permanent link">#</a></h2>
+<p>Specifies if partial app sync should be executed when resources are changed only in
+target Kubernetes cluster and no git change detected.
+This is the default value for all applications if not explicitly set.</p>
 <p><strong><em>Type:</em></strong>
 boolean</p>
 <p><strong><em>Default:</em></strong>
