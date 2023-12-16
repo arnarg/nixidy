@@ -84,7 +84,11 @@
         lib.mapAttrsToList (n: v: (
           setPriority 900
           (buildHelmRelease {
-            inherit (v) name namespace chart values includeCRDs transformer overlay;
+            inherit (v) name chart values includeCRDs transformer overlay;
+            namespace =
+              if !isNull v.namespace
+              then v.namespace
+              else config.namespace;
           })
         ))
         config.helm.releases;
