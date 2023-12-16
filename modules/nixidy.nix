@@ -43,17 +43,39 @@ in {
       '';
     };
 
-    defaultSyncPolicy = {
-      automated = {
-        prune = mkOption {
-          type = types.bool;
-          default = false;
-          description = "Specifies if resources should be pruned during auto-syncing. This is the default value for all applications if not explicitly set.";
-        };
-        selfHeal = mkOption {
-          type = types.bool;
-          default = false;
-          description = "Specifies if partial app sync should be executed when resources are changed only in target Kubernetes cluster and no git change detected. This is the default value for all applications if not explicitly set.";
+    defaults = {
+      helm.transformer = mkOption {
+        type = with types; nullOr (functionTo (listOf (attrsOf anything)));
+        default = null;
+        example = literalExpression ''
+          map (lib.kube.removeLabels ["helm.sh/chart"])
+        '';
+        description = ''
+          Function that will be applied to the list of rendered manifests after the helm templating.
+          This option applies to all helm releases in all applications unless explicitly specified
+          there.
+        '';
+      };
+
+      syncPolicy = {
+        automated = {
+          prune = mkOption {
+            type = types.bool;
+            default = false;
+            description = ''
+              Specifies if resources should be pruned during auto-syncing.
+              This is the default value for all applications if not explicitly set.
+            '';
+          };
+          selfHeal = mkOption {
+            type = types.bool;
+            default = false;
+            description = ''
+              Specifies if partial app sync should be executed when resources are changed only in
+              target Kubernetes cluster and no git change detected.
+              This is the default value for all applications if not explicitly set.
+            '';
+          };
         };
       };
     };

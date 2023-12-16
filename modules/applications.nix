@@ -42,7 +42,8 @@
         };
         transformer = mkOption {
           type = with types; nullOr (functionTo (listOf (attrsOf anything)));
-          default = null;
+          default = global.nixidy.defaults.helm.transformer;
+          defaultText = literalExpression "config.nixidy.defaults.helm.transformer";
           example = literalExpression ''
             map (lib.kube.removeLabels ["helm.sh/chart"])
           '';
@@ -118,21 +119,19 @@
           automated = {
             prune = mkOption {
               type = types.bool;
-              default = global.nixidy.defaultSyncPolicy.automated.prune;
+              default = global.nixidy.defaults.syncPolicy.automated.prune;
+              defaultText = literalExpression "config.nixidy.defaults.syncPolicy.automated.prune";
               description = ''
                 Specifies if resources should be pruned during auto-syncing.
-
-                Defaults to `config.nixidy.defaultSyncPolicy.automated.prune`.
               '';
             };
             selfHeal = mkOption {
               type = types.bool;
-              default = global.nixidy.defaultSyncPolicy.automated.selfHeal;
+              default = global.nixidy.defaults.syncPolicy.automated.selfHeal;
+              defaultText = literalExpression "config.nixidy.defaults.syncPolicy.automated.selfHeal";
               description = ''
-                Specifies if partial app sync should be executed when resources are changed only in target
-                Kubernetes cluster and no git change detected.
-
-                Defaults to `config.nixidy.defaultSyncPolicy.automated.selfHeal`.
+                Specifies if partial app sync should be executed when resources are changed only in
+                target Kubernetes cluster and no git change detected.
               '';
             };
           };
