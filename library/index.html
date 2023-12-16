@@ -423,6 +423,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#libkuberemovelabels" class="md-nav__link">
+    lib.kube.removeLabels
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#libkubenamespace" class="md-nav__link">
     lib.kube.namespace
   </a>
@@ -578,6 +585,13 @@
         <li class="md-nav__item">
   <a href="#libkubefromyaml" class="md-nav__link">
     lib.kube.fromYAML
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#libkuberemovelabels" class="md-nav__link">
+    lib.kube.removeLabels
   </a>
   
 </li>
@@ -929,6 +943,42 @@ with the output.</p>
 <span class="s1">    metadata.name = &quot;kube-system&quot;;</span>
 <span class="s1">  }</span>
 <span class="s1">]</span>
+</code></pre></div>
+<h2 id="libkuberemovelabels">lib.kube.removeLabels<a class="headerlink" href="#libkuberemovelabels" title="Permanent link">#</a></h2>
+<p><strong>Type</strong>: <code>removeLabels :: [String] -&gt; AttrSet -&gt; AttrSet</code></p>
+<p>Removes labels from a Kubernetes manifest.</p>
+<dl>
+<dt><code>labels</code></dt>
+<dd>
+<p>List of labels that should be removed</p>
+</dd>
+<dt><code>manifest</code></dt>
+<dd>
+<p>Kubernetes manifest</p>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code>removeLabels <span class="p">[</span><span class="s2">&quot;helm.sh/chart&quot;</span><span class="p">]</span> <span class="p">{</span>
+  <span class="ss">apiVersion =</span> <span class="s2">&quot;v1&quot;</span><span class="p">;</span>
+  <span class="ss">kind =</span> <span class="s2">&quot;ConfigMap&quot;</span><span class="p">;</span>
+  <span class="ss">metadata =</span> <span class="p">{</span>
+    <span class="ss">name =</span> <span class="s2">&quot;argocd-cm&quot;</span><span class="p">;</span>
+    <span class="ss">labels =</span> <span class="p">{</span>
+      <span class="s2">&quot;app.kubernetes.io/name&quot;</span> <span class="o">=</span> <span class="s2">&quot;argocd-cm&quot;</span><span class="p">;</span>
+      <span class="s2">&quot;helm.sh/chart&quot;</span> <span class="o">=</span> <span class="s2">&quot;argo-cd-5.51.6&quot;</span><span class="p">;</span>
+    <span class="p">};</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+<span class="o">=</span><span class="err">&gt;</span> <span class="p">{</span>
+  <span class="ss">apiVersion =</span> <span class="s2">&quot;v1&quot;</span><span class="p">;</span>
+  <span class="ss">kind =</span> <span class="s2">&quot;ConfigMap&quot;</span><span class="p">;</span>
+  <span class="ss">metadata =</span> <span class="p">{</span>
+    <span class="ss">name =</span> <span class="s2">&quot;argocd-cm&quot;</span><span class="p">;</span>
+    <span class="ss">labels =</span> <span class="p">{</span>
+      <span class="s2">&quot;app.kubernetes.io/name&quot;</span> <span class="o">=</span> <span class="s2">&quot;argocd-cm&quot;</span><span class="p">;</span>
+    <span class="p">};</span>
+  <span class="p">};</span>
+<span class="p">}</span>
 </code></pre></div>
 <h2 id="libkubenamespace">lib.kube.namespace<a class="headerlink" href="#libkubenamespace" title="Permanent link">#</a></h2>
 <p><strong>Type</strong>: <code>namespace :: String -&gt; AttrSet -&gt; AttrSet</code></p>
