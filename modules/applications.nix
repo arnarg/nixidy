@@ -40,6 +40,16 @@
             Whether or not to include CRDs in the helm release.
           '';
         };
+        transformer = mkOption {
+          type = with types; nullOr (functionTo (listOf (attrsOf anything)));
+          default = null;
+          example = literalExpression ''
+            map (lib.kube.removeLabels ["helm.sh/chart"])
+          '';
+          description = ''
+            Function that will be applied to the list of rendered manifests after the helm templating.
+          '';
+        };
       };
     };
 
@@ -48,7 +58,37 @@
       name,
       config,
       ...
-    }: {
+    }: let
+      buildHelmRelease = {
+        name,
+        chart,
+        values,
+        includeCRDs,
+        namespace ? config.namespace,
+        transformer ? null,
+        overlay ? null,
+      }:
+        lib.pipe {inherit name namespace chart values includeCRDs;} [
+          lib.helm.buildHelmChart
+          builtins.readFile
+          lib.kube.fromYAML
+          (
+            if isFunction transformer
+            then transformer
+            else lib.id
+          )
+          lib.resources.fromManifests
+        ];
+
+      helmReleases =
+        lib.mapAttrsToList (n: v: (
+          setPriority 900
+          (buildHelmRelease {
+            inherit (v) name namespace chart values includeCRDs transformer overlay;
+          })
+        ))
+        config.helm.releases;
+    in {
       options = {
         name = mkOption {
           type = types.str;
@@ -195,15 +235,7 @@
               (lib.resources.fromManifestYAMLs config.yamls))
             (lib.optionalAttrs config.createNamespace {v1.Namespace.${config.namespace} = {};})
           ]
-          ++ (lib.mapAttrsToList (n: v: (setPriority 900
-            (lib.resources.fromHelmChart {
-              inherit (v) name chart values includeCRDs;
-              namespace =
-                if (isNull v.namespace)
-                then config.namespace
-                else v.namespace;
-            })))
-          config.helm.releases));
+          ++ helmReleases);
       };
     };
 in {

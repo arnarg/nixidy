@@ -44,6 +44,53 @@ in {
       klib.fromYAML yaml;
 
   /*
+  Removes labels from a Kubernetes manifest.
+
+  Type:
+    removeLabels :: [String] -> AttrSet -> AttrSet
+
+  Example:
+    removeLabels ["helm.sh/chart"] {
+      apiVersion = "v1";
+      kind = "ConfigMap";
+      metadata = {
+        name = "argocd-cm";
+        labels = {
+          "app.kubernetes.io/name" = "argocd-cm";
+          "helm.sh/chart" = "argo-cd-5.51.6";
+        };
+      };
+    }
+    => {
+      apiVersion = "v1";
+      kind = "ConfigMap";
+      metadata = {
+        name = "argocd-cm";
+        labels = {
+          "app.kubernetes.io/name" = "argocd-cm";
+        };
+      };
+    }
+  */
+  removeLabels =
+    # List of labels that should be removed
+    labels:
+    # Kubernetes manifest
+    manifest:
+      manifest
+      // {
+        metadata =
+          manifest.metadata
+          // (
+            if manifest.metadata ? labels
+            then {
+              labels = removeAttrs manifest.metadata.labels labels;
+            }
+            else {}
+          );
+      };
+
+  /*
   Create a Kubernetes namespace manifest. This will create a manifest in
   Kubernetes format so if you want to use it for application's resources
   it should be then parsed with [lib.resources.fromManifests](#libresourcesfrommanifests).
