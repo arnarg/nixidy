@@ -1,0 +1,136 @@
+#!@bash@/bin/bash
+
+# Prepare to use tools from Nixpkgs.
+PATH=@DEP_PATH@${PATH:+:}$PATH
+
+set -euo pipefail
+
+function setFlakeParam() {
+  local flake="${FLAKE_PARAM%#*}"
+
+  case $FLAKE_PARAM in
+    *#*)
+      local env="${FLAKE_PARAM#*#}"
+      ;;
+    *)
+      local env=""
+      ;;
+  esac
+
+  export FLAKE_ROOT="$flake"
+  export FLAKE_ENV="$env"
+}
+
+function doInfo() {
+  setFlakeParam
+
+  if [[ -z "$FLAKE_ENV" ]]; then
+    doHelp
+    exit 1
+  fi
+
+  local info=$(nix eval "${FLAKE_ROOT}#nixidyEnvs.${NIX_SYSTEM}.${FLAKE_ENV}.meta" --json)
+
+  if [[ "$INFO_JSON" == "true" ]]; then
+    echo $info
+  else
+    echo "Repository: $(echo "$info" | jq -r .repository)"
+    echo "Branch:     $(echo "$info" | jq -r .branch)"
+  fi
+}
+
+function doBuild() {
+  setFlakeParam
+
+  if [[ -z "$FLAKE_ENV" ]]; then
+    doHelp
+    exit 1
+  fi
+  
+  nix build "${FLAKE_ROOT}#nixidyEnvs.${NIX_SYSTEM}.${FLAKE_ENV}.result" "${BUILD_PARAMS[@]}"
+}
+
+function doHelp() {
+    echo "Usage: $0 [OPTION] COMMAND"
+    echo
+    echo "Options"
+    echo
+    echo "  --no-link         Don't create a result symlink (only used in build)."
+    echo "  --out-link PATH   Create a custom result symlink (only used in build)."
+    echo "  --json            Output info in JSON format (only used in info)."
+    echo "  -h                Print this help"
+    echo
+    echo "Commands"
+    echo
+    echo "  help         Print this help."
+    echo
+    echo "  info FLAKE_URI"
+    echo "               Get info about environment."
+    echo "               Example: .#prod"
+    echo
+    echo "  build FLAKE_URI"
+    echo "               Build nixidy environment from flake URI."
+    echo "               Example: .#prod"
+}
+
+COMMAND=""
+FLAKE_PARAM=""
+
+BUILD_PARAMS=()
+INFO_JSON="false"
+
+while [[ $# -gt 0 ]]; do
+  opt="$1"
+  shift
+  case $opt in
+    build|info|help)
+      COMMAND="$opt"
+      ;;
+    --no-link)
+      BUILD_PARAMS+=("--no-link")
+      ;;
+    --out-link)
+      BUILD_PARAMS+=("--out-link" "$1")
+      shift
+      ;;
+    --json)
+      INFO_JSON="true"
+      ;;
+    -h|--help)
+      doHelp
+      exit 0
+      ;;
+    *)
+      FLAKE_PARAM="$opt"
+      ;;
+  esac
+done
+
+if [[ -z $COMMAND ]]; then
+    doHelp >&2
+    exit 1
+fi
+
+if [[ -z $FLAKE_PARAM ]]; then
+  FLAKE_PARAM=".#"
+fi
+
+NIX_SYSTEM=$(nix eval --expr builtins.currentSystem --raw --impure)
+
+case $COMMAND in
+  info)
+    doInfo
+    ;;
+  build)
+    doBuild
+    ;;
+  help)
+    doHelp
+    ;;
+  *)
+    _iError 'Unknown command: %s' "$COMMAND" >&2
+    doHelp >&2
+    exit 1
+    ;;
+esac
+

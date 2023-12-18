@@ -36,7 +36,10 @@
               mkEnv {
                 inherit pkgs lib;
                 extraSpecialArgs = extraSpecialArgs // (conf.extraSpecialArgs or {});
-                modules = modules ++ (conf.modules or []);
+                modules =
+                  [{nixidy.target.branch = lib.mkDefault "env/${env}";}]
+                  ++ modules
+                  ++ (conf.modules or []);
               }
           )
           envs;
@@ -49,7 +52,11 @@
       docs = import ./docs {
         inherit pkgs;
       };
+      packages = import ./nixidy pkgs;
     in {
-      packages.docs = docs;
+      packages = {
+        default = packages.nixidy;
+        docs = docs;
+      };
     }));
 }

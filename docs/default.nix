@@ -61,9 +61,14 @@
         - pymdownx.highlight
         - pymdownx.inlinehilite
         - pymdownx.superfences
+        - pymdownx.tabbed:
+            alternate_style: true
 
         nav:
         - Home: index.md
+        - 'User Guide':
+          - 'Getting Started': user_guide/getting_started.md
+          - 'More Environments': user_guide/more_environments.md
         - Reference:
           - 'Library Functions': library.md
           - 'Configuration Options': options.md

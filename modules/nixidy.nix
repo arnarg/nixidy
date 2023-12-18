@@ -28,10 +28,9 @@ in {
         type = types.str;
         description = "The repository URL to put in all generated applications.";
       };
-      revision = mkOption {
+      branch = mkOption {
         type = types.str;
-        default = "HEAD";
-        description = "The target revision to put in all generated applications.";
+        description = "The destination branch of the generated applications.";
       };
     };
 
@@ -45,8 +44,9 @@ in {
 
     defaults = {
       helm.transformer = mkOption {
-        type = with types; nullOr (functionTo (listOf (attrsOf anything)));
-        default = null;
+        type = with types; functionTo (listOf (attrsOf anything));
+        default = res: res;
+        defaultText = literalExpression "res: res";
         example = literalExpression ''
           map (lib.kube.removeLabels ["helm.sh/chart"])
         '';
@@ -105,7 +105,7 @@ in {
                 project = app.project;
                 source = {
                   repoURL = cfg.target.repository;
-                  targetRevision = cfg.target.revision;
+                  targetRevision = cfg.target.branch;
                   path = app.output.path;
                 };
                 destination = {

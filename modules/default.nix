@@ -120,6 +120,10 @@
       paths = [appsJoined extras];
     };
 in {
-  targetBranch = module.config.nixidy.target.revision;
+  targetBranch = module.config.nixidy.target.branch;
+  meta = {
+    repository = module.config.nixidy.target.repository;
+    branch = module.config.nixidy.target.branch;
+  };
   result = mkStage apps;
 }
