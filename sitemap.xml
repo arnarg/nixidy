@@ -15,4 +15,14 @@
          <lastmod>1980-01-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
+    <url>
+         <loc>https://arnarg.github.io/nixidy/user_guide/getting_started/</loc>
+         <lastmod>1980-01-01</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://arnarg.github.io/nixidy/user_guide/more_environments/</loc>
+         <lastmod>1980-01-01</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
 </urlset>
