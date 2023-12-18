@@ -39,6 +39,7 @@
 
           features:
           - content.code.annotate
+          - navigation.footer
 
           palette:
           - media: "(prefers-color-scheme: light)"
