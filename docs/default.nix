@@ -37,10 +37,6 @@
         theme:
           name: material
 
-          features:
-          - content.code.annotate
-          - navigation.footer
-
           palette:
           - media: "(prefers-color-scheme: light)"
             scheme: default
@@ -52,6 +48,10 @@
             toggle:
               icon: material/brightness-4
               name: Switch to light mode
+
+          features:
+          - navigation.footer
+          - content.tabs.link
 
         markdown_extensions:
         - def_list
@@ -69,7 +69,8 @@
         - Home: index.md
         - 'User Guide':
           - 'Getting Started': user_guide/getting_started.md
-          - 'More Environments': user_guide/more_environments.md
+          - 'GitHub Actions': user_guide/github_actions.md
+          - 'Transformers': user_guide/transformers.md
         - Reference:
           - 'Library Functions': library.md
           - 'Configuration Options': options.md

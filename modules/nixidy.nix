@@ -57,6 +57,20 @@ in {
         '';
       };
 
+      kustomize.transformer = mkOption {
+        type = with types; functionTo (listOf (attrsOf anything));
+        default = res: res;
+        defaultText = literalExpression "res: res";
+        example = literalExpression ''
+          map (lib.kube.removeLabels ["app.kubernetes.io/version"])
+        '';
+        description = ''
+          Function that will be applied to the list of rendered manifests after kustomize rendering.
+          This option applies to all kustomize applications in all nixidy applications unless
+          explicitly specified there.
+        '';
+      };
+
       syncPolicy = {
         automated = {
           prune = mkOption {

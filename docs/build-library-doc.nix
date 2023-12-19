@@ -33,7 +33,7 @@
       cat <<EOF > $out/lib.md
       # Libary Functions
 
-      The argument ''\\`lib''\\` is passed to each module in nixidy. This is a standard nixpkgs library extended with the following functions.
+      The argument ''\\`lib''\\` is passed to each module in nixidy. This is the [standard nixpkgs library](https://nixos.org/manual/nixpkgs/stable/#id-1.4) extended with the following functions.
 
       EOF
 

@@ -103,10 +103,10 @@
         };
         transformer = mkOption {
           type = with types; functionTo (listOf (attrsOf anything));
-          default = res: res;
-          defaultText = literalExpression "res: res";
+          default = global.nixidy.defaults.kustomize.transformer;
+          defaultText = literalExpression "config.nixidy.defaults.kustomize.transformer";
           description = ''
-            Function that will be applied to the list of rendered manifest from kustomize.
+            Function that will be applied to the list of rendered manifests from kustomize.
           '';
         };
         rendered = mkOption {

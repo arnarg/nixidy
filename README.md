@@ -24,6 +24,10 @@ I have _not_ been a fan of helm's string templating of a whitespace-sensitive co
 
 Therefore I made nixidy as an experiment to see if I can make something better (at least for myself). As all Argo CD applications are defined in a single configuration it can reference configuration options across applications and automatically generate an [App of Apps](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern) bootstrapping all of them.
 
+## Getting Started
+
+Take a look at the [getting started guide](https://arnarg.github.io/nixidy/user_guide/getting_started/).
+
 ## Demo
 
 See [nixidy-demo](https://github.com/arnarg/nixidy-demo).
