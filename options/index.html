@@ -323,11 +323,31 @@
   
   
     <li class="md-nav__item">
-      <a href="../user_guide/more_environments/" class="md-nav__link">
+      <a href="../user_guide/github_actions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    More Environments
+    GitHub Actions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guide/transformers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Transformers
   </span>
   
 
@@ -641,6 +661,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#nixidydefaultskustomizetransformer" class="md-nav__link">
+    nixidy.defaults.kustomize.transformer
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#nixidydefaultssyncpolicyautomatedprune" class="md-nav__link">
     nixidy.defaults.syncPolicy.automated.prune
   </a>
@@ -921,6 +948,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#nixidydefaultskustomizetransformer" class="md-nav__link">
+    nixidy.defaults.kustomize.transformer
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#nixidydefaultssyncpolicyautomatedprune" class="md-nav__link">
     nixidy.defaults.syncPolicy.automated.prune
   </a>
@@ -1158,11 +1192,11 @@ string</p>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/applications.nix">&lt;nixidy/modules/applications.nix&gt;</a></li>
 </ul>
 <h2 id="applicationsnamekustomizeapplicationsnametransformer">applications.&lt;name&gt;.kustomize.applications.&lt;name&gt;.transformer<a class="headerlink" href="#applicationsnamekustomizeapplicationsnametransformer" title="Permanent link">#</a></h2>
-<p>Function that will be applied to the list of rendered manifest from kustomize.</p>
+<p>Function that will be applied to the list of rendered manifests from kustomize.</p>
 <p><strong><em>Type:</em></strong>
 function that evaluates to a(n) list of attribute set of anything</p>
 <p><strong><em>Default:</em></strong>
-<code class="highlight">res<span class="p">:</span> res</code></p>
+<code class="highlight">config<span class="o">.</span>nixidy<span class="o">.</span>defaults<span class="o">.</span>kustomize<span class="o">.</span>transformer</code></p>
 <p><strong><em>Declared by:</em></strong></p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/applications.nix">&lt;nixidy/modules/applications.nix&gt;</a></li>
@@ -1352,6 +1386,20 @@ function that evaluates to a(n) list of attribute set of anything</p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
 </ul>
+<h2 id="nixidydefaultskustomizetransformer">nixidy.defaults.kustomize.transformer<a class="headerlink" href="#nixidydefaultskustomizetransformer" title="Permanent link">#</a></h2>
+<p>Function that will be applied to the list of rendered manifests after kustomize rendering.
+This option applies to all kustomize applications in all nixidy applications unless
+explicitly specified there.</p>
+<p><strong><em>Type:</em></strong>
+function that evaluates to a(n) list of attribute set of anything</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight">res<span class="p">:</span> res</code></p>
+<p><strong><em>Example:</em></strong>
+<code class="highlight"><span class="nb">map</span> <span class="p">(</span>lib<span class="o">.</span>kube<span class="o">.</span>removeLabels <span class="p">[</span><span class="s2">&quot;app.kubernetes.io/version&quot;</span><span class="p">])</span></code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
+</ul>
 <h2 id="nixidydefaultssyncpolicyautomatedprune">nixidy.defaults.syncPolicy.automated.prune<a class="headerlink" href="#nixidydefaultssyncpolicyautomatedprune" title="Permanent link">#</a></h2>
 <p>Specifies if resources should be pruned during auto-syncing.
 This is the default value for all applications if not explicitly set.</p>
@@ -1429,6 +1477,8 @@ string</p>
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
         </div>
         
       </main>
@@ -1480,7 +1530,7 @@ string</p>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.annotate", "navigation.footer"], "search": "../assets/javascripts/workers/search.dfff1995.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.footer", "content.tabs.link"], "search": "../assets/javascripts/workers/search.dfff1995.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
       <script src="../assets/javascripts/bundle.dff1b7c8.min.js"></script>

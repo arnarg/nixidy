@@ -14,7 +14,7 @@
         <link rel="prev" href="../..">
       
       
-        <link rel="next" href="../more_environments/">
+        <link rel="next" href="../github_actions/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -366,6 +366,47 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#modularizing-the-configuration" class="md-nav__link">
+    Modularizing the Configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#abstracting-options-on-top-of-applications" class="md-nav__link">
+    Abstracting Options on top of Applications
+  </a>
+  
+    <nav class="md-nav" aria-label="Abstracting Options on top of Applications">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#traefik" class="md-nav__link">
+    Traefik
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#argo-cd" class="md-nav__link">
+    Argo CD
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#putting-it-all-together" class="md-nav__link">
+    Putting it all together
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -381,11 +422,31 @@
   
   
     <li class="md-nav__item">
-      <a href="../more_environments/" class="md-nav__link">
+      <a href="../github_actions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    More Environments
+    GitHub Actions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../transformers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Transformers
   </span>
   
 
@@ -523,6 +584,47 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#modularizing-the-configuration" class="md-nav__link">
+    Modularizing the Configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#abstracting-options-on-top-of-applications" class="md-nav__link">
+    Abstracting Options on top of Applications
+  </a>
+  
+    <nav class="md-nav" aria-label="Abstracting Options on top of Applications">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#traefik" class="md-nav__link">
+    Traefik
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#argo-cd" class="md-nav__link">
+    Argo CD
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#putting-it-all-together" class="md-nav__link">
+    Putting it all together
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -650,7 +752,7 @@ result
         <span class="c1"># Run argocd-server with 2 replicas.</span>
         <span class="c1"># This is an option in the chart&#39;s `values.yaml`</span>
         <span class="c1"># usually declared like this:</span>
-        <span class="c1"># </span>
+        <span class="c1">#</span>
         <span class="c1"># server:</span>
         <span class="c1">#   replicas: 2</span>
         server<span class="o">.</span><span class="ss">replicas =</span> <span class="mi">2</span><span class="p">;</span>
@@ -738,6 +840,375 @@ result
 </code></pre></div>
 <p>A directory with rendered resources is generated for each application declared with <code>applications.&lt;name&gt;</code> as well as an Argo CD application resource YAML file in <code>apps/</code>. What this provides is the option to bootstrap the whole rendered branch to a cluster by adding an application pointing to the <code>apps/</code> folder.</p>
 <p>See <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern">App of Apps Pattern</a>.</p>
+<h2 id="modularizing-the-configuration">Modularizing the Configuration<a class="headerlink" href="#modularizing-the-configuration" title="Permanent link">#</a></h2>
+<p>So far we've initialized the repository with <code>flake.nix</code> and a single environment with all options set in a single file (<code>env/dev.nix</code>). Next we'll want to add a <code>test</code> environment.</p>
+<p>Adding a test environment is as simple as copying <code>env/dev.nix</code> to <code>env/test.nix</code>, renaming the target branch and adding that to <code>flake.nix</code> under <code>envs.test.modules</code>. This however will involve a lot of code duplication and the environment will need to be maintained completely separately.</p>
+<p>Instead we should modularize the configuration into re-usable modules that can allow slight modification between environments (number of replicas, ingress domain, etc.).</p>
+<p>To start this migration a <code>modules/default.nix</code> should be created.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Helm</label><label for="__tabbed_2_2">Kustomize</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">modules/default.nix</span><pre><span></span><code><span class="p">{</span>lib<span class="p">,</span> <span class="o">...</span><span class="p">}:</span> <span class="p">{</span>
+  <span class="c1"># This option should be common across all environments so we</span>
+  <span class="c1"># can declare it here.</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">repository =</span> <span class="s2">&quot;https://github.com/arnarg/nixidy-demo.git&quot;</span><span class="p">;</span>
+
+  <span class="c1"># Argo CD application using the Helm chart from argo-helm.</span>
+  applications<span class="o">.</span><span class="ss">argocd =</span> <span class="p">{</span>
+    <span class="c1"># Declare the destination namespace for the application.</span>
+    <span class="ss">namespace =</span> <span class="s2">&quot;argocd&quot;</span><span class="p">;</span>
+
+    <span class="c1"># Instruct nixidy to automatically create a `Namespace`</span>
+    <span class="c1"># manifest in the rendered manifests for namespace</span>
+    <span class="c1"># selected above.</span>
+    <span class="ss">createNamespace =</span> <span class="no">true</span><span class="p">;</span>
+
+    <span class="c1"># Specify Helm chart with values to template with.</span>
+    helm<span class="o">.</span>releases<span class="o">.</span><span class="ss">argocd =</span> <span class="p">{</span>
+      <span class="c1"># Using `downloadHelmChart` we can download</span>
+      <span class="c1"># the helm chart using nix.</span>
+      <span class="c1"># The value for `chartHash` needs to be updated</span>
+      <span class="c1"># with each version.</span>
+      <span class="ss">chart =</span> lib<span class="o">.</span>helm<span class="o">.</span>downloadHelmChart <span class="p">{</span>
+        <span class="ss">repo =</span> <span class="s2">&quot;https://argoproj.github.io/argo-helm/&quot;</span><span class="p">;</span>
+        <span class="ss">chart =</span> <span class="s2">&quot;argo-cd&quot;</span><span class="p">;</span>
+        <span class="ss">version =</span> <span class="s2">&quot;5.51.6&quot;</span><span class="p">;</span>
+        <span class="ss">chartHash =</span> <span class="s2">&quot;sha256-3kRkzOQdYa5JkrBV/+iJK3FP+LDFY1J8L20aPhcEMkY=&quot;</span><span class="p">;</span>
+      <span class="p">};</span>
+
+      <span class="c1"># Specify values to pass to the chart.</span>
+      <span class="ss">values =</span> <span class="p">{</span>
+        <span class="c1"># Run argocd-server with 2 replicas.</span>
+        <span class="c1"># This is an option in the chart&#39;s `values.yaml`</span>
+        <span class="c1"># usually declared like this:</span>
+        <span class="c1">#</span>
+        <span class="c1"># server:</span>
+        <span class="c1">#   replicas: 2</span>
+        server<span class="o">.</span><span class="ss">replicas =</span> <span class="mi">2</span><span class="p">;</span>
+      <span class="p">};</span>
+    <span class="p">};</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">modules/default.nix</span><pre><span></span><code><span class="p">{</span>pkgs<span class="p">,</span> <span class="o">...</span><span class="p">}:</span> <span class="p">{</span>
+  <span class="c1"># This option should be common across all environments so we</span>
+  <span class="c1"># can declare it here.</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">repository =</span> <span class="s2">&quot;https://github.com/arnarg/nixidy-demo.git&quot;</span><span class="p">;</span>
+
+  <span class="c1"># Argo CD application using the official kustomize application</span>
+  <span class="c1"># from Argo CD git repository.</span>
+  applications<span class="o">.</span><span class="ss">argocd =</span> <span class="p">{</span>
+    <span class="c1"># Declare the destination namespace for the application.</span>
+    <span class="ss">namespace =</span> <span class="s2">&quot;argocd&quot;</span><span class="p">;</span>
+
+    <span class="c1"># Instruct nixidy to automatically create a `Namespace`</span>
+    <span class="c1"># manifest in the rendered manifests for namespace</span>
+    <span class="c1"># selected above.</span>
+    <span class="ss">createNamespace =</span> <span class="no">true</span><span class="p">;</span>
+
+    <span class="c1"># Specify Kustomize application to render.</span>
+    kustomize<span class="o">.</span>applications<span class="o">.</span><span class="ss">argocd =</span> <span class="p">{</span>
+      <span class="c1"># Equivalent to `github.com/argoproj/argo-cd/manifests/cluster-install?ref=v2.9.3`</span>
+      <span class="c1"># in kustomization.yaml.</span>
+      <span class="ss">kustomization =</span> <span class="p">{</span>
+        <span class="ss">src =</span> pkgs<span class="o">.</span>fetchFromGitHub <span class="p">{</span>
+          <span class="ss">owner =</span> <span class="s2">&quot;argoproj&quot;</span><span class="p">;</span>
+          <span class="ss">repo =</span> <span class="s2">&quot;argo-cd&quot;</span><span class="p">;</span>
+          <span class="ss">rev =</span> <span class="s2">&quot;v2.9.3&quot;</span><span class="p">;</span>
+          <span class="ss">hash =</span> <span class="s2">&quot;sha256-GaY4Cw/LlSwy35umbB4epXt6ev8ya19UjHRwhDwilqU=&quot;</span><span class="p">;</span>
+        <span class="p">};</span>
+        <span class="ss">path =</span> <span class="s2">&quot;manifests/cluster-install&quot;</span><span class="p">;</span>
+      <span class="p">};</span>
+    <span class="p">};</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>And in <code>flake.nix</code> we can now set it to use <code>modules/default.nix</code> as a common module like the following:</p>
+<div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
+  <span class="ss">description =</span> <span class="s2">&quot;My ArgoCD configuration with nixidy.&quot;</span><span class="p">;</span>
+
+  inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">url =</span> <span class="s2">&quot;github:nixos/nixpkgs/nixos-unstable&quot;</span><span class="p">;</span>
+  inputs<span class="o">.</span>flake-utils<span class="o">.</span><span class="ss">url =</span> <span class="s2">&quot;github:numtide/flake-utils&quot;</span><span class="p">;</span>
+  inputs<span class="o">.</span>nixidy<span class="o">.</span><span class="ss">url =</span> <span class="s2">&quot;github:arnarg/nixidy&quot;</span><span class="p">;</span>
+
+  <span class="ss">outputs =</span> <span class="p">{</span>
+    self<span class="p">,</span>
+    nixpkgs<span class="p">,</span>
+    flake-utils<span class="p">,</span>
+    nixidy<span class="p">,</span>
+  <span class="p">}:</span> <span class="p">(</span>flake-utils<span class="o">.</span>lib<span class="o">.</span>eachDefaultSystem <span class="p">(</span>system<span class="p">:</span> <span class="k">let</span>
+    <span class="ss">pkgs =</span> <span class="nb">import</span> nixpkgs <span class="p">{</span>
+      <span class="k">inherit</span> system<span class="p">;</span>
+    <span class="p">};</span>
+  <span class="k">in</span> <span class="p">{</span>
+    <span class="c1"># This declares the available nixidy envs.</span>
+    <span class="ss">nixidyEnvs =</span> nixidy<span class="o">.</span>lib<span class="o">.</span>mkEnvs <span class="p">{</span>
+      <span class="k">inherit</span> pkgs<span class="p">;</span>
+
+      <span class="c1"># Modules to include in all envs.</span>
+      <span class="ss">modules =</span> <span class="p">[</span><span class="o">.</span><span class="l">/modules</span><span class="p">];</span>
+
+      <span class="ss">envs =</span> <span class="p">{</span>
+        dev<span class="o">.</span><span class="ss">modules =</span> <span class="p">[</span><span class="o">.</span><span class="l">/env/dev.nix</span><span class="p">];</span>
+        test<span class="o">.</span><span class="ss">modules =</span> <span class="p">[</span><span class="o">.</span><span class="l">/env/test.nix</span><span class="p">];</span>
+      <span class="p">};</span>
+    <span class="p">};</span>
+  <span class="p">}));</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Both environment specific files now only declare the target branch:</p>
+<div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">branch =</span> <span class="s2">&quot;env/dev&quot;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">env/test.nix</span><pre><span></span><code><span class="p">{</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">branch =</span> <span class="s2">&quot;env/test&quot;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="abstracting-options-on-top-of-applications">Abstracting Options on top of Applications<a class="headerlink" href="#abstracting-options-on-top-of-applications" title="Permanent link">#</a></h2>
+<p>Now we have all common configuration in a module that is used across all environments and the next step is to also add traefik as an ingress controller. Oh! and we also want to create an ingress for Argo CD Web UI using the ingress controller. Also, come to think of it, We also don't want to run 2 replicas of argocd-server in the dev environment to save on resources.</p>
+<p>Reaching these goals is simple enough by overriding the few needed options directly in the env specific configuration, for example:</p>
+<div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>lib<span class="p">,</span> <span class="o">...</span><span class="p">}:</span> <span class="p">{</span>
+  <span class="c1"># ...</span>
+
+  applications<span class="o">.</span>argocd<span class="o">.</span>helm<span class="o">.</span>releases<span class="o">.</span>argocd<span class="o">.</span><span class="ss">values =</span> <span class="p">{</span>
+    <span class="c1"># Actually we want 1 replica only in dev.</span>
+    server<span class="o">.</span><span class="ss">replicas =</span> lib<span class="o">.</span>mkForce <span class="mi">1</span><span class="p">;</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>But this requires knowing the implementation details of the application and introduces tight coupling and things become hard to change for the argocd application.</p>
+<p>Instead things should ideally be broken apart further and create an extra configuration interface on top. To achieve this we want to break the common modules into more files, or a module per application but with a common entrypoint.</p>
+<h3 id="traefik">Traefik<a class="headerlink" href="#traefik" title="Permanent link">#</a></h3>
+<p>Let's start by creating a module for traefik:</p>
+<div class="highlight"><span class="filename">modules/traefik.nix</span><pre><span></span><code><span class="p">{</span>
+  lib<span class="p">,</span>
+  config<span class="p">,</span>
+  <span class="o">...</span>
+<span class="p">}:</span> <span class="p">{</span>
+  options<span class="o">.</span>networking<span class="o">.</span><span class="ss">traefik =</span> <span class="k">with</span> lib<span class="p">;</span> <span class="p">{</span>
+    <span class="ss">enable =</span> mkEnableOption <span class="s2">&quot;traefik ingress controller&quot;</span><span class="p">;</span>
+    <span class="c1"># Exposing some options that _could_ be set directly</span>
+    <span class="c1"># in the values option below can be useful for discoverability</span>
+    <span class="c1"># and being able to reference in other modules</span>
+    <span class="ss">ingressClass =</span> <span class="p">{</span>
+      <span class="ss">enable =</span> mkOption <span class="p">{</span>
+        <span class="ss">type =</span> types<span class="o">.</span>bool<span class="p">;</span>
+        <span class="ss">default =</span> <span class="no">true</span><span class="p">;</span>
+        <span class="ss">description =</span> <span class="s1">&#39;&#39;</span>
+<span class="s1">          Whether or not an ingress class for traefik should be created automatically.</span>
+<span class="s1">        &#39;&#39;</span><span class="p">;</span>
+      <span class="p">};</span>
+      <span class="ss">name =</span> mkOption <span class="p">{</span>
+        <span class="ss">type =</span> types<span class="o">.</span>str<span class="p">;</span>
+        <span class="ss">default =</span> <span class="s2">&quot;traefik&quot;</span><span class="p">;</span>
+        <span class="ss">description =</span> <span class="s1">&#39;&#39;</span>
+<span class="s1">          The name of the ingress class for traefik that should be created automatically.</span>
+<span class="s1">        &#39;&#39;</span><span class="p">;</span>
+      <span class="p">};</span>
+    <span class="p">};</span>
+    <span class="c1"># To not limit the consumers of this module allowing for</span>
+    <span class="c1"># setting the helm values directly is useful in certain</span>
+    <span class="c1"># situations</span>
+    <span class="ss">values =</span> mkOption <span class="p">{</span>
+      <span class="ss">type =</span> types<span class="o">.</span>attrsOf types<span class="o">.</span>anything<span class="p">;</span>
+      <span class="ss">default =</span> <span class="p">{};</span>
+      <span class="ss">description =</span> <span class="s1">&#39;&#39;</span>
+<span class="s1">        Value overrides that will be passed to the helm chart.</span>
+<span class="s1">      &#39;&#39;</span><span class="p">;</span>
+    <span class="p">};</span>
+  <span class="p">};</span>
+
+  <span class="c1"># Only create the application if traefik is enabled</span>
+  <span class="ss">config =</span> lib<span class="o">.</span>mkIf config<span class="o">.</span>networking<span class="o">.</span>traefik<span class="o">.</span>enable <span class="p">{</span>
+    applications<span class="o">.</span><span class="ss">traefik =</span> <span class="p">{</span>
+      <span class="ss">namespace =</span> <span class="s2">&quot;traefik&quot;</span><span class="p">;</span>
+      <span class="ss">createNamespace =</span> <span class="no">true</span><span class="p">;</span>
+
+      helm<span class="o">.</span>releases<span class="o">.</span><span class="ss">traefik =</span> <span class="p">{</span>
+        <span class="ss">chart =</span> lib<span class="o">.</span>helm<span class="o">.</span>downloadHelmChart <span class="p">{</span>
+          <span class="ss">repo =</span> <span class="s2">&quot;https://traefik.github.io/charts/&quot;</span><span class="p">;</span>
+          <span class="ss">chart =</span> <span class="s2">&quot;traefik&quot;</span><span class="p">;</span>
+          <span class="ss">version =</span> <span class="s2">&quot;25.0.0&quot;</span><span class="p">;</span>
+          <span class="ss">chartHash =</span> <span class="s2">&quot;sha256-ua8KnUB6MxY7APqrrzaKKSOLwSjDYkk9tfVkb1bqkVM=&quot;</span><span class="p">;</span>
+        <span class="p">};</span>
+
+        <span class="c1"># Here we merge default values with provided</span>
+        <span class="c1"># values from `config.networking.traefik.values`.</span>
+        <span class="ss">values =</span> lib<span class="o">.</span>recursiveUpdate <span class="p">{</span>
+          <span class="ss">ingressClass =</span> <span class="p">{</span>
+            <span class="ss">enabled =</span> config<span class="o">.</span>networking<span class="o">.</span>traefik<span class="o">.</span>ingressClass<span class="o">.</span>enable<span class="p">;</span>
+            <span class="ss">name =</span> config<span class="o">.</span>networking<span class="o">.</span>traefik<span class="o">.</span>ingressClass<span class="o">.</span>name<span class="p">;</span>
+          <span class="p">};</span>
+        <span class="p">}</span> config<span class="o">.</span>networking<span class="o">.</span>traefik<span class="o">.</span>values<span class="p">;</span>
+      <span class="p">};</span>
+    <span class="p">};</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Here we have declared extra configuration options that can be set in other modules. By setting <code class="highlight">networking<span class="o">.</span>traefik<span class="o">.</span><span class="ss">enable =</span> <span class="no">true</span><span class="p">;</span></code> the <code>traefik</code> application will be added, otherwise not. By setting <code class="highlight">networking<span class="o">.</span>traefik<span class="o">.</span>ingressClass<span class="o">.</span><span class="ss">enable =</span> <span class="no">false</span><span class="p">;</span></code> the application will not contain an ingress class for traefik, and so on.</p>
+<h3 id="argo-cd">Argo CD<a class="headerlink" href="#argo-cd" title="Permanent link">#</a></h3>
+<p>Now let's create a specific module for Argo CD:</p>
+<div class="highlight"><span class="filename">modules/argocd.nix</span><pre><span></span><code><span class="p">{</span>
+  lib<span class="p">,</span>
+  config<span class="p">,</span>
+  <span class="o">...</span>
+<span class="p">}:</span> <span class="p">{</span>
+  options<span class="o">.</span>services<span class="o">.</span><span class="ss">argocd =</span> <span class="k">with</span> lib<span class="p">;</span> <span class="p">{</span>
+    <span class="ss">enable =</span> mkEnableOption <span class="s2">&quot;argocd&quot;</span><span class="p">;</span>
+    <span class="c1"># Configuration options for the ingress</span>
+    <span class="ss">ingress =</span> <span class="p">{</span>
+      <span class="ss">enable =</span> mkEnableOption <span class="s2">&quot;argocd ingress&quot;</span><span class="p">;</span>
+      <span class="ss">host =</span> mkOption <span class="p">{</span>
+        <span class="ss">type =</span> types<span class="o">.</span>nullOr types<span class="o">.</span>str<span class="p">;</span>
+        <span class="ss">default =</span> <span class="no">null</span><span class="p">;</span>
+        <span class="ss">description =</span> <span class="s1">&#39;&#39;</span>
+<span class="s1">          Hostname to use in the Ingress for argocd-server.</span>
+<span class="s1">        &#39;&#39;</span><span class="p">;</span>
+      <span class="p">};</span>
+      <span class="ss">ingressClassName =</span> mkOption <span class="p">{</span>
+        <span class="ss">type =</span> types<span class="o">.</span>str<span class="p">;</span>
+        <span class="ss">default =</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+        <span class="ss">description =</span> <span class="s1">&#39;&#39;</span>
+<span class="s1">          The ingress class to use in the Ingress for argocd-server.</span>
+<span class="s1">        &#39;&#39;</span><span class="p">;</span>
+      <span class="p">};</span>
+    <span class="p">};</span>
+    <span class="c1"># Configuration option for setting the replicas for</span>
+    <span class="c1"># argocd-server</span>
+    <span class="ss">replicas =</span> mkOption <span class="p">{</span>
+      <span class="ss">type =</span> types<span class="o">.</span>int<span class="p">;</span>
+      <span class="ss">default =</span> <span class="mi">2</span><span class="p">;</span>
+      <span class="ss">description =</span> <span class="s1">&#39;&#39;</span>
+<span class="s1">        Number of replicas of the argocd-server deployment.</span>
+<span class="s1">      &#39;&#39;</span><span class="p">;</span>
+    <span class="p">};</span>
+    <span class="c1"># To not limit the consumers of this module allowing for</span>
+    <span class="c1"># setting the helm values directly is useful in certain</span>
+    <span class="c1"># situations</span>
+    <span class="ss">values =</span> mkOption <span class="p">{</span>
+      <span class="ss">type =</span> types<span class="o">.</span>attrsOf types<span class="o">.</span>anything<span class="p">;</span>
+      <span class="ss">default =</span> <span class="p">{};</span>
+      <span class="ss">description =</span> <span class="s1">&#39;&#39;</span>
+<span class="s1">        Value overrides that will be passed to the helm chart.</span>
+<span class="s1">      &#39;&#39;</span><span class="p">;</span>
+    <span class="p">};</span>
+  <span class="p">};</span>
+
+  <span class="c1"># Only create the application if argocd is enabled</span>
+  <span class="ss">config =</span> lib<span class="o">.</span>mkIf config<span class="o">.</span>services<span class="o">.</span>argocd<span class="o">.</span>enable <span class="p">{</span>
+    applications<span class="o">.</span><span class="ss">argocd =</span> <span class="p">{</span>
+      <span class="ss">namespace =</span> <span class="s2">&quot;argocd&quot;</span><span class="p">;</span>
+      <span class="ss">createNamespace =</span> <span class="no">true</span><span class="p">;</span>
+
+      helm<span class="o">.</span>releases<span class="o">.</span><span class="ss">argocd =</span> <span class="p">{</span>
+        <span class="ss">chart =</span> lib<span class="o">.</span>helm<span class="o">.</span>downloadHelmChart <span class="p">{</span>
+          <span class="ss">repo =</span> <span class="s2">&quot;https://argoproj.github.io/argo-helm/&quot;</span><span class="p">;</span>
+          <span class="ss">chart =</span> <span class="s2">&quot;argo-cd&quot;</span><span class="p">;</span>
+          <span class="ss">version =</span> <span class="s2">&quot;5.51.6&quot;</span><span class="p">;</span>
+          <span class="ss">chartHash =</span> <span class="s2">&quot;sha256-3kRkzOQdYa5JkrBV/+iJK3FP+LDFY1J8L20aPhcEMkY=&quot;</span><span class="p">;</span>
+        <span class="p">};</span>
+
+        <span class="c1"># Here we merge default values with provided</span>
+        <span class="c1"># values from `config.services.argocd.values`.</span>
+        <span class="ss">values =</span> lib<span class="o">.</span>recursiveUpdate <span class="p">{</span>
+          <span class="c1"># Set number of replicas by using service option</span>
+          server<span class="o">.</span><span class="ss">replicas =</span> config<span class="o">.</span>services<span class="o">.</span>argocd<span class="o">.</span>replicas<span class="p">;</span>
+          <span class="c1"># Create an ingress with the configured hostname</span>
+          server<span class="o">.</span><span class="ss">ingress =</span> <span class="p">{</span>
+            <span class="ss">enabled =</span> config<span class="o">.</span>services<span class="o">.</span>argocd<span class="o">.</span>ingress<span class="o">.</span>enable<span class="p">;</span>
+            <span class="ss">ingressClassName =</span> config<span class="o">.</span>services<span class="o">.</span>argocd<span class="o">.</span>ingress<span class="o">.</span>ingressClassName<span class="p">;</span>
+            <span class="ss">hosts =</span>
+              <span class="k">if</span> <span class="o">!</span><span class="nb">isNull</span> config<span class="o">.</span>services<span class="o">.</span>argocd<span class="o">.</span>ingress<span class="o">.</span>host
+              <span class="k">then</span> <span class="p">[</span>config<span class="o">.</span>services<span class="o">.</span>argocd<span class="o">.</span>ingress<span class="o">.</span>host<span class="p">]</span>
+              <span class="k">else</span> <span class="p">[];</span>
+          <span class="p">};</span>
+        <span class="p">}</span> config<span class="o">.</span>services<span class="o">.</span>argocd<span class="o">.</span>values<span class="p">;</span>
+      <span class="p">};</span>
+    <span class="p">};</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Like with the traefik module you can now set <code class="highlight">services<span class="o">.</span>argocd<span class="o">.</span><span class="ss">enable =</span> <span class="no">true</span><span class="p">;</span></code> to enable the argocd application and <code class="highlight">services<span class="o">.</span>argocd<span class="o">.</span>ingress<span class="o">.</span><span class="ss">enable =</span> <span class="no">true</span><span class="p">;</span></code> to create an ingress.</p>
+<h3 id="putting-it-all-together">Putting it all together<a class="headerlink" href="#putting-it-all-together" title="Permanent link">#</a></h3>
+<p>Now with argocd and traefik declared in their own modules we will need to import them in the base <code>modules/default.nix</code>:</p>
+<div class="highlight"><span class="filename">modules/default.nix</span><pre><span></span><code><span class="p">{</span>lib<span class="p">,</span> config<span class="p">,</span> <span class="o">...</span><span class="p">}:</span> <span class="p">{</span>
+  <span class="c1"># Here we import the modules we created above.</span>
+  <span class="c1"># This will make all the configuration options</span>
+  <span class="c1"># available to other modules.</span>
+  <span class="ss">imports =</span> <span class="p">[</span>
+    <span class="o">.</span><span class="l">/argocd.nix</span>
+    <span class="o">.</span><span class="l">/traefik.nix</span>
+  <span class="p">];</span>
+
+  <span class="c1"># This option should be common across all environments so we</span>
+  <span class="c1"># can declare it here.</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">repository =</span> <span class="s2">&quot;https://github.com/arnarg/nixidy-demo.git&quot;</span><span class="p">;</span>
+
+  <span class="c1"># Traefik should be enable by default.</span>
+  networking<span class="o">.</span>traefik<span class="o">.</span><span class="ss">enable =</span> lib<span class="o">.</span>mkDefault <span class="no">true</span><span class="p">;</span>
+
+  <span class="c1"># Argo CD should be enabled by default.</span>
+  services<span class="o">.</span><span class="ss">argocd =</span> <span class="p">{</span>
+    <span class="ss">enable =</span> lib<span class="o">.</span>mkDefault <span class="no">true</span><span class="p">;</span>
+
+    <span class="ss">ingress =</span> <span class="p">{</span>
+      <span class="c1"># An ingress for Argo CD Web UI should</span>
+      <span class="c1"># be created if traefik is also enabled.</span>
+      <span class="ss">enable =</span> lib<span class="o">.</span>mkDefault config<span class="o">.</span>networking<span class="o">.</span>traefik<span class="o">.</span>enable<span class="p">;</span>
+
+      <span class="c1"># The ingress should use Treafik&#39;s ingress</span>
+      <span class="c1"># class.</span>
+      <span class="ss">ingressClassName =</span> lib<span class="o">.</span>mkDefault config<span class="o">.</span>networking<span class="o">.</span>traefik<span class="o">.</span>ingressClass<span class="o">.</span>name<span class="p">;</span>
+    <span class="p">};</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>This will import the two application modules and set some defaults by using <code>mkDefault</code> (this function sets the value as a default value but still allows overriding it in other modules). Notably we have set it up in a way that will automatically enable the ingress for Argo CD Web UI <em>if</em> traefik is also enabled, which is also enabled in this file but can be still be disabled in another module.</p>
+<p>Now in order to achieve the goals we set out to achieve in the beginning of this section, the following options are set in the environments' configurations:</p>
+<div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">branch =</span> <span class="s2">&quot;env/dev&quot;</span><span class="p">;</span>
+
+  <span class="c1"># We want to set the hostname for ArgoCD Web UI</span>
+  services<span class="o">.</span>argocd<span class="o">.</span>ingress<span class="o">.</span><span class="ss">host =</span> <span class="s2">&quot;argocd.dev.domain.com&quot;</span><span class="p">;</span>
+
+  <span class="c1"># We only want 1 replica of argocd server</span>
+  services<span class="o">.</span>argocd<span class="o">.</span><span class="ss">replicas =</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">env/test.nix</span><pre><span></span><code><span class="p">{</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">branch =</span> <span class="s2">&quot;env/test&quot;</span><span class="p">;</span>
+
+  <span class="c1"># We want to set the hostname for ArgoCD Web UI</span>
+  services<span class="o">.</span>argocd<span class="o">.</span>ingress<span class="o">.</span><span class="ss">host =</span> <span class="s2">&quot;argocd.test.domain.com&quot;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Now the following manifests are generated:</p>
+<div class="highlight"><pre><span></span><code>&gt;&gt;<span class="w"> </span>tree<span class="w"> </span>-l<span class="w"> </span>result
+result
+├──<span class="w"> </span>apps
+│<span class="w">   </span>├──<span class="w"> </span>Application-argocd.yaml
+│<span class="w">   </span>└──<span class="w"> </span>Application-traefik.yaml
+├──<span class="w"> </span>argocd
+│<span class="w">   </span>├──<span class="w"> </span>ClusterRole-argocd-application-controller.yaml
+│<span class="w">   </span>├──<span class="w"> </span>ClusterRole-argocd-notifications-controller.yaml
+│<span class="w">   </span>├──<span class="w"> </span>ClusterRole-argocd-repo-server.yaml
+│<span class="w">   </span>├──<span class="w"> </span>ClusterRole-argocd-server.yaml
+│<span class="w">   </span>├──<span class="w"> </span>ClusterRoleBinding-argocd-application-controller.yaml
+│<span class="w">   </span>└──<span class="w"> </span>...
+└──<span class="w"> </span>traefik
+<span class="w">    </span>├──<span class="w"> </span>ClusterRoleBinding-traefik-traefik.yaml
+<span class="w">    </span>├──<span class="w"> </span>ClusterRole-traefik-traefik.yaml
+<span class="w">    </span>├──<span class="w"> </span>CustomResourceDefinition-ingressroutes-traefik-containo-us.yaml
+<span class="w">    </span>├──<span class="w"> </span>CustomResourceDefinition-ingressroutes-traefik-io.yaml
+<span class="w">    </span>├──<span class="w"> </span>CustomResourceDefinition-ingressroutetcps-traefik-containo-us.yaml
+<span class="w">    </span>└──<span class="w"> </span>...
+</code></pre></div>
 
 
 
@@ -748,6 +1219,8 @@ result
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
         </div>
         
       </main>
@@ -776,13 +1249,13 @@ result
         
         
           
-          <a href="../more_environments/" class="md-footer__link md-footer__link--next" aria-label="Next: More Environments" rel="next">
+          <a href="../github_actions/" class="md-footer__link md-footer__link--next" aria-label="Next: GitHub Actions" rel="next">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                More Environments
+                GitHub Actions
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -815,7 +1288,7 @@ result
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.annotate", "navigation.footer"], "search": "../../assets/javascripts/workers/search.dfff1995.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.footer", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.dfff1995.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.dff1b7c8.min.js"></script>
