@@ -1,0 +1,41 @@
+name: nixidy action
+description: Generate manifest for a nixidy environment
+
+inputs:
+  environment:
+    description: Name of the environment to build
+    required: true
+  cwd:
+    description: Path to directory containing the checked out repository
+    default: '.'
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        FLAKE: github:${{github.action_repository}}/${{github.action_ref}}
+        DEST_DIR: ${{runner.temp}}/${{inputs.environment}}
+      run: |
+        TARGET_BRANCH=$(nix run '${{env.FLAKE}}#' -- info '${{inputs.cwd}}#${{inputs.environment}}' --json | jq -r .branch)
+
+        if git -C "${{inputs.cwd}}" fetch origin "$TARGET_BRANCH"; then
+          git -C "${{inputs.cwd}}" worktree add --checkout "${{env.DEST_DIR}}" "$TARGET_BRANCH"
+         else
+          git -C "${{inputs.cwd}}" worktree add --orphan -b "$TARGET_BRANCH" "${{env.DEST_DIR}}"
+        fi
+
+        RESULT=$(nix run '${{env.FLAKE}}#' -- build '${{inputs.cwd}}#${{inputs.environment}}' --print-out-paths --no-link)
+
+        rsync --recursive --delete --exclude=.git -L "$RESULT/" "${{env.DEST_DIR}}"
+
+        echo "BRANCH=$TARGET_BRANCH" >> "$GITHUB_ENV"
+        echo "DEST_DIR=$(realpath --relative-to "$PWD" "$DEST_DIR")" >> "$GITHUB_ENV"
+
+    - uses: EndBug/add-and-commit@v9
+      with:
+        cwd: ${{env.DEST_DIR}}
+        default_author: github_actions
+        message: "chore(${{inputs.environment}}): promote to ${{inputs.environment}} ${{github.sha}}"
+        fetch: false
+        push: --set-upstream origin ${{env.BRANCH}}

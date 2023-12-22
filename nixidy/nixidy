@@ -47,7 +47,7 @@ function doBuild() {
     exit 1
   fi
   
-  nix build "${FLAKE_ROOT}#nixidyEnvs.${NIX_SYSTEM}.${FLAKE_ENV}.result" "${BUILD_PARAMS[@]}"
+  nix build "${FLAKE_ROOT}#nixidyEnvs.${NIX_SYSTEM}.${FLAKE_ENV}.environmentPackage" "${BUILD_PARAMS[@]}"
 }
 
 function doHelp() {
@@ -55,22 +55,21 @@ function doHelp() {
     echo
     echo "Options"
     echo
-    echo "  --no-link         Don't create a result symlink (only used in build)."
-    echo "  --out-link PATH   Create a custom result symlink (only used in build)."
-    echo "  --json            Output info in JSON format (only used in info)."
-    echo "  -h                Print this help"
+    echo "  --no-link          Don't create a result symlink (only used in build)."
+    echo "  --out-link PATH    Create a custom result symlink (only used in build)."
+    echo "  --print-out-paths  Print the resulting output paths (only used in build)."
+    echo "  --json             Output info in JSON format (only used in info)."
+    echo "  -h                 Print this help"
     echo
     echo "Commands"
     echo
-    echo "  help         Print this help."
+    echo "  help             Print this help."
     echo
-    echo "  info FLAKE_URI"
-    echo "               Get info about environment."
-    echo "               Example: .#prod"
+    echo "  info FLAKE_URI   Get info about environment."
+    echo "                   Example: .#prod"
     echo
-    echo "  build FLAKE_URI"
-    echo "               Build nixidy environment from flake URI."
-    echo "               Example: .#prod"
+    echo "  build FLAKE_URI  Build nixidy environment from flake URI."
+    echo "                   Example: .#prod"
 }
 
 COMMAND=""
@@ -88,6 +87,9 @@ while [[ $# -gt 0 ]]; do
       ;;
     --no-link)
       BUILD_PARAMS+=("--no-link")
+      ;;
+    --print-out-paths)
+      BUILD_PARAMS+=("--print-out-paths")
       ;;
     --out-link)
       BUILD_PARAMS+=("--out-link" "$1")
