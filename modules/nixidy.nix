@@ -21,6 +21,29 @@
         };
       };
     };
+
+  walkDir = prefix: dir: let
+    contents = builtins.readDir "${prefix}/${dir}";
+  in
+    if contents ? "default.nix" && contents."default.nix" == "regular"
+    then lib.helm.downloadHelmChart (import "${prefix}/${dir}")
+    else
+      builtins.listToAttrs (map (
+        d: {
+          name = d.name;
+          value = walkDir "${prefix}/${dir}" d.name;
+        }
+      ) (lib.filter (c: c.value == "directory") (lib.attrsToList contents)));
+
+  mkChartAttrs = dir: let
+    contents = builtins.readDir dir;
+  in
+    builtins.listToAttrs (map (
+      d: {
+        name = d.name;
+        value = walkDir dir d.name;
+      }
+    ) (lib.filter (c: c.value == "directory") (lib.attrsToList contents)));
 in {
   options.nixidy = with lib; {
     target = {
@@ -106,6 +129,17 @@ in {
         description = "Destination namespace for generated Argo CD Applications in the app of apps applications.";
       };
     };
+
+    charts = mkOption {
+      type = with types; attrsOf anything;
+      default = {};
+      description = "Attrset of derivations containing helm charts. This will be passed as `charts` to every module.";
+    };
+    chartsDir = mkOption {
+      type = with types; nullOr path;
+      default = null;
+      description = "Path to a directory containing sub-directory structure that can be used to build a charts attrset. This will be passed as `charts` to every module.";
+    };
   };
 
   config = {
@@ -136,5 +170,8 @@ in {
           apps;
       };
     };
+
+    _module.args.charts = config.nixidy.charts;
+    nixidy.charts = lib.optionalAttrs (cfg.chartsDir != null) (mkChartAttrs cfg.chartsDir);
   };
 }
