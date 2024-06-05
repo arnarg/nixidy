@@ -654,6 +654,20 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#nixidycharts" class="md-nav__link">
+    nixidy.charts
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidychartsdir" class="md-nav__link">
+    nixidy.chartsDir
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#nixidydefaultshelmtransformer" class="md-nav__link">
     nixidy.defaults.helm.transformer
   </a>
@@ -936,6 +950,20 @@
         <li class="md-nav__item">
   <a href="#nixidyappofappsnamespace" class="md-nav__link">
     nixidy.appOfApps.namespace
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidycharts" class="md-nav__link">
+    nixidy.charts
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidychartsdir" class="md-nav__link">
+    nixidy.chartsDir
   </a>
   
 </li>
@@ -1368,6 +1396,26 @@ string</p>
 string</p>
 <p><strong><em>Default:</em></strong>
 <code class="highlight"><span class="s2">&quot;argocd&quot;</span></code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
+</ul>
+<h2 id="nixidycharts">nixidy.charts<a class="headerlink" href="#nixidycharts" title="Permanent link">#</a></h2>
+<p>Attrset of derivations containing helm charts. This will be passed as <code>charts</code> to every module.</p>
+<p><strong><em>Type:</em></strong>
+attribute set of anything</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="p">{</span> <span class="p">}</span></code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
+</ul>
+<h2 id="nixidychartsdir">nixidy.chartsDir<a class="headerlink" href="#nixidychartsdir" title="Permanent link">#</a></h2>
+<p>Path to a directory containing sub-directory structure that can be used to build a charts attrset. This will be passed as <code>charts</code> to every module.</p>
+<p><strong><em>Type:</em></strong>
+null or path</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="no">null</span></code></p>
 <p><strong><em>Declared by:</em></strong></p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
