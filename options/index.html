@@ -1095,12 +1095,11 @@ attribute set of (submodule)</p>
       <span class="ss">services =</span> <span class="p">{</span>
         <span class="ss">nginx =</span> <span class="p">{</span>
           <span class="ss">spec =</span> <span class="p">{</span>
-            <span class="ss">ports =</span> <span class="p">[</span>
-              <span class="p">{</span>
-                <span class="ss">name =</span> <span class="s2">&quot;http&quot;</span><span class="p">;</span>
+            <span class="ss">ports =</span> <span class="p">{</span>
+              <span class="ss">http =</span> <span class="p">{</span>
                 <span class="ss">port =</span> <span class="mi">80</span><span class="p">;</span>
-              <span class="p">}</span>
-            <span class="p">];</span>
+              <span class="p">};</span>
+            <span class="p">};</span>
             <span class="ss">selector =</span> <span class="p">{</span>
               <span class="ss">app =</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
             <span class="p">};</span>
@@ -1350,12 +1349,11 @@ attribute set</p>
   <span class="ss">services =</span> <span class="p">{</span>
     <span class="ss">nginx =</span> <span class="p">{</span>
       <span class="ss">spec =</span> <span class="p">{</span>
-        <span class="ss">ports =</span> <span class="p">[</span>
-          <span class="p">{</span>
-            <span class="ss">name =</span> <span class="s2">&quot;http&quot;</span><span class="p">;</span>
+        <span class="ss">ports =</span> <span class="p">{</span>
+          <span class="ss">http =</span> <span class="p">{</span>
             <span class="ss">port =</span> <span class="mi">80</span><span class="p">;</span>
-          <span class="p">}</span>
-        <span class="p">];</span>
+          <span class="p">};</span>
+        <span class="p">};</span>
         <span class="ss">selector =</span> <span class="p">{</span>
           <span class="ss">app =</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
         <span class="p">};</span>
