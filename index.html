@@ -330,26 +330,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#non-goals" class="md-nav__link">
-    Non Goals
-  </a>
-  
-    <nav class="md-nav" aria-label="Non Goals">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#typed-resource-definitions" class="md-nav__link">
-    Typed Resource Definitions
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#special-thanks" class="md-nav__link">
     Special Thanks
   </a>
@@ -607,26 +587,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#non-goals" class="md-nav__link">
-    Non Goals
-  </a>
-  
-    <nav class="md-nav" aria-label="Non Goals">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#typed-resource-definitions" class="md-nav__link">
-    Typed Resource Definitions
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#special-thanks" class="md-nav__link">
     Special Thanks
   </a>
@@ -670,14 +630,9 @@
 <p>Take a look at the <a href="https://arnarg.github.io/nixidy/user_guide/getting_started/">getting started guide</a>.</p>
 <h2 id="demo">Demo<a class="headerlink" href="#demo" title="Permanent link">#</a></h2>
 <p>See <a href="https://github.com/arnarg/nixidy-demo">nixidy-demo</a>.</p>
-<h2 id="non-goals">Non Goals<a class="headerlink" href="#non-goals" title="Permanent link">#</a></h2>
-<h3 id="typed-resource-definitions">Typed Resource Definitions<a class="headerlink" href="#typed-resource-definitions" title="Permanent link">#</a></h3>
-<p>nixidy does not concern itself with defining typed options for every possible Kubernetes resource like is done with <a href="https://github.com/hall/kubenix">kubenix</a>.
-This approach requires automatic generation from JSON schemas of all supported resources, and needs to be updated for every new release of Kubernetes.</p>
-<p>That also means that it will explicitly need to support every different CRD from applications it wants to deploy.</p>
-<p>Instead it allows for outputing any structure as long as it's under <code>&lt;apiVersion&gt;.&lt;kind&gt;.&lt;name&gt;</code> and let Argo CD surface the error if the data is not a valid Kubernetes manifest.</p>
 <h2 id="special-thanks">Special Thanks<a class="headerlink" href="#special-thanks" title="Permanent link">#</a></h2>
 <p><a href="https://github.com/farcaller/nix-kube-generators">farcaller/nix-kube-generators</a> is used internally to pull and render Helm charts and some functions are re-exposed in the lib passed to modules in nixidy.</p>
+<p><a href="https://github.com/hall/kubenix">hall/kubenix</a> project has code generation of nix module options for every standard kubernetes resource. Instead of doing this work in nixidy I simply import their generated resource options.</p>
 
 
 
