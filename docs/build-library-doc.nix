@@ -4,10 +4,6 @@
 }: let
   includedLib = [
     {
-      name = "resources";
-      description = "resources functions";
-    }
-    {
       name = "helm";
       description = "helm functions";
     }
