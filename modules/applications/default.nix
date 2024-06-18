@@ -214,7 +214,7 @@ in {
 
   config = {
     resources = lib.mkIf config.createNamespace {
-      namespaces.${config.name} = {};
+      namespaces.${config.namespace} = {};
     };
 
     objects = with lib;
