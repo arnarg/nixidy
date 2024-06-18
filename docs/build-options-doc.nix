@@ -10,9 +10,50 @@
     name = "${repo}/${subpath}";
   };
 
+  resourcesCompat = {lib, ...}: {
+    options.resources = with lib;
+      mkOption {
+        type = types.attrs;
+        default = {};
+        example = {
+          deployments.nginx.spec = {
+            replicas = 3;
+            selector.matchLabels.app = "nginx";
+            template = {
+              metadata.labels.app = "nginx";
+              spec = {
+                securityContext.fsGroup = 1000;
+                containers.nginx = {
+                  image = "nginx:1.25.1";
+                  imagePullPolicy = "IfNotPresent";
+                };
+              };
+            };
+          };
+
+          services.nginx.spec = {
+            selector.app = "nginx";
+            ports = [
+              {
+                name = "http";
+                port = 80;
+              }
+            ];
+          };
+        };
+        description = "Resources for the application";
+      };
+  };
+
   options =
     (lib.evalModules {
-      modules = import ../modules/modules.nix;
+      modules =
+        import ../modules/modules.nix
+        ++ [
+          {
+            nixidy.resourceImports = [resourcesCompat];
+          }
+        ];
       specialArgs = {
         inherit pkgs lib;
       };

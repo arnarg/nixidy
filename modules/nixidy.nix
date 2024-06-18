@@ -144,31 +144,34 @@ in {
 
   config = {
     applications.${cfg.appOfApps.name} = {
-      resources = {
-        "argoproj.io/v1alpha1".Application =
-          lib.attrsets.mapAttrs (
-            n: app: {
-              metadata.namespace = cfg.appOfApps.namespace;
-              spec = {
-                project = app.project;
-                source = {
-                  repoURL = cfg.target.repository;
-                  targetRevision = cfg.target.branch;
-                  path = app.output.path;
-                };
-                destination = {
-                  server = "https://kubernetes.default.svc";
-                  namespace = app.namespace;
-                };
-                syncPolicy.automated = {
-                  prune = app.syncPolicy.automated.prune;
-                  selfHeal = app.syncPolicy.automated.selfHeal;
-                };
+      objects =
+        lib.attrsets.mapAttrsToList (
+          n: app: {
+            apiVersion = "argoproj.io/v1alpha1";
+            kind = "Application";
+            metadata = {
+              name = n;
+              namespace = cfg.appOfApps.namespace;
+            };
+            spec = {
+              project = app.project;
+              source = {
+                repoURL = cfg.target.repository;
+                targetRevision = cfg.target.branch;
+                path = app.output.path;
               };
-            }
-          )
-          apps;
-      };
+              destination = {
+                server = "https://kubernetes.default.svc";
+                namespace = app.namespace;
+              };
+              syncPolicy.automated = {
+                prune = app.syncPolicy.automated.prune;
+                selfHeal = app.syncPolicy.automated.selfHeal;
+              };
+            };
+          }
+        )
+        apps;
     };
 
     _module.args.charts = config.nixidy.charts;

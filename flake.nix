@@ -5,11 +5,17 @@
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nix-kube-generators.url = "github:farcaller/nix-kube-generators";
 
+  inputs.kubenix = {
+    url = "github:hall/kubenix";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
   outputs = {
     self,
     nixpkgs,
     flake-utils,
     nix-kube-generators,
+    kubenix,
   }:
     {
       lib = rec {
@@ -20,7 +26,7 @@
           extraSpecialArgs ? {},
         }:
           import ./modules {
-            inherit modules pkgs lib extraSpecialArgs;
+            inherit modules pkgs lib extraSpecialArgs kubenix;
             kubelib = nix-kube-generators;
           };
 

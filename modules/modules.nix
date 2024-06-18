@@ -1,5 +1,5 @@
 [
   ./applications.nix
   ./nixidy.nix
-  ./environment.nix
+  ./build.nix
 ]

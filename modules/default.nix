@@ -2,6 +2,7 @@
   modules,
   pkgs,
   kubelib,
+  kubenix,
   lib ? pkgs.lib,
   extraSpecialArgs ? {},
 }: let
@@ -10,7 +11,14 @@
   nixidyModules = import ./modules.nix;
 
   module = lib.evalModules {
-    modules = modules ++ nixidyModules;
+    modules =
+      modules
+      ++ nixidyModules
+      ++ [
+        {
+          nixidy.resourceImports = [(kubenix + "/modules/generated/v1.30.nix")];
+        }
+      ];
     specialArgs =
       {
         inherit pkgs;
@@ -23,5 +31,5 @@ in {
     repository = module.config.nixidy.target.repository;
     branch = module.config.nixidy.target.branch;
   };
-  environmentPackage = module.config.nixidy.environmentPackage;
+  environmentPackage = module.config.build.environmentPackage;
 }
