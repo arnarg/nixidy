@@ -33,12 +33,7 @@
 
           services.nginx.spec = {
             selector.app = "nginx";
-            ports = [
-              {
-                name = "http";
-                port = 80;
-              }
-            ];
+            ports.http.port = 80;
           };
         };
         description = "Resources for the application";
