@@ -56,6 +56,7 @@
 in {
   imports = [
     ./helm.nix
+    ./kustomize.nix
     ./yamls.nix
     ./namespaced.nix
   ];
