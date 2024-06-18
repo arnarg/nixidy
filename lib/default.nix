@@ -11,7 +11,6 @@ in
       lib = self;
     };
   in {
-    resources = import ./resources.nix params;
     kustomize = import ./kustomize.nix params;
     helm = import ./helm.nix params;
     kube = import ./kube.nix params;

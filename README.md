@@ -32,17 +32,8 @@ Take a look at the [getting started guide](https://arnarg.github.io/nixidy/user_
 
 See [nixidy-demo](https://github.com/arnarg/nixidy-demo).
 
-## Non Goals
-
-### Typed Resource Definitions
-
-nixidy does not concern itself with defining typed options for every possible Kubernetes resource like is done with [kubenix](https://github.com/hall/kubenix).
-This approach requires automatic generation from JSON schemas of all supported resources, and needs to be updated for every new release of Kubernetes.
-
-That also means that it will explicitly need to support every different CRD from applications it wants to deploy.
-
-Instead it allows for outputing any structure as long as it's under `<apiVersion>.<kind>.<name>` and let Argo CD surface the error if the data is not a valid Kubernetes manifest.
-
 ## Special Thanks
 
 [farcaller/nix-kube-generators](https://github.com/farcaller/nix-kube-generators) is used internally to pull and render Helm charts and some functions are re-exposed in the lib passed to modules in nixidy.
+
+[hall/kubenix](https://github.com/hall/kubenix) project has code generation of nix module options for every standard kubernetes resource. Instead of doing this work in nixidy I simply import their generated resource options.
