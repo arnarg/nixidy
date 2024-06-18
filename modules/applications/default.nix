@@ -57,6 +57,7 @@ in {
   imports = [
     ./helm.nix
     ./yamls.nix
+    ./namespaced.nix
   ];
 
   options = with lib; {
