@@ -144,15 +144,12 @@ in {
 
   config = {
     applications.${cfg.appOfApps.name} = {
-      objects =
-        lib.attrsets.mapAttrsToList (
+      namespace = cfg.appOfApps.namespace;
+
+      resources.applications =
+        lib.attrsets.mapAttrs (
           n: app: {
-            apiVersion = "argoproj.io/v1alpha1";
-            kind = "Application";
-            metadata = {
-              name = n;
-              namespace = cfg.appOfApps.namespace;
-            };
+            metadata.name = n;
             spec = {
               project = app.project;
               source = {

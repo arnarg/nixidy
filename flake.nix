@@ -63,6 +63,7 @@
       packages = {
         default = packages.nixidy;
         docs = docs;
+        generators = import ./pkgs/generators {inherit pkgs;};
       };
     }));
 }

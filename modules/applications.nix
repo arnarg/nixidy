@@ -50,4 +50,10 @@
       description = "List of modules to import for resource defintion options.";
     };
   };
+
+  config = {
+    nixidy.resourceImports = [
+      ./generated/argocd.nix
+    ];
+  };
 }
