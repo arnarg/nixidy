@@ -278,6 +278,8 @@ with lib; let
 
   latestResourceTypesByKind = mapAttrs (_kind: last) resourcesTypesByKindSortByVersion;
 
+  namespacedResourceTypes = filterAttrs (_: type: type.namespaced == true) resourceTypes;
+
   genResourceOptions = resource:
     with gen; let
       submoduleForDefinition' = definition:
@@ -491,7 +493,7 @@ with lib; let
           kind = "${rt.kind}";
           default.metadata.namespace = lib.mkDefault config.namespace;
         }'')
-    resourceTypes)}];
+    namespacedResourceTypes)}];
       };
     }
   '';
