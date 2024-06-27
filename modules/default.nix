@@ -16,7 +16,10 @@
       ++ nixidyModules
       ++ [
         {
-          nixidy.resourceImports = [(kubenix + "/modules/generated/v1.30.nix")];
+          nixidy.resourceImports = [
+            (kubenix + "/modules/generated/v1.30.nix")
+            ./generated/argocd.nix
+          ];
         }
       ];
     specialArgs =
