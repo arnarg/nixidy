@@ -323,8 +323,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#demo" class="md-nav__link">
-    Demo
+  <a href="#examples" class="md-nav__link">
+    Examples
   </a>
   
 </li>
@@ -580,8 +580,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#demo" class="md-nav__link">
-    Demo
+  <a href="#examples" class="md-nav__link">
+    Examples
   </a>
   
 </li>
@@ -616,6 +616,7 @@
 <blockquote>
 <p>Kind of sounds like Nix CD.</p>
 </blockquote>
+<p>Manage an entire Kubernetes cluster like it's NixOS, with the help of Argo CD.</p>
 <h2 id="why">Why?<a class="headerlink" href="#why" title="Permanent link">#</a></h2>
 <p>It's desirable to manage Kubernetes clusters in a declarative way using a git repository as a source of truth for manifests that should be deployed into the cluster. One popular solution that is often used to achieve this goal is <a href="https://argo-cd.readthedocs.io/">Argo CD</a>.</p>
 <p>Argo CD has a concept of applications. Each application has an entrypoint somewhere in your git repository that is either a Helm chart, kustomize application, jsonnet files or just a directory of YAML files. All the resources that are output when templating the helm chart, kustomizing the kustomize application or are defined in the YAML files in the directory, make up the application and are (usually) deployed into a single namespace.</p>
@@ -628,8 +629,11 @@
 <p>Therefore I made nixidy as an experiment to see if I can make something better (at least for myself). As all Argo CD applications are defined in a single configuration it can reference configuration options across applications and automatically generate an <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern">App of Apps</a> bootstrapping all of them.</p>
 <h2 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">#</a></h2>
 <p>Take a look at the <a href="https://arnarg.github.io/nixidy/user_guide/getting_started/">getting started guide</a>.</p>
-<h2 id="demo">Demo<a class="headerlink" href="#demo" title="Permanent link">#</a></h2>
-<p>See <a href="https://github.com/arnarg/nixidy-demo">nixidy-demo</a>.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy-demo">nixidy-demo</a></li>
+<li><a href="https://github.com/arnarg/cluster">arnarg's cluster config</a></li>
+</ul>
 <h2 id="special-thanks">Special Thanks<a class="headerlink" href="#special-thanks" title="Permanent link">#</a></h2>
 <p><a href="https://github.com/farcaller/nix-kube-generators">farcaller/nix-kube-generators</a> is used internally to pull and render Helm charts and some functions are re-exposed in the lib passed to modules in nixidy.</p>
 <p><a href="https://github.com/hall/kubenix">hall/kubenix</a> project has code generation of nix module options for every standard kubernetes resource. Instead of doing this work in nixidy I simply import their generated resource options.</p>
