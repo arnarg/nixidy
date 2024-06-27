@@ -4,6 +4,8 @@ Kubernetes GitOps with nix and Argo CD.
 
 > Kind of sounds like Nix CD.
 
+Manage an entire Kubernetes cluster like it's NixOS, with the help of Argo CD.
+
 ## Why?
 
 It's desirable to manage Kubernetes clusters in a declarative way using a git repository as a source of truth for manifests that should be deployed into the cluster. One popular solution that is often used to achieve this goal is [Argo CD](https://argo-cd.readthedocs.io/).
@@ -28,9 +30,10 @@ Therefore I made nixidy as an experiment to see if I can make something better (
 
 Take a look at the [getting started guide](https://arnarg.github.io/nixidy/user_guide/getting_started/).
 
-## Demo
+## Examples
 
-See [nixidy-demo](https://github.com/arnarg/nixidy-demo).
+- [nixidy-demo](https://github.com/arnarg/nixidy-demo)
+- [arnarg's cluster config](https://github.com/arnarg/cluster)
 
 ## Special Thanks
 
