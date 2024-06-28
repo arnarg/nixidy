@@ -43,7 +43,7 @@
                 inherit pkgs lib;
                 extraSpecialArgs = extraSpecialArgs // (conf.extraSpecialArgs or {});
                 modules =
-                  [{nixidy.target.branch = lib.mkDefault "env/${env}";}]
+                  [{nixidy.target.rootPath = lib.mkDefault "./manifests/${env}";}]
                   ++ modules
                   ++ (conf.modules or []);
               }
