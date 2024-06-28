@@ -39,4 +39,4 @@ Take a look at the [getting started guide](https://arnarg.github.io/nixidy/user_
 
 [farcaller/nix-kube-generators](https://github.com/farcaller/nix-kube-generators) is used internally to pull and render Helm charts and some functions are re-exposed in the lib passed to modules in nixidy.
 
-[hall/kubenix](https://github.com/hall/kubenix) project has code generation of nix module options for every standard kubernetes resource. Instead of doing this work in nixidy I simply import their generated resource options.
+[hall/kubenix](https://github.com/hall/kubenix) project has code generation of nix module options for every standard kubernetes resource. Instead of doing this work in nixidy I simply import their generated resource options. The resource option generation scripts in nixidy are also a slight modification of kubenix's. Without their work this wouldn't be possible in nixidy.
