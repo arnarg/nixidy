@@ -296,6 +296,27 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#what-is-it" class="md-nav__link">
+    What is it?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    Getting Started
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    Examples
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#why" class="md-nav__link">
     Why?
   </a>
@@ -312,20 +333,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getting-started" class="md-nav__link">
-    Getting Started
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
-    Examples
-  </a>
   
 </li>
       
@@ -553,6 +560,27 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#what-is-it" class="md-nav__link">
+    What is it?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    Getting Started
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    Examples
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#why" class="md-nav__link">
     Why?
   </a>
@@ -569,20 +597,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getting-started" class="md-nav__link">
-    Getting Started
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
-    Examples
-  </a>
   
 </li>
       
@@ -616,7 +630,95 @@
 <blockquote>
 <p>Kind of sounds like Nix CD.</p>
 </blockquote>
-<p>Manage an entire Kubernetes cluster like it's NixOS, with the help of Argo CD.</p>
+<h2 id="what-is-it">What is it?<a class="headerlink" href="#what-is-it" title="Permanent link">#</a></h2>
+<p>Manage an entire Kubernetes cluster like it's NixOS, then have CI generate plain YAML manifests for ArgoCD.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="o">...</span><span class="p">}:</span> <span class="p">{</span>
+  applications<span class="o">.</span><span class="ss">demo =</span> <span class="p">{</span>
+    <span class="ss">namespace =</span> <span class="s2">&quot;demo&quot;</span><span class="p">;</span>
+
+    <span class="c1"># Automatically generate a namespace resource with the</span>
+    <span class="c1"># above set namespace</span>
+    <span class="ss">createNamespace =</span> <span class="no">true</span><span class="p">;</span>
+
+    <span class="ss">resources =</span> <span class="k">let</span>
+      <span class="ss">labels =</span> <span class="p">{</span>
+        <span class="s2">&quot;app.kubernetes.io/name&quot;</span> <span class="o">=</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
+      <span class="p">};</span>
+    <span class="k">in</span> <span class="p">{</span>
+      <span class="c1"># Define a deployment for running an nginx server</span>
+      deployments<span class="o">.</span>nginx<span class="o">.</span><span class="ss">spec =</span> <span class="p">{</span>
+        selector<span class="o">.</span><span class="ss">matchLabels =</span> labels<span class="p">;</span>
+        <span class="ss">template =</span> <span class="p">{</span>
+          metadata<span class="o">.</span><span class="ss">labels =</span> labels<span class="p">;</span>
+          <span class="ss">spec =</span> <span class="p">{</span>
+            securityContext<span class="o">.</span><span class="ss">fsGroup =</span> <span class="mi">1000</span><span class="p">;</span>
+            containers<span class="o">.</span><span class="ss">nginx =</span> <span class="p">{</span>
+              <span class="ss">image =</span> <span class="s2">&quot;nginx:1.25.1&quot;</span><span class="p">;</span>
+              <span class="ss">imagePullPolicy =</span> <span class="s2">&quot;IfNotPresent&quot;</span><span class="p">;</span>
+              <span class="ss">volumeMounts =</span> <span class="p">{</span>
+                <span class="s2">&quot;/etc/nginx&quot;</span><span class="o">.</span><span class="ss">name =</span> <span class="s2">&quot;config&quot;</span><span class="p">;</span>
+                <span class="s2">&quot;/var/lib/html&quot;</span><span class="o">.</span><span class="ss">name =</span> <span class="s2">&quot;static&quot;</span><span class="p">;</span>
+              <span class="p">};</span>
+            <span class="p">};</span>
+            <span class="ss">volumes =</span> <span class="p">{</span>
+              config<span class="o">.</span>configMap<span class="o">.</span><span class="ss">name =</span> <span class="s2">&quot;nginx-config&quot;</span><span class="p">;</span>
+              static<span class="o">.</span>configMap<span class="o">.</span><span class="ss">name =</span> <span class="s2">&quot;nginx-static&quot;</span><span class="p">;</span>
+            <span class="p">};</span>
+          <span class="p">};</span>
+        <span class="p">};</span>
+      <span class="p">};</span>
+
+      <span class="c1"># Define config maps with config for nginx</span>
+      <span class="ss">configMaps =</span> <span class="p">{</span>
+        nginx-config<span class="o">.</span>data<span class="o">.</span><span class="s2">&quot;nginx.conf&quot;</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="s1">          user nginx nginx;</span>
+<span class="s1">          error_log /dev/stdout info;</span>
+<span class="s1">          pid /dev/null;</span>
+<span class="s1">          events {}</span>
+<span class="s1">          http {</span>
+<span class="s1">            access_log /dev/stdout;</span>
+<span class="s1">            server {</span>
+<span class="s1">              listen 80;</span>
+<span class="s1">              index index.html;</span>
+<span class="s1">              location / {</span>
+<span class="s1">                root /var/lib/html;</span>
+<span class="s1">              }</span>
+<span class="s1">            }</span>
+<span class="s1">          }</span>
+<span class="s1">        &#39;&#39;</span><span class="p">;</span>
+
+        nginx-static<span class="o">.</span>data<span class="o">.</span><span class="s2">&quot;index.html&quot;</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="s1">          &lt;html&gt;&lt;body&gt;&lt;h1&gt;Hello from NGINX&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;</span>
+<span class="s1">        &#39;&#39;</span><span class="p">;</span>
+      <span class="p">};</span>
+
+      <span class="c1"># Define service for nginx</span>
+      services<span class="o">.</span>nginx<span class="o">.</span><span class="ss">spec =</span> <span class="p">{</span>
+        <span class="ss">selector =</span> labels<span class="p">;</span>
+        ports<span class="o">.</span>http<span class="o">.</span><span class="ss">port =</span> <span class="mi">80</span><span class="p">;</span>
+      <span class="p">};</span>
+    <span class="p">};</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Then build with nixidy using <code>nixidy build .#prod</code></p>
+<div class="highlight"><pre><span></span><code>tree -l result/
+├── apps
+│   └── Application-demo.yaml
+└── demo
+    ├── ConfigMap-nginx-config.yaml
+    ├── ConfigMap-nginx-static.yaml
+    ├── Deployment-nginx.yaml
+    ├── Namespace-demo.yaml
+    └── Service-nginx.yaml
+</code></pre></div>
+<h2 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">#</a></h2>
+<p>Take a look at the <a href="https://arnarg.github.io/nixidy/user_guide/getting_started/">getting started guide</a>.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy-demo">nixidy-demo</a></li>
+<li><a href="https://github.com/arnarg/cluster">arnarg's cluster config</a></li>
+</ul>
 <h2 id="why">Why?<a class="headerlink" href="#why" title="Permanent link">#</a></h2>
 <p>It's desirable to manage Kubernetes clusters in a declarative way using a git repository as a source of truth for manifests that should be deployed into the cluster. One popular solution that is often used to achieve this goal is <a href="https://argo-cd.readthedocs.io/">Argo CD</a>.</p>
 <p>Argo CD has a concept of applications. Each application has an entrypoint somewhere in your git repository that is either a Helm chart, kustomize application, jsonnet files or just a directory of YAML files. All the resources that are output when templating the helm chart, kustomizing the kustomize application or are defined in the YAML files in the directory, make up the application and are (usually) deployed into a single namespace.</p>
@@ -627,13 +729,6 @@
 <p>I have been a user and a fan of NixOS for many years and how its module system works to recursively merge all configuration options that are set in many different modules.</p>
 <p>I have <em>not</em> been a fan of helm's string templating of a whitespace-sensitive configuration language or kustomize's repitition (defining a <code>kustomization.yaml</code> file for each layer statically listing files to include, some are json patches some are not...).</p>
 <p>Therefore I made nixidy as an experiment to see if I can make something better (at least for myself). As all Argo CD applications are defined in a single configuration it can reference configuration options across applications and automatically generate an <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern">App of Apps</a> bootstrapping all of them.</p>
-<h2 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">#</a></h2>
-<p>Take a look at the <a href="https://arnarg.github.io/nixidy/user_guide/getting_started/">getting started guide</a>.</p>
-<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">#</a></h2>
-<ul>
-<li><a href="https://github.com/arnarg/nixidy-demo">nixidy-demo</a></li>
-<li><a href="https://github.com/arnarg/cluster">arnarg's cluster config</a></li>
-</ul>
 <h2 id="special-thanks">Special Thanks<a class="headerlink" href="#special-thanks" title="Permanent link">#</a></h2>
 <p><a href="https://github.com/farcaller/nix-kube-generators">farcaller/nix-kube-generators</a> is used internally to pull and render Helm charts and some functions are re-exposed in the lib passed to modules in nixidy.</p>
 <p><a href="https://github.com/hall/kubenix">hall/kubenix</a> project has code generation of nix module options for every standard kubernetes resource. Instead of doing this work in nixidy I simply import their generated resource options. The resource option generation scripts in nixidy are also a slight modification of kubenix's. Without their work this wouldn't be possible in nixidy.</p>
