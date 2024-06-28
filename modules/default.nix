@@ -35,4 +35,5 @@ in {
     branch = module.config.nixidy.target.branch;
   };
   environmentPackage = module.config.build.environmentPackage;
+  activationPackage = module.config.build.activationPackage;
 }

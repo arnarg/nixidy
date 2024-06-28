@@ -55,6 +55,11 @@ in {
       internal = true;
       description = "The package containing all the applications for an environment.";
     };
+    build.activationPackage = mkOption {
+      type = types.package;
+      internal = true;
+      description = "The package containing all the applications and an activation script.";
+    };
   };
 
   config = {
@@ -90,5 +95,32 @@ in {
           config.build.extrasPackage
         ];
       };
+
+    build.activationPackage = pkgs.stdenv.mkDerivation {
+      name = "nixidy-activation-environment-${envName}";
+      phases = ["installPhase"];
+
+      installPhase = ''
+        mkdir -p $out
+
+        ln -s ${config.build.environmentPackage} $out/environment
+
+        cat <<EOF > $out/activate
+        #!/usr/bin/env bash
+        set -eo pipefail
+        dest="${config.nixidy.target.rootPath}"
+
+        mkdir -p "\$dest"
+
+        echo "switching manifests"
+
+        ${pkgs.rsync}/bin/rsync --recursive --delete -L "${config.build.environmentPackage}/" "\$dest"
+
+        echo "done!"
+        EOF
+
+        chmod +x $out/activate
+      '';
+    };
   };
 }

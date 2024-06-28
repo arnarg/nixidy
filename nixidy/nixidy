@@ -50,6 +50,19 @@ function doBuild() {
   nix build "${FLAKE_ROOT}#nixidyEnvs.${NIX_SYSTEM}.${FLAKE_ENV}.environmentPackage" "${BUILD_PARAMS[@]}"
 }
 
+function doSwitch() {
+  setFlakeParam
+
+  if [[ -z "$FLAKE_ENV" ]]; then
+    doHelp
+    exit 1
+  fi
+
+  ENVIRON=$(nix build "${FLAKE_ROOT}#nixidyEnvs.${NIX_SYSTEM}.${FLAKE_ENV}.activationPackage" --no-link --print-out-paths)
+
+  "${ENVIRON}/activate"
+}
+
 function doHelp() {
     echo "Usage: $0 [OPTION] COMMAND"
     echo
@@ -70,6 +83,9 @@ function doHelp() {
     echo
     echo "  build FLAKE_URI  Build nixidy environment from flake URI."
     echo "                   Example: .#prod"
+    echo
+    echo "  switch FLAKE_URI Build and switch to nixidy environment from flake URI."
+    echo "                   Example: .#prod"
 }
 
 COMMAND=""
@@ -82,7 +98,7 @@ while [[ $# -gt 0 ]]; do
   opt="$1"
   shift
   case $opt in
-    build|info|help)
+    build|switch|info|help)
       COMMAND="$opt"
       ;;
     --no-link)
@@ -125,6 +141,9 @@ case $COMMAND in
     ;;
   build)
     doBuild
+    ;;
+  switch)
+    doSwitch
     ;;
   help)
     doHelp
