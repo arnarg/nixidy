@@ -55,6 +55,11 @@ in {
         type = types.str;
         description = "The destination branch of the generated applications.";
       };
+      rootPath = mkOption {
+        type = types.str;
+        default = "./";
+        description = "The root path of all generated applications in the repository.";
+      };
     };
 
     extraFiles = mkOption {
@@ -155,7 +160,10 @@ in {
               source = {
                 repoURL = cfg.target.repository;
                 targetRevision = cfg.target.branch;
-                path = app.output.path;
+                path = lib.path.subpath.join [
+                  cfg.target.rootPath
+                  app.output.path
+                ];
               };
               destination = {
                 server = "https://kubernetes.default.svc";
