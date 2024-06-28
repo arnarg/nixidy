@@ -93,6 +93,11 @@ def generate_jsonschema(files):
             newProps = {}
 
             for prop, val in definition['properties'].items():
+                # CRDs never have the type information for metadata and
+                # as we already have this type information from kubenix's
+                # generated options we create a special `$ref` with
+                # '#/global' prefix that we handle specially in our code
+                # generator.
                 if root and prop == 'metadata':
                     newProps[prop] = {
                         'description': 'Standard object\'s metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata',

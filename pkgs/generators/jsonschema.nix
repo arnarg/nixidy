@@ -133,6 +133,9 @@ with lib; let
                     # but if other definition does not have properties, then just take it's type
                     if hasAttr "$ref" property
                     then
+                      # Handle our special "#/global" ref prefix, used exclusively to get typed
+                      # metadata from CRDs.
+                      # See: crd2jsonschema.py
                       if hasPrefix "#/global" property."$ref"
                       then {
                         type = requiredOrNot (globalSubmoduleOf definitions (refDefinition property));
