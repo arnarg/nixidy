@@ -3,6 +3,29 @@ import yaml
 import json
 import string
 
+# Generate an attribute name for use in nix options.
+# Example:
+# Deployments   -> deployments
+# NetworkPolicy -> networkPolicies
+#
+# We want these to be in the plural form but the
+# plural form given in CRDs is always all lowercase
+# while we want it to be camelCase.
+#
+# Usually (if not always) it's only the last word
+# of the kind's PascalCase form that is pluralized.
+# So we can just go through both forms until a letter
+# doesn't match and at that point splice them together.
+def gen_attr_name(kind, plural):
+    for i, c in enumerate(kind):
+        if c.lower() != plural[i].lower():
+            return kind[0].lower() + kind[1:i] + plural[i:len(plural)]
+
+    # We got through the entire string so we can just concatinate
+    # the rest of the plural form on it.
+    return kind[0].lower() + kind[1:len(kind)] + plural[len(kind):len(plural)]
+
+# Kind of PascalCase.
 def uppercase_first(name):
     return name[0].upper() + name[1:]
 
@@ -32,7 +55,7 @@ def generate_jsonschema(files):
                                                'version': version,
                                                'kind': kind,
                                                'name': plural,
-                                               'attrName': plural,
+                                               'attrName': gen_attr_name(kind, plural),
                                                'description': ver['schema']['openAPIV3Schema']['description'],
                                                'namespaced': namespaced,
                                            })
