@@ -64,6 +64,10 @@ def generate_jsonschema(files):
         if not root:
             if 'type' in definition and definition['type'] == 'object':
                 if not 'properties' in definition:
+                    # The nix generator doesn't support anyOf
+                    if 'additionalProperties' in definition and 'anyOf' in definition['additionalProperties']:
+                        definition['additionalProperties'] = definition['additionalProperties']['anyOf'][0]
+
                     return definition
                 else:
                     schema['definitions'][key] = flatten_ref(definition, key, True)
@@ -76,6 +80,7 @@ def generate_jsonschema(files):
                 definition['items'] = flatten_ref(definition['items'], key, False)
                 return definition
 
+            # The nix generator doesn't support anyOf
             elif 'anyOf' in definition:
                 newDef = definition['anyOf'][0]
                 newDef['description'] = definition.get('description', '')

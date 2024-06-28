@@ -7342,7 +7342,7 @@ in {
         };
       }
       // {
-        "appprojects" = mkOption {
+        "appProjects" = mkOption {
           description = "AppProject provides a logical grouping of applications, providing controls for: * where the apps may deploy to (cluster whitelist) * what may be deployed (repository whitelist, resource whitelist/blacklist) * who can access these applications (roles, OIDC group claims bindings) * and what they can do (RBAC policies) * automation access to these roles (JWT tokens)";
           type = types.attrsOf (submoduleForDefinition "argoproj.io.v1alpha1.AppProject" "appprojects" "AppProject" "argoproj.io" "v1alpha1");
           default = {};
@@ -7366,7 +7366,7 @@ in {
         group = "argoproj.io";
         version = "v1alpha1";
         kind = "AppProject";
-        attrName = "appprojects";
+        attrName = "appProjects";
       }
       {
         name = "applications";
@@ -7379,7 +7379,7 @@ in {
 
     resources = {
       "argoproj.io"."v1alpha1"."AppProject" =
-        mkAliasDefinitions options.resources."appprojects";
+        mkAliasDefinitions options.resources."appProjects";
       "argoproj.io"."v1alpha1"."Application" =
         mkAliasDefinitions options.resources."applications";
     };
