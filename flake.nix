@@ -65,5 +65,27 @@
         docs = docs;
         generators = import ./pkgs/generators {inherit pkgs;};
       };
+
+      apps = {
+        # Generates all generators and copies into place
+        generate = {
+          type = "app";
+          program = with pkgs.lib;
+            (pkgs.writeShellScript "generate-modules" ''
+              set -eo pipefail
+              dest=./modules/generated
+
+              ${concatStringsSep "\n" (mapAttrsToList (
+                n: mod: ''
+                  echo "generating ${n}"
+                  cat ${mod} > $dest/${n}.nix
+                ''
+              ) (removeAttrs self.packages.${system}.generators ["fromCRD"]))}
+
+              echo "done!"
+            '')
+            .outPath;
+        };
+      };
     }));
 }
