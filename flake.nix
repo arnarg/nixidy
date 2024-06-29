@@ -24,10 +24,18 @@
           lib ? pkgs.lib,
           modules ? [],
           extraSpecialArgs ? {},
+          charts ? {},
         }:
           import ./modules {
-            inherit modules pkgs lib extraSpecialArgs kubenix;
+            inherit pkgs lib extraSpecialArgs kubenix;
             kubelib = nix-kube-generators;
+            modules =
+              modules
+              ++ [
+                {
+                  nixidy.charts = charts;
+                }
+              ];
           };
 
         mkEnvs = {
@@ -36,11 +44,12 @@
           modules ? [],
           extraSpecialArgs ? {},
           envs ? {},
+          charts ? {},
         }:
           lib.mapAttrs (
             env: conf:
               mkEnv {
-                inherit pkgs lib;
+                inherit pkgs lib charts;
                 extraSpecialArgs = extraSpecialArgs // (conf.extraSpecialArgs or {});
                 modules =
                   [{nixidy.target.rootPath = lib.mkDefault "./manifests/${env}";}]
