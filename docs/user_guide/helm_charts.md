@@ -67,7 +67,7 @@ In some cases the Helm Chart doesn't support changing certain aspects of the fin
       # the image.
       deployments.traefik.spec.template = {
         metadata.labels.my-custom-label = "my-custom-values";
-        spec.containers.traefik.image = "my-registry.io/patched-traefik:v3.0.0";
+        spec.containers.traefik.image = lib.mkForce "my-registry.io/patched-traefik:v3.0.0";
       };
     };
   };
