@@ -1,0 +1,16 @@
+name: nixidy switch action
+description: Generate and switch to new nixidy environment
+
+inputs:
+  environment:
+    description: Flake URI to the environment to switch to (e.g. .#prod)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        NIXIDY_FLAKE: github:${{github.action_repository}}/${{github.action_ref}}
+      run: |
+        nix run '${{env.NIXIDY_FLAKE}}#' -- switch '${{inputs.environment}}'

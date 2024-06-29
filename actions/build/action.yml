@@ -1,0 +1,25 @@
+name: nixidy build action
+description: Generate new nixidy environment manifests
+
+inputs:
+  environment:
+    description: Flake URI to the environment to switch to (e.g. .#prod)
+    required: true
+
+outputs:
+  out-path:
+    description: Output path for built environment
+    value: ${{ steps.build.outputs.out-path }}
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      id: build
+      env:
+        NIXIDY_FLAKE: github:${{github.action_repository}}/${{github.action_ref}}
+      run: |
+        RESULT=$(nix run '${{env.NIXIDY_FLAKE}}#' -- build '${{inputs.environment}}' --print-out-paths --no-link)
+
+        echo "out-path=$RESULT" >> "$GITHUB_OUTPUT"
+
