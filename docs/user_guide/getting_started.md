@@ -194,7 +194,7 @@ tree -l result/
 
 And the contents of the Argo CD application automatically generated is the following:
 
-```yaml title="apps/Application-argocd.yaml"
+```yaml title="apps/Application-demo.yaml"
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
