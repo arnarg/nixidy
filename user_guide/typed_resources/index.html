@@ -599,51 +599,52 @@
 <h2 id="generating-your-own-resource-options-from-crds">Generating your own resource options from CRDs<a class="headerlink" href="#generating-your-own-resource-options-from-crds" title="Permanent link">#</a></h2>
 <p>Thankfully a code generator for generating resource options from CRDs is provided by nixidy (this is based heavily on kubenix's code generator).</p>
 <p>As an example, to generate resource options for Cilium's <code>CiliumNetworkPolicy</code> and <code>CiliumClusterwideNetworkPolicy</code> the following can be defined in <code>flake.nix</code>.</p>
-<p>```nix file="flake.nix"
-{
-  description = "My ArgoCD configuration with nixidy.";</p>
-<p>inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-  inputs.flake-utils.url = "github:numtide/flake-utils";</p>
-<p>inputs.nixidy = {
-    url = "github:arnarg/nixidy";
-    inputs.nixpkgs.follows = "nixpkgs";
-  };</p>
-<p>outputs = {
-    self,
-    nixpkgs,
-    flake-utils,
-    nixidy,
-  }: (flake-utils.lib.eachDefaultSystem (system: let
-    pkgs = import nixpkgs {
-      inherit system;
-    };
-  in {
-    packages = {
-      generators.cilium = nixidy.packages.${system}.generators.fromCRD {
-        name = "cilium";
-        src = pkgs.fetchFromGitHub {
-          owner = "cilium";
-          repo = "cilium";
-          rev = "v1.15.6";
-          hash = "sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=";
-        };
-        crds = [
-          "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
-          "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml"
-        ];
-      };
-    };
-  }));
-}
-<div class="highlight"><pre><span></span><code>Then running `nix build .#generators.cilium` will produce a nix file that can be copied into place in your repository. After that the generated file has to be added to `nixidy.resourceImports` in your nixidy modules.
+<div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
+  <span class="ss">description =</span> <span class="s2">&quot;My ArgoCD configuration with nixidy.&quot;</span><span class="p">;</span>
 
-```nix file=&quot;env/dev.nix&quot;
-{
-  nixidy.resourcesImports = [
-    ./generated/cilium.nix
-  ];
-}
-</code></pre></div></p>
+  inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">url =</span> <span class="s2">&quot;github:nixos/nixpkgs/nixos-unstable&quot;</span><span class="p">;</span>
+  inputs<span class="o">.</span>flake-utils<span class="o">.</span><span class="ss">url =</span> <span class="s2">&quot;github:numtide/flake-utils&quot;</span><span class="p">;</span>
+
+  inputs<span class="o">.</span><span class="ss">nixidy =</span> <span class="p">{</span>
+    <span class="ss">url =</span> <span class="s2">&quot;github:arnarg/nixidy&quot;</span><span class="p">;</span>
+    inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">follows =</span> <span class="s2">&quot;nixpkgs&quot;</span><span class="p">;</span>
+  <span class="p">};</span>
+
+  <span class="ss">outputs =</span> <span class="p">{</span>
+    self<span class="p">,</span>
+    nixpkgs<span class="p">,</span>
+    flake-utils<span class="p">,</span>
+    nixidy<span class="p">,</span>
+  <span class="p">}:</span> <span class="p">(</span>flake-utils<span class="o">.</span>lib<span class="o">.</span>eachDefaultSystem <span class="p">(</span>system<span class="p">:</span> <span class="k">let</span>
+    <span class="ss">pkgs =</span> <span class="nb">import</span> nixpkgs <span class="p">{</span>
+      <span class="k">inherit</span> system<span class="p">;</span>
+    <span class="p">};</span>
+  <span class="k">in</span> <span class="p">{</span>
+    <span class="ss">packages =</span> <span class="p">{</span>
+      generators<span class="o">.</span><span class="ss">cilium =</span> nixidy<span class="o">.</span>packages<span class="o">.</span><span class="err">$</span><span class="p">{</span>system<span class="p">}</span><span class="o">.</span>generators<span class="o">.</span>fromCRD <span class="p">{</span>
+        <span class="ss">name =</span> <span class="s2">&quot;cilium&quot;</span><span class="p">;</span>
+        <span class="ss">src =</span> pkgs<span class="o">.</span>fetchFromGitHub <span class="p">{</span>
+          <span class="ss">owner =</span> <span class="s2">&quot;cilium&quot;</span><span class="p">;</span>
+          <span class="ss">repo =</span> <span class="s2">&quot;cilium&quot;</span><span class="p">;</span>
+          <span class="ss">rev =</span> <span class="s2">&quot;v1.15.6&quot;</span><span class="p">;</span>
+          <span class="ss">hash =</span> <span class="s2">&quot;sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=&quot;</span><span class="p">;</span>
+        <span class="p">};</span>
+        <span class="ss">crds =</span> <span class="p">[</span>
+          <span class="s2">&quot;pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml&quot;</span>
+          <span class="s2">&quot;pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml&quot;</span>
+        <span class="p">];</span>
+      <span class="p">};</span>
+    <span class="p">};</span>
+  <span class="p">}));</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Then running <code>nix build .#generators.cilium</code> will produce a nix file that can be copied into place in your repository. After that the generated file has to be added to <code>nixidy.resourceImports</code> in your nixidy modules.</p>
+<div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
+  nixidy<span class="o">.</span><span class="ss">resourcesImports =</span> <span class="p">[</span>
+    <span class="o">.</span><span class="l">/generated/cilium.nix</span>
+  <span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div>
 
 
 
