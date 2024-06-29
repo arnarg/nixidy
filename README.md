@@ -99,7 +99,6 @@ Take a look at the [getting started guide](https://arnarg.github.io/nixidy/user_
 
 ## Examples
 
-- [nixidy-demo](https://github.com/arnarg/nixidy-demo)
 - [arnarg's cluster config](https://github.com/arnarg/cluster)
 
 ## Why?
