@@ -5,6 +5,7 @@
 All core Kubernetes resources are imported by default in nixidy along with Argo CD's `Application` and `AppProject`. Every resource can be defined under `applications.<applicationName>.resources.<group>.<version>.<kind>` but is also offered as an alias `applications.<applicationName>.resources.<attrName>` where `<attrName>` is the plural form of the kind in camelCase.
 
 For example:
+
 - `resources.core.v1.Service` -> `resources.services`
 - `resources."networking.k8s.io".v1.NetworkPolicy` -> `resources.networkPolicies`
 
@@ -16,7 +17,7 @@ Thankfully a code generator for generating resource options from CRDs is provide
 
 As an example, to generate resource options for Cilium's `CiliumNetworkPolicy` and `CiliumClusterwideNetworkPolicy` the following can be defined in `flake.nix`.
 
-```nix file="flake.nix"
+```nix title="flake.nix"
 {
   description = "My ArgoCD configuration with nixidy.";
 
@@ -59,7 +60,7 @@ As an example, to generate resource options for Cilium's `CiliumNetworkPolicy` a
 
 Then running `nix build .#generators.cilium` will produce a nix file that can be copied into place in your repository. After that the generated file has to be added to `nixidy.resourceImports` in your nixidy modules.
 
-```nix file="env/dev.nix"
+```nix title="env/dev.nix"
 {
   nixidy.resourcesImports = [
     ./generated/cilium.nix
