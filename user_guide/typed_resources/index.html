@@ -590,9 +590,11 @@
 <h1 id="typed-resource-options">Typed Resource Options<a class="headerlink" href="#typed-resource-options" title="Permanent link">#</a></h1>
 <p><a href="https://github.com/hall/kubenix/">Kubenix</a> has done a great work with generating nix options definitions from official json schemas and nixidy builds on top of this.</p>
 <p>All core Kubernetes resources are imported by default in nixidy along with Argo CD's <code>Application</code> and <code>AppProject</code>. Every resource can be defined under <code>applications.&lt;applicationName&gt;.resources.&lt;group&gt;.&lt;version&gt;.&lt;kind&gt;</code> but is also offered as an alias <code>applications.&lt;applicationName&gt;.resources.&lt;attrName&gt;</code> where <code>&lt;attrName&gt;</code> is the plural form of the kind in camelCase.</p>
-<p>For example:
-- <code>resources.core.v1.Service</code> -&gt; <code>resources.services</code>
-- <code>resources."networking.k8s.io".v1.NetworkPolicy</code> -&gt; <code>resources.networkPolicies</code></p>
+<p>For example:</p>
+<ul>
+<li><code>resources.core.v1.Service</code> -&gt; <code>resources.services</code></li>
+<li><code>resources."networking.k8s.io".v1.NetworkPolicy</code> -&gt; <code>resources.networkPolicies</code></li>
+</ul>
 <p>The lack of availability of typed resource options only hinders the ability to define the resources in nix. Any manifests that are rendered from a Helm Chart or defined in <code>applications.&lt;applicationName&gt;.yamls</code> and do not have defined resource options for that group, version and kind will go straight to the output for the application and can not be patched by nixidy.</p>
 <h2 id="generating-your-own-resource-options-from-crds">Generating your own resource options from CRDs<a class="headerlink" href="#generating-your-own-resource-options-from-crds" title="Permanent link">#</a></h2>
 <p>Thankfully a code generator for generating resource options from CRDs is provided by nixidy (this is based heavily on kubenix's code generator).</p>
