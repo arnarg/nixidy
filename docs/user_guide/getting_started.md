@@ -228,4 +228,4 @@ A directory with rendered resources is generated for each application declared w
 
 See [App of Apps Pattern](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern).
 
-Running `nixidy switch .#dev` will create the `./manifests/demo` relative to the current working directory and sync the newly generated manifests into it.
+Running `nixidy switch .#dev` will create the `./manifests/dev` relative to the current working directory and sync the newly generated manifests into it.

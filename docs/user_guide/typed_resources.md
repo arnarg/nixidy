@@ -62,7 +62,7 @@ Then running `nix build .#generators.cilium` will produce a nix file that can be
 
 ```nix title="env/dev.nix"
 {
-  nixidy.resourcesImports = [
+  nixidy.resourceImports = [
     ./generated/cilium.nix
   ];
 }
