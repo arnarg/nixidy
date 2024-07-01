@@ -640,7 +640,7 @@
 </code></pre></div>
 <p>Then running <code>nix build .#generators.cilium</code> will produce a nix file that can be copied into place in your repository. After that the generated file has to be added to <code>nixidy.resourceImports</code> in your nixidy modules.</p>
 <div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
-  nixidy<span class="o">.</span><span class="ss">resourcesImports =</span> <span class="p">[</span>
+  nixidy<span class="o">.</span><span class="ss">resourceImports =</span> <span class="p">[</span>
     <span class="o">.</span><span class="l">/generated/cilium.nix</span>
   <span class="p">];</span>
 <span class="p">}</span>
