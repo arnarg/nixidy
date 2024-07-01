@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://arnarg.github.io/nixidy/user_guide/getting_started/">
+        <link rel="canonical" href="https://arnarg.github.io/nixidy/user_guide/using_nixhelm/">
       
       
-        <link rel="prev" href="../..">
+        <link rel="prev" href="../transformers/">
       
       
-        <link rel="next" href="../helm_charts/">
+        <link rel="next" href="../../library/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Getting Started - nixidy</title>
+        <title>Using nixhelm - nixidy</title>
       
     
     
@@ -77,7 +77,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#getting-started" class="md-skip">
+        <a href="#using-nixhelm" class="md-skip">
           Skip to content
         </a>
       
@@ -113,7 +113,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Getting Started
+              Using nixhelm
             
           </span>
         </div>
@@ -305,29 +305,9 @@
                 
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Getting Started
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../getting_started/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -336,40 +316,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#initialize-repository" class="md-nav__link">
-    Initialize Repository
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#our-first-application" class="md-nav__link">
-    Our first Application
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -459,9 +405,29 @@
                 
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../using_nixhelm/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Using nixhelm
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -470,6 +436,33 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#provide-your-own-charts-not-available-in-nixhelm" class="md-nav__link">
+    Provide your own charts not available in nixhelm
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -590,15 +583,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#initialize-repository" class="md-nav__link">
-    Initialize Repository
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#our-first-application" class="md-nav__link">
-    Our first Application
+  <a href="#provide-your-own-charts-not-available-in-nixhelm" class="md-nav__link">
+    Provide your own charts not available in nixhelm
   </a>
   
 </li>
@@ -621,209 +607,98 @@
   
 
 
-<h1 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">#</a></h1>
-<p>Nixidy only supports <a href="https://nixos.wiki/wiki/Flakes">Nix Flakes</a> so that needs to be enabled.</p>
-<h2 id="initialize-repository">Initialize Repository<a class="headerlink" href="#initialize-repository" title="Permanent link">#</a></h2>
-<p>First a <code>flake.nix</code> needs to be created in the root of the repository.</p>
+<h1 id="using-nixhelm">Using nixhelm<a class="headerlink" href="#using-nixhelm" title="Permanent link">#</a></h1>
+<p><a href="https://github.com/farcaller/nixhelm">nixhelm</a> is a collection of Helm Charts that can be used with <a href="https://github.com/farcaller/nixhelm">nix-kube-generators</a> and therefore also nixidy. The charts are automatically updated to the most recent version by CI regularly.</p>
+<p>To use with nixidy the nixhelm derivation attribute set can be passed to nixidy's <code>mkEnv</code> builder like so.</p>
 <div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
   <span class="ss">description =</span> <span class="s2">&quot;My ArgoCD configuration with nixidy.&quot;</span><span class="p">;</span>
 
   inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">url =</span> <span class="s2">&quot;github:nixos/nixpkgs/nixos-unstable&quot;</span><span class="p">;</span>
   inputs<span class="o">.</span>flake-utils<span class="o">.</span><span class="ss">url =</span> <span class="s2">&quot;github:numtide/flake-utils&quot;</span><span class="p">;</span>
-  inputs<span class="o">.</span>nixidy<span class="o">.</span><span class="ss">url =</span> <span class="s2">&quot;github:arnarg/nixidy&quot;</span><span class="p">;</span>
+
+  inputs<span class="o">.</span><span class="ss">nixidy =</span> <span class="p">{</span>
+    <span class="ss">url =</span> <span class="s2">&quot;github:arnarg/nixidy&quot;</span><span class="p">;</span>
+    inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">follows =</span> <span class="s2">&quot;nixpkgs&quot;</span><span class="p">;</span>
+  <span class="p">};</span>
+
+  inputs<span class="o">.</span><span class="ss">nixhelm =</span> <span class="p">{</span>
+    <span class="ss">url =</span> <span class="s2">&quot;github:farcaller/nixhelm&quot;</span><span class="p">;</span>
+    inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">follows =</span> <span class="s2">&quot;nixpkgs&quot;</span><span class="p">;</span>
+  <span class="p">};</span>
 
   <span class="ss">outputs =</span> <span class="p">{</span>
     self<span class="p">,</span>
     nixpkgs<span class="p">,</span>
     flake-utils<span class="p">,</span>
     nixidy<span class="p">,</span>
+    nixhelm<span class="p">,</span>
   <span class="p">}:</span> <span class="p">(</span>flake-utils<span class="o">.</span>lib<span class="o">.</span>eachDefaultSystem <span class="p">(</span>system<span class="p">:</span> <span class="k">let</span>
     <span class="ss">pkgs =</span> <span class="nb">import</span> nixpkgs <span class="p">{</span>
       <span class="k">inherit</span> system<span class="p">;</span>
     <span class="p">};</span>
   <span class="k">in</span> <span class="p">{</span>
-    <span class="c1"># This declares the available nixidy envs.</span>
-    <span class="ss">nixidyEnvs =</span> nixidy<span class="o">.</span>lib<span class="o">.</span>mkEnvs <span class="p">{</span>
+    nixidyEnvs<span class="o">.</span><span class="ss">dev =</span> nixidy<span class="o">.</span>lib<span class="o">.</span>mkEnv <span class="p">{</span>
       <span class="k">inherit</span> pkgs<span class="p">;</span>
 
-      <span class="ss">envs =</span> <span class="p">{</span>
-        <span class="c1"># Currently we only have the one dev env.</span>
-        dev<span class="o">.</span><span class="ss">modules =</span> <span class="p">[</span><span class="o">.</span><span class="l">/env/dev.nix</span><span class="p">];</span>
-      <span class="p">};</span>
-    <span class="p">};</span>
+      <span class="c1"># Pass nixhelm to all nixidy modules.</span>
+      <span class="ss">charts =</span> nixhelm<span class="o">.</span>chartsDerivations<span class="o">.</span><span class="err">$</span><span class="p">{</span>system<span class="p">};</span>
 
-    <span class="c1"># Handy to have nixidy cli available in the local</span>
-    <span class="c1"># flake too.</span>
-    packages<span class="o">.</span><span class="ss">nixidy =</span> nixidy<span class="o">.</span>packages<span class="o">.</span><span class="err">$</span><span class="p">{</span>system<span class="p">}</span><span class="o">.</span>default<span class="p">;</span>
-
-    <span class="c1"># Useful development shell with nixidy in path.</span>
-    <span class="c1"># Run `nix develop` to enter.</span>
-    devShells<span class="o">.</span><span class="ss">default =</span> pkgs<span class="o">.</span>mkShell <span class="p">{</span>
-      <span class="ss">buildInputs =</span> <span class="p">[</span>nixidy<span class="o">.</span>packages<span class="o">.</span><span class="err">$</span><span class="p">{</span>system<span class="p">}</span><span class="o">.</span>default<span class="p">];</span>
+      <span class="ss">modules =</span> <span class="p">[</span><span class="o">.</span><span class="l">/env/dev.nix</span><span class="p">];</span>
     <span class="p">};</span>
   <span class="p">}));</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>The flake declares a single nixidy environment called <code>dev</code>. It includes a single nix module found at <code>./env/dev.nix</code>, so let's create that.</p>
-<div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
-  <span class="c1"># Set the target repository for the rendered manifests</span>
-  <span class="c1"># and applications.</span>
-  <span class="c1"># This should be replaced with yours, usually the same</span>
-  <span class="c1"># repository as the nixidy definitions.</span>
-  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">repository =</span> <span class="s2">&quot;https://github.com/arnarg/nixidy-demo.git&quot;</span><span class="p">;</span>
-
-  <span class="c1"># Set the target branch the rendered manifests for _this_</span>
-  <span class="c1"># environment should be pushed to in the repository defined</span>
-  <span class="c1"># above.</span>
-  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">branch =</span> <span class="s2">&quot;main&quot;</span><span class="p">;</span>
-
-  <span class="c1"># Set the target sub-directory to copy the generated</span>
-  <span class="c1"># manifests to when running `nixidy switch .#dev`.</span>
-  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">rootPath =</span> <span class="s2">&quot;./manifests/dev&quot;</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>Now runnig <code>nix run .#nixidy -- info .#dev</code> (or simply <code>nixidy info .#dev</code> if run in nix shell using <code>nix develop</code>) you can get the same info we just declared above. This verifies that things are set up correctly so far.</p>
-<div class="highlight"><pre><span></span><code>&gt;&gt;<span class="w"> </span>nix<span class="w"> </span>run<span class="w"> </span>.#nixidy<span class="w"> </span>--<span class="w"> </span>info<span class="w"> </span>.#dev
-Repository:<span class="w"> </span>https://github.com/arnarg/nixidy-demo.git
-Branch:<span class="w">     </span>main
-</code></pre></div>
-<p>If we now attempt to build this new environment with <code>nix run .#nixidy -- build .#dev</code> we can see that nothing is generated but an empty folder called <code>apps</code>.</p>
-<div class="highlight"><pre><span></span><code>&gt;&gt;<span class="w"> </span>tree<span class="w"> </span>result
-result
-└──<span class="w"> </span>apps/
-</code></pre></div>
-<p>This is because we have not declared any applications yet for this environment.</p>
-<h2 id="our-first-application">Our first Application<a class="headerlink" href="#our-first-application" title="Permanent link">#</a></h2>
-<p>Applications and their resources are defined under <code>applications.&lt;applicationName&gt;</code>.</p>
-<div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
-  <span class="c1"># Set the target repository for the rendered manifests</span>
-  <span class="c1"># and applications.</span>
-  <span class="c1"># This should be replaced with yours, usually the same</span>
-  <span class="c1"># repository as the nixidy definitions.</span>
-  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">repository =</span> <span class="s2">&quot;https://github.com/arnarg/nixidy-demo.git&quot;</span><span class="p">;</span>
-
-  <span class="c1"># Set the target branch the rendered manifests for _this_</span>
-  <span class="c1"># environment should be pushed to in the repository defined</span>
-  <span class="c1"># above.</span>
-  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">branch =</span> <span class="s2">&quot;main&quot;</span><span class="p">;</span>
-
-  <span class="c1"># Set the target sub-directory to copy the generated</span>
-  <span class="c1"># manifests to when running `nixidy switch .#dev`.</span>
-  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">rootPath =</span> <span class="s2">&quot;./manifests/dev&quot;</span><span class="p">;</span>
-
-  <span class="c1"># Define an application called `demo`.</span>
-  applications<span class="o">.</span><span class="ss">demo =</span> <span class="p">{</span>
-    <span class="c1"># All resources will be deployed into this namespace.</span>
-    <span class="ss">namespace =</span> <span class="s2">&quot;demo&quot;</span><span class="p">;</span>
-
-    <span class="c1"># Automatically generate a namespace resource for the</span>
-    <span class="c1"># above set namespace</span>
+<p>And then the argument <code>charts</code> will be passed to every module in nixidy.</p>
+<div class="highlight"><span class="filename">./env/dev.nix</span><pre><span></span><code><span class="p">{</span>
+  lib<span class="p">,</span>
+  charts<span class="p">,</span>
+  <span class="o">...</span>
+<span class="p">}:</span> <span class="p">{</span>
+  applications<span class="o">.</span><span class="ss">traefik =</span> <span class="p">{</span>
+    <span class="ss">namespace =</span> <span class="s2">&quot;traefik&quot;</span><span class="p">;</span>
     <span class="ss">createNamespace =</span> <span class="no">true</span><span class="p">;</span>
 
-    <span class="ss">resources =</span> <span class="k">let</span>
-      <span class="ss">labels =</span> <span class="p">{</span>
-        <span class="s2">&quot;app.kubernetes.io/name&quot;</span> <span class="o">=</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
-      <span class="p">};</span>
-    <span class="k">in</span> <span class="p">{</span>
-      <span class="c1"># Define a deployment for running an nginx server</span>
-      deployments<span class="o">.</span>nginx<span class="o">.</span><span class="ss">spec =</span> <span class="p">{</span>
-        selector<span class="o">.</span><span class="ss">matchLabels =</span> labels<span class="p">;</span>
-        <span class="ss">template =</span> <span class="p">{</span>
-          metadata<span class="o">.</span><span class="ss">labels =</span> labels<span class="p">;</span>
-          <span class="ss">spec =</span> <span class="p">{</span>
-            securityContext<span class="o">.</span><span class="ss">fsGroup =</span> <span class="mi">1000</span><span class="p">;</span>
-            containers<span class="o">.</span><span class="ss">nginx =</span> <span class="p">{</span>
-              <span class="ss">image =</span> <span class="s2">&quot;nginx:1.25.1&quot;</span><span class="p">;</span>
-              <span class="ss">imagePullPolicy =</span> <span class="s2">&quot;IfNotPresent&quot;</span><span class="p">;</span>
-              <span class="ss">volumeMounts =</span> <span class="p">{</span>
-                <span class="s2">&quot;/etc/nginx&quot;</span><span class="o">.</span><span class="ss">name =</span> <span class="s2">&quot;config&quot;</span><span class="p">;</span>
-                <span class="s2">&quot;/var/lib/html&quot;</span><span class="o">.</span><span class="ss">name =</span> <span class="s2">&quot;static&quot;</span><span class="p">;</span>
-              <span class="p">};</span>
-            <span class="p">};</span>
-            <span class="ss">volumes =</span> <span class="p">{</span>
-              config<span class="o">.</span>configMap<span class="o">.</span><span class="ss">name =</span> <span class="s2">&quot;nginx-config&quot;</span><span class="p">;</span>
-              static<span class="o">.</span>configMap<span class="o">.</span><span class="ss">name =</span> <span class="s2">&quot;nginx-static&quot;</span><span class="p">;</span>
-            <span class="p">};</span>
-          <span class="p">};</span>
-        <span class="p">};</span>
-      <span class="p">};</span>
+    helm<span class="o">.</span>releases<span class="o">.</span><span class="ss">traefik =</span> <span class="p">{</span>
+      <span class="c1"># Use the traefik helm chart from nixhelm.</span>
+      <span class="ss">chart =</span> charts<span class="o">.</span>traefik<span class="o">.</span>traefik<span class="p">;</span>
 
-      <span class="c1"># Define config maps with config for nginx</span>
-      <span class="ss">configMaps =</span> <span class="p">{</span>
-        nginx-config<span class="o">.</span>data<span class="o">.</span><span class="s2">&quot;nginx.conf&quot;</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-<span class="s1">          user nginx nginx;</span>
-<span class="s1">          error_log /dev/stdout info;</span>
-<span class="s1">          pid /dev/null;</span>
-<span class="s1">          events {}</span>
-<span class="s1">          http {</span>
-<span class="s1">            access_log /dev/stdout;</span>
-<span class="s1">            server {</span>
-<span class="s1">              listen 80;</span>
-<span class="s1">              index index.html;</span>
-<span class="s1">              location / {</span>
-<span class="s1">                root /var/lib/html;</span>
-<span class="s1">              }</span>
-<span class="s1">            }</span>
-<span class="s1">          }</span>
-<span class="s1">        &#39;&#39;</span><span class="p">;</span>
-
-        nginx-static<span class="o">.</span>data<span class="o">.</span><span class="s2">&quot;index.html&quot;</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-<span class="s1">          &lt;html&gt;&lt;body&gt;&lt;h1&gt;Hello from NGINX&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;</span>
-<span class="s1">        &#39;&#39;</span><span class="p">;</span>
-      <span class="p">};</span>
-
-      <span class="c1"># Define service for nginx</span>
-      services<span class="o">.</span>nginx<span class="o">.</span><span class="ss">spec =</span> <span class="p">{</span>
-        <span class="ss">selector =</span> labels<span class="p">;</span>
-        ports<span class="o">.</span>http<span class="o">.</span><span class="ss">port =</span> <span class="mi">80</span><span class="p">;</span>
+      <span class="c1"># Example values to pass to the Helm Chart.</span>
+      <span class="ss">values =</span> <span class="p">{</span>
+        ingressClass<span class="o">.</span><span class="ss">enabled =</span> <span class="no">true</span><span class="p">;</span>
       <span class="p">};</span>
     <span class="p">};</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Running <code>nixidy build .#dev</code> will produce the following files.</p>
-<div class="highlight"><pre><span></span><code>tree<span class="w"> </span>-l<span class="w"> </span>result/
-├──<span class="w"> </span>apps
-│<span class="w">   </span>└──<span class="w"> </span>Application-demo.yaml
-└──<span class="w"> </span>demo
-<span class="w">    </span>├──<span class="w"> </span>ConfigMap-nginx-config.yaml
-<span class="w">    </span>├──<span class="w"> </span>ConfigMap-nginx-static.yaml
-<span class="w">    </span>├──<span class="w"> </span>Deployment-nginx.yaml
-<span class="w">    </span>├──<span class="w"> </span>Namespace-demo.yaml
-<span class="w">    </span>└──<span class="w"> </span>Service-nginx.yaml
+<h2 id="provide-your-own-charts-not-available-in-nixhelm">Provide your own charts not available in nixhelm<a class="headerlink" href="#provide-your-own-charts-not-available-in-nixhelm" title="Permanent link">#</a></h2>
+<p>Not all charts are available in nixhelm and in such cases you can contribute an initial version to them or setup a special folder structure locally to merge with the <code>charts</code> argument passed to modules.</p>
+<p>With the nixidy option <code>nixidy.chartsDir</code> that folder will be walked recursively and look for <code>default.nix</code> files that will build up the charts attribute set.</p>
+<div class="highlight"><span class="filename">./charts/kubernetes-csi/csi-driver-nfs/default.nix</span><pre><span></span><code><span class="p">{</span>
+  <span class="ss">repo =</span> <span class="s2">&quot;https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts&quot;</span><span class="p">;</span>
+  <span class="ss">chart =</span> <span class="s2">&quot;csi-driver-nfs&quot;</span><span class="p">;</span>
+  <span class="ss">version =</span> <span class="s2">&quot;4.7.0&quot;</span><span class="p">;</span>
+  <span class="ss">chartHash =</span> <span class="s2">&quot;sha256-EU2qaZglUU3vxa41l1p/2yBscksIhYMr8kSgH8t0vL8=&quot;</span><span class="p">;</span>
+<span class="p">}</span>
 </code></pre></div>
-<p>And the contents of the Argo CD application automatically generated is the following:</p>
-<div class="highlight"><span class="filename">apps/Application-demo.yaml</span><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Application</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="c1"># This is the name of the application (`applications.demo`).</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo</span>
-<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argocd</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">destination</span><span class="p">:</span>
-<span class="w">    </span><span class="c1"># This is the destination namespace for the application</span>
-<span class="w">    </span><span class="c1"># specified with `applications.demo.namespace`.</span>
-<span class="w">    </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo</span>
-<span class="w">    </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://kubernetes.default.svc</span>
-<span class="w">  </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
-<span class="w">  </span><span class="nt">source</span><span class="p">:</span>
-<span class="w">    </span><span class="c1"># This is the output path declared for the application with</span>
-<span class="w">    </span><span class="c1"># option `applications.&lt;applicationName&gt;.output.path`</span>
-<span class="w">    </span><span class="c1"># (defaults to the name) with `nixidy.target.rootPath`</span>
-<span class="w">    </span><span class="c1"># prefix.</span>
-<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./manifests/dev/demo</span>
-<span class="w">    </span><span class="c1"># Repository specified in `nixidy.target.repository`.</span>
-<span class="w">    </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/arnarg/nixidy-demo.git</span>
-<span class="w">    </span><span class="c1"># Branch specified in `nixidy.target.branch`.</span>
-<span class="w">    </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
-<span class="w">  </span><span class="nt">syncPolicy</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">automated</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">prune</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="w">      </span><span class="nt">selfHeal</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<p>And then in your nixidy modules you pass that <code>./charts</code> folder to <code>nixidy.chartsDir</code>.</p>
+<div class="highlight"><span class="filename">./env/dev.nix</span><pre><span></span><code><span class="p">{</span>charts<span class="p">,</span> <span class="o">...</span><span class="p">}:</span> <span class="p">{</span>
+  <span class="c1"># Point nixidy to a directory with charts to add to</span>
+  <span class="c1"># the charts attribute set.</span>
+  nixidy<span class="o">.</span><span class="ss">chartsDir =</span> <span class="o">..</span><span class="l">/charts</span><span class="p">;</span>
+
+  <span class="c1"># Use the nfs chart in an application.</span>
+  applications<span class="o">.</span><span class="ss">csi-driver-nfs =</span> <span class="p">{</span>
+    <span class="ss">namespace =</span> <span class="s2">&quot;kube-system&quot;</span><span class="p">;</span>
+
+    helm<span class="o">.</span>releases<span class="o">.</span><span class="ss">csi-driver-nfs =</span> <span class="p">{</span>
+      <span class="ss">chart =</span> charts<span class="o">.</span>kubernetes-csi<span class="o">.</span>csi-driver-nfs<span class="p">;</span>
+
+      <span class="c1"># Pass some values overrides to the chart.</span>
+      <span class="ss">values =</span> <span class="p">{};</span>
+    <span class="p">};</span>
+  <span class="p">};</span>
+<span class="p">}</span>
 </code></pre></div>
-<p>A directory with rendered resources is generated for each application declared with <code>applications.&lt;name&gt;</code> as well as an Argo CD application resource YAML file in <code>apps/</code>. What this provides is the option to bootstrap the whole rendered branch to a cluster by adding an application pointing to the <code>apps/</code> folder.</p>
-<p>See <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern">App of Apps Pattern</a>.</p>
-<p>Running <code>nixidy switch .#dev</code> will create the <code>./manifests/dev</code> relative to the current working directory and sync the newly generated manifests into it.</p>
 
 
 
@@ -847,7 +722,7 @@ result
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../.." class="md-footer__link md-footer__link--prev" aria-label="Previous: Home" rel="prev">
+          <a href="../transformers/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Transformers" rel="prev">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
@@ -857,20 +732,20 @@ result
                 Previous
               </span>
               <div class="md-ellipsis">
-                Home
+                Transformers
               </div>
             </div>
           </a>
         
         
           
-          <a href="../helm_charts/" class="md-footer__link md-footer__link--next" aria-label="Next: Using Helm Charts" rel="next">
+          <a href="../../library/" class="md-footer__link md-footer__link--next" aria-label="Next: Library Functions" rel="next">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Using Helm Charts
+                Library Functions
               </div>
             </div>
             <div class="md-footer__button md-icon">

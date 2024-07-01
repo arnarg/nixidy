@@ -40,4 +40,9 @@
          <lastmod>1980-01-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
+    <url>
+         <loc>https://arnarg.github.io/nixidy/user_guide/using_nixhelm/</loc>
+         <lastmod>1980-01-01</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
 </urlset>
