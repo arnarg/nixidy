@@ -73,6 +73,7 @@
           - 'Typed Resource Options': user_guide/typed_resources.md
           - 'GitHub Actions': user_guide/github_actions.md
           - 'Transformers': user_guide/transformers.md
+          - 'Using nixhelm': user_guide/using_nixhelm.md
         - Reference:
           - 'Library Functions': library.md
           - 'Configuration Options': options.md
