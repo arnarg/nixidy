@@ -36,7 +36,11 @@
             ports.http.port = 80;
           };
         };
-        description = "Resources for the application";
+        description = ''
+          Kubernetes resources for the application.
+
+          The entire list of available resource options is too large for the current documentation setup but its usage is explained [here](https://arnarg.github.io/nixidy/user_guide/typed_resources/).
+        '';
       };
   };
 
