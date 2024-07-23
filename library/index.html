@@ -549,36 +549,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#libkubefromoctal" class="md-nav__link">
+    lib.kube.fromOctal
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#libkuberemovelabels" class="md-nav__link">
     lib.kube.removeLabels
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libkubenamespace" class="md-nav__link">
-    lib.kube.namespace
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libkubeconfigmap" class="md-nav__link">
-    lib.kube.configMap
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libkubesecret" class="md-nav__link">
-    lib.kube.secret
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libkubeservice" class="md-nav__link">
-    lib.kube.service
   </a>
   
 </li>
@@ -681,36 +660,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#libkubefromoctal" class="md-nav__link">
+    lib.kube.fromOctal
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#libkuberemovelabels" class="md-nav__link">
     lib.kube.removeLabels
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libkubenamespace" class="md-nav__link">
-    lib.kube.namespace
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libkubeconfigmap" class="md-nav__link">
-    lib.kube.configMap
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libkubesecret" class="md-nav__link">
-    lib.kube.secret
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libkubeservice" class="md-nav__link">
-    lib.kube.service
   </a>
   
 </li>
@@ -845,6 +803,19 @@ with the output.</p>
 <span class="s1">  }</span>
 <span class="s1">]</span>
 </code></pre></div>
+<h2 id="libkubefromoctal">lib.kube.fromOctal<a class="headerlink" href="#libkubefromoctal" title="Permanent link">#</a></h2>
+<p><strong>Type</strong>: <code>fromOctal :: String -&gt; Integer</code></p>
+<p>Parse an octal representation of a number and convert into a decimal number. This can be useful when having to represent permission bits in a resource as nix has no support for representing octal numbers.</p>
+<dl>
+<dt><code>octal</code></dt>
+<dd>
+<p>String representation of the octal number to parse.</p>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code>fromOctal <span class="s2">&quot;0555&quot;</span>
+<span class="o">=</span><span class="err">&gt;</span> <span class="mi">365</span>
+</code></pre></div>
 <h2 id="libkuberemovelabels">lib.kube.removeLabels<a class="headerlink" href="#libkuberemovelabels" title="Permanent link">#</a></h2>
 <p><strong>Type</strong>: <code>removeLabels :: [String] -&gt; AttrSet -&gt; AttrSet</code></p>
 <p>Removes labels from a Kubernetes manifest.</p>
@@ -878,215 +849,6 @@ with the output.</p>
     <span class="ss">labels =</span> <span class="p">{</span>
       <span class="s2">&quot;app.kubernetes.io/name&quot;</span> <span class="o">=</span> <span class="s2">&quot;argocd-cm&quot;</span><span class="p">;</span>
     <span class="p">};</span>
-  <span class="p">};</span>
-<span class="p">}</span>
-</code></pre></div>
-<h2 id="libkubenamespace">lib.kube.namespace<a class="headerlink" href="#libkubenamespace" title="Permanent link">#</a></h2>
-<p><strong>Type</strong>: <code>namespace :: String -&gt; AttrSet -&gt; AttrSet</code></p>
-<p>Create a Kubernetes namespace manifest. This will create a manifest in
-Kubernetes format so if you want to use it for application's resources
-it should be then parsed with <a href="#libresourcesfrommanifests">lib.resources.fromManifests</a>.</p>
-<dl>
-<dt><code>name</code></dt>
-<dd>
-<p>Name of the namespace manifest to create.</p>
-</dd>
-<dt>structured function argument</dt>
-<dd>
-<p><code>annotations</code></p>
-</dd>
-<dd>
-<p>Optional annotations to add to the namespace manifest. This should be an attribute set.</p>
-</dd>
-<dt><code>labels</code></dt>
-<dd>
-<p>Optional labels to add to the namespace manifest. This should be an attribute set.</p>
-</dd>
-</dl>
-<p><strong>Example:</strong></p>
-<div class="highlight"><pre><span></span><code>namespace <span class="s2">&quot;default&quot;</span> <span class="p">{</span>
-  <span class="ss">labels =</span> <span class="p">{</span>
-    <span class="s2">&quot;pod-security.kubernetes.io/enforce&quot;</span> <span class="o">=</span> <span class="s2">&quot;privileged&quot;</span><span class="p">;</span>
-  <span class="p">};</span>
-<span class="p">}</span>
-<span class="o">=</span><span class="err">&gt;</span> <span class="p">{</span>
-  <span class="ss">apiVersion =</span> <span class="s2">&quot;v1&quot;</span><span class="p">;</span>
-  <span class="ss">kind =</span> <span class="s2">&quot;Namespace&quot;</span><span class="p">;</span>
-  <span class="ss">metadata =</span> <span class="p">{</span>
-    <span class="ss">name =</span> <span class="s2">&quot;default&quot;</span><span class="p">;</span>
-    <span class="ss">labels =</span> <span class="p">{</span>
-      <span class="s2">&quot;pod-security.kubernetes.io/enforce&quot;</span> <span class="o">=</span> <span class="s2">&quot;privileged&quot;</span><span class="p">;</span>
-    <span class="p">};</span>
-  <span class="p">};</span>
-<span class="p">}</span>
-</code></pre></div>
-<h2 id="libkubeconfigmap">lib.kube.configMap<a class="headerlink" href="#libkubeconfigmap" title="Permanent link">#</a></h2>
-<p><strong>Type</strong>: <code>configMap :: String -&gt; AttrSet -&gt; AttrSet</code></p>
-<p>Create a Kubernetes config map manifest. This will create a manifest in
-Kubernetes format so if you want to use it for application's resources
-it should be then parsed with <a href="#libresourcesfrommanifests">lib.resources.fromManifests</a>.</p>
-<dl>
-<dt><code>name</code></dt>
-<dd>
-<p>Name of the config map manifest to create.</p>
-</dd>
-<dt>structured function argument</dt>
-<dd>
-<p><code>data</code></p>
-</dd>
-<dd>
-<p>Attribute set of data to put in the config map.</p>
-</dd>
-<dt><code>namespace</code></dt>
-<dd>
-<p>Optional namespace to add to the config map manifest.</p>
-</dd>
-<dt><code>annotations</code></dt>
-<dd>
-<p>Optional annotations to add to the namespace manifest. This should be an attribute set.</p>
-</dd>
-<dt><code>labels</code></dt>
-<dd>
-<p>Optional labels to add to the namespace manifest. This should be an attribute set.</p>
-</dd>
-</dl>
-<p><strong>Example:</strong></p>
-<div class="highlight"><pre><span></span><code>configMap <span class="s2">&quot;my-config&quot;</span> <span class="p">{</span>
-  <span class="ss">namespace =</span> <span class="s2">&quot;default&quot;</span><span class="p">;</span>
-  data<span class="o">.</span><span class="s2">&quot;data.txt&quot;</span> <span class="o">=</span> <span class="s2">&quot;Hello world!&quot;</span><span class="p">;</span>
-<span class="p">}</span>
-<span class="o">=</span><span class="err">&gt;</span> <span class="p">{</span>
-  <span class="ss">apiVersion =</span> <span class="s2">&quot;v1&quot;</span><span class="p">;</span>
-  <span class="ss">kind =</span> <span class="s2">&quot;ConfigMap&quot;</span><span class="p">;</span>
-  <span class="ss">metadata =</span> <span class="p">{</span>
-    <span class="ss">name =</span> <span class="s2">&quot;my-config&quot;</span><span class="p">;</span>
-    <span class="ss">namespace =</span> <span class="s2">&quot;default&quot;</span><span class="p">;</span>
-  <span class="p">};</span>
-  <span class="ss">data =</span> <span class="p">{</span>
-    <span class="s2">&quot;data.txt&quot;</span> <span class="o">=</span> <span class="s2">&quot;Hello world!&quot;</span><span class="p">;</span>
-  <span class="p">};</span>
-<span class="p">}</span>
-</code></pre></div>
-<h2 id="libkubesecret">lib.kube.secret<a class="headerlink" href="#libkubesecret" title="Permanent link">#</a></h2>
-<p><strong>Type</strong>: <code>configMap :: String -&gt; AttrSet -&gt; AttrSet</code></p>
-<p>Create a Kubernetes secret manifest. This will create a manifest in
-Kubernetes format so if you want to use it for application's resources
-it should be then parsed with <a href="#libresourcesfrommanifests">lib.resources.fromManifests</a>.</p>
-<div class="admonition danger danger">
-<p class="admonition-title">Danger</p>
-<p>Due to the nature of nixidy this resource will be rendered to YAML
-and stored in cleartext in git.</p>
-<p>Using this resource for actual secret data is discouraged.</p>
-</div>
-<dl>
-<dt><code>name</code></dt>
-<dd>
-<p>Name of the secret manifest to create</p>
-</dd>
-<dt>structured function argument</dt>
-<dd>
-<p><code>data</code></p>
-</dd>
-<dd>
-<p>Attribute set of data to put in the config map. Values should be base64 encoded.</p>
-</dd>
-<dt><code>stringData</code></dt>
-<dd>
-<p>Attribute set of data to put in the config map. Values should be in cleartext.</p>
-</dd>
-<dt><code>namespace</code></dt>
-<dd>
-<p>Optional namespace to add to the config map manifest.</p>
-</dd>
-<dt><code>annotations</code></dt>
-<dd>
-<p>Optional annotations to add to the namespace manifest. This should be an attribute set.</p>
-</dd>
-<dt><code>labels</code></dt>
-<dd>
-<p>Optional labels to add to the namespace manifest. This should be an attribute set.</p>
-</dd>
-</dl>
-<p><strong>Example:</strong></p>
-<div class="highlight"><pre><span></span><code>secret <span class="s2">&quot;my-secret&quot;</span> <span class="p">{</span>
-  <span class="ss">namespace =</span> <span class="s2">&quot;default&quot;</span><span class="p">;</span>
-  stringData<span class="o">.</span><span class="s2">&quot;data.txt&quot;</span> <span class="o">=</span> <span class="s2">&quot;Hello world!&quot;</span><span class="p">;</span>
-<span class="p">}</span>
-<span class="o">=</span><span class="err">&gt;</span> <span class="p">{</span>
-  <span class="ss">apiVersion =</span> <span class="s2">&quot;v1&quot;</span><span class="p">;</span>
-  <span class="ss">kind =</span> <span class="s2">&quot;Secret&quot;</span><span class="p">;</span>
-  <span class="ss">metadata =</span> <span class="p">{</span>
-    <span class="ss">name =</span> <span class="s2">&quot;my-secret&quot;</span><span class="p">;</span>
-    <span class="ss">namespace =</span> <span class="s2">&quot;default&quot;</span><span class="p">;</span>
-  <span class="p">};</span>
-  <span class="ss">stringData =</span> <span class="p">{</span>
-    <span class="s2">&quot;data.txt&quot;</span> <span class="o">=</span> <span class="s2">&quot;Hello world!&quot;</span><span class="p">;</span>
-  <span class="p">};</span>
-<span class="p">}</span>
-</code></pre></div>
-<h2 id="libkubeservice">lib.kube.service<a class="headerlink" href="#libkubeservice" title="Permanent link">#</a></h2>
-<p><strong>Type</strong>: <code>service :: String -&gt; AttrSet -&gt; AttrSet</code></p>
-<p>Create a Kubernetes service manifest. This will create a manifest in
-Kubernetes format so if you want to use it for application's resources
-it should be then parsed with <a href="#libresourcesfrommanifests">lib.resources.fromManifests</a>.</p>
-<dl>
-<dt><code>name</code></dt>
-<dd>
-<p>Name of the service manifest to create.</p>
-</dd>
-<dt>structured function argument</dt>
-<dd>
-<p><code>type</code></p>
-</dd>
-<dd>
-<p>Type of service to create. Defaults to <code>ClusterIP</code>.</p>
-</dd>
-<dt><code>selector</code></dt>
-<dd>
-<p>Label selector to match pods that this service should target. This should be an attribute set.</p>
-</dd>
-<dt><code>ports</code></dt>
-<dd>
-<p>Ports this service should have. This should be an attribute set (see example).</p>
-</dd>
-<dt><code>namespace</code></dt>
-<dd>
-<p>Optional namespace to add to the config map manifest.</p>
-</dd>
-<dt><code>annotations</code></dt>
-<dd>
-<p>Optional annotations to add to the namespace manifest. This should be an attribute set.</p>
-</dd>
-<dt><code>labels</code></dt>
-<dd>
-<p>Optional labels to add to the namespace manifest. This should be an attribute set.</p>
-</dd>
-</dl>
-<p><strong>Example:</strong></p>
-<div class="highlight"><pre><span></span><code>service <span class="s2">&quot;nginx&quot;</span> <span class="p">{</span>
-  <span class="ss">namespace =</span> <span class="s2">&quot;default&quot;</span><span class="p">;</span>
-  selector<span class="o">.</span><span class="ss">app =</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
-  ports<span class="o">.</span><span class="ss">http =</span> <span class="p">{</span>
-    <span class="ss">port =</span> <span class="mi">80</span><span class="p">;</span>
-  <span class="p">};</span>
-<span class="p">}</span>
-<span class="o">=</span><span class="err">&gt;</span> <span class="p">{</span>
-  <span class="ss">apiVersion =</span> <span class="s2">&quot;v1&quot;</span><span class="p">;</span>
-  <span class="ss">kind =</span> <span class="s2">&quot;Service&quot;</span><span class="p">;</span>
-  <span class="ss">metadata =</span> <span class="p">{</span>
-    <span class="ss">name =</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
-    <span class="ss">namespace =</span> <span class="s2">&quot;default&quot;</span><span class="p">;</span>
-  <span class="p">};</span>
-  <span class="ss">spec =</span> <span class="p">{</span>
-    <span class="ss">type =</span> <span class="s2">&quot;ClusterIP&quot;</span><span class="p">;</span> <span class="c1"># Default</span>
-    selector<span class="o">.</span><span class="ss">app =</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
-    <span class="ss">ports =</span> <span class="p">[</span>
-      <span class="p">{</span>
-        <span class="ss">name =</span> <span class="s2">&quot;http&quot;</span><span class="p">;</span>
-        <span class="ss">port =</span> <span class="mi">80</span><span class="p">;</span>
-        <span class="ss">protocol =</span> <span class="s2">&quot;TCP&quot;</span><span class="p">;</span> <span class="c1"># Default</span>
-      <span class="p">}</span>
-    <span class="p">];</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
