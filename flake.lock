@@ -59,11 +59,11 @@
     },
     "nix-kube-generators": {
       "locked": {
-        "lastModified": 1702548734,
-        "narHash": "sha256-2pREm/iZ1FyyFuukt/B3nud2NYTUImy5vqc2tESoP9g=",
+        "lastModified": 1708155396,
+        "narHash": "sha256-A/BIeJjiRS7sBYP6tFJa/WHDPHe7DGTCkSEKXttYeAQ=",
         "owner": "farcaller",
         "repo": "nix-kube-generators",
-        "rev": "fb7a70a8cd76aa76fdf3281123582693aec486a7",
+        "rev": "14dbd5e5b40615937900f71d9a9851b59b4d9a88",
         "type": "github"
       },
       "original": {
