@@ -44,6 +44,24 @@ in {
       klib.fromYAML yaml;
 
   /*
+  Parse an octal representation of a number and convert into a decimal number. This can be useful when having to represent permission bits in a resource as nix has no support for representing octal numbers.
+
+  Type:
+    fromOctal :: String -> Integer
+
+  Example:
+    fromOctal "0555"
+    => 365
+  */
+  fromOctal =
+    # String representation of the octal number to parse.
+    octal: let
+      noPrefix = lib.strings.removePrefix "0o" octal;
+      parsed = builtins.fromTOML "v=0o${noPrefix}";
+    in
+      parsed.v;
+
+  /*
   Removes labels from a Kubernetes manifest.
 
   Type:
