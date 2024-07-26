@@ -112,11 +112,20 @@ in {
 
         mkdir -p "\$dest"
 
-        echo "switching manifests"
+        # We need to check if there is a difference between
+        # the newly built environment and the destination
+        # excluding `.revision` because that will most likely
+        # always change when going through CI, avoiding infinite
+        # loop.
+        if ! ${pkgs.diffutils}/bin/diff -q -r --exclude .revision "${config.build.environmentPackage}" "\$dest" &>/dev/null; then
+          echo "switching manifests"
 
-        ${pkgs.rsync}/bin/rsync --recursive --delete -L "${config.build.environmentPackage}/" "\$dest"
+          ${pkgs.rsync}/bin/rsync --recursive --delete -L "${config.build.environmentPackage}/" "\$dest"
 
-        echo "done!"
+          echo "done!"
+        else
+          echo "no changes!"
+        fi
         EOF
 
         chmod +x $out/activate

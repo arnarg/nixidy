@@ -62,6 +62,17 @@ in {
       };
     };
 
+    build = {
+      revision = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        example = literalExpression ''
+          if (self ? rev) then self.rev else self.dirtyRev
+        '';
+        description = "The revision being built. Will be written to `.revision` in the environment destination directory.";
+      };
+    };
+
     extraFiles = mkOption {
       type = types.attrsOf (types.submodule extraFilesOpts);
       default = {};
@@ -181,5 +192,9 @@ in {
 
     _module.args.charts = config.nixidy.charts;
     nixidy.charts = lib.optionalAttrs (cfg.chartsDir != null) (mkChartAttrs cfg.chartsDir);
+
+    nixidy.extraFiles = lib.optionalAttrs (cfg.build.revision != null) {
+      ".revision".text = cfg.build.revision;
+    };
   };
 }
