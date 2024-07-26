@@ -2,9 +2,7 @@
   lib,
   klib,
   ...
-}: let
-  mkManifest = manifest: lib.filterAttrsRecursive (_: v: v != null) manifest;
-in {
+}: {
   /*
   Parses a YAML document string into a list of attribute sets.
 

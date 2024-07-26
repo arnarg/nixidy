@@ -51,28 +51,4 @@
         ${pkgs.kubectl}/bin/kubectl kustomize "${sanitizedPath}" -o "$out"
       '';
     };
-
-  mkKustomizeApplication = {
-    name,
-    namespace,
-    kustomization,
-    path,
-    extrasGenerator ? _: {},
-  }: let
-    extras = extrasGenerator {inherit namespace;};
-
-    rendered = lib.resources.fromKustomization {
-      inherit name namespace path;
-      src = kustomization;
-    };
-
-    merged = lib.mkMerge [
-      rendered
-      (extras.resources or {})
-      (lib.resources.fromManifestYAMLs (extras.YAMLs or []))
-    ];
-  in {
-    inherit namespace;
-    resources = merged;
-  };
 }
