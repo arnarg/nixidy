@@ -165,7 +165,13 @@ in {
       resources.applications =
         lib.attrsets.mapAttrs (
           n: app: {
-            metadata.name = n;
+            metadata = {
+              name = n;
+              annotations =
+                if app.annotations != {}
+                then app.annotations
+                else null;
+            };
             spec = {
               project = app.project;
               source = {

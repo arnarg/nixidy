@@ -82,6 +82,11 @@ in {
       default = "default";
       description = "ArgoCD project to make application a part of.";
     };
+    annotations = mkOption {
+      type = types.attrsOf types.str;
+      default = {};
+      description = "Annotations to add to the rendered ArgoCD application.";
+    };
     syncPolicy = {
       automated = {
         prune = mkOption {
