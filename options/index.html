@@ -1720,7 +1720,7 @@ boolean</p>
 <p>By default, Argo CD executes <code>kubectl apply</code> operation to apply the configuration stored in Git.
 In some cases <code>kubectl apply</code> is not suitable. For example, resource spec might be too big and won't fit into
 <code>kubectl.kubernetes.io/last-applied-configuration</code> annotation that is added by kubectl apply.</p>
-<p>If the <code>replace = true;`` sync option is set the Argo CD will use</code>kubectl replace<code>or</code>kubectl create` command
+<p>If the <code>replace = true;</code> sync option is set the Argo CD will use <code>kubectl replace</code> or <code>kubectl create</code> command
 to apply changes.</p>
 <p><strong><em>Type:</em></strong>
 boolean</p>
