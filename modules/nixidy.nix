@@ -111,7 +111,15 @@ in {
       };
 
       syncPolicy = {
-        automated = {
+        autoSync = {
+          enabled = mkOption {
+            type = types.bool;
+            default = false;
+            description = ''
+              Specifies if the application should automatically sync.
+              This is the default value for all applications if not explicitly set.
+            '';
+          };
           prune = mkOption {
             type = types.bool;
             default = false;
@@ -187,9 +195,15 @@ in {
                 inherit (app) namespace;
                 server = "https://kubernetes.default.svc";
               };
-              syncPolicy.automated = {
-                inherit (app.syncPolicy.automated) prune selfHeal;
-              };
+              syncPolicy =
+                (lib.optionalAttrs (app.syncPolicy.autoSync.enabled) {
+                  automated = {
+                    inherit (app.syncPolicy.autoSync) prune selfHeal;
+                  };
+                })
+                // (lib.optionalAttrs (lib.length app.syncPolicy.finalSyncOpts > 0) {
+                  syncOptions = app.syncPolicy.finalSyncOpts;
+                });
             };
           }
         )
