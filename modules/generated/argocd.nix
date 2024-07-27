@@ -6,7 +6,7 @@
   ...
 }:
 with lib; let
-  hasAttrNotNull = attr: set: hasAttr attr set && !isNull set.${attr};
+  hasAttrNotNull = attr: set: hasAttr attr set && set.${attr} != null;
 
   attrsToList = values:
     if values != null
@@ -43,6 +43,8 @@ with lib; let
       # converted to `finalType` using `coerceFunc`.
       coercedTo = coercedType: coerceFunc: finalType:
         mkOptionType rec {
+          inherit (finalType) getSubOptions getSubModules;
+
           name = "coercedTo";
           description = "${finalType.description} or ${coercedType.description}";
           check = x: finalType.check x || coercedType.check x;
@@ -56,8 +58,6 @@ with lib; let
                 assert finalType.check coerced; coerced;
           in
             finalType.merge loc (map (def: def // {value = coerceVal def.value;}) defs);
-          getSubOptions = finalType.getSubOptions;
-          getSubModules = finalType.getSubModules;
           substSubModules = m: coercedTo coercedType coerceFunc (finalType.substSubModules m);
           typeMerge = t1: t2: null;
           functor = (defaultFunctor name) // {wrapped = finalType;};
@@ -135,8 +135,9 @@ with lib; let
       else "${group}/${version}";
   in
     types.submodule ({name, ...}: {
+      inherit (definitions."${ref}") options;
+
       imports = getDefaults resource group version kind;
-      options = definitions."${ref}".options;
       config = mkMerge [
         definitions."${ref}".config
         {
