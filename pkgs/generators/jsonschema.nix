@@ -281,7 +281,7 @@ with lib; let
 
   latestResourceTypesByKind = mapAttrs (_kind: last) resourcesTypesByKindSortByVersion;
 
-  namespacedResourceTypes = filterAttrs (_: type: type.namespaced == true) resourceTypes;
+  namespacedResourceTypes = filterAttrs (_: type: type.namespaced) resourceTypes;
 
   genResourceOptions = resource:
     with gen; let

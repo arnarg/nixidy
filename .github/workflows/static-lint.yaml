@@ -1,0 +1,28 @@
+name: Statix check
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - manifests/**
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  static-lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: cachix/install-nix-action@v20
+      with:
+        extra_nix_config: |
+          extra-experimental-features = nix-command flakes
+
+    - uses: DeterminateSystems/magic-nix-cache-action@v7
+
+    - name: Run statix
+      run: |
+        nix run .#staticCheck
