@@ -53,6 +53,18 @@
       else if isList value
       then map moduleToAttrs value
       else value;
+
+  applyCmpOption = apply: val:
+    if val == null
+    then null
+    else apply val;
+
+  convertCmpOptionsAnnotation = opts: let
+    filtered = lib.filter (val: val != null) (lib.mapAttrsToList (_: val: val) opts);
+  in
+    lib.mkIf (lib.length filtered > 0) {
+      "argocd.argoproj.io/compare-options" = lib.mkDefault (lib.concatStringsSep "," filtered);
+    };
 in {
   imports = [
     ./helm.nix
@@ -86,6 +98,36 @@ in {
       type = types.attrsOf types.str;
       default = {};
       description = "Annotations to add to the rendered ArgoCD application.";
+    };
+    compareOptions = {
+      serverSideDiff = mkOption {
+        type = types.nullOr types.bool;
+        default = null;
+        apply = applyCmpOption (val: "ServerSideDiff=${
+          if val
+          then "true"
+          else "false"
+        }");
+        description = "Sets ServerSideDiff compare option for the application. Leave as `null` for the default behavior.";
+      };
+      includeMutationWebhook = mkOption {
+        type = types.nullOr types.bool;
+        default = null;
+        apply = applyCmpOption (val:
+          if val
+          then "IncludeMutationWebhook=true"
+          else null);
+        description = "Sets IncludeMutationWebhook compare option for the application. Only setting it as `true` has any effect.";
+      };
+      ignoreExtraneous = mkOption {
+        type = types.nullOr types.bool;
+        default = null;
+        apply = applyCmpOption (val:
+          if val
+          then "IgnoreExtraneous"
+          else null);
+        description = "Sets IgnoreExtraneous compare option for the application. Only setting it as `true` has any effect.";
+      };
     };
     syncPolicy = {
       automated = {
@@ -230,5 +272,7 @@ in {
             mapAttrsToList (_: moduleToAttrs) config.resources.${type.group}.${type.version}.${type.kind}
         )
         config.types);
+
+    annotations = convertCmpOptionsAnnotation config.compareOptions;
   };
 }
