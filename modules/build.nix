@@ -45,91 +45,95 @@
     };
 in {
   options = with lib; {
-    build.extrasPackage = mkOption {
-      type = types.package;
-      internal = true;
-      description = "The package containing all the extra files for an environment.";
-    };
-    build.environmentPackage = mkOption {
-      type = types.package;
-      internal = true;
-      description = "The package containing all the applications for an environment.";
-    };
-    build.activationPackage = mkOption {
-      type = types.package;
-      internal = true;
-      description = "The package containing all the applications and an activation script.";
+    build = {
+      extrasPackage = mkOption {
+        type = types.package;
+        internal = true;
+        description = "The package containing all the extra files for an environment.";
+      };
+      environmentPackage = mkOption {
+        type = types.package;
+        internal = true;
+        description = "The package containing all the applications for an environment.";
+      };
+      activationPackage = mkOption {
+        type = types.package;
+        internal = true;
+        description = "The package containing all the applications and an activation script.";
+      };
     };
   };
 
   config = {
-    build.extrasPackage = pkgs.stdenv.mkDerivation {
-      name = "nixidy-extras-${envName}";
+    build = {
+      extrasPackage = pkgs.stdenv.mkDerivation {
+        name = "nixidy-extras-${envName}";
 
-      phases = ["installPhase"];
+        phases = ["installPhase"];
 
-      installPhase =
-        ''
-          mkdir -p $out
-        ''
-        + (lib.concatStringsSep "\n" (lib.mapAttrsToList (_: file: ''
-            mkdir -p $out/$(dirname ${file.path})
-            cat <<EOF > "$out/${file.path}"
-            ${file.text}
-            EOF
-          '')
-          config.nixidy.extraFiles));
-    };
-
-    build.environmentPackage = let
-      joined = pkgs.linkFarm "nixidy-apps-joined-${envName}" (lib.mapAttrsToList (_: app: {
-          name = app.output.path;
-          path = mkApp app;
-        })
-        config.applications);
-    in
-      pkgs.symlinkJoin {
-        name = "nixidy-environment-${envName}";
-        paths = [
-          joined
-          config.build.extrasPackage
-        ];
+        installPhase =
+          ''
+            mkdir -p $out
+          ''
+          + (lib.concatStringsSep "\n" (lib.mapAttrsToList (_: file: ''
+              mkdir -p $out/$(dirname ${file.path})
+              cat <<EOF > "$out/${file.path}"
+              ${file.text}
+              EOF
+            '')
+            config.nixidy.extraFiles));
       };
 
-    build.activationPackage = pkgs.stdenv.mkDerivation {
-      name = "nixidy-activation-environment-${envName}";
-      phases = ["installPhase"];
+      environmentPackage = let
+        joined = pkgs.linkFarm "nixidy-apps-joined-${envName}" (lib.mapAttrsToList (_: app: {
+            name = app.output.path;
+            path = mkApp app;
+          })
+          config.applications);
+      in
+        pkgs.symlinkJoin {
+          name = "nixidy-environment-${envName}";
+          paths = [
+            joined
+            config.build.extrasPackage
+          ];
+        };
 
-      installPhase = ''
-        mkdir -p $out
+      activationPackage = pkgs.stdenv.mkDerivation {
+        name = "nixidy-activation-environment-${envName}";
+        phases = ["installPhase"];
 
-        ln -s ${config.build.environmentPackage} $out/environment
+        installPhase = ''
+          mkdir -p $out
 
-        cat <<EOF > $out/activate
-        #!/usr/bin/env bash
-        set -eo pipefail
-        dest="${config.nixidy.target.rootPath}"
+          ln -s ${config.build.environmentPackage} $out/environment
 
-        mkdir -p "\$dest"
+          cat <<EOF > $out/activate
+          #!/usr/bin/env bash
+          set -eo pipefail
+          dest="${config.nixidy.target.rootPath}"
 
-        # We need to check if there is a difference between
-        # the newly built environment and the destination
-        # excluding `.revision` because that will most likely
-        # always change when going through CI, avoiding infinite
-        # loop.
-        if ! ${pkgs.diffutils}/bin/diff -q -r --exclude .revision "${config.build.environmentPackage}" "\$dest" &>/dev/null; then
-          echo "switching manifests"
+          mkdir -p "\$dest"
 
-          ${pkgs.rsync}/bin/rsync --recursive --delete -L "${config.build.environmentPackage}/" "\$dest"
+          # We need to check if there is a difference between
+          # the newly built environment and the destination
+          # excluding `.revision` because that will most likely
+          # always change when going through CI, avoiding infinite
+          # loop.
+          if ! ${pkgs.diffutils}/bin/diff -q -r --exclude .revision "${config.build.environmentPackage}" "\$dest" &>/dev/null; then
+            echo "switching manifests"
 
-          echo "done!"
-        else
-          echo "no changes!"
-        fi
-        EOF
+            ${pkgs.rsync}/bin/rsync --recursive --delete -L "${config.build.environmentPackage}/" "\$dest"
 
-        chmod +x $out/activate
-      '';
+            echo "done!"
+          else
+            echo "no changes!"
+          fi
+          EOF
+
+          chmod +x $out/activate
+        '';
+      };
     };
   };
 }

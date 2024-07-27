@@ -30,7 +30,7 @@
     else
       builtins.listToAttrs (map (
         d: {
-          name = d.name;
+          inherit (d) name;
           value = walkDir "${prefix}/${dir}" d.name;
         }
       ) (lib.filter (c: c.value == "directory") (lib.attrsToList contents)));
@@ -40,7 +40,7 @@
   in
     builtins.listToAttrs (map (
       d: {
-        name = d.name;
+        inherit (d) name;
         value = walkDir dir d.name;
       }
     ) (lib.filter (c: c.value == "directory") (lib.attrsToList contents)));
@@ -160,7 +160,7 @@ in {
 
   config = {
     applications.${cfg.appOfApps.name} = {
-      namespace = cfg.appOfApps.namespace;
+      inherit (cfg.appOfApps) namespace;
 
       resources.applications =
         lib.attrsets.mapAttrs (
@@ -173,7 +173,8 @@ in {
                 else null;
             };
             spec = {
-              project = app.project;
+              inherit (app) project;
+
               source = {
                 repoURL = cfg.target.repository;
                 targetRevision = cfg.target.branch;
@@ -183,12 +184,11 @@ in {
                 ];
               };
               destination = {
+                inherit (app) namespace;
                 server = "https://kubernetes.default.svc";
-                namespace = app.namespace;
               };
               syncPolicy.automated = {
-                prune = app.syncPolicy.automated.prune;
-                selfHeal = app.syncPolicy.automated.selfHeal;
+                inherit (app.syncPolicy.automated) prune selfHeal;
               };
             };
           }

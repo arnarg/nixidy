@@ -1,13 +1,15 @@
 {
   description = "ArgoCD application and Kubernetes manifest generator in Nix.";
 
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-  inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.nix-kube-generators.url = "github:farcaller/nix-kube-generators";
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
+    nix-kube-generators.url = "github:farcaller/nix-kube-generators";
 
-  inputs.kubenix = {
-    url = "github:hall/kubenix";
-    inputs.nixpkgs.follows = "nixpkgs";
+    kubenix = {
+      url = "github:hall/kubenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -70,8 +72,9 @@
       packages = import ./nixidy pkgs;
     in {
       packages = {
+        inherit docs;
+
         default = packages.nixidy;
-        docs = docs;
         generators = import ./pkgs/generators {inherit pkgs;};
       };
 

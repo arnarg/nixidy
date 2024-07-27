@@ -41,13 +41,13 @@ in {
           else "objects"
       ) (concatMap kube.fromYAML config.yamls));
   in {
+    inherit (groupedObjects) objects;
+
     resources = mkMerge (map (object: let
         gvk = helpers.getGVK object;
       in {
         ${gvk.group}.${gvk.version}.${gvk.kind}.${object.metadata.name} = object;
       })
       groupedObjects.resources);
-
-    objects = groupedObjects.objects;
   };
 }

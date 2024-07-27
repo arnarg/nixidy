@@ -4,7 +4,7 @@
   config,
   ...
 }: let
-  namespace = config.namespace;
+  inherit (config) namespace;
 
   helpers = import ./lib.nix lib;
 in {

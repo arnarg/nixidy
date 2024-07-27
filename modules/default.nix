@@ -30,10 +30,6 @@
       // extraSpecialArgs;
   };
 in {
-  meta = {
-    repository = module.config.nixidy.target.repository;
-    branch = module.config.nixidy.target.branch;
-  };
-  environmentPackage = module.config.build.environmentPackage;
-  activationPackage = module.config.build.activationPackage;
+  inherit (module.config.build) environmentPackage activationPackage;
+  meta = {inherit (module.config.nixidy.target) repository branch;};
 }

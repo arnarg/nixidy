@@ -227,7 +227,7 @@ in {
     objects = with lib;
       flatten (mapAttrsToList (
           _: type:
-            mapAttrsToList (_: res: moduleToAttrs res) config.resources.${type.group}.${type.version}.${type.kind}
+            mapAttrsToList (_: moduleToAttrs) config.resources.${type.group}.${type.version}.${type.kind}
         )
         config.types);
   };
