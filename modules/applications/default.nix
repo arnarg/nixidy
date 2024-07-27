@@ -200,7 +200,7 @@ in {
             In some cases `kubectl apply` is not suitable. For example, resource spec might be too big and won't fit into
             `kubectl.kubernetes.io/last-applied-configuration` annotation that is added by kubectl apply.
 
-            If the `replace = true;`` sync option is set the Argo CD will use `kubectl replace` or `kubectl create` command
+            If the `replace = true;` sync option is set the Argo CD will use `kubectl replace` or `kubectl create` command
             to apply changes.
           '';
         };
