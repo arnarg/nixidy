@@ -196,7 +196,7 @@ in {
                 server = "https://kubernetes.default.svc";
               };
               syncPolicy =
-                (lib.optionalAttrs (app.syncPolicy.autoSync.enabled) {
+                (lib.optionalAttrs app.syncPolicy.autoSync.enabled {
                   automated = {
                     inherit (app.syncPolicy.autoSync) prune selfHeal;
                   };
