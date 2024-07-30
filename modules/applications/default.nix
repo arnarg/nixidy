@@ -242,6 +242,16 @@ in {
         internal = true;
       };
     };
+    destination = {
+      server = mkOption {
+        type = types.str;
+        default = nixidyDefaults.destination.server;
+        defaultText = literalExpression "config.nixidy.defaults.destination.server";
+        description = ''
+          The Kubernetes server that ArgoCD should deploy the application to.
+        '';
+      };
+    };
     output = {
       path = mkOption {
         type = types.str;
@@ -354,10 +364,14 @@ in {
   };
 
   config = {
+    # If createNamespace is set to `true` we should
+    # create one.
     resources = lib.mkIf config.createNamespace {
       namespaces.${config.namespace} = {};
     };
 
+    # Turn all typed resources into standard kubernetes
+    # objects that will be written to YAML files.
     objects = with lib;
       flatten (mapAttrsToList (
           _: type:

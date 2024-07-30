@@ -116,8 +116,9 @@ in {
             type = types.bool;
             default = false;
             description = ''
-              Specifies if the application should automatically sync.
-              This is the default value for all applications if not explicitly set.
+              Specifies if applications should automatically sync.
+
+              This is the default value for all applications if not explicitly set for the application.
             '';
           };
           prune = mkOption {
@@ -125,7 +126,8 @@ in {
             default = false;
             description = ''
               Specifies if resources should be pruned during auto-syncing.
-              This is the default value for all applications if not explicitly set.
+
+              This is the default value for all applications if not explicitly set for the application.
             '';
           };
           selfHeal = mkOption {
@@ -134,9 +136,22 @@ in {
             description = ''
               Specifies if partial app sync should be executed when resources are changed only in
               target Kubernetes cluster and no git change detected.
-              This is the default value for all applications if not explicitly set.
+
+              This is the default value for all applications if not explicitly set for the application.
             '';
           };
+        };
+      };
+
+      destination = {
+        server = mkOption {
+          type = types.str;
+          default = "https://kubernetes.default.svc";
+          description = ''
+            The Kubernetes server that ArgoCD should deploy all applications to.
+
+            This is the default value for all applications if not explicitly set for the application.
+          '';
         };
       };
     };
@@ -193,7 +208,7 @@ in {
               };
               destination = {
                 inherit (app) namespace;
-                server = "https://kubernetes.default.svc";
+                inherit (app.destination) server;
               };
               syncPolicy =
                 (lib.optionalAttrs app.syncPolicy.autoSync.enabled {
