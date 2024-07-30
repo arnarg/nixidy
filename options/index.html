@@ -574,6 +574,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#applicationsnamedestinationserver" class="md-nav__link">
+    applications.&lt;name&gt;.destination.server
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#applicationsnamehelmreleases" class="md-nav__link">
     applications.&lt;name&gt;.helm.releases
   </a>
@@ -793,6 +800,13 @@
         <li class="md-nav__item">
   <a href="#nixidychartsdir" class="md-nav__link">
     nixidy.chartsDir
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidydefaultsdestinationserver" class="md-nav__link">
+    nixidy.defaults.destination.server
   </a>
   
 </li>
@@ -966,6 +980,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#applicationsnamedestinationserver" class="md-nav__link">
+    applications.&lt;name&gt;.destination.server
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#applicationsnamehelmreleases" class="md-nav__link">
     applications.&lt;name&gt;.helm.releases
   </a>
@@ -1185,6 +1206,13 @@
         <li class="md-nav__item">
   <a href="#nixidychartsdir" class="md-nav__link">
     nixidy.chartsDir
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidydefaultsdestinationserver" class="md-nav__link">
+    nixidy.defaults.destination.server
   </a>
   
 </li>
@@ -1402,6 +1430,16 @@ null or boolean</p>
 boolean</p>
 <p><strong><em>Default:</em></strong>
 <code class="highlight"><span class="no">false</span></code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/applications">&lt;nixidy/modules/applications&gt;</a></li>
+</ul>
+<h2 id="applicationsnamedestinationserver">applications.&lt;name&gt;.destination.server<a class="headerlink" href="#applicationsnamedestinationserver" title="Permanent link">#</a></h2>
+<p>The Kubernetes server that ArgoCD should deploy the application to.</p>
+<p><strong><em>Type:</em></strong>
+string</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight">config<span class="o">.</span>nixidy<span class="o">.</span>defaults<span class="o">.</span>destination<span class="o">.</span>server</code></p>
 <p><strong><em>Declared by:</em></strong></p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/applications">&lt;nixidy/modules/applications&gt;</a></li>
@@ -1818,6 +1856,17 @@ null or path</p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
 </ul>
+<h2 id="nixidydefaultsdestinationserver">nixidy.defaults.destination.server<a class="headerlink" href="#nixidydefaultsdestinationserver" title="Permanent link">#</a></h2>
+<p>The Kubernetes server that ArgoCD should deploy all applications to.</p>
+<p>This is the default value for all applications if not explicitly set for the application.</p>
+<p><strong><em>Type:</em></strong>
+string</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="s2">&quot;https://kubernetes.default.svc&quot;</span></code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
+</ul>
 <h2 id="nixidydefaultshelmtransformer">nixidy.defaults.helm.transformer<a class="headerlink" href="#nixidydefaultshelmtransformer" title="Permanent link">#</a></h2>
 <p>Function that will be applied to the list of rendered manifests after the helm templating.
 This option applies to all helm releases in all applications unless explicitly specified
@@ -1847,8 +1896,8 @@ function that evaluates to a(n) list of attribute set of anything</p>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
 </ul>
 <h2 id="nixidydefaultssyncpolicyautosyncenabled">nixidy.defaults.syncPolicy.autoSync.enabled<a class="headerlink" href="#nixidydefaultssyncpolicyautosyncenabled" title="Permanent link">#</a></h2>
-<p>Specifies if the application should automatically sync.
-This is the default value for all applications if not explicitly set.</p>
+<p>Specifies if applications should automatically sync.</p>
+<p>This is the default value for all applications if not explicitly set for the application.</p>
 <p><strong><em>Type:</em></strong>
 boolean</p>
 <p><strong><em>Default:</em></strong>
@@ -1858,8 +1907,8 @@ boolean</p>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
 </ul>
 <h2 id="nixidydefaultssyncpolicyautosyncprune">nixidy.defaults.syncPolicy.autoSync.prune<a class="headerlink" href="#nixidydefaultssyncpolicyautosyncprune" title="Permanent link">#</a></h2>
-<p>Specifies if resources should be pruned during auto-syncing.
-This is the default value for all applications if not explicitly set.</p>
+<p>Specifies if resources should be pruned during auto-syncing.</p>
+<p>This is the default value for all applications if not explicitly set for the application.</p>
 <p><strong><em>Type:</em></strong>
 boolean</p>
 <p><strong><em>Default:</em></strong>
@@ -1870,8 +1919,8 @@ boolean</p>
 </ul>
 <h2 id="nixidydefaultssyncpolicyautosyncselfheal">nixidy.defaults.syncPolicy.autoSync.selfHeal<a class="headerlink" href="#nixidydefaultssyncpolicyautosyncselfheal" title="Permanent link">#</a></h2>
 <p>Specifies if partial app sync should be executed when resources are changed only in
-target Kubernetes cluster and no git change detected.
-This is the default value for all applications if not explicitly set.</p>
+target Kubernetes cluster and no git change detected.</p>
+<p>This is the default value for all applications if not explicitly set for the application.</p>
 <p><strong><em>Type:</em></strong>
 boolean</p>
 <p><strong><em>Default:</em></strong>
