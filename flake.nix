@@ -78,6 +78,11 @@
         generators = import ./pkgs/generators {inherit pkgs;};
       };
 
+      libTests = import ./lib/tests.nix {
+        inherit pkgs;
+        kubelib = nix-kube-generators;
+      };
+
       apps = {
         # Generates all generators and copies into place
         generate = {
@@ -134,6 +139,22 @@
               else
                 ${pkgs.statix}/bin/statix check .
               fi
+            '')
+            .outPath;
+        };
+
+        # Runs lib unit tests
+        libTests = {
+          type = "app";
+          program =
+            (pkgs.writeShellScript "lib-unit-tests" ''
+              set -eo pipefail
+
+              SYSTEM=$(nix eval --expr builtins.currentSystem --raw --impure)
+
+              ${pkgs.nix-unit}/bin/nix-unit \
+                --extra-experimental-features flakes \
+                --flake "${self}#libTests.''${SYSTEM}"
             '')
             .outPath;
         };
