@@ -5,24 +5,26 @@
 }: let
   apps = config.applications.apps.resources.applications;
 in {
-  # Create an application with all sync options set
-  applications.test1.syncPolicy.syncOptions = {
-    serverSideApply = true;
-    replace = true;
-    pruneLast = true;
-    failOnSharedResource = true;
-    applyOutOfSyncOnly = true;
-  };
+  applications = {
+    # Create an application with all sync options set
+    test1.syncPolicy.syncOptions = {
+      serverSideApply = true;
+      replace = true;
+      pruneLast = true;
+      failOnSharedResource = true;
+      applyOutOfSyncOnly = true;
+    };
 
-  # Create an application with some sync options set
-  applications.test2.syncPolicy.syncOptions = {
-    serverSideApply = true;
-    pruneLast = true;
-    applyOutOfSyncOnly = true;
-  };
+    # Create an application with some sync options set
+    test2.syncPolicy.syncOptions = {
+      serverSideApply = true;
+      pruneLast = true;
+      applyOutOfSyncOnly = true;
+    };
 
-  # Create an application with no sync options set
-  applications.test3 = {};
+    # Create an application with no sync options set
+    test3 = {};
+  };
 
   test = with lib; {
     name = "sync options";

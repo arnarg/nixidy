@@ -10,9 +10,13 @@ in {
     destination.server = defaultServer;
 
     # Turn on auto sync
-    syncPolicy.autoSync.enabled = true;
-    syncPolicy.autoSync.prune = true;
-    syncPolicy.autoSync.selfHeal = true;
+    syncPolicy = {
+      autoSync = {
+        enabled = true;
+        prune = true;
+        selfHeal = true;
+      };
+    };
   };
 
   # Create an application that does not override

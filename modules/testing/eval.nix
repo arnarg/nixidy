@@ -48,12 +48,16 @@
       testModuleOptions
 
       {
-        # Import all resourceImports
-        nixidy.resourceImports = resourceImports;
+        nixidy = {
+          # Import all resourceImports
+          inherit resourceImports;
 
-        # Set nixidy target
-        nixidy.target.repository = "https://github.com/arnarg/nixidy.git";
-        nixidy.target.branch = "main";
+          # Set nixidy target
+          target = {
+            repository = "https://github.com/arnarg/nixidy.git";
+            branch = "main";
+          };
+        };
       }
     ]
     # Import all base nixidy modules
