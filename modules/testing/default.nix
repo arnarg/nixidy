@@ -79,7 +79,7 @@ in {
       reportScript = pkgs.writeShellScript "testing-${config.testing.name}-report-script" ''
         set -eo pipefail
 
-        printf '${config.testing.report}'
+        printf '${config.testing.report}\n'
 
         exit ${
           if config.testing.success
