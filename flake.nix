@@ -83,6 +83,17 @@
         kubelib = nix-kube-generators;
       };
 
+      moduleTests =
+        (self.lib.mkEnv {
+          inherit pkgs;
+          modules = [
+            ./modules/testing
+            ./tests
+          ];
+        })
+        .config
+        .testing;
+
       apps = {
         # Generates all generators and copies into place
         generate = {
@@ -157,6 +168,12 @@
                 --flake "${self}#libTests.''${SYSTEM}"
             '')
             .outPath;
+        };
+
+        # Run module unit tests
+        moduleTests = {
+          type = "app";
+          program = self.moduleTests.${system}.reportScript.outPath;
         };
       };
     }));
