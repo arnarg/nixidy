@@ -6,6 +6,7 @@
       ./defaults.nix
       ./sync-options.nix
       ./compare-options.nix
+      ./create-namespace.nix
     ];
   };
 }
