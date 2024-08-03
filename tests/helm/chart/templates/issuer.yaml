@@ -1,0 +1,11 @@
+{{ if .Values.issuer.create }}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: ca-issuer
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+spec:
+  ca:
+    secretName: ca-key-pair
+{{ end }}

@@ -30,7 +30,7 @@ in {
                 description = "Namespace for the release.";
               };
               chart = mkOption {
-                type = types.package;
+                type = with types; either package path;
                 description = ''
                   Derivation containing the helm chart for the release.
                 '';
