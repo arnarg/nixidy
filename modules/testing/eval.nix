@@ -113,7 +113,7 @@ in {
             if success
             then "\\033[1;32m✓\\033[0m"
             else "\\033[1;31mx\\033[0m";
-        in "       ${result} ${el.description}"
+        in "   ${result} ${el.description}"
       )
       evaled.config.test.assertions;
   };
