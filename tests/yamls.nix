@@ -48,36 +48,51 @@ in {
     assertions = [
       {
         description = "Service should be parsed correctly.";
-        expression = apps.test1.resources.core.v1.Service.my-svc;
-        assertion = svc: let
-          port = head svc.spec.ports;
-        in
-          svc.kind
-          == "Service"
-          && svc.metadata.name == "my-svc"
-          && svc.metadata.namespace == "test1"
-          && svc.metadata.labels
-          == {
+
+        expression =
+          findFirst
+          (x: x.kind == "Service" && x.metadata.name == "my-svc")
+          null
+          apps.test1.objects;
+
+        expected = {
+          apiVersion = "v1";
+          kind = "Service";
+          metadata = {
             name = "my-svc";
-          }
-          && svc.spec.type == "ClusterIP"
-          && port.port == 80
-          && port.targetPort == "http"
-          && port.protocol == "TCP"
-          && port.name == "http";
+            namespace = "test1";
+            labels.name = "my-svc";
+          };
+          spec = {
+            type = "ClusterIP";
+            ports = [
+              {
+                port = 80;
+                targetPort = "http";
+                protocol = "TCP";
+                name = "http";
+              }
+            ];
+            selector.name = "my-svc";
+          };
+        };
       }
 
       {
         description = "Custom yaml of unsupported resource types should still be in the resources output.";
-        expression = apps.test1.objects;
-        assertion = any (
-          obj:
-            obj.apiVersion
-            == "cert-manager.io/v1"
-            && obj.kind == "Issuer"
-            && obj.metadata.name == "ca-issuer"
-            && obj.spec.ca.secretName == "ca-key-pair"
-        );
+
+        expression =
+          findFirst
+          (x: x.kind == "Issuer" && x.metadata.name == "ca-issuer")
+          null
+          apps.test1.objects;
+
+        expected = {
+          apiVersion = "cert-manager.io/v1";
+          kind = "Issuer";
+          metadata.name = "ca-issuer";
+          spec.ca.secretName = "ca-key-pair";
+        };
       }
     ];
   };

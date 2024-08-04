@@ -31,99 +31,167 @@ in {
     assertions = [
       {
         description = "Deployment should be rendered correctly from base kustomization.";
-        expression = apps.test1.resources.apps.v1.Deployment.deployment;
-        assertion = depl: let
-          container = head depl.spec.template.spec.containers;
-        in
-          depl.kind
-          == "Deployment"
-          && depl.metadata.name == "deployment"
-          && depl.metadata.namespace == "test1"
-          && depl.metadata.labels
-          == {
-            "app.kubernetes.io/name" = "deployment";
-          }
-          && depl.spec.replicas == 1
-          && container.name == "nginx"
-          && container.image == "nginx:latest";
+
+        expression =
+          findFirst
+          (x: x.kind == "Deployment" && x.metadata.name == "deployment")
+          null
+          apps.test1.objects;
+
+        expected = {
+          apiVersion = "apps/v1";
+          kind = "Deployment";
+          metadata = {
+            name = "deployment";
+            namespace = "test1";
+            labels."app.kubernetes.io/name" = "deployment";
+          };
+          spec = {
+            replicas = 1;
+            selector.matchLabels."app.kubernetes.io/name" = "deployment";
+            template = {
+              metadata.labels."app.kubernetes.io/name" = "deployment";
+              spec.containers = [
+                {
+                  name = "nginx";
+                  image = "nginx:latest";
+                  ports = [
+                    {
+                      name = "http";
+                      containerPort = 80;
+                      protocol = "TCP";
+                    }
+                  ];
+                }
+              ];
+            };
+          };
+        };
       }
 
       {
         description = "Service should be rendered correctly from base kustomization.";
-        expression = apps.test1.resources.core.v1.Service.service;
-        assertion = svc: let
-          port = head svc.spec.ports;
-        in
-          svc.kind
-          == "Service"
-          && svc.metadata.name == "service"
-          && svc.metadata.namespace == "test1"
-          && svc.metadata.labels
-          == {
-            "app.kubernetes.io/name" = "service";
-          }
-          && svc.spec.type == "ClusterIP"
-          && port.port == 80
-          && port.targetPort == "http"
-          && port.protocol == "TCP"
-          && port.name == "http";
+
+        expression =
+          findFirst
+          (x: x.kind == "Service" && x.metadata.name == "service")
+          null
+          apps.test1.objects;
+
+        expected = {
+          apiVersion = "v1";
+          kind = "Service";
+          metadata = {
+            name = "service";
+            namespace = "test1";
+            labels."app.kubernetes.io/name" = "service";
+          };
+          spec = {
+            type = "ClusterIP";
+            ports = [
+              {
+                port = 80;
+                targetPort = "http";
+                protocol = "TCP";
+                name = "http";
+              }
+            ];
+            selector."app.kubernetes.io/name" = "deployment";
+          };
+        };
       }
 
       {
         description = "Deployment should be rendered correctly from overlay kustomization.";
-        expression = apps.test2.resources.apps.v1.Deployment.deployment;
-        assertion = depl: let
-          container = head depl.spec.template.spec.containers;
-        in
-          depl.kind
-          == "Deployment"
-          && depl.metadata.name == "deployment"
-          && depl.metadata.namespace == "test2"
-          && depl.metadata.labels
-          == {
-            "app.kubernetes.io/name" = "deployment";
-          }
-          && depl.spec.replicas == 3
-          && container.name == "nginx"
-          && container.image == "nginx:latest";
+
+        expression =
+          findFirst
+          (x: x.kind == "Deployment" && x.metadata.name == "deployment")
+          null
+          apps.test2.objects;
+
+        expected = {
+          apiVersion = "apps/v1";
+          kind = "Deployment";
+          metadata = {
+            name = "deployment";
+            namespace = "test2";
+            labels."app.kubernetes.io/name" = "deployment";
+          };
+          spec = {
+            replicas = 3;
+            selector.matchLabels."app.kubernetes.io/name" = "deployment";
+            template = {
+              metadata.labels."app.kubernetes.io/name" = "deployment";
+              spec.containers = [
+                {
+                  name = "nginx";
+                  image = "nginx:latest";
+                  ports = [
+                    {
+                      name = "http";
+                      containerPort = 80;
+                      protocol = "TCP";
+                    }
+                  ];
+                }
+              ];
+            };
+          };
+        };
       }
 
       {
         description = "Service should be rendered correctly from overlay kustomization.";
-        expression = apps.test2.resources.core.v1.Service.service;
-        assertion = svc: let
-          port = head svc.spec.ports;
-        in
-          svc.kind
-          == "Service"
-          && svc.metadata.name == "service"
-          && svc.metadata.namespace == "test2"
-          && svc.metadata.labels
-          == {
-            "app.kubernetes.io/name" = "service";
-          }
-          && svc.spec.type == "ClusterIP"
-          && port.port == 80
-          && port.targetPort == "http"
-          && port.protocol == "TCP"
-          && port.name == "http";
+
+        expression =
+          findFirst
+          (x: x.kind == "Service" && x.metadata.name == "service")
+          null
+          apps.test2.objects;
+
+        expected = {
+          apiVersion = "v1";
+          kind = "Service";
+          metadata = {
+            name = "service";
+            namespace = "test2";
+            labels."app.kubernetes.io/name" = "service";
+          };
+          spec = {
+            type = "ClusterIP";
+            ports = [
+              {
+                port = 80;
+                targetPort = "http";
+                protocol = "TCP";
+                name = "http";
+              }
+            ];
+            selector."app.kubernetes.io/name" = "deployment";
+          };
+        };
       }
 
       {
         description = "Unknown resource type should still be output in the applications.";
-        expression = apps.test2.objects;
-        assertion = any (
-          obj:
-            obj.apiVersion
-            == "cert-manager.io/v1"
-            && obj.kind == "Issuer"
-            && obj.metadata.name == "ca-issuer"
-            && obj.metadata.labels
-            == {
-              "app.kubernetes.io/name" = "ca-issuer";
-            }
-            && obj.spec.ca.secretName == "ca-key-pair"
-        );
+
+        expression =
+          findFirst
+          (x: x.kind == "Issuer" && x.metadata.name == "ca-issuer")
+          null
+          apps.test2.objects;
+
+        expected = {
+          apiVersion = "cert-manager.io/v1";
+          kind = "Issuer";
+          metadata = {
+            name = "ca-issuer";
+            namespace = "test2";
+            labels."app.kubernetes.io/name" = "ca-issuer";
+          };
+          spec.ca.secretName = "ca-key-pair";
+        };
       }
     ];
   };
