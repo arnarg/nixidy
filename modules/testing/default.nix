@@ -62,7 +62,7 @@ in {
 
       report = let
         total = lib.length config.testing.tests;
-        passing = lib.length (lib.filter (test: test.success) config.testing.tests);
+        passing = lib.count (test: test.success) config.testing.tests;
       in
         (lib.concatMapStringsSep "\n" (
             test: let
