@@ -31,7 +31,7 @@ in {
               };
               kustomization = {
                 src = mkOption {
-                  type = types.package;
+                  type = with types; either package path;
                   description = "Derivation containing all the kustomize bases and overlays.";
                 };
                 path = mkOption {

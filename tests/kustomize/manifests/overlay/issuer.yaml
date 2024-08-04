@@ -1,0 +1,9 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: ca-issuer
+  labels:
+    app.kubernetes.io/name: ca-issuer
+spec:
+  ca:
+    secretName: ca-key-pair

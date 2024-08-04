@@ -9,6 +9,7 @@
       ./create-namespace.nix
       ./yamls.nix
       ./helm
+      ./kustomize
     ];
   };
 }
