@@ -16,7 +16,7 @@
       };
       assertions = mkOption {
         type = with types;
-          listOf (submodule {
+          listOf (submodule ({config, ...}: {
             options = {
               description = mkOption {
                 type = str;
@@ -26,15 +26,21 @@
                 type = types.anything;
                 description = "Expression that should be asserted.";
               };
+              expected = mkOption {
+                type = types.anything;
+                default = null;
+                description = "Expected value.";
+              };
               assertion = mkOption {
                 type = types.functionTo types.bool;
+                default = val: val == config.expected;
                 description = ''
                   Function that should take the value of `expression` as argument and return a bool,
                   depending on if the check passed or not.
                 '';
               };
             };
-          });
+          }));
       };
     };
   };

@@ -36,113 +36,204 @@ in {
     assertions = [
       {
         description = "Helm chart with no values override should render deployment correctly.";
-        expression = apps.test1.resources.apps.v1.Deployment.test1-chart;
-        assertion = depl: let
-          container = head depl.spec.template.spec.containers;
-        in
-          depl.kind
-          == "Deployment"
-          && depl.metadata.name == "test1-chart"
-          && depl.metadata.namespace == "test1"
-          && depl.metadata.labels
-          == {
-            "app.kubernetes.io/instance" = "test1";
-            "app.kubernetes.io/managed-by" = "Helm";
-            "app.kubernetes.io/name" = "chart";
-            "app.kubernetes.io/version" = "1.16.0";
-            "helm.sh/chart" = "chart-0.1.0";
-          }
-          && depl.spec.replicas == 1
-          && container.name == "chart"
-          && container.image == "nginx:latest";
+        expression =
+          findFirst
+          (x: x.kind == "Deployment" && x.metadata.name == "test1-chart")
+          null
+          apps.test1.objects;
+        expected = {
+          apiVersion = "apps/v1";
+          kind = "Deployment";
+          metadata = {
+            name = "test1-chart";
+            namespace = "test1";
+            labels = {
+              "app.kubernetes.io/instance" = "test1";
+              "app.kubernetes.io/managed-by" = "Helm";
+              "app.kubernetes.io/name" = "chart";
+              "app.kubernetes.io/version" = "1.16.0";
+              "helm.sh/chart" = "chart-0.1.0";
+            };
+          };
+          spec = {
+            replicas = 1;
+            selector.matchLabels = {
+              "app.kubernetes.io/instance" = "test1";
+              "app.kubernetes.io/name" = "chart";
+            };
+            template = {
+              metadata.labels = {
+                "app.kubernetes.io/instance" = "test1";
+                "app.kubernetes.io/managed-by" = "Helm";
+                "app.kubernetes.io/name" = "chart";
+                "app.kubernetes.io/version" = "1.16.0";
+                "helm.sh/chart" = "chart-0.1.0";
+              };
+              spec.containers = [
+                {
+                  name = "chart";
+                  image = "nginx:latest";
+                  ports = [
+                    {
+                      name = "http";
+                      containerPort = 80;
+                      protocol = "TCP";
+                    }
+                  ];
+                }
+              ];
+            };
+          };
+        };
       }
 
       {
         description = "Helm chart with no values override should render service correctly.";
-        expression = apps.test1.resources.core.v1.Service.test1-chart;
-        assertion = svc: let
-          port = head svc.spec.ports;
-        in
-          svc.kind
-          == "Service"
-          && svc.metadata.name == "test1-chart"
-          && svc.metadata.namespace == "test1"
-          && svc.metadata.labels
-          == {
-            "app.kubernetes.io/instance" = "test1";
-            "app.kubernetes.io/managed-by" = "Helm";
-            "app.kubernetes.io/name" = "chart";
-            "app.kubernetes.io/version" = "1.16.0";
-            "helm.sh/chart" = "chart-0.1.0";
-          }
-          && svc.spec.type == "ClusterIP"
-          && port.port == 80
-          && port.targetPort == "http"
-          && port.protocol == "TCP"
-          && port.name == "http";
+        expression =
+          findFirst
+          (x: x.kind == "Service" && x.metadata.name == "test1-chart")
+          null
+          apps.test1.objects;
+        expected = {
+          apiVersion = "v1";
+          kind = "Service";
+          metadata = {
+            name = "test1-chart";
+            namespace = "test1";
+            labels = {
+              "app.kubernetes.io/instance" = "test1";
+              "app.kubernetes.io/managed-by" = "Helm";
+              "app.kubernetes.io/name" = "chart";
+              "app.kubernetes.io/version" = "1.16.0";
+              "helm.sh/chart" = "chart-0.1.0";
+            };
+          };
+          spec = {
+            type = "ClusterIP";
+            ports = [
+              {
+                port = 80;
+                targetPort = "http";
+                protocol = "TCP";
+                name = "http";
+              }
+            ];
+            selector = {
+              "app.kubernetes.io/instance" = "test1";
+              "app.kubernetes.io/name" = "chart";
+            };
+          };
+        };
       }
 
       {
         description = "Helm chart with values override should render deployment correctly.";
-        expression = apps.test2.resources.apps.v1.Deployment.test2-chart;
-        assertion = depl: let
-          container = head depl.spec.template.spec.containers;
-        in
-          depl.kind
-          == "Deployment"
-          && depl.metadata.name == "test2-chart"
-          && depl.metadata.namespace == "test2"
-          && depl.metadata.labels
-          == {
-            "app.kubernetes.io/instance" = "test2";
-            "app.kubernetes.io/managed-by" = "Helm";
-            "app.kubernetes.io/name" = "chart";
-          }
-          && depl.spec.replicas == 3
-          && container.name == "chart"
-          && container.image == "nginx:1.0.0";
+        expression =
+          findFirst
+          (x: x.kind == "Deployment" && x.metadata.name == "test2-chart")
+          null
+          apps.test2.objects;
+        expected = {
+          apiVersion = "apps/v1";
+          kind = "Deployment";
+          metadata = {
+            name = "test2-chart";
+            namespace = "test2";
+            labels = {
+              "app.kubernetes.io/instance" = "test2";
+              "app.kubernetes.io/managed-by" = "Helm";
+              "app.kubernetes.io/name" = "chart";
+            };
+          };
+          spec = {
+            replicas = 3;
+            selector.matchLabels = {
+              "app.kubernetes.io/instance" = "test2";
+              "app.kubernetes.io/name" = "chart";
+            };
+            template = {
+              metadata.labels = {
+                "app.kubernetes.io/instance" = "test2";
+                "app.kubernetes.io/managed-by" = "Helm";
+                "app.kubernetes.io/name" = "chart";
+                "app.kubernetes.io/version" = "1.16.0";
+                "helm.sh/chart" = "chart-0.1.0";
+              };
+              spec.containers = [
+                {
+                  name = "chart";
+                  image = "nginx:1.0.0";
+                  ports = [
+                    {
+                      name = "http";
+                      containerPort = 8080;
+                      protocol = "TCP";
+                    }
+                  ];
+                }
+              ];
+            };
+          };
+        };
       }
 
       {
         description = "Helm chart with values override should render service correctly.";
-        expression = apps.test2.resources.core.v1.Service.test2-chart;
-        assertion = svc: let
-          port = head svc.spec.ports;
-        in
-          svc.kind
-          == "Service"
-          && svc.metadata.name == "test2-chart"
-          && svc.metadata.namespace == "test2"
-          && svc.metadata.labels
-          == {
-            "app.kubernetes.io/instance" = "test2";
-            "app.kubernetes.io/managed-by" = "Helm";
-            "app.kubernetes.io/name" = "chart";
-          }
-          && svc.spec.type == "ClusterIP"
-          && port.port == 8080
-          && port.targetPort == "http"
-          && port.protocol == "TCP"
-          && port.name == "http";
+        expression =
+          findFirst
+          (x: x.kind == "Service" && x.metadata.name == "test2-chart")
+          null
+          apps.test2.objects;
+        expected = {
+          apiVersion = "v1";
+          kind = "Service";
+          metadata = {
+            name = "test2-chart";
+            namespace = "test2";
+            labels = {
+              "app.kubernetes.io/instance" = "test2";
+              "app.kubernetes.io/managed-by" = "Helm";
+              "app.kubernetes.io/name" = "chart";
+            };
+          };
+          spec = {
+            type = "ClusterIP";
+            ports = [
+              {
+                port = 8080;
+                targetPort = "http";
+                protocol = "TCP";
+                name = "http";
+              }
+            ];
+            selector = {
+              "app.kubernetes.io/instance" = "test2";
+              "app.kubernetes.io/name" = "chart";
+            };
+          };
+        };
       }
 
       {
         description = "Helm chart with unsupported resource types should still output the resource.";
-        expression = apps.test2.objects;
-        assertion = any (
-          obj:
-            obj.apiVersion
-            == "cert-manager.io/v1"
-            && obj.kind == "Issuer"
-            && obj.metadata.name == "ca-issuer"
-            && obj.metadata.labels
-            == {
+        expression =
+          lib.findFirst
+          (x: x.kind == "Issuer" && x.metadata.name == "ca-issuer")
+          null
+          apps.test2.objects;
+        expected = {
+          apiVersion = "cert-manager.io/v1";
+          kind = "Issuer";
+          metadata = {
+            name = "ca-issuer";
+            labels = {
               "app.kubernetes.io/instance" = "test2";
               "app.kubernetes.io/managed-by" = "Helm";
               "app.kubernetes.io/name" = "chart";
-            }
-            && obj.spec.ca.secretName == "ca-key-pair"
-        );
+            };
+          };
+          spec.ca.secretName = "ca-key-pair";
+        };
       }
     ];
   };
