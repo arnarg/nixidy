@@ -23,6 +23,17 @@ in {
         path = "overlay";
       };
     };
+
+    # Create an application with a kustomization and
+    # a resource override
+    test3 = {
+      kustomize.applications.test3.kustomization = {
+        src = ./manifests;
+        path = "base";
+      };
+
+      resources.deployments.deployment.spec.template.spec.containers.nginx.image = lib.mkForce "nginx:2.0.0";
+    };
   };
 
   test = with lib; {
@@ -191,6 +202,46 @@ in {
             labels."app.kubernetes.io/name" = "ca-issuer";
           };
           spec.ca.secretName = "ca-key-pair";
+        };
+      }
+
+      {
+        description = "Overridden deployment in nixidy should override deployment rendered by kustomize.";
+
+        expression =
+          findFirst
+          (x: x.kind == "Deployment" && x.metadata.name == "deployment")
+          null
+          apps.test3.objects;
+
+        expected = {
+          apiVersion = "apps/v1";
+          kind = "Deployment";
+          metadata = {
+            name = "deployment";
+            namespace = "test3";
+            labels."app.kubernetes.io/name" = "deployment";
+          };
+          spec = {
+            replicas = 1;
+            selector.matchLabels."app.kubernetes.io/name" = "deployment";
+            template = {
+              metadata.labels."app.kubernetes.io/name" = "deployment";
+              spec.containers = [
+                {
+                  name = "nginx";
+                  image = "nginx:2.0.0";
+                  ports = [
+                    {
+                      name = "http";
+                      containerPort = 80;
+                      protocol = "TCP";
+                    }
+                  ];
+                }
+              ];
+            };
+          };
         };
       }
     ];

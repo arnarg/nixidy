@@ -28,6 +28,16 @@ in {
         "helm.sh/chart"
       ]);
     };
+
+    # Create an application with a helm chart
+    # and resource override
+    test3 = {
+      helm.releases.test3 = {
+        chart = ./chart;
+      };
+
+      resources.deployments.test3-chart.spec.template.spec.containers.chart.image = lib.mkForce "nginx:2.0.0";
+    };
   };
 
   test = with lib; {
@@ -233,6 +243,59 @@ in {
             };
           };
           spec.ca.secretName = "ca-key-pair";
+        };
+      }
+
+      {
+        description = "Resource override in nixidy should override resource rendered by helm.";
+        expression =
+          findFirst
+          (x: x.kind == "Deployment" && x.metadata.name == "test3-chart")
+          null
+          apps.test3.objects;
+        expected = {
+          apiVersion = "apps/v1";
+          kind = "Deployment";
+          metadata = {
+            name = "test3-chart";
+            namespace = "test3";
+            labels = {
+              "app.kubernetes.io/instance" = "test3";
+              "app.kubernetes.io/managed-by" = "Helm";
+              "app.kubernetes.io/name" = "chart";
+              "app.kubernetes.io/version" = "1.16.0";
+              "helm.sh/chart" = "chart-0.1.0";
+            };
+          };
+          spec = {
+            replicas = 1;
+            selector.matchLabels = {
+              "app.kubernetes.io/instance" = "test3";
+              "app.kubernetes.io/name" = "chart";
+            };
+            template = {
+              metadata.labels = {
+                "app.kubernetes.io/instance" = "test3";
+                "app.kubernetes.io/managed-by" = "Helm";
+                "app.kubernetes.io/name" = "chart";
+                "app.kubernetes.io/version" = "1.16.0";
+                "helm.sh/chart" = "chart-0.1.0";
+              };
+              spec.containers = [
+                {
+                  name = "chart";
+                  image = "nginx:2.0.0";
+                  ports = [
+                    {
+                      name = "http";
+                      containerPort = 80;
+                      protocol = "TCP";
+                    }
+                  ];
+                }
+              ];
+            };
+          };
         };
       }
     ];

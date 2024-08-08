@@ -40,6 +40,32 @@ in {
             secretName: ca-key-pair
       ''
     ];
+
+    # Create an application with yamls and a
+    # resource override
+    test2 = {
+      yamls = [
+        ''
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: my-svc
+            labels:
+              name: my-svc
+          spec:
+            type: ClusterIP
+            ports:
+              - port: 80
+                targetPort: http
+                protocol: TCP
+                name: http
+            selector:
+              name: my-svc
+        ''
+      ];
+
+      resources.services.my-svc.spec.ports.http.port = lib.mkForce 8080;
+    };
   };
 
   test = with lib; {
@@ -92,6 +118,38 @@ in {
           kind = "Issuer";
           metadata.name = "ca-issuer";
           spec.ca.secretName = "ca-key-pair";
+        };
+      }
+
+      {
+        description = "Service should be overridden correctly.";
+
+        expression =
+          findFirst
+          (x: x.kind == "Service" && x.metadata.name == "my-svc")
+          null
+          apps.test2.objects;
+
+        expected = {
+          apiVersion = "v1";
+          kind = "Service";
+          metadata = {
+            name = "my-svc";
+            namespace = "test2";
+            labels.name = "my-svc";
+          };
+          spec = {
+            type = "ClusterIP";
+            ports = [
+              {
+                port = 8080;
+                targetPort = "http";
+                protocol = "TCP";
+                name = "http";
+              }
+            ];
+            selector.name = "my-svc";
+          };
         };
       }
     ];
