@@ -12,7 +12,9 @@
       ./helm/with-values.nix
       ./helm/transformer.nix
       ./helm/resource-override.nix
-      ./kustomize
+      ./kustomize/base.nix
+      ./kustomize/overlay.nix
+      ./kustomize/resource-override.nix
     ];
   };
 }
