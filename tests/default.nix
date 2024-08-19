@@ -8,7 +8,10 @@
       ./compare-options.nix
       ./create-namespace.nix
       ./yamls.nix
-      ./helm
+      ./helm/no-values.nix
+      ./helm/with-values.nix
+      ./helm/transformer.nix
+      ./helm/resource-override.nix
       ./kustomize
     ];
   };
