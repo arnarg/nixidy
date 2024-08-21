@@ -608,8 +608,8 @@
 
 
 <h1 id="using-nixhelm">Using nixhelm<a class="headerlink" href="#using-nixhelm" title="Permanent link">#</a></h1>
-<p><a href="https://github.com/farcaller/nixhelm">nixhelm</a> is a collection of Helm Charts that can be used with <a href="https://github.com/farcaller/nixhelm">nix-kube-generators</a> and therefore also nixidy. The charts are automatically updated to the most recent version by CI regularly.</p>
-<p>To use with nixidy the nixhelm derivation attribute set can be passed to nixidy's <code>mkEnv</code> builder like so.</p>
+<p><a href="https://github.com/farcaller/nixhelm">nixhelm</a> is a collection of Helm Charts that can be used with <a href="https://github.com/farcaller/nixhelm">nix-kube-generators</a> and as a result also nixidy. The charts are automatically updated to the most recent version by CI regularly.</p>
+<p>To use with nixidy, pass the nixhelm derivation attribute set to nixidy's <code>mkEnv</code> builder like so.</p>
 <div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
   <span class="ss">description =</span> <span class="s2">&quot;My ArgoCD configuration with nixidy.&quot;</span><span class="p">;</span>
 
@@ -671,7 +671,7 @@
 <span class="p">}</span>
 </code></pre></div>
 <h2 id="provide-your-own-charts-not-available-in-nixhelm">Provide your own charts not available in nixhelm<a class="headerlink" href="#provide-your-own-charts-not-available-in-nixhelm" title="Permanent link">#</a></h2>
-<p>Not all charts are available in nixhelm and in such cases you can contribute an initial version to them or setup a special folder structure locally to merge with the <code>charts</code> argument passed to modules.</p>
+<p>Not all charts are available in nixhelm and in such cases you can contribute an initial version to them or setup a specific folder structure locally to merge with the <code>charts</code> argument passed to modules.</p>
 <p>With the nixidy option <code>nixidy.chartsDir</code> that folder will be walked recursively and look for <code>default.nix</code> files that will build up the charts attribute set.</p>
 <div class="highlight"><span class="filename">./charts/kubernetes-csi/csi-driver-nfs/default.nix</span><pre><span></span><code><span class="p">{</span>
   <span class="ss">repo =</span> <span class="s2">&quot;https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts&quot;</span><span class="p">;</span>
