@@ -1,0 +1,11 @@
+[Nn]ixidy
+[Nn]ixhelm
+[Kk]ubernetes
+[Kk]ustomiz(?:e|ing|ation)
+[Kk]ubenix
+CRD
+JSON
+camelCase
+[Aa]pplication
+arnarg
+[Nn]amespace

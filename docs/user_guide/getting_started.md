@@ -68,7 +68,7 @@ The flake declares a single nixidy environment called `dev`. It includes a singl
 }
 ```
 
-Now runnig `nix run .#nixidy -- info .#dev` (or simply `nixidy info .#dev` if run in nix shell using `nix develop`) you can get the same info we just declared above. This verifies that things are set up correctly so far.
+Now running `nix run .#nixidy -- info .#dev` (or `nixidy info .#dev` if run in nix shell using `nix develop`) you can get the same info we just declared above. This verifies that things are set up correctly so far.
 
 ```shell
 >> nix run .#nixidy -- info .#dev

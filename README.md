@@ -9,7 +9,7 @@ Kubernetes GitOps with nix and Argo CD.
 Manage an entire Kubernetes cluster like it's NixOS, then have CI generate plain YAML manifests for ArgoCD.
 
 ```nix
-{...}: {
+{
   applications.demo = {
     namespace = "demo";
 
@@ -99,7 +99,7 @@ Take a look at the [getting started guide](https://arnarg.github.io/nixidy/user_
 
 ## Examples
 
-- [arnarg's cluster config](https://github.com/arnarg/cluster)
+- [arnarg's cluster configuration](https://github.com/arnarg/cluster)
 
 ## Why?
 
@@ -117,7 +117,7 @@ Having dealt with these design decisions and pains that come with the different 
 
 I have been a user and a fan of NixOS for many years and how its module system works to recursively merge all configuration options that are set in many different modules.
 
-I have _not_ been a fan of helm's string templating of a whitespace-sensitive configuration language or kustomize's repitition (defining a `kustomization.yaml` file for each layer statically listing files to include, some are json patches some are not...).
+I have _not_ been a fan of helm's string templating of a whitespace-sensitive configuration language or kustomize's repetition (defining a `kustomization.yaml` file for each layer statically listing files to include, some are JSON patches some are not...).
 
 Therefore I made nixidy as an experiment to see if I can make something better (at least for myself). As all Argo CD applications are defined in a single configuration it can reference configuration options across applications and automatically generate an [App of Apps](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern) bootstrapping all of them.
 
@@ -125,4 +125,4 @@ Therefore I made nixidy as an experiment to see if I can make something better (
 
 [farcaller/nix-kube-generators](https://github.com/farcaller/nix-kube-generators) is used internally to pull and render Helm charts and some functions are re-exposed in the lib passed to modules in nixidy.
 
-[hall/kubenix](https://github.com/hall/kubenix) project has code generation of nix module options for every standard kubernetes resource. Instead of doing this work in nixidy I simply import their generated resource options. The resource option generation scripts in nixidy are also a slight modification of kubenix's. Without their work this wouldn't be possible in nixidy.
+[hall/kubenix](https://github.com/hall/kubenix) project has code generation of nix module options for every standard kubernetes resource. Instead of doing this work in nixidy I import their generated resource options. The resource option generation scripts in nixidy are also a slight modification of kubenix's. Without their work this wouldn't be possible in nixidy.

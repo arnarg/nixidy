@@ -1,6 +1,6 @@
 # Typed Resource Options
 
-[Kubenix](https://github.com/hall/kubenix/) has done a great work with generating nix options definitions from official json schemas and nixidy builds on top of this.
+[Kubenix](https://github.com/hall/kubenix/) has done a great work with generating nix options definitions from official JSON schemas and nixidy builds on top of this.
 
 All core Kubernetes resources are imported by default in nixidy along with Argo CD's `Application` and `AppProject`. Every resource can be defined under `applications.<applicationName>.resources.<group>.<version>.<kind>` but is also offered as an alias `applications.<applicationName>.resources.<attrName>` where `<attrName>` is the plural form of the kind in camelCase.
 

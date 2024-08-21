@@ -1,8 +1,8 @@
 # Using nixhelm
 
-[nixhelm](https://github.com/farcaller/nixhelm) is a collection of Helm Charts that can be used with [nix-kube-generators](https://github.com/farcaller/nixhelm) and therefore also nixidy. The charts are automatically updated to the most recent version by CI regularly.
+[nixhelm](https://github.com/farcaller/nixhelm) is a collection of Helm Charts that can be used with [nix-kube-generators](https://github.com/farcaller/nixhelm) and as a result also nixidy. The charts are automatically updated to the most recent version by CI regularly.
 
-To use with nixidy the nixhelm derivation attribute set can be passed to nixidy's `mkEnv` builder like so.
+To use with nixidy, pass the nixhelm derivation attribute set to nixidy's `mkEnv` builder like so.
 
 ```nix title="flake.nix"
 {
@@ -71,7 +71,7 @@ And then the argument `charts` will be passed to every module in nixidy.
 
 ## Provide your own charts not available in nixhelm
 
-Not all charts are available in nixhelm and in such cases you can contribute an initial version to them or setup a special folder structure locally to merge with the `charts` argument passed to modules.
+Not all charts are available in nixhelm and in such cases you can contribute an initial version to them or setup a specific folder structure locally to merge with the `charts` argument passed to modules.
 
 With the nixidy option `nixidy.chartsDir` that folder will be walked recursively and look for `default.nix` files that will build up the charts attribute set.
 
