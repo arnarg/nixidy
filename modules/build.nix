@@ -43,6 +43,22 @@
           '')
           resources));
     };
+
+  groupedApps = with lib; groupBy (app: app.value.promotionGroup) (attrsToList config.applications);
+
+  groupOpts = {name, ...}: {
+    options = with lib; {
+      apps = mkOption {
+        type = types.listOf types.str;
+        default = [];
+        internal = true;
+      };
+      environmentPackage = mkOption {
+        type = types.package;
+        internal = true;
+      };
+    };
+  };
 in {
   options = with lib; {
     build = {
@@ -61,11 +77,42 @@ in {
         internal = true;
         description = "The package containing all the applications and an activation script.";
       };
+      groups = mkOption {
+        type = with types; attrsOf (submodule groupOpts);
+        default = {};
+        internal = true;
+      };
     };
   };
 
   config = {
     build = {
+      groups =
+        lib.mapAttrs (
+          group: apps: let
+            joined = pkgs.linkFarm "nixidy-apps-joined-${group}-${envName}" (map (app: {
+                name = app.value.output.path;
+                path = mkApp app.value;
+              })
+              apps);
+          in {
+            apps = map (app: app.name) apps;
+            environmentPackage = pkgs.symlinkJoin {
+              name = "nixidy-environment-${group}-${envName}";
+              paths = [
+                joined
+                (pkgs.writeTextDir ".nixidy/groups/${group}.json" (builtins.toJSON ({
+                    apps = map (app: app.name) apps;
+                  }
+                  // (lib.optionalAttrs (config.nixidy.build.revision != null) {
+                    revision = config.nixidy.build.revision;
+                  }))))
+              ];
+            };
+          }
+        )
+        groupedApps;
+
       extrasPackage = pkgs.stdenv.mkDerivation {
         name = "nixidy-extras-${envName}";
 
@@ -84,20 +131,14 @@ in {
             config.nixidy.extraFiles));
       };
 
-      environmentPackage = let
-        joined = pkgs.linkFarm "nixidy-apps-joined-${envName}" (lib.mapAttrsToList (_: app: {
-            name = app.output.path;
-            path = mkApp app;
-          })
-          config.applications);
-      in
-        pkgs.symlinkJoin {
-          name = "nixidy-environment-${envName}";
-          paths = [
-            joined
+      environmentPackage = pkgs.symlinkJoin {
+        name = "nixidy-environment-${envName}";
+        paths =
+          [
             config.build.extrasPackage
-          ];
-        };
+          ]
+          ++ (lib.mapAttrsToList (_: group: group.environmentPackage) config.build.groups);
+      };
 
       activationPackage = pkgs.stdenv.mkDerivation {
         name = "nixidy-activation-environment-${envName}";

@@ -29,8 +29,10 @@
       }
       // extraSpecialArgs;
   };
-in {
-  inherit (module) config;
-  inherit (module.config.build) environmentPackage activationPackage;
-  meta = {inherit (module.config.nixidy.target) repository branch;};
-}
+in
+  {
+    inherit (module) config;
+    inherit (module.config.build) environmentPackage activationPackage;
+    meta = {inherit (module.config.nixidy.target) repository branch;};
+  }
+  // module.config.build.groups

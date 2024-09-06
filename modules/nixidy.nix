@@ -227,9 +227,5 @@ in {
 
     _module.args.charts = config.nixidy.charts;
     nixidy.charts = lib.optionalAttrs (cfg.chartsDir != null) (mkChartAttrs cfg.chartsDir);
-
-    nixidy.extraFiles = lib.optionalAttrs (cfg.build.revision != null) {
-      ".revision".text = cfg.build.revision;
-    };
   };
 }

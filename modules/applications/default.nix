@@ -94,6 +94,11 @@ in {
       default = false;
       description = "Whether or not a namespace resource should be automatically created.";
     };
+    promotionGroup = mkOption {
+      type = types.str;
+      default = "default";
+      description = "The promotion group the application should be a part of.";
+    };
     project = mkOption {
       type = types.str;
       default = "default";
