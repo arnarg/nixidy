@@ -56,7 +56,7 @@ def generate_jsonschema(files):
                                                'kind': kind,
                                                'name': plural,
                                                'attrName': gen_attr_name(kind, plural),
-                                               'description': ver['schema']['openAPIV3Schema']['description'],
+                                               'description': ver['schema']['openAPIV3Schema'].get('description', ''),
                                                'namespaced': namespaced,
                                            })
 
@@ -64,9 +64,16 @@ def generate_jsonschema(files):
         if not root:
             if 'type' in definition and definition['type'] == 'object':
                 if not 'properties' in definition:
-                    # The nix generator doesn't support anyOf
-                    if 'additionalProperties' in definition and 'anyOf' in definition['additionalProperties']:
-                        definition['additionalProperties'] = definition['additionalProperties']['anyOf'][0]
+                    if 'additionalProperties' in definition:
+                        # The nix generator doesn't support anyOf
+                        if 'anyOf' in definition['additionalProperties']:
+                            definition['additionalProperties'] = definition['additionalProperties']['anyOf'][0]
+
+                        # If additionalProperties only contains 'x-kubernetes-preserve-unknown-fields'
+                        # we can just drop the `additionalProperties` entirely and the generator
+                        # will generate `types.attrs` (`types.attrsOf types.any`).
+                        if 'type' not in definition['additionalProperties'] and definition['additionalProperties'].get('x-kubernetes-preserve-unknown-fields', False) == True:
+                            del definition['additionalProperties']
 
                     return definition
                 else:
@@ -78,6 +85,12 @@ def generate_jsonschema(files):
 
             elif 'type' in definition and definition['type'] == 'array':
                 definition['items'] = flatten_ref(definition['items'], key, False)
+                return definition
+
+            # If a definition contains `x-kubernetes-preserve-unknown-fields` without
+            # any `type` set, we assume the `type` is `object`.
+            elif 'type' not in definition and definition.get('x-kubernetes-preserve-unknown-fields', False) == True:
+                definition['type'] = 'object'
                 return definition
 
             # The nix generator doesn't support anyOf
