@@ -8,6 +8,7 @@
       ./compare-options.nix
       ./create-namespace.nix
       ./yamls.nix
+      ./override-name.nix
       ./helm/no-values.nix
       ./helm/with-values.nix
       ./helm/transformer.nix

@@ -189,7 +189,7 @@ in {
         lib.attrsets.mapAttrs (
           n: app: {
             metadata = {
-              name = n;
+              inherit (app) name;
               annotations =
                 if app.annotations != {}
                 then app.annotations

@@ -86,7 +86,7 @@ in {
     };
     namespace = mkOption {
       type = types.str;
-      default = name;
+      default = config.name;
       description = "Namespace to deploy application into (defaults to name).";
     };
     createNamespace = mkOption {
@@ -255,7 +255,7 @@ in {
     output = {
       path = mkOption {
         type = types.str;
-        default = name;
+        default = config.name;
         description = ''
           Name of the folder that contains all rendered resources for the application. Relative to the root of the repository.
         '';
