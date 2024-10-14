@@ -23,11 +23,12 @@
         }
       ];
     specialArgs =
-      {
-        inherit pkgs;
-        lib = extendedLib;
-      }
-      // extraSpecialArgs;
+      lib.attrsets.recursiveUpdate
+        {
+          inherit pkgs;
+          lib = extendedLib;
+        }
+        extraSpecialArgs;
   };
 in {
   inherit (module) config;
