@@ -5,6 +5,7 @@
   kubenix,
   lib ? pkgs.lib,
   extraSpecialArgs ? {},
+  libOverlay ? null,
 }: let
   extendedLib = import ../lib {inherit pkgs kubelib;};
 
@@ -25,7 +26,10 @@
     specialArgs =
       {
         inherit pkgs;
-        lib = extendedLib;
+        lib =
+          if builtins.isFunction libOverlay
+          then extendedLib.extend libOverlay
+          else extendedLib;
       }
       // extraSpecialArgs;
   };

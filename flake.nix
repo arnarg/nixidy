@@ -27,9 +27,10 @@
           modules ? [],
           extraSpecialArgs ? {},
           charts ? {},
+          libOverlay ? null,
         }:
           import ./modules {
-            inherit pkgs lib extraSpecialArgs kubenix;
+            inherit pkgs lib extraSpecialArgs kubenix libOverlay;
             kubelib = nix-kube-generators;
             modules =
               modules
@@ -47,11 +48,12 @@
           extraSpecialArgs ? {},
           envs ? {},
           charts ? {},
+          libOverlay ? null,
         }:
           lib.mapAttrs (
             env: conf:
               mkEnv {
-                inherit pkgs lib charts;
+                inherit pkgs lib charts libOverlay;
                 extraSpecialArgs = extraSpecialArgs // (conf.extraSpecialArgs or {});
                 modules =
                   [{nixidy.target.rootPath = lib.mkDefault "./manifests/${env}";}]
