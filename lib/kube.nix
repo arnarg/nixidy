@@ -1,10 +1,12 @@
 {
   lib,
-  pkgs,
+  klib,
   ...
 }: {
   /*
   Parses a YAML document string into a list of attribute sets.
+
+  > This is re-exported directly from [farcaller/nix-kube-generators](https://github.com/farcaller/nix-kube-generators).
 
   Type:
     fromYAML :: String -> [AttrSet]
@@ -37,18 +39,7 @@
   fromYAML =
     # String with a yaml document.
     yaml:
-      lib.pipe yaml [
-        (yaml: (pkgs.stdenv.mkDerivation {
-          inherit yaml;
-          passAsFile = "yaml";
-          name = "fromYAML";
-          phases = ["buildPhase"];
-          buildPhase = "${pkgs.yq}/bin/yq -Ms . $yamlPath > $out";
-        }))
-        builtins.readFile
-        builtins.fromJSON
-        (builtins.filter (v: v != null))
-      ];
+      klib.fromYAML yaml;
 
   /*
   Parse an octal representation of a number and convert into a decimal number. This can be useful when having to represent permission bits in a resource as nix has no support for representing octal numbers.
