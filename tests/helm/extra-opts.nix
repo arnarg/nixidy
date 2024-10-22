@@ -6,14 +6,15 @@
   apps = config.applications;
 in {
   # Create an application with a helm chart
-  # without setting any values
+  # with `extraOpts` set
   applications.test1.helm.releases.test1 = {
     chart = ./chart;
+    extraOpts = ["--no-hooks"];
   };
 
   test = with lib; {
-    name = "helm chart with default values";
-    description = "Create an application with Helm chart without setting values.";
+    name = "helm chart with extra opts";
+    description = "Create an application with Helm chart and adding extra opts.";
     assertions = [
       {
         description = "Deployment should be rendered correctly.";
@@ -112,7 +113,7 @@ in {
       }
 
       {
-        description = "Job hook should be rendered correctly.";
+        description = "Job hook should not be rendered at all.";
 
         expression =
           findFirst
@@ -120,46 +121,7 @@ in {
           null
           apps.test1.objects;
 
-        expected = {
-          apiVersion = "batch/v1";
-          kind = "Job";
-          metadata = {
-            name = "job-hook";
-            namespace = "test1";
-            annotations = {
-              "helm.sh/hook" = "post-install,post-upgrade";
-            };
-            labels = {
-              "app.kubernetes.io/instance" = "test1";
-              "app.kubernetes.io/managed-by" = "Helm";
-              "app.kubernetes.io/name" = "chart";
-              "app.kubernetes.io/version" = "1.16.0";
-              "helm.sh/chart" = "chart-0.1.0";
-            };
-          };
-          spec = {
-            template = {
-              metadata.labels = {
-                "app.kubernetes.io/instance" = "test1";
-                "app.kubernetes.io/managed-by" = "Helm";
-                "app.kubernetes.io/name" = "chart";
-                "app.kubernetes.io/version" = "1.16.0";
-                "helm.sh/chart" = "chart-0.1.0";
-              };
-              spec.containers = [
-                {
-                  name = "chart-job-hook";
-                  image = "busybox";
-                  command = [
-                    "sh"
-                    "-c"
-                    "echo The hook Job is running"
-                  ];
-                }
-              ];
-            };
-          };
-        };
+        expected = null;
       }
     ];
   };

@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-hook
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "chart.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-job-hook
+          image: busybox
+          command:
+            - 'sh'
+            - '-c'
+            - 'echo The hook Job is running'

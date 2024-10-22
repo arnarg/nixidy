@@ -49,6 +49,14 @@ in {
                   Whether or not to include CRDs in the helm release.
                 '';
               };
+              extraOpts = mkOption {
+                type = with types; listOf str;
+                default = [];
+                example = ["--no-hooks"];
+                description = ''
+                  Extra options to pass to `helm template` that is run when rendering the helm chart.
+                '';
+              };
               transformer = mkOption {
                 type = with types; functionTo (listOf (attrsOf anything));
                 default = nixidyDefaults.helm.transformer;
@@ -70,7 +78,7 @@ in {
 
             config = {
               objects = with lib;
-                pipe {inherit (config) name namespace chart values includeCRDs;} [
+                pipe {inherit (config) name namespace chart values includeCRDs extraOpts;} [
                   helm.buildHelmChart
                   builtins.readFile
                   kube.fromYAML
