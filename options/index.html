@@ -595,6 +595,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#applicationsnamehelmreleasesnameextraopts" class="md-nav__link">
+    applications.&lt;name&gt;.helm.releases.&lt;name&gt;.extraOpts
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#applicationsnamehelmreleasesnameincludecrds" class="md-nav__link">
     applications.&lt;name&gt;.helm.releases.&lt;name&gt;.includeCRDs
   </a>
@@ -996,6 +1003,13 @@
         <li class="md-nav__item">
   <a href="#applicationsnamehelmreleasesnamechart" class="md-nav__link">
     applications.&lt;name&gt;.helm.releases.&lt;name&gt;.chart
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#applicationsnamehelmreleasesnameextraopts" class="md-nav__link">
+    applications.&lt;name&gt;.helm.releases.&lt;name&gt;.extraOpts
   </a>
   
 </li>
@@ -1458,6 +1472,21 @@ attribute set of (submodule)</p>
 <p>Derivation containing the helm chart for the release.</p>
 <p><strong><em>Type:</em></strong>
 package or path</p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/applications/helm.nix">&lt;nixidy/modules/applications/helm.nix&gt;</a></li>
+</ul>
+<h2 id="applicationsnamehelmreleasesnameextraopts">applications.&lt;name&gt;.helm.releases.&lt;name&gt;.extraOpts<a class="headerlink" href="#applicationsnamehelmreleasesnameextraopts" title="Permanent link">#</a></h2>
+<p>Extra options to pass to <code>helm template</code> that is run when rendering the helm chart.</p>
+<p><strong><em>Type:</em></strong>
+list of string</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="p">[</span> <span class="p">]</span></code></p>
+<p><strong><em>Example:</em></strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">[</span>
+  <span class="s2">&quot;--no-hooks&quot;</span>
+<span class="p">]</span>
+</code></pre></div>
 <p><strong><em>Declared by:</em></strong></p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/applications/helm.nix">&lt;nixidy/modules/applications/helm.nix&gt;</a></li>
