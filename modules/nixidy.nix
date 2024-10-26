@@ -5,8 +5,6 @@
 }: let
   cfg = config.nixidy;
 
-  apps = builtins.removeAttrs config.applications [cfg.appOfApps.name];
-
   extraFilesOpts = with lib;
     {name, ...}: {
       options = {
@@ -167,6 +165,11 @@ in {
         default = "argocd";
         description = "Destination namespace for generated Argo CD Applications in the app of apps applications.";
       };
+      project = mkOption {
+        type = types.str;
+        default = "default";
+        description = "The project of the generated bootstrap app for appOfApps";
+      };
     };
 
     charts = mkOption {
@@ -179,57 +182,116 @@ in {
       default = null;
       description = "Path to a directory containing sub-directory structure that can be used to build a charts attrset. This will be passed as `charts` to every module.";
     };
+
+    publicApps = mkOption {
+      type = with types; listOf str;
+      default = [];
+      internal = true;
+      description = ''
+        List of the names of all applications that do not contain the internal `__` prefix.
+      '';
+    };
   };
 
   config = {
     applications.${cfg.appOfApps.name} = {
       inherit (cfg.appOfApps) namespace;
 
-      resources.applications =
-        lib.attrsets.mapAttrs (
-          n: app: {
-            metadata = {
-              inherit (app) name;
-              annotations =
-                if app.annotations != {}
-                then app.annotations
-                else null;
-            };
-            spec = {
-              inherit (app) project;
+      resources.applications = let
+        appsWithoutAppsOfApps = lib.filter (n: n != cfg.appOfApps.name) cfg.publicApps;
+      in
+        builtins.listToAttrs
+        (map (
+            name: let
+              app = config.applications.${name};
+            in {
+              inherit name;
 
-              source = {
-                repoURL = cfg.target.repository;
-                targetRevision = cfg.target.branch;
-                path = lib.path.subpath.join [
-                  cfg.target.rootPath
-                  app.output.path
-                ];
-              };
-              destination = {
-                inherit (app) namespace;
-                inherit (app.destination) server;
-              };
-              syncPolicy =
-                (lib.optionalAttrs app.syncPolicy.autoSync.enabled {
-                  automated = {
-                    inherit (app.syncPolicy.autoSync) prune selfHeal;
+              value = {
+                metadata = {
+                  inherit (app) name;
+                  annotations =
+                    if app.annotations != {}
+                    then app.annotations
+                    else null;
+                };
+                spec = {
+                  inherit (app) project;
+
+                  source = {
+                    repoURL = cfg.target.repository;
+                    targetRevision = cfg.target.branch;
+                    path = lib.path.subpath.join [
+                      cfg.target.rootPath
+                      app.output.path
+                    ];
                   };
-                })
-                // (lib.optionalAttrs (lib.length app.syncPolicy.finalSyncOpts > 0) {
-                  syncOptions = app.syncPolicy.finalSyncOpts;
-                });
-            };
-          }
-        )
-        apps;
+                  destination = {
+                    inherit (app) namespace;
+                    inherit (app.destination) server;
+                  };
+                  syncPolicy =
+                    (lib.optionalAttrs app.syncPolicy.autoSync.enabled {
+                      automated = {
+                        inherit (app.syncPolicy.autoSync) prune selfHeal;
+                      };
+                    })
+                    // (lib.optionalAttrs (lib.length app.syncPolicy.finalSyncOpts > 0) {
+                      syncOptions = app.syncPolicy.finalSyncOpts;
+                    });
+                };
+              };
+            }
+          )
+          appsWithoutAppsOfApps);
+    };
+
+    # This application's resources are printed on
+    # stdout when `nixidy bootstrap .#<env>` is run
+    applications.__bootstrap = let
+      app = config.applications.${cfg.appOfApps.name};
+    in {
+      inherit (cfg.appOfApps) namespace;
+
+      resources.applications.${cfg.appOfApps.name} = {
+        metadata.namespace = cfg.appOfApps.namespace;
+        spec = {
+          inherit (cfg.appOfApps) project;
+
+          source = {
+            repoURL = cfg.target.repository;
+            targetRevision = cfg.target.branch;
+            path = lib.path.subpath.join [
+              cfg.target.rootPath
+              app.output.path
+            ];
+          };
+          destination = {
+            inherit (app) namespace;
+            inherit (app.destination) server;
+          };
+          # Maybe this should be configurable but
+          # generally I think autoSync would be
+          # desirable on the initial appOfApps.
+          syncPolicy.automated = {
+            prune = true;
+            selfHeal = true;
+          };
+        };
+      };
     };
 
     _module.args.charts = config.nixidy.charts;
-    nixidy.charts = lib.optionalAttrs (cfg.chartsDir != null) (mkChartAttrs cfg.chartsDir);
+    nixidy = {
+      charts = lib.optionalAttrs (cfg.chartsDir != null) (mkChartAttrs cfg.chartsDir);
 
-    nixidy.extraFiles = lib.optionalAttrs (cfg.build.revision != null) {
-      ".revision".text = cfg.build.revision;
+      extraFiles = lib.optionalAttrs (cfg.build.revision != null) {
+        ".revision".text = cfg.build.revision;
+      };
+
+      publicApps =
+        builtins.filter (n: !(lib.hasPrefix "__" n))
+        (builtins.attrNames config.applications);
     };
   };
 }
