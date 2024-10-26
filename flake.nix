@@ -177,6 +177,18 @@
           type = "app";
           program = self.moduleTests.${system}.reportScript.outPath;
         };
+
+        # Run a docs server
+        docsServe = {
+          type = "app";
+          program =
+            (
+              pkgs.writeShellScript "serve-docs" ''
+                ${pkgs.python3}/bin/python -m http.server -d ${self.packages.${system}.docs.html} 8080
+              ''
+            )
+            .outPath;
+        };
       };
     }));
 }
