@@ -9,6 +9,7 @@
       ./create-namespace.nix
       ./yamls.nix
       ./override-name.nix
+      ./internal-apps.nix
       ./helm/no-values.nix
       ./helm/with-values.nix
       ./helm/transformer.nix

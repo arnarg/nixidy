@@ -46,6 +46,11 @@
 in {
   options = with lib; {
     build = {
+      bootstrapPackage = mkOption {
+        type = types.package;
+        internal = true;
+        description = "The package containing the bootstrap appOfApps application manifest.";
+      };
       extrasPackage = mkOption {
         type = types.package;
         internal = true;
@@ -66,6 +71,8 @@ in {
 
   config = {
     build = {
+      bootstrapPackage = mkApp config.applications.__bootstrap;
+
       extrasPackage = pkgs.stdenv.mkDerivation {
         name = "nixidy-extras-${envName}";
 
@@ -85,11 +92,15 @@ in {
       };
 
       environmentPackage = let
-        joined = pkgs.linkFarm "nixidy-apps-joined-${envName}" (lib.mapAttrsToList (_: app: {
+        joined = pkgs.linkFarm "nixidy-apps-joined-${envName}" (
+          map (name: let
+            app = config.applications.${name};
+          in {
             name = app.output.path;
             path = mkApp app;
           })
-          config.applications);
+          config.nixidy.publicApps
+        );
       in
         pkgs.symlinkJoin {
           name = "nixidy-environment-${envName}";

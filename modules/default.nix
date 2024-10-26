@@ -35,6 +35,6 @@
   };
 in {
   inherit (module) config;
-  inherit (module.config.build) environmentPackage activationPackage;
+  inherit (module.config.build) environmentPackage activationPackage bootstrapPackage;
   meta = {inherit (module.config.nixidy.target) repository branch;};
 }
