@@ -181,7 +181,7 @@ Applications and their resources are defined under `applications.<applicationNam
 Running `nixidy build .#dev` will produce the following files.
 
 ```shell
-tree -l result/
+>> tree -l result/
 ├── apps
 │   └── Application-demo.yaml
 └── demo
@@ -229,3 +229,38 @@ A directory with rendered resources is generated for each application declared w
 See [App of Apps Pattern](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern).
 
 Running `nixidy switch .#dev` will create the `./manifests/dev` relative to the current working directory and sync the newly generated manifests into it.
+
+## Bootstrapping Cluster
+
+After creating a git repository that is specified in `nixidy.target.repository` and pushing the generated manifests (e.g. by running `nixidy switch .#dev`) to the branch specified in `nixidy.target.branch`, your cluster can be bootstrapped.
+
+Make sure you have access to the Kubernetes API and Argo CD is installed and running on your cluster (refer to Argo CD's [getting started guide](https://argo-cd.readthedocs.io/en/stable/getting_started) for that).
+
+For quick bootstrapping you can run the command `nixidy bootstrap` to output an initial `Application` that will trigger a deployment of all other applications.
+
+```sh
+>> nixidy bootstrap .#dev
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  destination:
+    namespace: argocd
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: ./manifests/dev/apps
+    repoURL: https://github.com/arnarg/nixidy-demo.git
+    targetRevision: main
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+```
+
+To actually deploy it, run `nixidy bootstrap .#dev | kubectl apply -f -` (this assumes that the argocd namespace already exists in the cluster).
+
+Alternatively, create a new application in the Argo CD Web GUI by specifying the `manifests/dev/apps` path.
