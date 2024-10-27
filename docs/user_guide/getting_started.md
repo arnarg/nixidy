@@ -264,3 +264,7 @@ spec:
 To actually deploy it, run `nixidy bootstrap .#dev | kubectl apply -f -` (this assumes that the argocd namespace already exists in the cluster).
 
 Alternatively, create a new application in the Argo CD Web GUI by specifying the `manifests/dev/apps` path.
+
+## Next Steps
+
+Now that the cluster is running the applications specified in your nixidy config, you might want to build your applications on top of [helm charts](./helm_charts.md) or have [Github Actions](./github_actions.md) generate the manifests.
