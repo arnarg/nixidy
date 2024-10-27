@@ -382,6 +382,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Steps
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -640,6 +649,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Steps
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -888,6 +906,8 @@ spec:
 </code></pre></div>
 <p>To actually deploy it, run <code>nixidy bootstrap .#dev | kubectl apply -f -</code> (this assumes that the argocd namespace already exists in the cluster).</p>
 <p>Alternatively, create a new application in the Argo CD Web GUI by specifying the <code>manifests/dev/apps</code> path.</p>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">#</a></h2>
+<p>Now that the cluster is running the applications specified in your nixidy config, you might want to build your applications on top of <a href="../helm_charts/">helm charts</a> or have <a href="../github_actions/">Github Actions</a> generate the manifests.</p>
 
 
 
