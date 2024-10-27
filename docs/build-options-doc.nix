@@ -82,6 +82,7 @@
         ''
           # Configuration Options
 
+          To see all available resources options, use the [nixidy options search](search) powered by [NüschtOS](https://github.com/NuschtOS/search).
         ''
       ]
       ++ (mapAttrsToList (n: opt:

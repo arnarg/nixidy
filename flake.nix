@@ -6,6 +6,14 @@
     flake-utils.url = "github:numtide/flake-utils";
     nix-kube-generators.url = "github:farcaller/nix-kube-generators";
 
+    nuschtos = {
+      url = "github:nuschtos/search";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
+    };
+
     kubenix = {
       url = "github:hall/kubenix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -18,6 +26,7 @@
     flake-utils,
     nix-kube-generators,
     kubenix,
+    nuschtos,
   }:
     {
       lib = rec {
@@ -69,7 +78,12 @@
         inherit system;
       };
       docs = import ./docs {
-        inherit pkgs;
+        inherit pkgs kubenix;
+        mkSearch = nuschtos.packages.${system}.mkSearch;
+        lib = import ./lib {
+          inherit pkgs;
+          kubelib = nix-kube-generators;
+        };
       };
       packages = import ./nixidy pkgs;
     in {

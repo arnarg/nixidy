@@ -1,8 +1,14 @@
 {
   pkgs,
   lib ? pkgs.lib,
+  kubenix,
+  mkSearch,
 }: let
   optionsMd = import ./build-options-doc.nix {inherit pkgs lib;};
+
+  buildSearch = import ./build-options-search.nix {
+    inherit pkgs lib kubenix mkSearch;
+  };
 
   libraryMd = import ./build-library-doc.nix {inherit pkgs lib;};
 
@@ -83,8 +89,11 @@
     buildPhase = ''
       mkdir -p $out
       python -m mkdocs build
+
+      cp -r ${buildSearch "/nixidy/options/search/"} $out/options/search
     '';
   };
 in {
   html = docsHtml;
+  search = buildSearch "/";
 }
