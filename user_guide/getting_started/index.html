@@ -373,6 +373,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#bootstrapping-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bootstrapping Cluster
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -622,6 +631,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#bootstrapping-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bootstrapping Cluster
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -801,7 +819,7 @@ result
 <span class="p">}</span>
 </code></pre></div>
 <p>Running <code>nixidy build .#dev</code> will produce the following files.</p>
-<div class="highlight"><pre><span></span><code>tree<span class="w"> </span>-l<span class="w"> </span>result/
+<div class="highlight"><pre><span></span><code>&gt;&gt;<span class="w"> </span>tree<span class="w"> </span>-l<span class="w"> </span>result/
 ├──<span class="w"> </span>apps
 │<span class="w">   </span>└──<span class="w"> </span>Application-demo.yaml
 └──<span class="w"> </span>demo
@@ -843,6 +861,33 @@ result
 <p>A directory with rendered resources is generated for each application declared with <code>applications.&lt;name&gt;</code> as well as an Argo CD application resource YAML file in <code>apps/</code>. What this provides is the option to bootstrap the whole rendered branch to a cluster by adding an application pointing to the <code>apps/</code> folder.</p>
 <p>See <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern">App of Apps Pattern</a>.</p>
 <p>Running <code>nixidy switch .#dev</code> will create the <code>./manifests/dev</code> relative to the current working directory and sync the newly generated manifests into it.</p>
+<h2 id="bootstrapping-cluster">Bootstrapping Cluster<a class="headerlink" href="#bootstrapping-cluster" title="Permanent link">#</a></h2>
+<p>After creating a git repository that is specified in <code>nixidy.target.repository</code> and pushing the generated manifests (e.g. by running <code>nixidy switch .#dev</code>) to the branch specified in <code>nixidy.target.branch</code>, your cluster can be bootstrapped.</p>
+<p>Make sure you have access to the Kubernetes API and Argo CD is installed and running on your cluster (refer to Argo CD's <a href="https://argo-cd.readthedocs.io/en/stable/getting_started">getting started guide</a> for that).</p>
+<p>For quick bootstrapping you can run the command <code>nixidy bootstrap</code> to output an initial <code>Application</code> that will trigger a deployment of all other applications.</p>
+<div class="highlight"><pre><span></span><code>&gt;&gt;<span class="w"> </span>nixidy<span class="w"> </span>bootstrap<span class="w"> </span>.#dev
+---
+apiVersion:<span class="w"> </span>argoproj.io/v1alpha1
+kind:<span class="w"> </span>Application
+metadata:
+<span class="w">  </span>name:<span class="w"> </span>apps
+<span class="w">  </span>namespace:<span class="w"> </span>argocd
+spec:
+<span class="w">  </span>destination:
+<span class="w">    </span>namespace:<span class="w"> </span>argocd
+<span class="w">    </span>server:<span class="w"> </span>https://kubernetes.default.svc
+<span class="w">  </span>project:<span class="w"> </span>default
+<span class="w">  </span>source:
+<span class="w">    </span>path:<span class="w"> </span>./manifests/dev/apps
+<span class="w">    </span>repoURL:<span class="w"> </span>https://github.com/arnarg/nixidy-demo.git
+<span class="w">    </span>targetRevision:<span class="w"> </span>main
+<span class="w">  </span>syncPolicy:
+<span class="w">    </span>automated:
+<span class="w">      </span>prune:<span class="w"> </span><span class="nb">true</span>
+<span class="w">      </span>selfHeal:<span class="w"> </span><span class="nb">true</span>
+</code></pre></div>
+<p>To actually deploy it, run <code>nixidy bootstrap .#dev | kubectl apply -f -</code> (this assumes that the argocd namespace already exists in the cluster).</p>
+<p>Alternatively, create a new application in the Argo CD Web GUI by specifying the <code>manifests/dev/apps</code> path.</p>
 
 
 
