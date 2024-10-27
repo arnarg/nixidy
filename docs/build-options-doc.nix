@@ -39,7 +39,7 @@
         description = ''
           Kubernetes resources for the application.
 
-          The entire list of available resource options is too large for the current documentation setup but its usage is explained [here](https://arnarg.github.io/nixidy/user_guide/typed_resources/).
+          The entire list of available resource options is too large for the current documentation setup but can be searched in the [nixidy options search](search) powered by [NüschtOS](https://github.com/NuschtOS/search).
         '';
       };
   };
