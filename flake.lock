@@ -34,32 +34,6 @@
         "type": "github"
       }
     },
-    "ixx": {
-      "inputs": {
-        "flake-utils": [
-          "nuschtos",
-          "flake-utils"
-        ],
-        "nixpkgs": [
-          "nuschtos",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1729544999,
-        "narHash": "sha256-YcyJLvTmN6uLEBGCvYoMLwsinblXMkoYkNLEO4WnKus=",
-        "owner": "NuschtOS",
-        "repo": "ixx",
-        "rev": "65c207c92befec93e22086da9456d3906a4e999c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NuschtOS",
-        "ref": "v0.0.5",
-        "repo": "ixx",
-        "type": "github"
-      }
-    },
     "kubenix": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -114,37 +88,12 @@
         "type": "github"
       }
     },
-    "nuschtos": {
-      "inputs": {
-        "flake-utils": [
-          "flake-utils"
-        ],
-        "ixx": "ixx",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1729992468,
-        "narHash": "sha256-zzGpWx64+/TfZdF5TjzUIV4ESFWCsscapK5Smx9bexk=",
-        "owner": "nuschtos",
-        "repo": "search",
-        "rev": "3c246cc08ffa8e61956e506dd6689bc6e9d5aa20",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nuschtos",
-        "repo": "search",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
         "kubenix": "kubenix",
         "nix-kube-generators": "nix-kube-generators",
-        "nixpkgs": "nixpkgs",
-        "nuschtos": "nuschtos"
+        "nixpkgs": "nixpkgs"
       }
     },
     "systems": {

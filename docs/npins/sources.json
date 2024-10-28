@@ -1,0 +1,38 @@
+{
+  "pins": {
+    "ixx": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nuschtos",
+        "repo": "ixx"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "version": "v0.0.5",
+      "revision": "65c207c92befec93e22086da9456d3906a4e999c",
+      "url": "https://api.github.com/repos/nuschtos/ixx/tarball/v0.0.5",
+      "hash": "1sraly2kpi6jj0c4lcjpp6fj42rg1j5bv0hi225sndz6yhp8kk31"
+    },
+    "nixpkgs": {
+      "type": "Channel",
+      "name": "nixpkgs-unstable",
+      "url": "https://releases.nixos.org/nixpkgs/nixpkgs-24.11pre697431.86e78d3d2084/nixexprs.tar.xz",
+      "hash": "0wbmh3jc25xan6x6nndfidgkfigip49zqp0rivi6lsdv18sx9mvx"
+    },
+    "search": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nuschtos",
+        "repo": "search"
+      },
+      "branch": "main",
+      "revision": "e373332c1f8237fc1263901745b0fe747228c8ba",
+      "url": "https://github.com/nuschtos/search/archive/e373332c1f8237fc1263901745b0fe747228c8ba.tar.gz",
+      "hash": "02vqpp8k3aisnv34301lrcb0129kgnklpy6xf2bb94p1bpv9bg0d"
+    }
+  },
+  "version": 3
+}

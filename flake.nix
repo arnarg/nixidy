@@ -6,14 +6,6 @@
     flake-utils.url = "github:numtide/flake-utils";
     nix-kube-generators.url = "github:farcaller/nix-kube-generators";
 
-    nuschtos = {
-      url = "github:nuschtos/search";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
-      };
-    };
-
     kubenix = {
       url = "github:hall/kubenix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -26,7 +18,6 @@
     flake-utils,
     nix-kube-generators,
     kubenix,
-    nuschtos,
   }:
     {
       lib = rec {
@@ -77,19 +68,9 @@
       pkgs = import nixpkgs {
         inherit system;
       };
-      docs = import ./docs {
-        inherit pkgs kubenix;
-        mkSearch = nuschtos.packages.${system}.mkSearch;
-        lib = import ./lib {
-          inherit pkgs;
-          kubelib = nix-kube-generators;
-        };
-      };
       packages = import ./nixidy pkgs;
     in {
       packages = {
-        inherit docs;
-
         default = packages.nixidy;
         generators = import ./pkgs/generators {inherit pkgs;};
       };
@@ -190,18 +171,6 @@
         moduleTests = {
           type = "app";
           program = self.moduleTests.${system}.reportScript.outPath;
-        };
-
-        # Run a docs server
-        docsServe = {
-          type = "app";
-          program =
-            (
-              pkgs.writeShellScript "serve-docs" ''
-                ${pkgs.python3}/bin/python -m http.server -d ${self.packages.${system}.docs.html} 8080
-              ''
-            )
-            .outPath;
         };
       };
     }));

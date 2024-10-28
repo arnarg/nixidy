@@ -1,99 +1,44 @@
-{
-  pkgs,
-  lib ? pkgs.lib,
-  kubenix,
-  mkSearch,
-}: let
-  optionsMd = import ./build-options-doc.nix {inherit pkgs lib;};
+let
+  # Get some sources from npins.
+  sources = import ./npins;
+  pkgs = import sources.nixpkgs {};
 
-  buildSearch = import ./build-options-search.nix {
-    inherit pkgs lib kubenix mkSearch;
+  # Some inputs from the root flake need
+  # be available to the docs generation.
+  # To make sure they are the same version
+  # as is used by the flake I read the flake.lock
+  # and fetch them below.
+  flakeLock = builtins.fromJSON (builtins.readFile ../flake.lock);
+  kubenix = let
+    lock = flakeLock.nodes.kubenix.locked;
+  in
+    pkgs.fetchFromGitHub {
+      inherit (lock) owner repo rev;
+      hash = lock.narHash;
+    };
+  kubelib = let
+    lock = flakeLock.nodes.nix-kube-generators.locked;
+  in
+    pkgs.fetchFromGitHub {
+      inherit (lock) owner repo rev;
+      hash = lock.narHash;
+    };
+
+  # Setup nuschtos without using a flake.
+  nuschtos = sources.search;
+  ixx = sources.ixx;
+  ixxPkgs = {
+    ixx = pkgs.callPackage "${ixx}/ixx/derivation.nix" {};
+    fixx = pkgs.callPackage "${ixx}/fixx/derivation.nix" {};
+    libixx = pkgs.callPackage "${ixx}/libixx/derivation.nix" {};
   };
-
-  libraryMd = import ./build-library-doc.nix {inherit pkgs lib;};
-
-  docsHtml = pkgs.stdenv.mkDerivation {
-    inherit optionsMd;
-
-    passAsFile = ["optionsMd"];
-
-    name = "nixidy-html-docs";
-
-    src = lib.cleanSource ./..;
-
-    buildInputs = with pkgs.python3.pkgs; [mkdocs-material mkdocs-material-extensions];
-
-    phases = ["unpackPhase" "patchPhase" "buildPhase"];
-
-    patchPhase = ''
-      cat $optionsMdPath > docs/options.md
-      cp ${libraryMd}/lib.md docs/library.md
-      cp ${../README.md} docs/index.md
-
-      cat <<EOF > mkdocs.yml
-        site_name: nixidy
-        site_url: https://arnarg.github.io/nixidy/
-        site_dir: $out
-
-        repo_url: https://github.com/arnarg/nixidy/
-
-        exclude_docs: |
-          *.nix
-
-        theme:
-          name: material
-
-          palette:
-          - media: "(prefers-color-scheme: light)"
-            scheme: default
-            toggle:
-              icon: material/brightness-7
-              name: Switch to dark mode
-          - media: "(prefers-color-scheme: dark)"
-            scheme: slate
-            toggle:
-              icon: material/brightness-4
-              name: Switch to light mode
-
-          features:
-          - navigation.footer
-          - content.tabs.link
-
-        markdown_extensions:
-        - def_list
-        - toc:
-            permalink: "#"
-            toc_depth: 3
-        - admonition
-        - pymdownx.highlight
-        - pymdownx.inlinehilite
-        - pymdownx.superfences
-        - pymdownx.tabbed:
-            alternate_style: true
-
-        nav:
-        - Home: index.md
-        - 'User Guide':
-          - 'Getting Started': user_guide/getting_started.md
-          - 'Using Helm Charts': user_guide/helm_charts.md
-          - 'Typed Resource Options': user_guide/typed_resources.md
-          - 'GitHub Actions': user_guide/github_actions.md
-          - 'Transformers': user_guide/transformers.md
-          - 'Using nixhelm': user_guide/using_nixhelm.md
-        - Reference:
-          - 'Library Functions': library.md
-          - 'Configuration Options': options.md
-      EOF
-    '';
-
-    buildPhase = ''
-      mkdir -p $out
-      python -m mkdocs build
-
-      cp -r ${buildSearch "/nixidy/options/search/"} $out/options/search
-    '';
-  };
-in {
-  html = docsHtml;
-  search = buildSearch "/";
-}
+  nuscht-search = pkgs.callPackage "${nuschtos}/nix/frontend.nix" {};
+  mkSearch = (pkgs.callPackage "${nuschtos}/nix/wrapper.nix" {inherit nuscht-search ixxPkgs;}).mkSearch;
+in
+  # Build docs!
+  import ./docs.nix {
+    inherit pkgs kubenix mkSearch;
+    lib = import ../lib {
+      inherit pkgs kubelib;
+    };
+  }
