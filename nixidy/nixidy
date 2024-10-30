@@ -6,11 +6,11 @@ PATH=@DEP_PATH@${PATH:+:}$PATH
 set -euo pipefail
 
 function setFlakeParam() {
-  local flake="${FLAKE_PARAM%#*}"
+  local flake="${ENV_PARAM%#*}"
 
-  case $FLAKE_PARAM in
+  case $ENV_PARAM in
     *#*)
-      local env="${FLAKE_PARAM#*#}"
+      local env="${ENV_PARAM#*#}"
       ;;
     *)
       local env=""
@@ -19,9 +19,34 @@ function setFlakeParam() {
 
   export FLAKE_ROOT="$flake"
   export FLAKE_ENV="$env"
+  export NIX_SYSTEM=$(nix eval --expr builtins.currentSystem --raw --impure)
 }
 
 function doInfo() {
+  if [[ "$USE_FLAKE" == true ]]; then
+    doInfoFlake
+  else
+    doInfoAttr
+  fi
+}
+
+function doInfoAttr() {
+  if [[ -z $ENV_PARAM ]]; then
+    doHelp
+    exit 1
+  fi
+
+  local info=$(nix-instantiate --eval --strict --json "$FILE_PARAM" -A "$ENV_PARAM.meta")
+
+  if [[ "$INFO_JSON" == "true" ]]; then
+    echo $info
+  else
+    echo "Repository: $(echo "$info" | jq -r .repository)"
+    echo "Branch:     $(echo "$info" | jq -r .branch)"
+  fi
+}
+
+function doInfoFlake() {
   setFlakeParam
 
   if [[ -z "$FLAKE_ENV" ]]; then
@@ -40,6 +65,23 @@ function doInfo() {
 }
 
 function doBuild() {
+  if [[ "$USE_FLAKE" == true ]]; then
+    doBuildFlake
+  else
+    doBuildAttr
+  fi
+}
+
+function doBuildAttr() {
+  if [[ -z $ENV_PARAM ]]; then
+    doHelp
+    exit 1
+  fi
+
+  nix-build "$FILE_PARAM" -A "$ENV_PARAM.environmentPackage" "${BUILD_PARAMS[@]}"
+}
+
+function doBuildFlake() {
   setFlakeParam
 
   if [[ -z "$FLAKE_ENV" ]]; then
@@ -51,6 +93,26 @@ function doBuild() {
 }
 
 function doSwitch() {
+  if [[ "$USE_FLAKE" == true ]]; then
+    doSwitchFlake
+  else
+    doSwitchAttr
+  fi
+}
+
+function doSwitchAttr() {
+  if [[ -z $ENV_PARAM ]]; then
+    doHelp
+    exit 1
+  fi
+
+  # TODO: set link path
+  ENVIRON=$(nix-build "$FILE_PARAM" -A "$ENV_PARAM.activationPackage")
+
+  "result/activate"
+}
+
+function doSwitchFlake() {
   setFlakeParam
 
   if [[ -z "$FLAKE_ENV" ]]; then
@@ -109,7 +171,9 @@ function doHelp() {
 }
 
 COMMAND=""
-FLAKE_PARAM=""
+USE_FLAKE=true
+ENV_PARAM=""
+FILE_PARAM=""
 
 BUILD_PARAMS=()
 INFO_JSON="false"
@@ -134,12 +198,16 @@ while [[ $# -gt 0 ]]; do
     --json)
       INFO_JSON="true"
       ;;
+    -f|--file)
+      FILE_PARAM="$1"
+      USE_FLAKE=false
+      ;;
     -h|--help)
       doHelp
       exit 0
       ;;
     *)
-      FLAKE_PARAM="$opt"
+      ENV_PARAM="$opt"
       ;;
   esac
 done
@@ -148,12 +216,6 @@ if [[ -z $COMMAND ]]; then
     doHelp >&2
     exit 1
 fi
-
-if [[ -z $FLAKE_PARAM ]]; then
-  FLAKE_PARAM=".#"
-fi
-
-NIX_SYSTEM=$(nix eval --expr builtins.currentSystem --raw --impure)
 
 case $COMMAND in
   info)
