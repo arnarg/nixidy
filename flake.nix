@@ -133,6 +133,26 @@
           type = "app";
           program = self.moduleTests.${system}.reportScript.outPath;
         };
+
+        # Run shellcheck on nixidy cli
+        cliTest = {
+          type = "app";
+          program =
+            (pkgs.writeShellScript "cli-shellcheck-test" ''
+              ${pkgs.shellcheck}/bin/shellcheck ${self.packages.${system}.default}/bin/nixidy
+            '')
+            .outPath;
+        };
+
+        # Serve docs
+        docsServe = {
+          type = "app";
+          program =
+            (pkgs.writeShellScript "serve-docs" ''
+              ${pkgs.python3}/bin/python -m http.server -d ${(import ./docs {inherit pkgs;}).html} 8080
+            '')
+            .outPath;
+        };
       };
     }));
 }

@@ -69,6 +69,7 @@
         - pymdownx.highlight
         - pymdownx.inlinehilite
         - pymdownx.superfences
+        - pymdownx.details
         - pymdownx.tabbed:
             alternate_style: true
 

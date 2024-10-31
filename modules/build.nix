@@ -128,7 +128,7 @@ in {
 
           # We need to check if there is a difference between
           # the newly built environment and the destination
-          # excluding `.revision` because that will most likely
+          # excluding ".revision" because that will most likely
           # always change when going through CI, avoiding infinite
           # loop.
           if ! ${pkgs.diffutils}/bin/diff -q -r --exclude .revision "${config.build.environmentPackage}" "\$dest" &>/dev/null; then

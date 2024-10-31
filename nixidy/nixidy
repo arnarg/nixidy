@@ -17,9 +17,13 @@ function setFlakeParam() {
       ;;
   esac
 
-  export FLAKE_ROOT="$flake"
-  export FLAKE_ENV="$env"
-  export NIX_SYSTEM=$(nix eval --expr builtins.currentSystem --raw --impure)
+  FLAKE_ROOT="$flake"
+  FLAKE_ENV="$env"
+  NIX_SYSTEM=$(nix eval --expr builtins.currentSystem --raw --impure)
+
+  export FLAKE_ROOT
+  export FLAKE_ENV
+  export NIX_SYSTEM
 }
 
 function doInfo() {
@@ -36,10 +40,11 @@ function doInfoAttr() {
     exit 1
   fi
 
-  local info=$(nix-instantiate --eval --strict --json "$FILE_PARAM" -A "$ENV_PARAM.meta")
+  local info
+  info=$(nix-instantiate --eval --strict --json "$FILE_PARAM" -A "$ENV_PARAM.meta")
 
   if [[ "$INFO_JSON" == "true" ]]; then
-    echo $info
+    echo "$info"
   else
     echo "Repository: $(echo "$info" | jq -r .repository)"
     echo "Branch:     $(echo "$info" | jq -r .branch)"
@@ -47,17 +52,16 @@ function doInfoAttr() {
 }
 
 function doInfoFlake() {
-  setFlakeParam
-
   if [[ -z "$FLAKE_ENV" ]]; then
     doHelp
     exit 1
   fi
 
-  local info=$(nix eval "${FLAKE_ROOT}#nixidyEnvs.${NIX_SYSTEM}.${FLAKE_ENV}.meta" --json)
+  local info
+  info=$(nix eval "${FLAKE_ROOT}#nixidyEnvs.${NIX_SYSTEM}.${FLAKE_ENV}.meta" --json)
 
   if [[ "$INFO_JSON" == "true" ]]; then
-    echo $info
+    echo "$info"
   else
     echo "Repository: $(echo "$info" | jq -r .repository)"
     echo "Branch:     $(echo "$info" | jq -r .branch)"
@@ -82,8 +86,6 @@ function doBuildAttr() {
 }
 
 function doBuildFlake() {
-  setFlakeParam
-
   if [[ -z "$FLAKE_ENV" ]]; then
     doHelp
     exit 1
@@ -106,15 +108,12 @@ function doSwitchAttr() {
     exit 1
   fi
 
-  # TODO: set link path
-  ENVIRON=$(nix-build "$FILE_PARAM" -A "$ENV_PARAM.activationPackage")
+  ENVIRON=$(nix-build "$FILE_PARAM" -A "$ENV_PARAM.activationPackage" --no-link)
 
-  "result/activate"
+  "${ENVIRON}/activate"
 }
 
 function doSwitchFlake() {
-  setFlakeParam
-
   if [[ -z "$FLAKE_ENV" ]]; then
     doHelp
     exit 1
@@ -126,8 +125,28 @@ function doSwitchFlake() {
 }
 
 function doBootstrap() {
-  setFlakeParam
+  if [[ "$USE_FLAKE" == true ]]; then
+    doBootstrapFlake
+  else
+    doBootstrapAttr
+  fi
+}
 
+function doBootstrapAttr() {
+  if [[ -z $ENV_PARAM ]]; then
+    doHelp
+    exit 1
+  fi
+
+  BOOTSTRAP=$(nix-build "$FILE_PARAM" -A "$ENV_PARAM.bootstrapPackage" --no-link)
+
+  for manifest in "$BOOTSTRAP"/*.yaml; do
+    echo "---"
+    cat "$manifest"
+  done
+}
+
+function doBootstrapFlake() {
   if [[ -z "$FLAKE_ENV" ]]; then
     doHelp
     exit 1
@@ -135,9 +154,9 @@ function doBootstrap() {
 
   BOOTSTRAP=$(nix build "${FLAKE_ROOT}#nixidyEnvs.${NIX_SYSTEM}.${FLAKE_ENV}.bootstrapPackage" --no-link --print-out-paths)
 
-  for manifest in "$BOOTSTRAP/*.yaml"; do
+  for manifest in "$BOOTSTRAP"/*.yaml; do
     echo "---"
-    cat $manifest
+    cat "$manifest"
   done
 }
 
@@ -150,23 +169,34 @@ function doHelp() {
     echo "  --out-link PATH    Create a custom result symlink (only used in build)."
     echo "  --print-out-paths  Print the resulting output paths (only used in build)."
     echo "  --json             Output info in JSON format (only used in info)."
+    echo "  -f, --file PATH    Specify path to entrypoint nix file (only flake-less)."
     echo "  -h                 Print this help"
+    echo
+    echo "ENV parameter"
+    echo
+    echo "  All sub-commands take an \`ENV\` parameter, this parameter is used to"
+    echo "  determine if flakes or flake-less nix should be used and which environment"
+    echo "  should be built."
+    echo
+    echo "  Example:"
+    echo "  - \`.#prod\`:  Uses a flake in the local directory."
+    echo "  - \`prod\`:    Does not use flake but builds the \`prod\` environment in"
+    echo "               \`default.nix\` by default (can be overridden with --file)."
     echo
     echo "Commands"
     echo
     echo "  help             Print this help."
     echo
-    echo "  info FLAKE_URI   Get info about environment."
+    echo "  info ENV         Get info about environment."
     echo "                   Example: .#prod"
     echo
-    echo "  build FLAKE_URI  Build nixidy environment from flake URI."
+    echo "  build ENV        Build nixidy environment from flake URI."
     echo "                   Example: .#prod"
     echo
-    echo "  switch FLAKE_URI Build and switch to nixidy environment from flake URI."
+    echo "  switch ENV       Build and switch to nixidy environment from flake URI."
     echo "                   Example: .#prod"
     echo
-    echo "  bootstrap FLAKE_URI"
-    echo "                   Output a manifest to bootstrap appOfApps."
+    echo "  bootstrap ENV    Output a manifest to bootstrap appOfApps."
     echo "                   Example: .#prod"
 }
 
@@ -215,6 +245,13 @@ done
 if [[ -z $COMMAND ]]; then
     doHelp >&2
     exit 1
+fi
+
+# Detect if we should use a flake or flake-less approach
+if [[ $ENV_PARAM =~ ^[a-zA-Z0-9\:\/\.]+#[a-zA-Z0-9\.]*$ ]]; then
+  setFlakeParam
+else
+  USE_FLAKE=false
 fi
 
 case $COMMAND in

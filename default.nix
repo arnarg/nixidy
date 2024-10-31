@@ -1,6 +1,11 @@
 {nixpkgs ? null}: let
+  # To not having to maintain versions of dependencies in 2 locations
+  # we here read the flake.lock to parse revisions and hashes
+  # for a select few dependencies.
   flakeLock = builtins.fromJSON (builtins.readFile ./flake.lock);
 
+  # Helper function to fetch metadata about a locked input.
+  # Currently only fetches relevant information for github.
   flakeLockMeta = node: let
     lock = flakeLock.nodes.${node}.locked;
   in {
@@ -8,10 +13,10 @@
     hash = lock.narHash;
   };
 
-  npkgs = let
+  # Import nixpkgs from either parameter or the lock file.
+  pkgs = let
     meta = flakeLockMeta "nixpkgs";
-
-    source =
+    npkgs =
       if nixpkgs == null
       then
         builtins.fetchTarball {
@@ -20,22 +25,35 @@
         }
       else nixpkgs;
   in
-    import source {};
+    import npkgs {};
 
-  importFromFlakeLock = node: let
+  # Helper function that can fetch input from flake.lock
+  # by its name.
+  fetchFromFlakeLock = node: let
     lock = flakeLockMeta node;
   in
     if lock.type == "github"
-    then npkgs.fetchFromGitHub (removeAttrs lock ["type"])
+    then pkgs.fetchFromGitHub (removeAttrs lock ["type"])
     else throw "fetcher for type ${lock.type} unsupported";
 
-  kubenix = importFromFlakeLock "kubenix";
-  kubelib = importFromFlakeLock "nix-kube-generators";
+  # Get kubenix and nix-kube-generators.
+  kubenix = fetchFromFlakeLock "kubenix";
+  kubelib = let
+    src = fetchFromFlakeLock "nix-kube-generators";
+  in {
+    lib = import "${src}/lib";
+  };
 
+  # Import the lib functions present in the flake.
   lib = import ./make-env.nix {inherit kubenix kubelib;};
 in {
+  # Wrap the lib functions to use the pkgs imported above
+  # without having the user needing to pass it in.
   lib = {
-    mkEnv = args @ {pkgs ? npkgs, ...}: lib.mkEnv (args // {inherit pkgs;});
-    mkEnvs = args @ {pkgs ? npkgs, ...}: lib.mkEnvs (args // {inherit pkgs;});
+    mkEnv = args: lib.mkEnv ({inherit pkgs;} // args);
+    mkEnvs = args: lib.mkEnvs ({inherit pkgs;} // args);
   };
+
+  # Have the nixidy cli available.
+  nixidy = pkgs.callPackage ./nixidy/nixidy.nix {};
 }
