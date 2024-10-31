@@ -19,29 +19,6 @@
         };
       };
     };
-
-  walkDir = prefix: dir: let
-    contents = builtins.readDir "${prefix}/${dir}";
-  in
-    if contents ? "default.nix" && contents."default.nix" == "regular"
-    then lib.helm.downloadHelmChart (import "${prefix}/${dir}")
-    else
-      builtins.listToAttrs (map (
-        d: {
-          inherit (d) name;
-          value = walkDir "${prefix}/${dir}" d.name;
-        }
-      ) (lib.filter (c: c.value == "directory") (lib.attrsToList contents)));
-
-  mkChartAttrs = dir: let
-    contents = builtins.readDir dir;
-  in
-    builtins.listToAttrs (map (
-      d: {
-        inherit (d) name;
-        value = walkDir dir d.name;
-      }
-    ) (lib.filter (c: c.value == "directory") (lib.attrsToList contents)));
 in {
   options.nixidy = with lib; {
     target = {
@@ -283,7 +260,7 @@ in {
 
     _module.args.charts = config.nixidy.charts;
     nixidy = {
-      charts = lib.optionalAttrs (cfg.chartsDir != null) (mkChartAttrs cfg.chartsDir);
+      charts = lib.optionalAttrs (cfg.chartsDir != null) (lib.helm.mkChartAttrs cfg.chartsDir);
 
       extraFiles = lib.optionalAttrs (cfg.build.revision != null) {
         ".revision".text = cfg.build.revision;

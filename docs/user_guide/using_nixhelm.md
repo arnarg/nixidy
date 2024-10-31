@@ -66,14 +66,14 @@
       nixidy.lib.mkEnvs {
         # These modules get passed to every env.
         modules = [
-          {
+          ({lib, ...}: {
             # nixhelm is a flake so we can't just import it
             # like we do in flakes (as an input).
             # Thankfully the directory structure in nixhelm
             # is compatible with the one expected by
-            # `nixidy.chartsDir`.
-            nixidy.chartsDir = "${nixhelm}/charts";
-          }
+            # `lib.helm.mkChartAttrs`.
+            nixidy.charts = lib.helm.mkChartAttrs "${nixhelm}/charts";
+          })
         ];
 
         # This declares the available nixidy envs.
