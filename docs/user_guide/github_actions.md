@@ -26,6 +26,10 @@ jobs:
 
     - uses: cachix/install-nix-action@v20
       with:
+        # The `arnarg/nixidy/actions/build` action depends
+        # on nix flakes to run the actual nixidy cli.
+        # Therefore the following setting is required even
+        # when using nixidy with non-flakes.
         extra_nix_config: |
           extra-experimental-features = nix-command flakes
 
@@ -35,6 +39,8 @@ jobs:
       id: build
       with:
         environment: .#dev
+        # Without flakes:
+        # environment: dev
 
     - shell: bash
       run: |
@@ -82,6 +88,10 @@ jobs:
 
     - uses: cachix/install-nix-action@v20
       with:
+        # The `arnarg/nixidy/actions/switch` action depends
+        # on nix flakes to run the actual nixidy cli.
+        # Therefore the following setting is required even
+        # when using nixidy with non-flakes.
         extra_nix_config: |
           extra-experimental-features = nix-command flakes
 
@@ -90,6 +100,8 @@ jobs:
     - uses: arnarg/nixidy/actions/switch@main
       with:
         environment: .#dev
+        # Without flakes:
+        # environment: dev
 
     - uses: EndBug/add-and-commit@v9
       id: commit
