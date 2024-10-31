@@ -118,7 +118,7 @@
       pkgs = import nixpkgs {};
 
       # Import nixidy
-      nixidy = import ../nixidy {inherit nixpkgs;};
+      nixidy = import sources.nixidy {inherit nixpkgs;};
     in
       pkgs.mkShellNoCC {
         packages = with pkgs; [

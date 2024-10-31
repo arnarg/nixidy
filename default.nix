@@ -56,4 +56,7 @@ in {
 
   # Have the nixidy cli available.
   nixidy = pkgs.callPackage ./nixidy/nixidy.nix {};
+
+  # Have fromCRD generator available.
+  generators.fromCRD = (import ./pkgs/generators {inherit pkgs;}).fromCRD;
 }
