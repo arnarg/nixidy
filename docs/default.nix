@@ -1,7 +1,10 @@
-let
+{pkgs ? null}: let
   # Get some sources from npins.
   sources = import ./npins;
-  pkgs = import sources.nixpkgs {};
+  npkgs =
+    if pkgs == null
+    then import sources.nixpkgs {}
+    else pkgs;
 
   # Some inputs from the root flake need
   # be available to the docs generation.
@@ -12,14 +15,14 @@ let
   kubenix = let
     lock = flakeLock.nodes.kubenix.locked;
   in
-    pkgs.fetchFromGitHub {
+    npkgs.fetchFromGitHub {
       inherit (lock) owner repo rev;
       hash = lock.narHash;
     };
   kubelib = let
     lock = flakeLock.nodes.nix-kube-generators.locked;
   in
-    pkgs.fetchFromGitHub {
+    npkgs.fetchFromGitHub {
       inherit (lock) owner repo rev;
       hash = lock.narHash;
     };
@@ -28,17 +31,19 @@ let
   nuschtos = sources.search;
   ixx = sources.ixx;
   ixxPkgs = {
-    ixx = pkgs.callPackage "${ixx}/ixx/derivation.nix" {};
-    fixx = pkgs.callPackage "${ixx}/fixx/derivation.nix" {};
-    libixx = pkgs.callPackage "${ixx}/libixx/derivation.nix" {};
+    ixx = npkgs.callPackage "${ixx}/ixx/derivation.nix" {};
+    fixx = npkgs.callPackage "${ixx}/fixx/derivation.nix" {};
+    libixx = npkgs.callPackage "${ixx}/libixx/derivation.nix" {};
   };
-  nuscht-search = pkgs.callPackage "${nuschtos}/nix/frontend.nix" {};
-  mkSearch = (pkgs.callPackage "${nuschtos}/nix/wrapper.nix" {inherit nuscht-search ixxPkgs;}).mkSearch;
+  nuscht-search = npkgs.callPackage "${nuschtos}/nix/frontend.nix" {};
+  mkSearch = (npkgs.callPackage "${nuschtos}/nix/wrapper.nix" {inherit nuscht-search ixxPkgs;}).mkSearch;
 in
   # Build docs!
   import ./docs.nix {
-    inherit pkgs kubenix mkSearch;
+    inherit kubenix mkSearch;
+    pkgs = npkgs;
     lib = import ../lib {
-      inherit pkgs kubelib;
+      inherit kubelib;
+      pkgs = npkgs;
     };
   }

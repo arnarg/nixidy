@@ -1,53 +1,144 @@
 # Getting Started
 
-Nixidy only supports [Nix Flakes](https://nixos.wiki/wiki/Flakes) so that needs to be enabled.
-
 ## Initialize Repository
 
-First a `flake.nix` needs to be created in the root of the repository.
+=== "flakes"
 
-```nix title="flake.nix"
-{
-  description = "My ArgoCD configuration with nixidy.";
+    First a `flake.nix` needs to be created in the root of the repository.
 
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-  inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.nixidy.url = "github:arnarg/nixidy";
+    ```nix title="flake.nix"
+    {
+      description = "My ArgoCD configuration with nixidy.";
 
-  outputs = {
-    self,
-    nixpkgs,
-    flake-utils,
-    nixidy,
-  }: (flake-utils.lib.eachDefaultSystem (system: let
-    pkgs = import nixpkgs {
-      inherit system;
-    };
-  in {
-    # This declares the available nixidy envs.
-    nixidyEnvs = nixidy.lib.mkEnvs {
-      inherit pkgs;
+      inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+      inputs.flake-utils.url = "github:numtide/flake-utils";
+      inputs.nixidy.url = "github:arnarg/nixidy";
 
-      envs = {
-        # Currently we only have the one dev env.
-        dev.modules = [./env/dev.nix];
-      };
-    };
+      outputs = {
+        self,
+        nixpkgs,
+        flake-utils,
+        nixidy,
+      }: (flake-utils.lib.eachDefaultSystem (system: let
+        pkgs = import nixpkgs {
+          inherit system;
+        };
+      in {
+        # This declares the available nixidy envs.
+        nixidyEnvs = nixidy.lib.mkEnvs {
+          inherit pkgs;
 
-    # Handy to have nixidy cli available in the local
-    # flake too.
-    packages.nixidy = nixidy.packages.${system}.default;
+          envs = {
+            # Currently we only have the one dev env.
+            dev.modules = [./env/dev.nix];
+          };
+        };
 
-    # Useful development shell with nixidy in path.
-    # Run `nix develop` to enter.
-    devShells.default = pkgs.mkShell {
-      buildInputs = [nixidy.packages.${system}.default];
-    };
-  }));
-}
-```
+        # Handy to have nixidy cli available in the local
+        # flake too.
+        packages.nixidy = nixidy.packages.${system}.default;
 
-The flake declares a single nixidy environment called `dev`. It includes a single nix module found at `./env/dev.nix`, so let's create that.
+        # Useful development shell with nixidy in path.
+        # Run `nix develop` to enter.
+        devShells.default = pkgs.mkShell {
+          buildInputs = [nixidy.packages.${system}.default];
+        };
+      }));
+    }
+    ```
+
+    !!! info
+
+        In the rest of the guide when running the `nixidy` cli (e.g. `nixidy build`) you can use `nix run .#nixidy -- build` or enter a nix shell with `nix develop` where `nixidy` will be available, with the `flake.nix` example above.
+
+    The flake declares a single nixidy environment called `dev`. It includes a single nix module found at `./env/dev.nix`, so let's create that.
+
+=== "flake-less"
+
+    ??? tip "Dependency pinning"
+
+        Instead of using nix channels, the recommended way to use nixidy without flakes is to use either [npins](https://github.com/andir/npins) or [niv](https://github.com/nmattia/niv) to lock dependency versions in your repository.
+
+        === "npins"
+            First initialize npins:
+            ```sh
+            npins init --bare
+            ```
+
+            Then add nixidy:
+            ```sh
+            npins add github arnarg nixidy --branch main # or --at vx.x.x
+            ```
+
+        === "niv"
+            First initialize niv:
+            ```sh
+            niv init --no-nixpkgs
+            ```
+
+            Then add nixidy:
+            ```sh
+            niv add github arnarg/nixidy --branch main # or --rev vx.x.x
+            ```
+
+    First a `default.nix` needs to be created in the root of the repository.
+
+    ```nix title="default.nix"
+    let
+      # With npins
+      sources = import ./npins;
+      # With niv
+      # sources = import ./nix/sources.nix;
+
+      # Import nixidy
+      nixidy = import sources.nixidy {};
+    in
+      nixidy.lib.mkEnvs {
+        # This declares the available nixidy envs.
+        envs = {
+          # Currently we only have the one dev env.
+          dev.modules = [./env/dev.nix];
+        };
+      }
+    ```
+
+    It's also a good idea to have `shell.nix` file in the root of the repository to have the necessary tools available.
+
+    ```nix title="shell.nix"
+    let
+      # With npins
+      sources = import ./npins;
+      # With niv
+      # sources = import ./nix/sources.nix;
+
+      # nixpkgs added with:
+      #   npins: `npins add --name nixpkgs channel nixos-unstable`
+      #   niv: `niv add github nixos/nixpkgs -b nixos-unstable`
+      nixpkgs = sources.nixpkgs;
+      pkgs = import nixpkgs {};
+
+      # Import nixidy
+      nixidy = import ../nixidy {inherit nixpkgs;};
+    in
+      pkgs.mkShellNoCC {
+        packages = with pkgs; [
+          # Add nixidy cli
+          nixidy.nixidy
+          # npins
+          npins
+          # or niv
+          niv
+        ];
+      }
+    ```
+
+    !!! info
+        In the rest of the guide when running the `nixidy` cli (e.g. `nixidy build`) you can run `nix-shell` to enter a nix shell where `nixidy` will be a avilable, with the `shell.nix` example above.
+
+    !!! warning
+        In the rest of the guide the `nixidy` commands will also use the flakes format (e.g. `nixidy build .#dev`), when using a flake-less setup the `.#` prefix should be removed (e.g. `nixidy build dev`).
+
+    The `default.nix` file declares a single nixidy environment called `dev`. It includes a single nix module found at `./env/dev.nix`, so let's create that.
 
 ```nix title="env/dev.nix"
 {
@@ -68,15 +159,15 @@ The flake declares a single nixidy environment called `dev`. It includes a singl
 }
 ```
 
-Now running `nix run .#nixidy -- info .#dev` (or `nixidy info .#dev` if run in nix shell using `nix develop`) you can get the same info we just declared above. This verifies that things are set up correctly so far.
+Now running `nixidy info .#dev` you can get the same info we just declared above. This verifies that things are set up correctly so far.
 
 ```shell
->> nix run .#nixidy -- info .#dev
+>> nixidy info .#dev
 Repository: https://github.com/arnarg/nixidy-demo.git
 Branch:     main
 ```
 
-If we now attempt to build this new environment with `nix run .#nixidy -- build .#dev` we can see that nothing is generated but an empty folder called `apps`.
+If we now attempt to build this new environment with `nixidy build .#dev` we can see that nothing is generated but an empty folder called `apps`.
 
 ```shell
 >> tree result

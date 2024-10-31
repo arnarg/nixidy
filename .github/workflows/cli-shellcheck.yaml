@@ -1,12 +1,16 @@
-name: Statix check
+name: CLI shellcheck test
 
 on:
   push:
     branches:
       - main
+    paths:
+      - nixidy/**
   pull_request:
     branches:
       - main
+    paths:
+      - nixidy/**
 
 jobs:
   static-lint:
@@ -23,4 +27,4 @@ jobs:
 
     - name: Run statix
       run: |
-        nix run .#staticCheck
+        nix run .#cliTest
