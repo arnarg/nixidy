@@ -677,8 +677,10 @@
 
 
 <h1 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">#</a></h1>
-<p>Nixidy only supports <a href="https://nixos.wiki/wiki/Flakes">Nix Flakes</a> so that needs to be enabled.</p>
 <h2 id="initialize-repository">Initialize Repository<a class="headerlink" href="#initialize-repository" title="Permanent link">#</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">flakes</label><label for="__tabbed_1_2">flake-less</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
 <p>First a <code>flake.nix</code> needs to be created in the root of the repository.</p>
 <div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
   <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;My ArgoCD configuration with nixidy.&quot;</span><span class="p">;</span>
@@ -719,7 +721,94 @@
   <span class="p">}));</span>
 <span class="p">}</span>
 </code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>In the rest of the guide when running the <code>nixidy</code> cli (e.g. <code>nixidy build</code>) you can use <code>nix run .#nixidy -- build</code> or enter a nix shell with <code>nix develop</code> where <code>nixidy</code> will be available, with the <code>flake.nix</code> example above.</p>
+</div>
 <p>The flake declares a single nixidy environment called <code>dev</code>. It includes a single nix module found at <code>./env/dev.nix</code>, so let's create that.</p>
+</div>
+<div class="tabbed-block">
+<details class="tip">
+<summary>Dependency pinning</summary>
+<p>Instead of using nix channels, the recommended way to use nixidy without flakes is to use either <a href="https://github.com/andir/npins">npins</a> or <a href="https://github.com/nmattia/niv">niv</a> to lock dependency versions in your repository.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">npins</label><label for="__tabbed_2_2">niv</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>First initialize npins:
+<div class="highlight"><pre><span></span><code>npins<span class="w"> </span>init<span class="w"> </span>--bare
+</code></pre></div></p>
+<p>Then add nixidy:
+<div class="highlight"><pre><span></span><code>npins<span class="w"> </span>add<span class="w"> </span>github<span class="w"> </span>arnarg<span class="w"> </span>nixidy<span class="w"> </span>--branch<span class="w"> </span>main<span class="w"> </span><span class="c1"># or --at vx.x.x</span>
+</code></pre></div></p>
+</div>
+<div class="tabbed-block">
+<p>First initialize niv:
+<div class="highlight"><pre><span></span><code>niv<span class="w"> </span>init<span class="w"> </span>--no-nixpkgs
+</code></pre></div></p>
+<p>Then add nixidy:
+<div class="highlight"><pre><span></span><code>niv<span class="w"> </span>add<span class="w"> </span>github<span class="w"> </span>arnarg/nixidy<span class="w"> </span>--branch<span class="w"> </span>main<span class="w"> </span><span class="c1"># or --rev vx.x.x</span>
+</code></pre></div></p>
+</div>
+</div>
+</div>
+</details>
+<p>First a <code>default.nix</code> needs to be created in the root of the repository.</p>
+<div class="highlight"><span class="filename">default.nix</span><pre><span></span><code><span class="k">let</span>
+  <span class="c1"># With npins</span>
+  <span class="ss">sources</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./npins</span><span class="p">;</span>
+  <span class="c1"># With niv</span>
+  <span class="c1"># sources = import ./nix/sources.nix;</span>
+
+  <span class="c1"># Import nixidy</span>
+  <span class="ss">nixidy</span> <span class="o">=</span> <span class="nb">import</span> sources<span class="o">.</span>nixidy <span class="p">{};</span>
+<span class="k">in</span>
+  nixidy<span class="o">.</span>lib<span class="o">.</span>mkEnvs <span class="p">{</span>
+    <span class="c1"># This declares the available nixidy envs.</span>
+    <span class="ss">envs</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="c1"># Currently we only have the one dev env.</span>
+      dev<span class="o">.</span><span class="ss">modules</span> <span class="o">=</span> <span class="p">[</span><span class="l">./env/dev.nix</span><span class="p">];</span>
+    <span class="p">};</span>
+  <span class="p">}</span>
+</code></pre></div>
+<p>It's also a good idea to have <code>shell.nix</code> file in the root of the repository to have the necessary tools available.</p>
+<div class="highlight"><span class="filename">shell.nix</span><pre><span></span><code><span class="k">let</span>
+  <span class="c1"># With npins</span>
+  <span class="ss">sources</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./npins</span><span class="p">;</span>
+  <span class="c1"># With niv</span>
+  <span class="c1"># sources = import ./nix/sources.nix;</span>
+
+  <span class="c1"># nixpkgs added with:</span>
+  <span class="c1">#   npins: `npins add --name nixpkgs channel nixos-unstable`</span>
+  <span class="c1">#   niv: `niv add github nixos/nixpkgs -b nixos-unstable`</span>
+  <span class="ss">nixpkgs</span> <span class="o">=</span> sources<span class="o">.</span>nixpkgs<span class="p">;</span>
+  <span class="ss">pkgs</span> <span class="o">=</span> <span class="nb">import</span> nixpkgs <span class="p">{};</span>
+
+  <span class="c1"># Import nixidy</span>
+  <span class="ss">nixidy</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">../nixidy</span> <span class="p">{</span><span class="k">inherit</span> nixpkgs<span class="p">;};</span>
+<span class="k">in</span>
+  pkgs<span class="o">.</span>mkShellNoCC <span class="p">{</span>
+    <span class="ss">packages</span> <span class="o">=</span> <span class="k">with</span> pkgs<span class="p">;</span> <span class="p">[</span>
+      <span class="c1"># Add nixidy cli</span>
+      nixidy<span class="o">.</span>nixidy
+      <span class="c1"># npins</span>
+      npins
+      <span class="c1"># or niv</span>
+      niv
+    <span class="p">];</span>
+  <span class="p">}</span>
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>In the rest of the guide when running the <code>nixidy</code> cli (e.g. <code>nixidy build</code>) you can run <code>nix-shell</code> to enter a nix shell where <code>nixidy</code> will be a avilable, with the <code>shell.nix</code> example above.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>In the rest of the guide the <code>nixidy</code> commands will also use the flakes format (e.g. <code>nixidy build .#dev</code>), when using a flake-less setup the <code>.#</code> prefix should be removed (e.g. <code>nixidy build dev</code>).</p>
+</div>
+<p>The <code>default.nix</code> file declares a single nixidy environment called <code>dev</code>. It includes a single nix module found at <code>./env/dev.nix</code>, so let's create that.</p>
+</div>
+</div>
+</div>
 <div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
   <span class="c1"># Set the target repository for the rendered manifests</span>
   <span class="c1"># and applications.</span>
@@ -737,12 +826,12 @@
   nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">rootPath</span> <span class="o">=</span> <span class="s2">&quot;./manifests/dev&quot;</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Now running <code>nix run .#nixidy -- info .#dev</code> (or <code>nixidy info .#dev</code> if run in nix shell using <code>nix develop</code>) you can get the same info we just declared above. This verifies that things are set up correctly so far.</p>
-<div class="highlight"><pre><span></span><code>&gt;&gt;<span class="w"> </span>nix<span class="w"> </span>run<span class="w"> </span>.#nixidy<span class="w"> </span>--<span class="w"> </span>info<span class="w"> </span>.#dev
+<p>Now running <code>nixidy info .#dev</code> you can get the same info we just declared above. This verifies that things are set up correctly so far.</p>
+<div class="highlight"><pre><span></span><code>&gt;&gt;<span class="w"> </span>nixidy<span class="w"> </span>info<span class="w"> </span>.#dev
 Repository:<span class="w"> </span>https://github.com/arnarg/nixidy-demo.git
 Branch:<span class="w">     </span>main
 </code></pre></div>
-<p>If we now attempt to build this new environment with <code>nix run .#nixidy -- build .#dev</code> we can see that nothing is generated but an empty folder called <code>apps</code>.</p>
+<p>If we now attempt to build this new environment with <code>nixidy build .#dev</code> we can see that nothing is generated but an empty folder called <code>apps</code>.</p>
 <div class="highlight"><pre><span></span><code>&gt;&gt;<span class="w"> </span>tree<span class="w"> </span>result
 result
 └──<span class="w"> </span>apps/

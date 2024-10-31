@@ -624,6 +624,9 @@
 
 <h1 id="using-nixhelm">Using nixhelm<a class="headerlink" href="#using-nixhelm" title="Permanent link">#</a></h1>
 <p><a href="https://github.com/farcaller/nixhelm">nixhelm</a> is a collection of Helm Charts that can be used with <a href="https://github.com/farcaller/nixhelm">nix-kube-generators</a> and as a result also nixidy. The charts are automatically updated to the most recent version by CI regularly.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">flakes</label><label for="__tabbed_1_2">flake-less</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
 <p>To use with nixidy, pass the nixhelm derivation attribute set to nixidy's <code>mkEnv</code> builder like so.</p>
 <div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
   <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;My ArgoCD configuration with nixidy.&quot;</span><span class="p">;</span>
@@ -663,9 +666,48 @@
   <span class="p">}));</span>
 <span class="p">}</span>
 </code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>To use with nixidy, pass the nixhelm <code>charts/</code> directory to nixidy in a module like so:</p>
+<div class="highlight"><span class="filename">default.nix</span><pre><span></span><code><span class="k">let</span>
+  <span class="c1"># With npins</span>
+  <span class="ss">sources</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./npins</span><span class="p">;</span>
+  <span class="c1"># With niv</span>
+  <span class="c1"># sources = import ./nix/sources.nix;</span>
+
+  <span class="c1"># nixhelm added with:</span>
+  <span class="c1">#   npins: `npins add github farcaller nixhelm --branch master`</span>
+  <span class="c1">#   niv: `niv add github farcaller/nixhelm --branch master`</span>
+  <span class="ss">nixhelm</span> <span class="o">=</span> sources<span class="o">.</span>nixhelm<span class="p">;</span>
+
+  <span class="c1"># Import nixidy</span>
+  <span class="ss">nixidy</span> <span class="o">=</span> <span class="nb">import</span> sources<span class="o">.</span>nixidy <span class="p">{};</span>
+<span class="k">in</span>
+  nixidy<span class="o">.</span>lib<span class="o">.</span>mkEnvs <span class="p">{</span>
+    <span class="c1"># These modules get passed to every env.</span>
+    <span class="ss">modules</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="p">{</span>
+        <span class="c1"># nixhelm is a flake so we can&#39;t just import it</span>
+        <span class="c1"># like we do in flakes (as an input).</span>
+        <span class="c1"># Thankfully the directory structure in nixhelm</span>
+        <span class="c1"># is compatible with the one expected by</span>
+        <span class="c1"># `nixidy.chartsDir`.</span>
+        nixidy<span class="o">.</span><span class="ss">chartsDir</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">${</span>nixhelm<span class="si">}</span><span class="s2">/charts&quot;</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">];</span>
+
+    <span class="c1"># This declares the available nixidy envs.</span>
+    <span class="ss">envs</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="c1"># Currently we only have the one dev env.</span>
+      dev<span class="o">.</span><span class="ss">modules</span> <span class="o">=</span> <span class="p">[</span><span class="l">./env/dev.nix</span><span class="p">];</span>
+    <span class="p">};</span>
+  <span class="p">}</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <p>And then the argument <code>charts</code> will be passed to every module in nixidy.</p>
 <div class="highlight"><span class="filename">./env/dev.nix</span><pre><span></span><code><span class="p">{</span>
-  lib<span class="p">,</span>
   charts<span class="p">,</span>
   <span class="o">...</span>
 <span class="p">}:</span> <span class="p">{</span>
