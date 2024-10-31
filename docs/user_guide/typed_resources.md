@@ -97,6 +97,7 @@ Thankfully a code generator for generating resource options from CRDs is provide
       }
     ```
 
+    Then running `nix-build generate.nix -A cilium` will produce a nix file that can be copied into place in your repository. After that the generated file has to be added to `nixidy.resourceImports` in your nixidy modules.
 
 ```nix title="env/dev.nix"
 {
