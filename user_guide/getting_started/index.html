@@ -784,7 +784,7 @@
   <span class="ss">pkgs</span> <span class="o">=</span> <span class="nb">import</span> nixpkgs <span class="p">{};</span>
 
   <span class="c1"># Import nixidy</span>
-  <span class="ss">nixidy</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">../nixidy</span> <span class="p">{</span><span class="k">inherit</span> nixpkgs<span class="p">;};</span>
+  <span class="ss">nixidy</span> <span class="o">=</span> <span class="nb">import</span> sources<span class="o">.</span>nixidy <span class="p">{</span><span class="k">inherit</span> nixpkgs<span class="p">;};</span>
 <span class="k">in</span>
   pkgs<span class="o">.</span>mkShellNoCC <span class="p">{</span>
     <span class="ss">packages</span> <span class="o">=</span> <span class="k">with</span> pkgs<span class="p">;</span> <span class="p">[</span>

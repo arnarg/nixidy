@@ -633,6 +633,9 @@
 <p>The lack of availability of typed resource options only hinders the ability to define the resources in nix. Any manifests that are rendered from a Helm Chart or defined in <code>applications.&lt;applicationName&gt;.yamls</code> and do not have defined resource options for that group, version and kind will go straight to the output for the application and can not be patched by nixidy.</p>
 <h2 id="generating-your-own-resource-options-from-crds">Generating your own resource options from CRDs<a class="headerlink" href="#generating-your-own-resource-options-from-crds" title="Permanent link">#</a></h2>
 <p>Thankfully a code generator for generating resource options from CRDs is provided by nixidy (this is based heavily on kubenix's code generator).</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">flakes</label><label for="__tabbed_1_2">flake-less</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
 <p>As an example, to generate resource options for Cilium's <code>CiliumNetworkPolicy</code> and <code>CiliumClusterwideNetworkPolicy</code> the following can be defined in <code>flake.nix</code>.</p>
 <div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
   <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;My ArgoCD configuration with nixidy.&quot;</span><span class="p">;</span>
@@ -674,6 +677,43 @@
 <span class="p">}</span>
 </code></pre></div>
 <p>Then running <code>nix build .#generators.cilium</code> will produce a nix file that can be copied into place in your repository. After that the generated file has to be added to <code>nixidy.resourceImports</code> in your nixidy modules.</p>
+</div>
+<div class="tabbed-block">
+<p>As an example, to generate resource options for Cilium's <code>CiliumNetworkPolicy</code> and <code>CiliumClusterwideNetworkPolicy</code> the following can be defined in <code>generate.nix</code>.</p>
+<div class="highlight"><span class="filename">generate.nix</span><pre><span></span><code><span class="k">let</span>
+  <span class="c1"># With npins</span>
+  <span class="ss">sources</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./npins</span><span class="p">;</span>
+  <span class="c1"># With niv</span>
+  <span class="c1"># sources = import ./nix/sources.nix;</span>
+
+  <span class="c1"># nixpkgs added with:</span>
+  <span class="c1">#   npins: `npins add --name nixpkgs channel nixos-unstable`</span>
+  <span class="c1">#   niv: `niv add github nixos/nixpkgs -b nixos-unstable`</span>
+  <span class="ss">nixpkgs</span> <span class="o">=</span> sources<span class="o">.</span>nixpkgs<span class="p">;</span>
+  <span class="ss">pkgs</span> <span class="o">=</span> <span class="nb">import</span> nixpkgs <span class="p">{};</span>
+
+  <span class="c1"># Import nixidy</span>
+  <span class="ss">nixidy</span> <span class="o">=</span> <span class="nb">import</span> sources<span class="o">.</span>nixidy <span class="p">{</span><span class="k">inherit</span> nixpkgs<span class="p">;};</span>
+<span class="k">in</span>
+  <span class="p">{</span>
+    <span class="ss">cilium</span> <span class="o">=</span> nixidy<span class="o">.</span>generators<span class="o">.</span>fromCRD <span class="p">{</span>
+      <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;cilium&quot;</span><span class="p">;</span>
+      <span class="ss">src</span> <span class="o">=</span> pkgs<span class="o">.</span>fetchFromGitHub <span class="p">{</span>
+        <span class="ss">owner</span> <span class="o">=</span> <span class="s2">&quot;cilium&quot;</span><span class="p">;</span>
+        <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;cilium&quot;</span><span class="p">;</span>
+        <span class="ss">rev</span> <span class="o">=</span> <span class="s2">&quot;v1.15.6&quot;</span><span class="p">;</span>
+        <span class="ss">hash</span> <span class="o">=</span> <span class="s2">&quot;sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=&quot;</span><span class="p">;</span>
+      <span class="p">};</span>
+      <span class="ss">crds</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml&quot;</span>
+        <span class="s2">&quot;pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml&quot;</span>
+      <span class="p">];</span>
+    <span class="p">};</span>
+  <span class="p">}</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
   nixidy<span class="o">.</span><span class="ss">resourceImports</span> <span class="o">=</span> <span class="p">[</span>
     <span class="l">./generated/cilium.nix</span>
