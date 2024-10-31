@@ -551,6 +551,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#libhelmmkchartattrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      lib.helm.mkChartAttrs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#libkustomizebuildkustomization" class="md-nav__link">
     <span class="md-ellipsis">
       lib.kustomize.buildKustomization
@@ -677,6 +686,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#libhelmmkchartattrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      lib.helm.mkChartAttrs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#libkustomizebuildkustomization" class="md-nav__link">
     <span class="md-ellipsis">
       lib.kustomize.buildKustomization
@@ -765,6 +783,36 @@ with the output.</p>
   server<span class="o">.</span><span class="ss">replicas</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
   controller<span class="o">.</span><span class="ss">replicas</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
   <span class="c1"># ...</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="libhelmmkchartattrs">lib.helm.mkChartAttrs<a class="headerlink" href="#libhelmmkchartattrs" title="Permanent link">#</a></h2>
+<p><strong>Type</strong>: <code>mkChartAttrs :: Path -&gt; AttrSet</code></p>
+<p>Walk a directory tree and import all <code>default.nix</code> to download helm charts.</p>
+<p>The <code>default.nix</code> needs to have the following format:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+  <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts&quot;</span><span class="p">;</span>
+  <span class="ss">chart</span> <span class="o">=</span> <span class="s2">&quot;csi-driver-nfs&quot;</span><span class="p">;</span>
+  <span class="ss">version</span> <span class="o">=</span> <span class="s2">&quot;4.7.0&quot;</span><span class="p">;</span>
+  <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">&quot;sha256-EU2qaZglUU3vxa41l1p/2yBscksIhYMr8kSgH8t0vL8=&quot;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<dl>
+<dt><code>dir</code></dt>
+<dd>
+<p>Path to a directory containing the correct directory structure described above.</p>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code>mkChartAttrs <span class="l">./charts</span>
+<span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="ss">kubernetes-csi</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ss">csi-driver-nfs</span> <span class="o">=</span> lib<span class="o">.</span>helm<span class="o">.</span>downloadHelmChart <span class="p">{</span>
+      <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts&quot;</span><span class="p">;</span>
+      <span class="ss">chart</span> <span class="o">=</span> <span class="s2">&quot;csi-driver-nfs&quot;</span><span class="p">;</span>
+      <span class="ss">version</span> <span class="o">=</span> <span class="s2">&quot;4.7.0&quot;</span><span class="p">;</span>
+      <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">&quot;sha256-EU2qaZglUU3vxa41l1p/2yBscksIhYMr8kSgH8t0vL8=&quot;</span><span class="p">;</span>
+    <span class="p">};</span>
+  <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
 <h2 id="libkustomizebuildkustomization">lib.kustomize.buildKustomization<a class="headerlink" href="#libkustomizebuildkustomization" title="Permanent link">#</a></h2>

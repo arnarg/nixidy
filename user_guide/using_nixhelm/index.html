@@ -686,14 +686,14 @@
   nixidy<span class="o">.</span>lib<span class="o">.</span>mkEnvs <span class="p">{</span>
     <span class="c1"># These modules get passed to every env.</span>
     <span class="ss">modules</span> <span class="o">=</span> <span class="p">[</span>
-      <span class="p">{</span>
+      <span class="p">({</span>lib<span class="p">,</span> <span class="o">...</span><span class="p">}:</span> <span class="p">{</span>
         <span class="c1"># nixhelm is a flake so we can&#39;t just import it</span>
         <span class="c1"># like we do in flakes (as an input).</span>
         <span class="c1"># Thankfully the directory structure in nixhelm</span>
         <span class="c1"># is compatible with the one expected by</span>
-        <span class="c1"># `nixidy.chartsDir`.</span>
-        nixidy<span class="o">.</span><span class="ss">chartsDir</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">${</span>nixhelm<span class="si">}</span><span class="s2">/charts&quot;</span><span class="p">;</span>
-      <span class="p">}</span>
+        <span class="c1"># `lib.helm.mkChartAttrs`.</span>
+        nixidy<span class="o">.</span><span class="ss">charts</span> <span class="o">=</span> lib<span class="o">.</span>helm<span class="o">.</span>mkChartAttrs <span class="s2">&quot;</span><span class="si">${</span>nixhelm<span class="si">}</span><span class="s2">/charts&quot;</span><span class="p">;</span>
+      <span class="p">})</span>
     <span class="p">];</span>
 
     <span class="c1"># This declares the available nixidy envs.</span>
