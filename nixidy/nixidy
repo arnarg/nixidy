@@ -248,7 +248,8 @@ if [[ -z $COMMAND ]]; then
 fi
 
 # Detect if we should use a flake or flake-less approach
-if [[ $ENV_PARAM =~ ^[a-zA-Z0-9\:\/\.]+#[a-zA-Z0-9\.]*$ ]]; then
+FLAKE_FILTER='^[a-zA-Z0-9\:\/\.\@\_\-]+#[a-zA-Z0-9\.\@\_\-]*$'
+if [[ $ENV_PARAM =~ $FLAKE_FILTER ]]; then
   setFlakeParam
 else
   USE_FLAKE=false
