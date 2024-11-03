@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://arnarg.github.io/nixidy/user_guide/using_nixhelm/">
+        <link rel="canonical" href="https://arnarg.github.io/nixidy/user_guide/git_strategies/">
       
       
-        <link rel="prev" href="../transformers/">
+        <link rel="prev" href="../typed_resources/">
       
       
-        <link rel="next" href="../../library/">
+        <link rel="next" href="../github_actions/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Using nixhelm - nixidy</title>
+        <title>Git Strategies - nixidy</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#using-nixhelm" class="md-skip">
+        <a href="#git-strategies" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Using nixhelm
+              Git Strategies
             
           </span>
         </div>
@@ -370,10 +370,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../git_strategies/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Git Strategies
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -382,6 +402,98 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#monorepo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monorepo
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monorepo">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-branches" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment branches
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment branches">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setup_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-repositories" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment repositories
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment repositories">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setup_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -433,30 +545,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Using nixhelm
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../using_nixhelm/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -465,35 +557,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#provide-your-own-charts-not-available-in-nixhelm" class="md-nav__link">
-    <span class="md-ellipsis">
-      Provide your own charts not available in nixhelm
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -617,11 +680,74 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#provide-your-own-charts-not-available-in-nixhelm" class="md-nav__link">
+  <a href="#monorepo" class="md-nav__link">
     <span class="md-ellipsis">
-      Provide your own charts not available in nixhelm
+      Monorepo
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Monorepo">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-branches" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment branches
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment branches">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setup_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-repositories" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment repositories
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment repositories">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setup_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -643,138 +769,96 @@
   
 
 
-<h1 id="using-nixhelm">Using nixhelm<a class="headerlink" href="#using-nixhelm" title="Permanent link">#</a></h1>
-<p><a href="https://github.com/farcaller/nixhelm">nixhelm</a> is a collection of Helm Charts that can be used with <a href="https://github.com/farcaller/nixhelm">nix-kube-generators</a> and as a result also nixidy. The charts are automatically updated to the most recent version by CI regularly.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">flakes</label><label for="__tabbed_1_2">flake-less</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<p>To use with nixidy, pass the nixhelm derivation attribute set to nixidy's <code>mkEnv</code> builder like so.</p>
-<div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
-  <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;My ArgoCD configuration with nixidy.&quot;</span><span class="p">;</span>
+<h1 id="git-strategies">Git Strategies<a class="headerlink" href="#git-strategies" title="Permanent link">#</a></h1>
+<p>When it comes to planning out how to structure the git repositories for your environments some options are available.</p>
+<h2 id="monorepo">Monorepo<a class="headerlink" href="#monorepo" title="Permanent link">#</a></h2>
+<p>With this strategy everything happens on the <code>main</code>/<code>master</code> branch. With every change to nixidy modules should result in a rebuild and the resulting manifests will be put in a sub-directory on the same branch.</p>
+<p><img alt="Diagram showing the monorepo strategy." src="../../images/monorepo.jpg" /></p>
+<p>The biggest gain from using this strategy is fast iteration locally as any change made to a nixidy module can be previewed by running <code>nixidy switch .#&lt;env&gt;</code> and then followed by <code>git diff</code> to see what has actually changed in the generated manifests.</p>
+<p>This strategy does require more complicated access control mechanism such as <a href="https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners">CODEOWNER file</a> to make sure not everyone can change the generated manifests.</p>
+<h3 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">#</a></h3>
+<p>In a module that's common to all the environment the target repository and branch needs to be set.</p>
+<div class="highlight"><span class="filename">modules/default.nix</span><pre><span></span><code><span class="p">{</span>
+  <span class="c1"># Set the target repository for the rendered manifests</span>
+  <span class="c1"># and applications.</span>
+  <span class="c1"># This should be replaced with yours.</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">repository</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/arnarg/nixidy-demo.git&quot;</span><span class="p">;</span>
 
-  inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:nixos/nixpkgs/nixos-unstable&quot;</span><span class="p">;</span>
-  inputs<span class="o">.</span>flake-utils<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:numtide/flake-utils&quot;</span><span class="p">;</span>
-
-  inputs<span class="o">.</span><span class="ss">nixidy</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:arnarg/nixidy&quot;</span><span class="p">;</span>
-    inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">follows</span> <span class="o">=</span> <span class="s2">&quot;nixpkgs&quot;</span><span class="p">;</span>
-  <span class="p">};</span>
-
-  inputs<span class="o">.</span><span class="ss">nixhelm</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:farcaller/nixhelm&quot;</span><span class="p">;</span>
-    inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">follows</span> <span class="o">=</span> <span class="s2">&quot;nixpkgs&quot;</span><span class="p">;</span>
-  <span class="p">};</span>
-
-  <span class="ss">outputs</span> <span class="o">=</span> <span class="p">{</span>
-    self<span class="p">,</span>
-    nixpkgs<span class="p">,</span>
-    flake-utils<span class="p">,</span>
-    nixidy<span class="p">,</span>
-    nixhelm<span class="p">,</span>
-  <span class="p">}:</span> <span class="p">(</span>flake-utils<span class="o">.</span>lib<span class="o">.</span>eachDefaultSystem <span class="p">(</span>system<span class="p">:</span> <span class="k">let</span>
-    <span class="ss">pkgs</span> <span class="o">=</span> <span class="nb">import</span> nixpkgs <span class="p">{</span>
-      <span class="k">inherit</span> system<span class="p">;</span>
-    <span class="p">};</span>
-  <span class="k">in</span> <span class="p">{</span>
-    nixidyEnvs<span class="o">.</span><span class="ss">dev</span> <span class="o">=</span> nixidy<span class="o">.</span>lib<span class="o">.</span>mkEnv <span class="p">{</span>
-      <span class="k">inherit</span> pkgs<span class="p">;</span>
-
-      <span class="c1"># Pass nixhelm to all nixidy modules.</span>
-      <span class="ss">charts</span> <span class="o">=</span> nixhelm<span class="o">.</span>chartsDerivations<span class="o">.</span><span class="si">${</span>system<span class="si">}</span><span class="p">;</span>
-
-      <span class="ss">modules</span> <span class="o">=</span> <span class="p">[</span><span class="l">./env/dev.nix</span><span class="p">];</span>
-    <span class="p">};</span>
-  <span class="p">}));</span>
+  <span class="c1"># Set the target branch the rendered manifests for every</span>
+  <span class="c1"># environment should be pushed to in the repository defined</span>
+  <span class="c1"># above.</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">branch</span> <span class="o">=</span> <span class="s2">&quot;main&quot;</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
-</div>
-<div class="tabbed-block">
-<p>To use with nixidy, pass the nixhelm <code>charts/</code> directory to nixidy in a module like so:</p>
-<div class="highlight"><span class="filename">default.nix</span><pre><span></span><code><span class="k">let</span>
-  <span class="c1"># With npins</span>
-  <span class="ss">sources</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./npins</span><span class="p">;</span>
-  <span class="c1"># With niv</span>
-  <span class="c1"># sources = import ./nix/sources.nix;</span>
-
-  <span class="c1"># nixhelm added with:</span>
-  <span class="c1">#   npins: `npins add github farcaller nixhelm --branch master`</span>
-  <span class="c1">#   niv: `niv add github farcaller/nixhelm --branch master`</span>
-  <span class="ss">nixhelm</span> <span class="o">=</span> sources<span class="o">.</span>nixhelm<span class="p">;</span>
-
-  <span class="c1"># Import nixidy</span>
-  <span class="ss">nixidy</span> <span class="o">=</span> <span class="nb">import</span> sources<span class="o">.</span>nixidy <span class="p">{};</span>
-<span class="k">in</span>
-  nixidy<span class="o">.</span>lib<span class="o">.</span>mkEnvs <span class="p">{</span>
-    <span class="c1"># These modules get passed to every env.</span>
-    <span class="ss">modules</span> <span class="o">=</span> <span class="p">[</span>
-      <span class="p">({</span>lib<span class="p">,</span> <span class="o">...</span><span class="p">}:</span> <span class="p">{</span>
-        <span class="c1"># nixhelm is a flake so we can&#39;t just import it</span>
-        <span class="c1"># like we do in flakes (as an input).</span>
-        <span class="c1"># Thankfully the directory structure in nixhelm</span>
-        <span class="c1"># is compatible with the one expected by</span>
-        <span class="c1"># `lib.helm.mkChartAttrs`.</span>
-        nixidy<span class="o">.</span><span class="ss">charts</span> <span class="o">=</span> lib<span class="o">.</span>helm<span class="o">.</span>mkChartAttrs <span class="s2">&quot;</span><span class="si">${</span>nixhelm<span class="si">}</span><span class="s2">/charts&quot;</span><span class="p">;</span>
-      <span class="p">})</span>
-    <span class="p">];</span>
-
-    <span class="c1"># This declares the available nixidy envs.</span>
-    <span class="ss">envs</span> <span class="o">=</span> <span class="p">{</span>
-      <span class="c1"># Currently we only have the one dev env.</span>
-      dev<span class="o">.</span><span class="ss">modules</span> <span class="o">=</span> <span class="p">[</span><span class="l">./env/dev.nix</span><span class="p">];</span>
-    <span class="p">};</span>
-  <span class="p">}</span>
-</code></pre></div>
-</div>
-</div>
-</div>
-<p>And then the argument <code>charts</code> will be passed to every module in nixidy.</p>
-<div class="highlight"><span class="filename">./env/dev.nix</span><pre><span></span><code><span class="p">{</span>
-  charts<span class="p">,</span>
-  <span class="o">...</span>
-<span class="p">}:</span> <span class="p">{</span>
-  applications<span class="o">.</span><span class="ss">traefik</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;traefik&quot;</span><span class="p">;</span>
-    <span class="ss">createNamespace</span> <span class="o">=</span> <span class="no">true</span><span class="p">;</span>
-
-    helm<span class="o">.</span>releases<span class="o">.</span><span class="ss">traefik</span> <span class="o">=</span> <span class="p">{</span>
-      <span class="c1"># Use the traefik helm chart from nixhelm.</span>
-      <span class="ss">chart</span> <span class="o">=</span> charts<span class="o">.</span>traefik<span class="o">.</span>traefik<span class="p">;</span>
-
-      <span class="c1"># Example values to pass to the Helm Chart.</span>
-      <span class="ss">values</span> <span class="o">=</span> <span class="p">{</span>
-        ingressClass<span class="o">.</span><span class="ss">enabled</span> <span class="o">=</span> <span class="no">true</span><span class="p">;</span>
-      <span class="p">};</span>
-    <span class="p">};</span>
-  <span class="p">};</span>
+<p>And in a module that's specific to each environment the target root path needs to be set.</p>
+<div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
+  <span class="c1"># Set the target sub-directory to copy the generated</span>
+  <span class="c1"># manifests to when running `nixidy switch .#dev`.</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">rootPath</span> <span class="o">=</span> <span class="s2">&quot;./manifests/dev&quot;</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
-<h2 id="provide-your-own-charts-not-available-in-nixhelm">Provide your own charts not available in nixhelm<a class="headerlink" href="#provide-your-own-charts-not-available-in-nixhelm" title="Permanent link">#</a></h2>
-<p>Not all charts are available in nixhelm and in such cases you can contribute an initial version to them or setup a specific folder structure locally to merge with the <code>charts</code> argument passed to modules.</p>
-<p>With the nixidy option <code>nixidy.chartsDir</code> that folder will be walked recursively and look for <code>default.nix</code> files that will build up the charts attribute set.</p>
-<div class="highlight"><span class="filename">./charts/kubernetes-csi/csi-driver-nfs/default.nix</span><pre><span></span><code><span class="p">{</span>
-  <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts&quot;</span><span class="p">;</span>
-  <span class="ss">chart</span> <span class="o">=</span> <span class="s2">&quot;csi-driver-nfs&quot;</span><span class="p">;</span>
-  <span class="ss">version</span> <span class="o">=</span> <span class="s2">&quot;4.7.0&quot;</span><span class="p">;</span>
-  <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">&quot;sha256-EU2qaZglUU3vxa41l1p/2yBscksIhYMr8kSgH8t0vL8=&quot;</span><span class="p">;</span>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>When using <code>mkEnvs</code> from nixidy, each environment's <code>rootPath</code> is automatically set to <code>./manifests/${dev}</code>.</p>
+</div>
+<h2 id="environment-branches">Environment branches<a class="headerlink" href="#environment-branches" title="Permanent link">#</a></h2>
+<p>With this strategy generated manifests are committed and pushed to separate environment specific branches. As these branches will not share any git history with the <code>main</code> branch or other environment branches (this is not git flow) they need to be created as orphan branches.</p>
+<p><img alt="Diagram showing the environment branches strategy." src="../../images/env-branches.jpg" /></p>
+<p>The biggest gain from this strategy is that it's simpler to implement access control compared to the monorepo, the branches can be setup with basic branch protection rules.</p>
+<h3 id="setup_1">Setup<a class="headerlink" href="#setup_1" title="Permanent link">#</a></h3>
+<p>In a module that's common to all the environments the target repository needs to be set. Unless you want the root path to differ between the environment's that can also be set here.</p>
+<div class="highlight"><span class="filename">modules/default.nix</span><pre><span></span><code><span class="p">{</span>
+  <span class="c1"># Set the target repository for the rendered manifests</span>
+  <span class="c1"># and applications.</span>
+  <span class="c1"># This should be replaced with yours.</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">repository</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/arnarg/nixidy-demo.git&quot;</span><span class="p">;</span>
+
+  <span class="c1"># The generated manifests should be at the root of</span>
+  <span class="c1"># each environment branch.</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">rootPath</span> <span class="o">=</span> <span class="s2">&quot;./&quot;</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>And then in your nixidy modules you pass that <code>./charts</code> folder to <code>nixidy.chartsDir</code>.</p>
-<div class="highlight"><span class="filename">./env/dev.nix</span><pre><span></span><code><span class="p">{</span>charts<span class="p">,</span> <span class="o">...</span><span class="p">}:</span> <span class="p">{</span>
-  <span class="c1"># Point nixidy to a directory with charts to add to</span>
-  <span class="c1"># the charts attribute set.</span>
-  nixidy<span class="o">.</span><span class="ss">chartsDir</span> <span class="o">=</span> <span class="l">../charts</span><span class="p">;</span>
+<p>And in a module that's specific to each environment the target branch needs to be set.</p>
+<div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
+  <span class="c1"># Set the target branch the rendered manifests for _this_</span>
+  <span class="c1"># environment should be pushed to in the repository defined</span>
+  <span class="c1"># above.</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">branch</span> <span class="o">=</span> <span class="s2">&quot;env/dev&quot;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>The environment branches need to be created manually and they <em>need</em> to be created as orphan branches.</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>checkout<span class="w"> </span>--orphan<span class="w"> </span>env/dev
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;# env/dev&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>README.md
+git<span class="w"> </span>add<span class="w"> </span>README.md
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Initial commmit&quot;</span>
+git<span class="w"> </span>push<span class="w"> </span>-u<span class="w"> </span>origin<span class="w"> </span>env/dev
+</code></pre></div>
+</div>
+<h2 id="environment-repositories">Environment repositories<a class="headerlink" href="#environment-repositories" title="Permanent link">#</a></h2>
+<p>With this strategy generated manifests are committed and pushed to separate repositories entirely.</p>
+<p><img alt="Diagram showing the environment repositories strategy." src="../../images/env-repos.jpg" /></p>
+<p>The biggest gain from this strategy is that it's possible to go even further with access control from the environment branches.</p>
+<h3 id="setup_2">Setup<a class="headerlink" href="#setup_2" title="Permanent link">#</a></h3>
+<p>In a module that's common to all the branches only the root path should be set, unless that should differ between the environments.</p>
+<div class="highlight"><span class="filename">modules/default.nix</span><pre><span></span><code><span class="p">{</span>
+  <span class="c1"># The generated manifests should be at the root of</span>
+  <span class="c1"># each environment repository.</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">rootPath</span> <span class="o">=</span> <span class="s2">&quot;./&quot;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>And in a module that's specific to each environment the target repository and target branch needs to be set.</p>
+<div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
+  <span class="c1"># Set the target repository for the rendered manifests</span>
+  <span class="c1"># and applications.</span>
+  <span class="c1"># This should be replaced with yours.</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">repository</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/arnarg/nixidy-demo-dev.git&quot;</span><span class="p">;</span>
 
-  <span class="c1"># Use the nfs chart in an application.</span>
-  applications<span class="o">.</span><span class="ss">csi-driver-nfs</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;kube-system&quot;</span><span class="p">;</span>
-
-    helm<span class="o">.</span>releases<span class="o">.</span><span class="ss">csi-driver-nfs</span> <span class="o">=</span> <span class="p">{</span>
-      <span class="ss">chart</span> <span class="o">=</span> charts<span class="o">.</span>kubernetes-csi<span class="o">.</span>csi-driver-nfs<span class="p">;</span>
-
-      <span class="c1"># Pass some values overrides to the chart.</span>
-      <span class="ss">values</span> <span class="o">=</span> <span class="p">{};</span>
-    <span class="p">};</span>
-  <span class="p">};</span>
+  <span class="c1"># Set the target branch the rendered manifests for _this_</span>
+  <span class="c1"># environment should be pushed to in the repository defined</span>
+  <span class="c1"># above.</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">branch</span> <span class="o">=</span> <span class="s2">&quot;main&quot;</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -808,7 +892,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../transformers/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Transformers">
+          <a href="../typed_resources/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Typed Resource Options">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -818,20 +902,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Transformers
+                Typed Resource Options
               </div>
             </div>
           </a>
         
         
           
-          <a href="../../library/" class="md-footer__link md-footer__link--next" aria-label="Next: Library Functions">
+          <a href="../github_actions/" class="md-footer__link md-footer__link--next" aria-label="Next: GitHub Actions">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Library Functions
+                GitHub Actions
               </div>
             </div>
             <div class="md-footer__button md-icon">
