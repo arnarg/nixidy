@@ -52,8 +52,6 @@ in {
                 "app.kubernetes.io/instance" = "test1";
                 "app.kubernetes.io/managed-by" = "Helm";
                 "app.kubernetes.io/name" = "chart";
-                "app.kubernetes.io/version" = "1.16.0";
-                "helm.sh/chart" = "chart-0.1.0";
               };
               spec.containers = [
                 {
@@ -142,8 +140,6 @@ in {
                 "app.kubernetes.io/instance" = "test1";
                 "app.kubernetes.io/managed-by" = "Helm";
                 "app.kubernetes.io/name" = "chart";
-                "app.kubernetes.io/version" = "1.16.0";
-                "helm.sh/chart" = "chart-0.1.0";
               };
               spec.containers = [
                 {

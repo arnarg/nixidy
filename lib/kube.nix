@@ -92,17 +92,50 @@
     # List of labels that should be removed
     labels:
     # Kubernetes manifest
-    manifest:
-      manifest
-      // {
-        metadata =
-          manifest.metadata
-          // (
-            if manifest.metadata ? labels
-            then {
-              labels = removeAttrs manifest.metadata.labels labels;
-            }
-            else {}
-          );
-      };
+    manifest: let
+      updateFunc = old: removeAttrs old labels;
+
+      hasLabelPath = p: res: (lib.attrByPath p null res) != null;
+
+      specialTemplateKinds = [
+        "Deployment"
+        "ReplicaSet"
+        "StatefulSet"
+        "DaemonSet"
+        "Job"
+      ];
+    in
+      lib.attrsets.updateManyAttrsByPath (
+        # If metadata.labels is present, it should be filtered
+        (lib.optional (manifest.metadata ? labels) {
+          path = ["metadata" "labels"];
+          update = updateFunc;
+        })
+        # If it's one of the special kinds with
+        # spec.template.metadata.labels, that should be filtered
+        # too
+        ++ (lib.optional (
+            (lib.any (k: manifest.kind == k) specialTemplateKinds)
+            && (hasLabelPath ["spec" "template" "metadata" "labels"] manifest)
+          ) {
+            path = ["spec" "template" "metadata" "labels"];
+            update = updateFunc;
+          })
+        # CronJob needs to be filtered differently too
+        ++ (
+          lib.optionals
+          (manifest.kind == "CronJob")
+          (
+            (lib.optional (hasLabelPath ["spec" "jobTemplate" "metadata" "labels"] manifest) {
+              path = ["spec" "jobTemplate" "metadata" "labels"];
+              update = updateFunc;
+            })
+            ++ (lib.optional (hasLabelPath ["spec" "jobTemplate" "spec" "template" "metadata" "labels"] manifest) {
+              path = ["spec" "jobTemplate" "spec" "template" "metadata" "labels"];
+              update = updateFunc;
+            })
+          )
+        )
+      )
+      manifest;
 }
