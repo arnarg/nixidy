@@ -53,8 +53,7 @@
 
   The `default.nix` needs to have the following format:
 
-  ```nix
-  # ./charts/kubernetes-csi/csi-driver-nfs/default.nix
+  ```nix title="./charts/kubernetes-csi/csi-driver-nfs/default.nix"
   {
     repo = "https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts";
     chart = "csi-driver-nfs";
