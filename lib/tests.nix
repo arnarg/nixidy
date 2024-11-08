@@ -207,6 +207,97 @@ in {
           };
         };
       };
+      testCronJobTemplateLabels = {
+        expr = lib.kube.removeLabels ["helm.sh/chart"] {
+          apiVersion = "batch/v1";
+          kind = "CronJob";
+          metadata = {
+            name = "test1-chart";
+            namespace = "test1";
+            labels = {
+              "app.kubernetes.io/instance" = "test1";
+              "app.kubernetes.io/managed-by" = "Helm";
+              "app.kubernetes.io/name" = "chart";
+              "helm.sh/chart" = "chart-0.1.0";
+            };
+          };
+          spec = {
+            schedule = "*/20 * * * *";
+            jobTemplate = {
+              metadata.labels = {
+                "app.kubernetes.io/instance" = "test1";
+                "app.kubernetes.io/managed-by" = "Helm";
+                "app.kubernetes.io/name" = "chart";
+                "helm.sh/chart" = "chart-0.1.0";
+              };
+              spec.template = {
+                metadata.labels = {
+                  "app.kubernetes.io/instance" = "test1";
+                  "app.kubernetes.io/managed-by" = "Helm";
+                  "app.kubernetes.io/name" = "chart";
+                  "helm.sh/chart" = "chart-0.1.0";
+                };
+                spec.containers = [
+                  {
+                    name = "chart";
+                    image = "nginx:latest";
+                    ports = [
+                      {
+                        name = "http";
+                        containerPort = 80;
+                        protocol = "TCP";
+                      }
+                    ];
+                  }
+                ];
+              };
+            };
+          };
+        };
+        expected = {
+          apiVersion = "batch/v1";
+          kind = "CronJob";
+          metadata = {
+            name = "test1-chart";
+            namespace = "test1";
+            labels = {
+              "app.kubernetes.io/instance" = "test1";
+              "app.kubernetes.io/managed-by" = "Helm";
+              "app.kubernetes.io/name" = "chart";
+            };
+          };
+          spec = {
+            schedule = "*/20 * * * *";
+            jobTemplate = {
+              metadata.labels = {
+                "app.kubernetes.io/instance" = "test1";
+                "app.kubernetes.io/managed-by" = "Helm";
+                "app.kubernetes.io/name" = "chart";
+              };
+              spec.template = {
+                metadata.labels = {
+                  "app.kubernetes.io/instance" = "test1";
+                  "app.kubernetes.io/managed-by" = "Helm";
+                  "app.kubernetes.io/name" = "chart";
+                };
+                spec.containers = [
+                  {
+                    name = "chart";
+                    image = "nginx:latest";
+                    ports = [
+                      {
+                        name = "http";
+                        containerPort = 80;
+                        protocol = "TCP";
+                      }
+                    ];
+                  }
+                ];
+              };
+            };
+          };
+        };
+      };
     };
   };
 }
