@@ -298,6 +298,42 @@ in {
           };
         };
       };
+      testDeploymentMatchLabels = {
+        expr = lib.kube.removeLabels ["helm.sh/chart"] {
+          apiVersion = "apps/v1";
+          kind = "Deployment";
+          metadata = {
+            name = "test-deployment";
+            labels = {
+              "app.kubernetes.io/name" = "test";
+              "helm.sh/chart" = "test-chart";
+            };
+          };
+          spec = {
+            replicas = 1;
+            selector.matchLabels = {
+              "app.kubernetes.io/name" = "test";
+              "helm.sh/chart" = "test-chart";
+            };
+          };
+        };
+        expected = {
+          apiVersion = "apps/v1";
+          kind = "Deployment";
+          metadata = {
+            name = "test-deployment";
+            labels = {
+              "app.kubernetes.io/name" = "test";
+            };
+          };
+          spec = {
+            replicas = 1;
+            selector.matchLabels = {
+              "app.kubernetes.io/name" = "test";
+            };
+          };
+        };
+      };
     };
   };
 }
