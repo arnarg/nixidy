@@ -121,6 +121,13 @@
             path = ["spec" "template" "metadata" "labels"];
             update = updateFunc;
           })
+        # Handle Deployment selector matchLabels
+        ++ (lib.optional (
+            (manifest.kind == "Deployment") && (hasLabelPath ["spec" "selector" "matchLabels"] manifest)
+          ) {
+            path = ["spec" "selector" "matchLabels"];
+            update = updateFunc;
+          })
         # CronJob needs to be filtered differently too
         ++ (
           lib.optionals
