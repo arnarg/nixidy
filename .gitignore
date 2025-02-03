@@ -1,2 +1,6 @@
 # nix build result
 result
+
+# aider.chat stuff
+.aider*
+.env
