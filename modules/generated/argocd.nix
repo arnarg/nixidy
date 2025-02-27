@@ -161,11 +161,11 @@ with lib; let
     "argoproj.io.v1alpha1.AppProject" = {
       options = {
         "apiVersion" = mkOption {
-          description = "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources";
+          description = "APIVersion defines the versioned schema of this representation of an object.\nServers should convert recognized schemas to the latest internal value, and\nmay reject unrecognized values.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources";
           type = types.nullOr types.str;
         };
         "kind" = mkOption {
-          description = "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds";
+          description = "Kind is a string value representing the REST resource this object represents.\nServers may infer this from the endpoint the client submits requests to.\nCannot be updated.\nIn CamelCase.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds";
           type = types.nullOr types.str;
         };
         "metadata" = mkOption {
@@ -201,6 +201,10 @@ with lib; let
         "description" = mkOption {
           description = "Description contains optional project description";
           type = types.nullOr types.str;
+        };
+        "destinationServiceAccounts" = mkOption {
+          description = "DestinationServiceAccounts holds information about the service accounts to be impersonated for the application sync operation for each destination.";
+          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.AppProjectSpecDestinationServiceAccounts"));
         };
         "destinations" = mkOption {
           description = "Destinations contains list of destinations available for deployment";
@@ -250,6 +254,7 @@ with lib; let
         "clusterResourceBlacklist" = mkOverride 1002 null;
         "clusterResourceWhitelist" = mkOverride 1002 null;
         "description" = mkOverride 1002 null;
+        "destinationServiceAccounts" = mkOverride 1002 null;
         "destinations" = mkOverride 1002 null;
         "namespaceResourceBlacklist" = mkOverride 1002 null;
         "namespaceResourceWhitelist" = mkOverride 1002 null;
@@ -290,6 +295,26 @@ with lib; let
 
       config = {};
     };
+    "argoproj.io.v1alpha1.AppProjectSpecDestinationServiceAccounts" = {
+      options = {
+        "defaultServiceAccount" = mkOption {
+          description = "DefaultServiceAccount to be used for impersonation during the sync operation";
+          type = types.str;
+        };
+        "namespace" = mkOption {
+          description = "Namespace specifies the target namespace for the application's resources.";
+          type = types.nullOr types.str;
+        };
+        "server" = mkOption {
+          description = "Server specifies the URL of the target cluster's Kubernetes control plane API.";
+          type = types.str;
+        };
+      };
+
+      config = {
+        "namespace" = mkOverride 1002 null;
+      };
+    };
     "argoproj.io.v1alpha1.AppProjectSpecDestinations" = {
       options = {
         "name" = mkOption {
@@ -297,7 +322,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "namespace" = mkOption {
-          description = "Namespace specifies the target namespace for the application's resources. The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace";
+          description = "Namespace specifies the target namespace for the application's resources.\nThe namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace";
           type = types.nullOr types.str;
         };
         "server" = mkOption {
@@ -504,11 +529,11 @@ with lib; let
     "argoproj.io.v1alpha1.Application" = {
       options = {
         "apiVersion" = mkOption {
-          description = "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources";
+          description = "APIVersion defines the versioned schema of this representation of an object.\nServers should convert recognized schemas to the latest internal value, and\nmay reject unrecognized values.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources";
           type = types.nullOr types.str;
         };
         "kind" = mkOption {
-          description = "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds";
+          description = "Kind is a string value representing the REST resource this object represents.\nServers may infer this from the endpoint the client submits requests to.\nCannot be updated.\nIn CamelCase.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds";
           type = types.nullOr types.str;
         };
         "metadata" = mkOption {
@@ -636,6 +661,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationOperationSync" = {
       options = {
+        "autoHealAttemptsCount" = mkOption {
+          description = "SelfHealAttemptsCount contains the number of auto-heal attempts";
+          type = types.nullOr types.int;
+        };
         "dryRun" = mkOption {
           description = "DryRun specifies to perform a `kubectl apply --dry-run` without actually performing the sync";
           type = types.nullOr types.bool;
@@ -654,20 +683,21 @@ with lib; let
           apply = attrsToList;
         };
         "revision" = mkOption {
-          description = "Revision is the revision (Git) or chart version (Helm) which to sync the application to If omitted, will use the revision specified in app spec.";
+          description = "Revision is the revision (Git) or chart version (Helm) which to sync the application to\nIf omitted, will use the revision specified in app spec.";
           type = types.nullOr types.str;
         };
         "revisions" = mkOption {
-          description = "Revisions is the list of revision (Git) or chart version (Helm) which to sync each source in sources field for the application to If omitted, will use the revision specified in app spec.";
+          description = "Revisions is the list of revision (Git) or chart version (Helm) which to sync each source in sources field for the application to\nIf omitted, will use the revision specified in app spec.";
           type = types.nullOr (types.listOf types.str);
         };
         "source" = mkOption {
-          description = "Source overrides the source definition set in the application. This is typically set in a Rollback operation and is nil during a Sync operation";
+          description = "Source overrides the source definition set in the application.\nThis is typically set in a Rollback operation and is nil during a Sync operation";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationOperationSyncSource");
         };
         "sources" = mkOption {
-          description = "Sources overrides the source definition set in the application. This is typically set in a Rollback operation and is nil during a Sync operation";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationOperationSyncSources"));
+          description = "Sources overrides the source definition set in the application.\nThis is typically set in a Rollback operation and is nil during a Sync operation";
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationOperationSyncSources" "name" []);
+          apply = attrsToList;
         };
         "syncOptions" = mkOption {
           description = "SyncOptions provide per-sync sync-options, e.g. Validate=false";
@@ -680,6 +710,7 @@ with lib; let
       };
 
       config = {
+        "autoHealAttemptsCount" = mkOverride 1002 null;
         "dryRun" = mkOverride 1002 null;
         "manifests" = mkOverride 1002 null;
         "prune" = mkOverride 1002 null;
@@ -735,6 +766,10 @@ with lib; let
           description = "Kustomize holds kustomize specific options";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationOperationSyncSourceKustomize");
         };
+        "name" = mkOption {
+          description = "Name is used to refer to a source and is displayed in the UI. It is used in multi-source Applications.";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "Path is a directory path within the Git repository, and is only valid for applications sourced from Git.";
           type = types.nullOr types.str;
@@ -752,7 +787,7 @@ with lib; let
           type = types.str;
         };
         "targetRevision" = mkOption {
-          description = "TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.";
+          description = "TargetRevision defines the revision of the source to sync the application to.\nIn case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD.\nIn case of Helm, this is a semver tag for the Chart's version.";
           type = types.nullOr types.str;
         };
       };
@@ -762,6 +797,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -861,6 +897,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationOperationSyncSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "FileParameters are file parameters to the helm template";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationOperationSyncSourceHelmFileParameters" "name" []);
@@ -869,6 +909,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "Namespace is an optional namespace to template with. If left empty, defaults to the app's destination namespace.";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation";
@@ -885,6 +933,14 @@ with lib; let
         };
         "skipCrds" = mkOption {
           description = "SkipCrds skips custom resource definition installation step (Helm's --skip-crds)";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "SkipSchemaValidation skips JSON schema validation (Helm's --skip-schema-validation)";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
+          description = "SkipTests skips test manifest installation step (Helm's --skip-tests).";
           type = types.nullOr types.bool;
         };
         "valueFiles" = mkOption {
@@ -906,12 +962,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -959,6 +1020,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationOperationSyncSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "CommonAnnotations is a list of additional annotations to add to rendered manifests";
           type = types.nullOr (types.attrsOf types.str);
@@ -986,6 +1051,10 @@ with lib; let
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -1019,6 +1088,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -1026,6 +1096,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -1201,6 +1272,10 @@ with lib; let
           description = "Kustomize holds kustomize specific options";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationOperationSyncSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "Name is used to refer to a source and is displayed in the UI. It is used in multi-source Applications.";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "Path is a directory path within the Git repository, and is only valid for applications sourced from Git.";
           type = types.nullOr types.str;
@@ -1218,7 +1293,7 @@ with lib; let
           type = types.str;
         };
         "targetRevision" = mkOption {
-          description = "TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.";
+          description = "TargetRevision defines the revision of the source to sync the application to.\nIn case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD.\nIn case of Helm, this is a semver tag for the Chart's version.";
           type = types.nullOr types.str;
         };
       };
@@ -1228,6 +1303,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -1327,6 +1403,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationOperationSyncSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "FileParameters are file parameters to the helm template";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationOperationSyncSourcesHelmFileParameters" "name" []);
@@ -1335,6 +1415,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "Namespace is an optional namespace to template with. If left empty, defaults to the app's destination namespace.";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation";
@@ -1351,6 +1439,14 @@ with lib; let
         };
         "skipCrds" = mkOption {
           description = "SkipCrds skips custom resource definition installation step (Helm's --skip-crds)";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "SkipSchemaValidation skips JSON schema validation (Helm's --skip-schema-validation)";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
+          description = "SkipTests skips test manifest installation step (Helm's --skip-tests).";
           type = types.nullOr types.bool;
         };
         "valueFiles" = mkOption {
@@ -1372,12 +1468,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -1425,6 +1526,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationOperationSyncSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "CommonAnnotations is a list of additional annotations to add to rendered manifests";
           type = types.nullOr (types.attrsOf types.str);
@@ -1452,6 +1557,10 @@ with lib; let
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -1485,6 +1594,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -1492,6 +1602,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -1669,7 +1780,7 @@ with lib; let
     "argoproj.io.v1alpha1.ApplicationOperationSyncSyncStrategyApply" = {
       options = {
         "force" = mkOption {
-          description = "Force indicates whether or not to supply the --force flag to `kubectl apply`. The --force flag deletes and re-create the resource, when PATCH encounters conflict and has retried for 5 times.";
+          description = "Force indicates whether or not to supply the --force flag to `kubectl apply`.\nThe --force flag deletes and re-create the resource, when PATCH encounters conflict and has\nretried for 5 times.";
           type = types.nullOr types.bool;
         };
       };
@@ -1681,7 +1792,7 @@ with lib; let
     "argoproj.io.v1alpha1.ApplicationOperationSyncSyncStrategyHook" = {
       options = {
         "force" = mkOption {
-          description = "Force indicates whether or not to supply the --force flag to `kubectl apply`. The --force flag deletes and re-create the resource, when PATCH encounters conflict and has retried for 5 times.";
+          description = "Force indicates whether or not to supply the --force flag to `kubectl apply`.\nThe --force flag deletes and re-create the resource, when PATCH encounters conflict and has\nretried for 5 times.";
           type = types.nullOr types.bool;
         };
       };
@@ -1948,9 +2059,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -1963,6 +2079,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -2062,6 +2179,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -2089,6 +2210,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -2188,6 +2310,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHelmFileParameters" "name" []);
@@ -2196,6 +2322,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -2211,6 +2345,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -2233,12 +2375,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -2284,8 +2431,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -2313,6 +2526,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -2346,6 +2563,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -2353,6 +2571,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -2528,6 +2747,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -2555,6 +2778,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -2654,6 +2878,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -2662,6 +2890,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -2677,6 +2913,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -2699,12 +2943,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -2752,6 +3001,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -2779,6 +3032,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -2812,6 +3069,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -2819,6 +3077,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -3083,6 +3342,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClusters" = {
       options = {
+        "flatList" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "selector" = mkOption {
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersSelector");
@@ -3098,6 +3361,7 @@ with lib; let
       };
 
       config = {
+        "flatList" = mkOverride 1002 null;
         "selector" = mkOverride 1002 null;
         "template" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
@@ -3182,9 +3446,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -3197,6 +3466,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -3296,6 +3566,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -3323,6 +3597,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -3422,6 +3697,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHelmFileParameters" "name" []);
@@ -3430,6 +3709,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -3445,6 +3732,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -3467,12 +3762,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -3518,8 +3818,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -3547,6 +3913,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -3580,6 +3950,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -3587,6 +3958,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -3762,6 +4134,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -3789,6 +4165,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -3888,6 +4265,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -3896,6 +4277,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -3911,6 +4300,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -3933,12 +4330,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -3986,6 +4388,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -4013,6 +4419,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -4046,6 +4456,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -4053,6 +4464,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -4428,9 +4840,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -4443,6 +4860,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -4542,6 +4960,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -4569,6 +4991,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -4668,6 +5091,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceHelmFileParameters" "name" []);
@@ -4676,6 +5103,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -4691,6 +5126,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -4713,12 +5156,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -4764,8 +5212,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -4793,6 +5307,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -4826,6 +5344,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -4833,6 +5352,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -5008,6 +5528,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -5035,6 +5559,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -5134,6 +5659,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -5142,6 +5671,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -5157,6 +5694,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -5179,12 +5724,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -5232,6 +5782,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -5259,6 +5813,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -5292,6 +5850,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -5299,6 +5858,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -5625,9 +6185,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -5640,6 +6205,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -5739,6 +6305,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -5766,6 +6336,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -5865,6 +6436,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceHelmFileParameters" "name" []);
@@ -5873,6 +6448,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -5888,6 +6471,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -5910,12 +6501,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -5961,8 +6557,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -5990,6 +6652,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -6023,6 +6689,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -6030,6 +6697,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -6205,6 +6873,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -6232,6 +6904,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -6331,6 +7004,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -6339,6 +7016,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -6354,6 +7039,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -6376,12 +7069,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -6429,6 +7127,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -6456,6 +7158,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -6489,6 +7195,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -6496,6 +7203,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -6946,9 +7654,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -6961,6 +7674,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -7060,6 +7774,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -7087,6 +7805,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -7186,6 +7905,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHelmFileParameters" "name" []);
@@ -7194,6 +7917,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -7209,6 +7940,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -7231,12 +7970,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -7282,8 +8026,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -7311,6 +8121,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -7344,6 +8158,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -7351,6 +8166,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -7526,6 +8342,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -7553,6 +8373,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -7652,6 +8473,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -7660,6 +8485,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -7675,6 +8508,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -7697,12 +8538,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -7750,6 +8596,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -7777,6 +8627,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -7810,6 +8664,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -7817,6 +8672,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -8081,6 +8937,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusters" = {
       options = {
+        "flatList" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "selector" = mkOption {
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersSelector");
@@ -8096,6 +8956,7 @@ with lib; let
       };
 
       config = {
+        "flatList" = mkOverride 1002 null;
         "selector" = mkOverride 1002 null;
         "template" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
@@ -8180,9 +9041,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -8195,6 +9061,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -8294,6 +9161,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -8321,6 +9192,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -8420,6 +9292,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHelmFileParameters" "name" []);
@@ -8428,6 +9304,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -8443,6 +9327,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -8465,12 +9357,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -8516,8 +9413,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -8545,6 +9508,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -8578,6 +9545,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -8585,6 +9553,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -8760,6 +9729,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -8787,6 +9760,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -8886,6 +9860,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -8894,6 +9872,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -8909,6 +9895,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -8931,12 +9925,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -8984,6 +9983,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -9011,6 +10014,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -9044,6 +10051,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -9051,6 +10059,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -9426,9 +10435,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -9441,6 +10455,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -9540,6 +10555,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -9567,6 +10586,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -9666,6 +10686,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHelmFileParameters" "name" []);
@@ -9674,6 +10698,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -9689,6 +10721,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -9711,12 +10751,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -9762,8 +10807,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -9791,6 +10902,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -9824,6 +10939,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -9831,6 +10947,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -10006,6 +11123,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -10033,6 +11154,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -10132,6 +11254,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -10140,6 +11266,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -10155,6 +11289,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -10177,12 +11319,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -10230,6 +11377,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -10257,6 +11408,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -10290,6 +11445,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -10297,6 +11453,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -10623,9 +11780,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -10638,6 +11800,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -10737,6 +11900,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -10764,6 +11931,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -10863,6 +12031,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHelmFileParameters" "name" []);
@@ -10871,6 +12043,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -10886,6 +12066,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -10908,12 +12096,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -10959,8 +12152,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -10988,6 +12247,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -11021,6 +12284,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -11028,6 +12292,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -11203,6 +12468,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -11230,6 +12499,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -11329,6 +12599,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -11337,6 +12611,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -11352,6 +12634,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -11374,12 +12664,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -11427,6 +12722,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -11454,6 +12753,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -11487,6 +12790,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -11494,6 +12798,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -11851,9 +13156,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPluginTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPluginTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPluginTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPluginTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -11866,6 +13176,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -11965,6 +13276,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPluginTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -11992,6 +13307,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -12091,6 +13407,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPluginTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPluginTemplateSpecSourceHelmFileParameters" "name" []);
@@ -12099,6 +13419,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -12114,6 +13442,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -12136,12 +13472,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -12187,8 +13528,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPluginTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPluginTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPluginTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPluginTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPluginTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPluginTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPluginTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPluginTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -12216,6 +13623,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -12249,6 +13660,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -12256,6 +13668,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -12431,6 +13844,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPluginTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -12458,6 +13875,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -12557,6 +13975,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPluginTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPluginTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -12565,6 +13987,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -12580,6 +14010,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -12602,12 +14040,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -12655,6 +14098,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPluginTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -12682,6 +14129,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -12715,6 +14166,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -12722,6 +14174,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -13176,6 +14629,18 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestBitbucketServerBasicAuth");
         };
+        "bearerToken" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestBitbucketServerBearerToken");
+        };
+        "caRef" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestBitbucketServerCaRef");
+        };
+        "insecure" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "project" = mkOption {
           description = "";
           type = types.str;
@@ -13188,6 +14653,9 @@ with lib; let
 
       config = {
         "basicAuth" = mkOverride 1002 null;
+        "bearerToken" = mkOverride 1002 null;
+        "caRef" = mkOverride 1002 null;
+        "insecure" = mkOverride 1002 null;
       };
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestBitbucketServerBasicAuth" = {
@@ -13211,6 +14679,44 @@ with lib; let
           type = types.str;
         };
         "secretName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestBitbucketServerBearerToken" = {
+      options = {
+        "tokenRef" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestBitbucketServerBearerTokenTokenRef";
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestBitbucketServerBearerTokenTokenRef" = {
+      options = {
+        "key" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "secretName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestBitbucketServerCaRef" = {
+      options = {
+        "configMapName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "key" = mkOption {
           description = "";
           type = types.str;
         };
@@ -13333,6 +14839,10 @@ with lib; let
           description = "";
           type = types.nullOr types.str;
         };
+        "caRef" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestGitlabCaRef");
+        };
         "insecure" = mkOption {
           description = "";
           type = types.nullOr types.bool;
@@ -13357,11 +14867,26 @@ with lib; let
 
       config = {
         "api" = mkOverride 1002 null;
+        "caRef" = mkOverride 1002 null;
         "insecure" = mkOverride 1002 null;
         "labels" = mkOverride 1002 null;
         "pullRequestState" = mkOverride 1002 null;
         "tokenRef" = mkOverride 1002 null;
       };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestGitlabCaRef" = {
+      options = {
+        "configMapName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "key" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestGitlabTokenRef" = {
       options = {
@@ -13419,9 +14944,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -13434,6 +14964,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -13533,6 +15064,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -13560,6 +15095,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -13659,6 +15195,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHelmFileParameters" "name" []);
@@ -13667,6 +15207,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -13682,6 +15230,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -13704,12 +15260,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -13755,8 +15316,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -13784,6 +15411,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -13817,6 +15448,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -13824,6 +15456,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -13999,6 +15632,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -14026,6 +15663,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -14125,6 +15763,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -14133,6 +15775,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -14148,6 +15798,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -14170,12 +15828,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -14223,6 +15886,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -14250,6 +15917,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -14283,6 +15954,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -14290,6 +15962,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -14757,6 +16430,18 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderBitbucketServerBasicAuth");
         };
+        "bearerToken" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderBitbucketServerBearerToken");
+        };
+        "caRef" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderBitbucketServerCaRef");
+        };
+        "insecure" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "project" = mkOption {
           description = "";
           type = types.str;
@@ -14766,6 +16451,9 @@ with lib; let
       config = {
         "allBranches" = mkOverride 1002 null;
         "basicAuth" = mkOverride 1002 null;
+        "bearerToken" = mkOverride 1002 null;
+        "caRef" = mkOverride 1002 null;
+        "insecure" = mkOverride 1002 null;
       };
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderBitbucketServerBasicAuth" = {
@@ -14789,6 +16477,44 @@ with lib; let
           type = types.str;
         };
         "secretName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderBitbucketServerBearerToken" = {
+      options = {
+        "tokenRef" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderBitbucketServerBearerTokenTokenRef";
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderBitbucketServerBearerTokenTokenRef" = {
+      options = {
+        "key" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "secretName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderBitbucketServerCaRef" = {
+      options = {
+        "configMapName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "key" = mkOption {
           description = "";
           type = types.str;
         };
@@ -14927,6 +16653,10 @@ with lib; let
           description = "";
           type = types.nullOr types.str;
         };
+        "caRef" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderGitlabCaRef");
+        };
         "group" = mkOption {
           description = "";
           type = types.str;
@@ -14956,12 +16686,27 @@ with lib; let
       config = {
         "allBranches" = mkOverride 1002 null;
         "api" = mkOverride 1002 null;
+        "caRef" = mkOverride 1002 null;
         "includeSharedProjects" = mkOverride 1002 null;
         "includeSubgroups" = mkOverride 1002 null;
         "insecure" = mkOverride 1002 null;
         "tokenRef" = mkOverride 1002 null;
         "topic" = mkOverride 1002 null;
       };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderGitlabCaRef" = {
+      options = {
+        "configMapName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "key" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderGitlabTokenRef" = {
       options = {
@@ -15019,9 +16764,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -15034,6 +16784,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -15133,6 +16884,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -15160,6 +16915,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -15259,6 +17015,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHelmFileParameters" "name" []);
@@ -15267,6 +17027,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -15282,6 +17050,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -15304,12 +17080,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -15355,8 +17136,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -15384,6 +17231,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -15417,6 +17268,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -15424,6 +17276,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -15599,6 +17452,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -15626,6 +17483,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -15725,6 +17583,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -15733,6 +17595,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -15748,6 +17618,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -15770,12 +17648,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -15823,6 +17706,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -15850,6 +17737,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -15883,6 +17774,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -15890,6 +17782,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -16231,9 +18124,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -16246,6 +18144,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -16345,6 +18244,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -16372,6 +18275,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -16471,6 +18375,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHelmFileParameters" "name" []);
@@ -16479,6 +18387,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -16494,6 +18410,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -16516,12 +18440,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -16567,8 +18496,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -16596,6 +18591,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -16629,6 +18628,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -16636,6 +18636,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -16811,6 +18812,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -16838,6 +18843,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -16937,6 +18943,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -16945,6 +18955,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -16960,6 +18978,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -16982,12 +19008,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -17035,6 +19066,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -17062,6 +19097,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -17095,6 +19134,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -17102,6 +19142,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -17556,9 +19597,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -17571,6 +19617,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -17670,6 +19717,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -17697,6 +19748,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -17796,6 +19848,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHelmFileParameters" "name" []);
@@ -17804,6 +19860,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -17819,6 +19883,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -17841,12 +19913,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -17892,8 +19969,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -17921,6 +20064,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -17954,6 +20101,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -17961,6 +20109,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -18136,6 +20285,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -18163,6 +20316,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -18262,6 +20416,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -18270,6 +20428,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -18285,6 +20451,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -18307,12 +20481,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -18360,6 +20539,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -18387,6 +20570,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -18420,6 +20607,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -18427,6 +20615,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -18691,6 +20880,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusters" = {
       options = {
+        "flatList" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "selector" = mkOption {
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersSelector");
@@ -18706,6 +20899,7 @@ with lib; let
       };
 
       config = {
+        "flatList" = mkOverride 1002 null;
         "selector" = mkOverride 1002 null;
         "template" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
@@ -18790,9 +20984,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -18805,6 +21004,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -18904,6 +21104,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -18931,6 +21135,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -19030,6 +21235,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHelmFileParameters" "name" []);
@@ -19038,6 +21247,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -19053,6 +21270,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -19075,12 +21300,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -19126,8 +21356,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -19155,6 +21451,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -19188,6 +21488,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -19195,6 +21496,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -19370,6 +21672,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -19397,6 +21703,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -19496,6 +21803,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -19504,6 +21815,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -19519,6 +21838,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -19541,12 +21868,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -19594,6 +21926,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -19621,6 +21957,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -19654,6 +21994,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -19661,6 +22002,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -20036,9 +22378,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -20051,6 +22398,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -20150,6 +22498,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -20177,6 +22529,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -20276,6 +22629,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHelmFileParameters" "name" []);
@@ -20284,6 +22641,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -20299,6 +22664,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -20321,12 +22694,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -20372,8 +22750,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -20401,6 +22845,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -20434,6 +22882,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -20441,6 +22890,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -20616,6 +23066,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -20643,6 +23097,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -20742,6 +23197,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -20750,6 +23209,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -20765,6 +23232,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -20787,12 +23262,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -20840,6 +23320,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -20867,6 +23351,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -20900,6 +23388,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -20907,6 +23396,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -21233,9 +23723,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -21248,6 +23743,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -21347,6 +23843,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -21374,6 +23874,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -21473,6 +23974,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHelmFileParameters" "name" []);
@@ -21481,6 +23986,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -21496,6 +24009,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -21518,12 +24039,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -21569,8 +24095,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -21598,6 +24190,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -21631,6 +24227,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -21638,6 +24235,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -21813,6 +24411,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -21840,6 +24442,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -21939,6 +24542,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -21947,6 +24554,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -21962,6 +24577,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -21984,12 +24607,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -22037,6 +24665,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -22064,6 +24696,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -22097,6 +24733,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -22104,6 +24741,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -22461,9 +25099,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPluginTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPluginTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPluginTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPluginTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -22476,6 +25119,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -22575,6 +25219,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPluginTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -22602,6 +25250,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -22701,6 +25350,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPluginTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPluginTemplateSpecSourceHelmFileParameters" "name" []);
@@ -22709,6 +25362,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -22724,6 +25385,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -22746,12 +25415,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -22797,8 +25471,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPluginTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPluginTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPluginTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPluginTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPluginTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPluginTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPluginTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPluginTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -22826,6 +25566,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -22859,6 +25603,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -22866,6 +25611,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -23041,6 +25787,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPluginTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -23068,6 +25818,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -23167,6 +25918,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPluginTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPluginTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -23175,6 +25930,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -23190,6 +25953,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -23212,12 +25983,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -23265,6 +26041,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPluginTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -23292,6 +26072,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -23325,6 +26109,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -23332,6 +26117,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -23786,6 +26572,18 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestBitbucketServerBasicAuth");
         };
+        "bearerToken" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestBitbucketServerBearerToken");
+        };
+        "caRef" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestBitbucketServerCaRef");
+        };
+        "insecure" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "project" = mkOption {
           description = "";
           type = types.str;
@@ -23798,6 +26596,9 @@ with lib; let
 
       config = {
         "basicAuth" = mkOverride 1002 null;
+        "bearerToken" = mkOverride 1002 null;
+        "caRef" = mkOverride 1002 null;
+        "insecure" = mkOverride 1002 null;
       };
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestBitbucketServerBasicAuth" = {
@@ -23821,6 +26622,44 @@ with lib; let
           type = types.str;
         };
         "secretName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestBitbucketServerBearerToken" = {
+      options = {
+        "tokenRef" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestBitbucketServerBearerTokenTokenRef";
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestBitbucketServerBearerTokenTokenRef" = {
+      options = {
+        "key" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "secretName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestBitbucketServerCaRef" = {
+      options = {
+        "configMapName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "key" = mkOption {
           description = "";
           type = types.str;
         };
@@ -23943,6 +26782,10 @@ with lib; let
           description = "";
           type = types.nullOr types.str;
         };
+        "caRef" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestGitlabCaRef");
+        };
         "insecure" = mkOption {
           description = "";
           type = types.nullOr types.bool;
@@ -23967,11 +26810,26 @@ with lib; let
 
       config = {
         "api" = mkOverride 1002 null;
+        "caRef" = mkOverride 1002 null;
         "insecure" = mkOverride 1002 null;
         "labels" = mkOverride 1002 null;
         "pullRequestState" = mkOverride 1002 null;
         "tokenRef" = mkOverride 1002 null;
       };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestGitlabCaRef" = {
+      options = {
+        "configMapName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "key" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestGitlabTokenRef" = {
       options = {
@@ -24029,9 +26887,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -24044,6 +26907,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -24143,6 +27007,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -24170,6 +27038,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -24269,6 +27138,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHelmFileParameters" "name" []);
@@ -24277,6 +27150,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -24292,6 +27173,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -24314,12 +27203,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -24365,8 +27259,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -24394,6 +27354,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -24427,6 +27391,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -24434,6 +27399,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -24609,6 +27575,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -24636,6 +27606,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -24735,6 +27706,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -24743,6 +27718,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -24758,6 +27741,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -24780,12 +27771,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -24833,6 +27829,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -24860,6 +27860,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -24893,6 +27897,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -24900,6 +27905,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -25367,6 +28373,18 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderBitbucketServerBasicAuth");
         };
+        "bearerToken" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderBitbucketServerBearerToken");
+        };
+        "caRef" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderBitbucketServerCaRef");
+        };
+        "insecure" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "project" = mkOption {
           description = "";
           type = types.str;
@@ -25376,6 +28394,9 @@ with lib; let
       config = {
         "allBranches" = mkOverride 1002 null;
         "basicAuth" = mkOverride 1002 null;
+        "bearerToken" = mkOverride 1002 null;
+        "caRef" = mkOverride 1002 null;
+        "insecure" = mkOverride 1002 null;
       };
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderBitbucketServerBasicAuth" = {
@@ -25399,6 +28420,44 @@ with lib; let
           type = types.str;
         };
         "secretName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderBitbucketServerBearerToken" = {
+      options = {
+        "tokenRef" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderBitbucketServerBearerTokenTokenRef";
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderBitbucketServerBearerTokenTokenRef" = {
+      options = {
+        "key" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "secretName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderBitbucketServerCaRef" = {
+      options = {
+        "configMapName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "key" = mkOption {
           description = "";
           type = types.str;
         };
@@ -25537,6 +28596,10 @@ with lib; let
           description = "";
           type = types.nullOr types.str;
         };
+        "caRef" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderGitlabCaRef");
+        };
         "group" = mkOption {
           description = "";
           type = types.str;
@@ -25566,12 +28629,27 @@ with lib; let
       config = {
         "allBranches" = mkOverride 1002 null;
         "api" = mkOverride 1002 null;
+        "caRef" = mkOverride 1002 null;
         "includeSharedProjects" = mkOverride 1002 null;
         "includeSubgroups" = mkOverride 1002 null;
         "insecure" = mkOverride 1002 null;
         "tokenRef" = mkOverride 1002 null;
         "topic" = mkOverride 1002 null;
       };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderGitlabCaRef" = {
+      options = {
+        "configMapName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "key" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderGitlabTokenRef" = {
       options = {
@@ -25629,9 +28707,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -25644,6 +28727,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -25743,6 +28827,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -25770,6 +28858,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -25869,6 +28958,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHelmFileParameters" "name" []);
@@ -25877,6 +28970,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -25892,6 +28993,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -25914,12 +29023,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -25965,8 +29079,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -25994,6 +29174,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -26027,6 +29211,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -26034,6 +29219,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -26209,6 +29395,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -26236,6 +29426,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -26335,6 +29526,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -26343,6 +29538,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -26358,6 +29561,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -26380,12 +29591,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -26433,6 +29649,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -26460,6 +29680,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -26493,6 +29717,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -26500,6 +29725,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -26841,9 +30067,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -26856,6 +30087,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -26955,6 +30187,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -26982,6 +30218,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -27081,6 +30318,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHelmFileParameters" "name" []);
@@ -27089,6 +30330,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -27104,6 +30353,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -27126,12 +30383,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -27177,8 +30439,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -27206,6 +30534,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -27239,6 +30571,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -27246,6 +30579,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -27421,6 +30755,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -27448,6 +30786,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -27547,6 +30886,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -27555,6 +30898,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -27570,6 +30921,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -27592,12 +30951,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -27645,6 +31009,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -27672,6 +31040,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -27705,6 +31077,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -27712,6 +31085,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -28069,9 +31443,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPluginTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPluginTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPluginTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPluginTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -28084,6 +31463,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -28183,6 +31563,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPluginTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -28210,6 +31594,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -28309,6 +31694,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPluginTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPluginTemplateSpecSourceHelmFileParameters" "name" []);
@@ -28317,6 +31706,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -28332,6 +31729,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -28354,12 +31759,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -28405,8 +31815,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPluginTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPluginTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPluginTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPluginTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPluginTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPluginTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPluginTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPluginTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -28434,6 +31910,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -28467,6 +31947,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -28474,6 +31955,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -28649,6 +32131,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPluginTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -28676,6 +32162,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -28775,6 +32262,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPluginTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPluginTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -28783,6 +32274,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -28798,6 +32297,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -28820,12 +32327,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -28873,6 +32385,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPluginTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -28900,6 +32416,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -28933,6 +32453,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -28940,6 +32461,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -29394,6 +32916,18 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestBitbucketServerBasicAuth");
         };
+        "bearerToken" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestBitbucketServerBearerToken");
+        };
+        "caRef" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestBitbucketServerCaRef");
+        };
+        "insecure" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "project" = mkOption {
           description = "";
           type = types.str;
@@ -29406,6 +32940,9 @@ with lib; let
 
       config = {
         "basicAuth" = mkOverride 1002 null;
+        "bearerToken" = mkOverride 1002 null;
+        "caRef" = mkOverride 1002 null;
+        "insecure" = mkOverride 1002 null;
       };
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestBitbucketServerBasicAuth" = {
@@ -29429,6 +32966,44 @@ with lib; let
           type = types.str;
         };
         "secretName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestBitbucketServerBearerToken" = {
+      options = {
+        "tokenRef" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestBitbucketServerBearerTokenTokenRef";
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestBitbucketServerBearerTokenTokenRef" = {
+      options = {
+        "key" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "secretName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestBitbucketServerCaRef" = {
+      options = {
+        "configMapName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "key" = mkOption {
           description = "";
           type = types.str;
         };
@@ -29551,6 +33126,10 @@ with lib; let
           description = "";
           type = types.nullOr types.str;
         };
+        "caRef" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestGitlabCaRef");
+        };
         "insecure" = mkOption {
           description = "";
           type = types.nullOr types.bool;
@@ -29575,11 +33154,26 @@ with lib; let
 
       config = {
         "api" = mkOverride 1002 null;
+        "caRef" = mkOverride 1002 null;
         "insecure" = mkOverride 1002 null;
         "labels" = mkOverride 1002 null;
         "pullRequestState" = mkOverride 1002 null;
         "tokenRef" = mkOverride 1002 null;
       };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestGitlabCaRef" = {
+      options = {
+        "configMapName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "key" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestGitlabTokenRef" = {
       options = {
@@ -29637,9 +33231,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -29652,6 +33251,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -29751,6 +33351,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -29778,6 +33382,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -29877,6 +33482,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHelmFileParameters" "name" []);
@@ -29885,6 +33494,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -29900,6 +33517,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -29922,12 +33547,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -29973,8 +33603,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -30002,6 +33698,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -30035,6 +33735,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -30042,6 +33743,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -30217,6 +33919,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -30244,6 +33950,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -30343,6 +34050,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -30351,6 +34062,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -30366,6 +34085,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -30388,12 +34115,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -30441,6 +34173,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -30468,6 +34204,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -30501,6 +34241,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -30508,6 +34249,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -30975,6 +34717,18 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderBitbucketServerBasicAuth");
         };
+        "bearerToken" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderBitbucketServerBearerToken");
+        };
+        "caRef" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderBitbucketServerCaRef");
+        };
+        "insecure" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "project" = mkOption {
           description = "";
           type = types.str;
@@ -30984,6 +34738,9 @@ with lib; let
       config = {
         "allBranches" = mkOverride 1002 null;
         "basicAuth" = mkOverride 1002 null;
+        "bearerToken" = mkOverride 1002 null;
+        "caRef" = mkOverride 1002 null;
+        "insecure" = mkOverride 1002 null;
       };
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderBitbucketServerBasicAuth" = {
@@ -31007,6 +34764,44 @@ with lib; let
           type = types.str;
         };
         "secretName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderBitbucketServerBearerToken" = {
+      options = {
+        "tokenRef" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderBitbucketServerBearerTokenTokenRef";
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderBitbucketServerBearerTokenTokenRef" = {
+      options = {
+        "key" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "secretName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderBitbucketServerCaRef" = {
+      options = {
+        "configMapName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "key" = mkOption {
           description = "";
           type = types.str;
         };
@@ -31145,6 +34940,10 @@ with lib; let
           description = "";
           type = types.nullOr types.str;
         };
+        "caRef" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderGitlabCaRef");
+        };
         "group" = mkOption {
           description = "";
           type = types.str;
@@ -31174,12 +34973,27 @@ with lib; let
       config = {
         "allBranches" = mkOverride 1002 null;
         "api" = mkOverride 1002 null;
+        "caRef" = mkOverride 1002 null;
         "includeSharedProjects" = mkOverride 1002 null;
         "includeSubgroups" = mkOverride 1002 null;
         "insecure" = mkOverride 1002 null;
         "tokenRef" = mkOverride 1002 null;
         "topic" = mkOverride 1002 null;
       };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderGitlabCaRef" = {
+      options = {
+        "configMapName" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "key" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderGitlabTokenRef" = {
       options = {
@@ -31237,9 +35051,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -31252,6 +35071,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -31351,6 +35171,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -31378,6 +35202,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -31477,6 +35302,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHelmFileParameters" "name" []);
@@ -31485,6 +35314,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -31500,6 +35337,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -31522,12 +35367,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -31573,8 +35423,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -31602,6 +35518,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -31635,6 +35555,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -31642,6 +35563,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -31817,6 +35739,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -31844,6 +35770,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -31943,6 +35870,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -31951,6 +35882,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -31966,6 +35905,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -31988,12 +35935,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -32041,6 +35993,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -32068,6 +36024,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -32101,6 +36061,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -32108,6 +36069,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -32573,9 +36535,14 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecTemplateSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecTemplateSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecTemplateSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecTemplateSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "";
@@ -32588,6 +36555,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -32687,6 +36655,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecTemplateSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -32714,6 +36686,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -32813,6 +36786,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecTemplateSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecTemplateSpecSourceHelmFileParameters" "name" []);
@@ -32821,6 +36798,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -32836,6 +36821,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -32858,12 +36851,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -32909,8 +36907,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetSpecTemplateSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecTemplateSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecTemplateSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecTemplateSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecTemplateSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecTemplateSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSetSpecTemplateSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSetSpecTemplateSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -32938,6 +37002,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -32971,6 +37039,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -32978,6 +37047,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -33153,6 +37223,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecTemplateSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "";
           type = types.nullOr types.str;
@@ -33180,6 +37254,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -33279,6 +37354,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecTemplateSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetSpecTemplateSpecSourcesHelmFileParameters" "name" []);
@@ -33287,6 +37366,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "";
@@ -33302,6 +37389,14 @@ with lib; let
           type = types.nullOr types.str;
         };
         "skipCrds" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
           description = "";
           type = types.nullOr types.bool;
         };
@@ -33324,12 +37419,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -33377,6 +37477,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecTemplateSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "";
           type = types.nullOr (types.attrsOf types.str);
@@ -33404,6 +37508,10 @@ with lib; let
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -33437,6 +37545,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -33444,6 +37553,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -33716,11 +37826,17 @@ with lib; let
           description = "";
           type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSetStatusConditions"));
         };
+        "resources" = mkOption {
+          description = "";
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSetStatusResources" "name" []);
+          apply = attrsToList;
+        };
       };
 
       config = {
         "applicationStatus" = mkOverride 1002 null;
         "conditions" = mkOverride 1002 null;
+        "resources" = mkOverride 1002 null;
       };
     };
     "argoproj.io.v1alpha1.ApplicationSetStatusApplicationStatus" = {
@@ -33744,6 +37860,10 @@ with lib; let
         "step" = mkOption {
           description = "";
           type = types.str;
+        };
+        "targetRevisions" = mkOption {
+          description = "";
+          type = types.listOf types.str;
         };
       };
 
@@ -33779,6 +37899,90 @@ with lib; let
         "lastTransitionTime" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSetStatusResources" = {
+      options = {
+        "group" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "health" = mkOption {
+          description = "";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetStatusResourcesHealth");
+        };
+        "hook" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "kind" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "name" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "requiresDeletionConfirmation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "requiresPruning" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
+        "status" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "syncWave" = mkOption {
+          description = "";
+          type = types.nullOr types.int;
+        };
+        "version" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+      };
+
+      config = {
+        "group" = mkOverride 1002 null;
+        "health" = mkOverride 1002 null;
+        "hook" = mkOverride 1002 null;
+        "kind" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
+        "requiresDeletionConfirmation" = mkOverride 1002 null;
+        "requiresPruning" = mkOverride 1002 null;
+        "status" = mkOverride 1002 null;
+        "syncWave" = mkOverride 1002 null;
+        "version" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSetStatusResourcesHealth" = {
+      options = {
+        "lastTransitionTime" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "message" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "status" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+      };
+
+      config = {
+        "lastTransitionTime" = mkOverride 1002 null;
+        "message" = mkOverride 1002 null;
+        "status" = mkOverride 1002 null;
+      };
+    };
     "argoproj.io.v1alpha1.ApplicationSpec" = {
       options = {
         "destination" = mkOption {
@@ -33796,20 +38000,25 @@ with lib; let
           apply = attrsToList;
         };
         "project" = mkOption {
-          description = "Project is a reference to the project this application belongs to. The empty string means that application belongs to the 'default' project.";
+          description = "Project is a reference to the project this application belongs to.\nThe empty string means that application belongs to the 'default' project.";
           type = types.str;
         };
         "revisionHistoryLimit" = mkOption {
-          description = "RevisionHistoryLimit limits the number of items kept in the application's revision history, which is used for informational purposes as well as for rollbacks to previous versions. This should only be changed in exceptional circumstances. Setting to zero will store no history. This will reduce storage used. Increasing will increase the space used to store the history, so we do not recommend increasing it. Default is 10.";
+          description = "RevisionHistoryLimit limits the number of items kept in the application's revision history, which is used for informational purposes as well as for rollbacks to previous versions.\nThis should only be changed in exceptional circumstances.\nSetting to zero will store no history. This will reduce storage used.\nIncreasing will increase the space used to store the history, so we do not recommend increasing it.\nDefault is 10.";
           type = types.nullOr types.int;
         };
         "source" = mkOption {
           description = "Source is a reference to the location of the application's manifests or chart";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSpecSource");
         };
+        "sourceHydrator" = mkOption {
+          description = "SourceHydrator provides a way to push hydrated manifests back to git before syncing them to the cluster.";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSpecSourceHydrator");
+        };
         "sources" = mkOption {
           description = "Sources is a reference to the location of the application's manifests or chart";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationSpecSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSpecSources" "name" []);
+          apply = attrsToList;
         };
         "syncPolicy" = mkOption {
           description = "SyncPolicy controls when and how a sync will be performed";
@@ -33822,6 +38031,7 @@ with lib; let
         "info" = mkOverride 1002 null;
         "revisionHistoryLimit" = mkOverride 1002 null;
         "source" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sources" = mkOverride 1002 null;
         "syncPolicy" = mkOverride 1002 null;
       };
@@ -33833,7 +38043,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "namespace" = mkOption {
-          description = "Namespace specifies the target namespace for the application's resources. The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace";
+          description = "Namespace specifies the target namespace for the application's resources.\nThe namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace";
           type = types.nullOr types.str;
         };
         "server" = mkOption {
@@ -33867,7 +38077,7 @@ with lib; let
           type = types.str;
         };
         "managedFieldsManagers" = mkOption {
-          description = "ManagedFieldsManagers is a list of trusted managers. Fields mutated by those managers will take precedence over the desired state defined in the SCM and won't be displayed in diffs";
+          description = "ManagedFieldsManagers is a list of trusted managers. Fields mutated by those managers will take precedence over the\ndesired state defined in the SCM and won't be displayed in diffs";
           type = types.nullOr (types.listOf types.str);
         };
         "name" = mkOption {
@@ -33921,6 +38131,10 @@ with lib; let
           description = "Kustomize holds kustomize specific options";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSpecSourceKustomize");
         };
+        "name" = mkOption {
+          description = "Name is used to refer to a source and is displayed in the UI. It is used in multi-source Applications.";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "Path is a directory path within the Git repository, and is only valid for applications sourced from Git.";
           type = types.nullOr types.str;
@@ -33938,7 +38152,7 @@ with lib; let
           type = types.str;
         };
         "targetRevision" = mkOption {
-          description = "TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.";
+          description = "TargetRevision defines the revision of the source to sync the application to.\nIn case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD.\nIn case of Helm, this is a semver tag for the Chart's version.";
           type = types.nullOr types.str;
         };
       };
@@ -33948,6 +38162,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -34047,6 +38262,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSpecSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "FileParameters are file parameters to the helm template";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSpecSourceHelmFileParameters" "name" []);
@@ -34055,6 +38274,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "Namespace is an optional namespace to template with. If left empty, defaults to the app's destination namespace.";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation";
@@ -34071,6 +38298,14 @@ with lib; let
         };
         "skipCrds" = mkOption {
           description = "SkipCrds skips custom resource definition installation step (Helm's --skip-crds)";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "SkipSchemaValidation skips JSON schema validation (Helm's --skip-schema-validation)";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
+          description = "SkipTests skips test manifest installation step (Helm's --skip-tests).";
           type = types.nullOr types.bool;
         };
         "valueFiles" = mkOption {
@@ -34092,12 +38327,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -34143,8 +38383,74 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "argoproj.io.v1alpha1.ApplicationSpecSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "DrySource specifies where the dry \"don't repeat yourself\" manifest source lives.";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSpecSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "HydrateTo specifies an optional \"staging\" location to push hydrated manifests to. An external system would then\nhave to move manifests to the SyncSource, e.g. by pull request.";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSpecSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "SyncSource specifies where to sync hydrated manifests from.";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationSpecSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationSpecSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "Path is a directory path within the Git repository where the manifests are located";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "RepoURL is the URL to the git repository that contains the application manifests";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "TargetRevision defines the revision of the source to hydrate";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSpecSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "TargetBranch is the branch to which hydrated manifests should be committed";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationSpecSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "Path is a directory path within the git repository where hydrated manifests should be committed to and synced\nfrom. If hydrateTo is set, this is just the path from which hydrated manifests will be synced.";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "TargetBranch is the branch to which hydrated manifests should be committed";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
     "argoproj.io.v1alpha1.ApplicationSpecSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "CommonAnnotations is a list of additional annotations to add to rendered manifests";
           type = types.nullOr (types.attrsOf types.str);
@@ -34172,6 +38478,10 @@ with lib; let
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -34205,6 +38515,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -34212,6 +38523,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -34387,6 +38699,10 @@ with lib; let
           description = "Kustomize holds kustomize specific options";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSpecSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "Name is used to refer to a source and is displayed in the UI. It is used in multi-source Applications.";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "Path is a directory path within the Git repository, and is only valid for applications sourced from Git.";
           type = types.nullOr types.str;
@@ -34404,7 +38720,7 @@ with lib; let
           type = types.str;
         };
         "targetRevision" = mkOption {
-          description = "TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.";
+          description = "TargetRevision defines the revision of the source to sync the application to.\nIn case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD.\nIn case of Helm, this is a semver tag for the Chart's version.";
           type = types.nullOr types.str;
         };
       };
@@ -34414,6 +38730,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -34513,6 +38830,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSpecSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "FileParameters are file parameters to the helm template";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationSpecSourcesHelmFileParameters" "name" []);
@@ -34521,6 +38842,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "Namespace is an optional namespace to template with. If left empty, defaults to the app's destination namespace.";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation";
@@ -34537,6 +38866,14 @@ with lib; let
         };
         "skipCrds" = mkOption {
           description = "SkipCrds skips custom resource definition installation step (Helm's --skip-crds)";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "SkipSchemaValidation skips JSON schema validation (Helm's --skip-schema-validation)";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
+          description = "SkipTests skips test manifest installation step (Helm's --skip-tests).";
           type = types.nullOr types.bool;
         };
         "valueFiles" = mkOption {
@@ -34558,12 +38895,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -34611,6 +38953,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationSpecSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "CommonAnnotations is a list of additional annotations to add to rendered manifests";
           type = types.nullOr (types.attrsOf types.str);
@@ -34638,6 +38984,10 @@ with lib; let
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -34671,6 +39021,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -34678,6 +39029,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -34959,7 +39311,7 @@ with lib; let
           type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusHistory"));
         };
         "observedAt" = mkOption {
-          description = "ObservedAt indicates when the application state was updated without querying latest git state Deprecated: controller no longer updates ObservedAt field";
+          description = "ObservedAt indicates when the application state was updated without querying latest git state\nDeprecated: controller no longer updates ObservedAt field";
           type = types.nullOr types.str;
         };
         "operationState" = mkOption {
@@ -34978,6 +39330,10 @@ with lib; let
           description = "Resources is a list of Kubernetes resources managed by this application";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationStatusResources" "name" []);
           apply = attrsToList;
+        };
+        "sourceHydrator" = mkOption {
+          description = "SourceHydrator stores information about the current state of source hydration";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusSourceHydrator");
         };
         "sourceType" = mkOption {
           description = "SourceType specifies the type of this application";
@@ -35007,6 +39363,7 @@ with lib; let
         "reconciledAt" = mkOverride 1002 null;
         "resourceHealthSource" = mkOverride 1002 null;
         "resources" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
         "sourceType" = mkOverride 1002 null;
         "sourceTypes" = mkOverride 1002 null;
         "summary" = mkOverride 1002 null;
@@ -35035,6 +39392,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationStatusHealth" = {
       options = {
+        "lastTransitionTime" = mkOption {
+          description = "LastTransitionTime is the time the HealthStatus was set or updated";
+          type = types.nullOr types.str;
+        };
         "message" = mkOption {
           description = "Message is a human-readable informational message describing the health status";
           type = types.nullOr types.str;
@@ -35046,6 +39407,7 @@ with lib; let
       };
 
       config = {
+        "lastTransitionTime" = mkOverride 1002 null;
         "message" = mkOverride 1002 null;
         "status" = mkOverride 1002 null;
       };
@@ -35082,7 +39444,8 @@ with lib; let
         };
         "sources" = mkOption {
           description = "Sources is a reference to the application sources used for the sync operation";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusHistorySources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationStatusHistorySources" "name" []);
+          apply = attrsToList;
         };
       };
 
@@ -35130,6 +39493,10 @@ with lib; let
           description = "Kustomize holds kustomize specific options";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusHistorySourceKustomize");
         };
+        "name" = mkOption {
+          description = "Name is used to refer to a source and is displayed in the UI. It is used in multi-source Applications.";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "Path is a directory path within the Git repository, and is only valid for applications sourced from Git.";
           type = types.nullOr types.str;
@@ -35147,7 +39514,7 @@ with lib; let
           type = types.str;
         };
         "targetRevision" = mkOption {
-          description = "TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.";
+          description = "TargetRevision defines the revision of the source to sync the application to.\nIn case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD.\nIn case of Helm, this is a semver tag for the Chart's version.";
           type = types.nullOr types.str;
         };
       };
@@ -35157,6 +39524,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -35256,6 +39624,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationStatusHistorySourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "FileParameters are file parameters to the helm template";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationStatusHistorySourceHelmFileParameters" "name" []);
@@ -35264,6 +39636,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "Namespace is an optional namespace to template with. If left empty, defaults to the app's destination namespace.";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation";
@@ -35280,6 +39660,14 @@ with lib; let
         };
         "skipCrds" = mkOption {
           description = "SkipCrds skips custom resource definition installation step (Helm's --skip-crds)";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "SkipSchemaValidation skips JSON schema validation (Helm's --skip-schema-validation)";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
+          description = "SkipTests skips test manifest installation step (Helm's --skip-tests).";
           type = types.nullOr types.bool;
         };
         "valueFiles" = mkOption {
@@ -35301,12 +39689,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -35354,6 +39747,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationStatusHistorySourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "CommonAnnotations is a list of additional annotations to add to rendered manifests";
           type = types.nullOr (types.attrsOf types.str);
@@ -35381,6 +39778,10 @@ with lib; let
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -35414,6 +39815,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -35421,6 +39823,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -35596,6 +39999,10 @@ with lib; let
           description = "Kustomize holds kustomize specific options";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusHistorySourcesKustomize");
         };
+        "name" = mkOption {
+          description = "Name is used to refer to a source and is displayed in the UI. It is used in multi-source Applications.";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "Path is a directory path within the Git repository, and is only valid for applications sourced from Git.";
           type = types.nullOr types.str;
@@ -35613,7 +40020,7 @@ with lib; let
           type = types.str;
         };
         "targetRevision" = mkOption {
-          description = "TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.";
+          description = "TargetRevision defines the revision of the source to sync the application to.\nIn case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD.\nIn case of Helm, this is a semver tag for the Chart's version.";
           type = types.nullOr types.str;
         };
       };
@@ -35623,6 +40030,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -35722,6 +40130,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationStatusHistorySourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "FileParameters are file parameters to the helm template";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationStatusHistorySourcesHelmFileParameters" "name" []);
@@ -35730,6 +40142,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "Namespace is an optional namespace to template with. If left empty, defaults to the app's destination namespace.";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation";
@@ -35746,6 +40166,14 @@ with lib; let
         };
         "skipCrds" = mkOption {
           description = "SkipCrds skips custom resource definition installation step (Helm's --skip-crds)";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "SkipSchemaValidation skips JSON schema validation (Helm's --skip-schema-validation)";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
+          description = "SkipTests skips test manifest installation step (Helm's --skip-tests).";
           type = types.nullOr types.bool;
         };
         "valueFiles" = mkOption {
@@ -35767,12 +40195,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -35820,6 +40253,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationStatusHistorySourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "CommonAnnotations is a list of additional annotations to add to rendered manifests";
           type = types.nullOr (types.attrsOf types.str);
@@ -35847,6 +40284,10 @@ with lib; let
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -35880,6 +40321,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -35887,6 +40329,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -36183,6 +40626,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationStatusOperationStateOperationSync" = {
       options = {
+        "autoHealAttemptsCount" = mkOption {
+          description = "SelfHealAttemptsCount contains the number of auto-heal attempts";
+          type = types.nullOr types.int;
+        };
         "dryRun" = mkOption {
           description = "DryRun specifies to perform a `kubectl apply --dry-run` without actually performing the sync";
           type = types.nullOr types.bool;
@@ -36201,20 +40648,21 @@ with lib; let
           apply = attrsToList;
         };
         "revision" = mkOption {
-          description = "Revision is the revision (Git) or chart version (Helm) which to sync the application to If omitted, will use the revision specified in app spec.";
+          description = "Revision is the revision (Git) or chart version (Helm) which to sync the application to\nIf omitted, will use the revision specified in app spec.";
           type = types.nullOr types.str;
         };
         "revisions" = mkOption {
-          description = "Revisions is the list of revision (Git) or chart version (Helm) which to sync each source in sources field for the application to If omitted, will use the revision specified in app spec.";
+          description = "Revisions is the list of revision (Git) or chart version (Helm) which to sync each source in sources field for the application to\nIf omitted, will use the revision specified in app spec.";
           type = types.nullOr (types.listOf types.str);
         };
         "source" = mkOption {
-          description = "Source overrides the source definition set in the application. This is typically set in a Rollback operation and is nil during a Sync operation";
+          description = "Source overrides the source definition set in the application.\nThis is typically set in a Rollback operation and is nil during a Sync operation";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusOperationStateOperationSyncSource");
         };
         "sources" = mkOption {
-          description = "Sources overrides the source definition set in the application. This is typically set in a Rollback operation and is nil during a Sync operation";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusOperationStateOperationSyncSources"));
+          description = "Sources overrides the source definition set in the application.\nThis is typically set in a Rollback operation and is nil during a Sync operation";
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationStatusOperationStateOperationSyncSources" "name" []);
+          apply = attrsToList;
         };
         "syncOptions" = mkOption {
           description = "SyncOptions provide per-sync sync-options, e.g. Validate=false";
@@ -36227,6 +40675,7 @@ with lib; let
       };
 
       config = {
+        "autoHealAttemptsCount" = mkOverride 1002 null;
         "dryRun" = mkOverride 1002 null;
         "manifests" = mkOverride 1002 null;
         "prune" = mkOverride 1002 null;
@@ -36282,6 +40731,10 @@ with lib; let
           description = "Kustomize holds kustomize specific options";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceKustomize");
         };
+        "name" = mkOption {
+          description = "Name is used to refer to a source and is displayed in the UI. It is used in multi-source Applications.";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "Path is a directory path within the Git repository, and is only valid for applications sourced from Git.";
           type = types.nullOr types.str;
@@ -36299,7 +40752,7 @@ with lib; let
           type = types.str;
         };
         "targetRevision" = mkOption {
-          description = "TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.";
+          description = "TargetRevision defines the revision of the source to sync the application to.\nIn case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD.\nIn case of Helm, this is a semver tag for the Chart's version.";
           type = types.nullOr types.str;
         };
       };
@@ -36309,6 +40762,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -36408,6 +40862,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "FileParameters are file parameters to the helm template";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceHelmFileParameters" "name" []);
@@ -36416,6 +40874,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "Namespace is an optional namespace to template with. If left empty, defaults to the app's destination namespace.";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation";
@@ -36432,6 +40898,14 @@ with lib; let
         };
         "skipCrds" = mkOption {
           description = "SkipCrds skips custom resource definition installation step (Helm's --skip-crds)";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "SkipSchemaValidation skips JSON schema validation (Helm's --skip-schema-validation)";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
+          description = "SkipTests skips test manifest installation step (Helm's --skip-tests).";
           type = types.nullOr types.bool;
         };
         "valueFiles" = mkOption {
@@ -36453,12 +40927,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -36506,6 +40985,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "CommonAnnotations is a list of additional annotations to add to rendered manifests";
           type = types.nullOr (types.attrsOf types.str);
@@ -36533,6 +41016,10 @@ with lib; let
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -36566,6 +41053,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -36573,6 +41061,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -36748,6 +41237,10 @@ with lib; let
           description = "Kustomize holds kustomize specific options";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusOperationStateOperationSyncSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "Name is used to refer to a source and is displayed in the UI. It is used in multi-source Applications.";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "Path is a directory path within the Git repository, and is only valid for applications sourced from Git.";
           type = types.nullOr types.str;
@@ -36765,7 +41258,7 @@ with lib; let
           type = types.str;
         };
         "targetRevision" = mkOption {
-          description = "TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.";
+          description = "TargetRevision defines the revision of the source to sync the application to.\nIn case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD.\nIn case of Helm, this is a semver tag for the Chart's version.";
           type = types.nullOr types.str;
         };
       };
@@ -36775,6 +41268,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -36874,6 +41368,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationStatusOperationStateOperationSyncSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "FileParameters are file parameters to the helm template";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationStatusOperationStateOperationSyncSourcesHelmFileParameters" "name" []);
@@ -36882,6 +41380,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "Namespace is an optional namespace to template with. If left empty, defaults to the app's destination namespace.";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation";
@@ -36898,6 +41404,14 @@ with lib; let
         };
         "skipCrds" = mkOption {
           description = "SkipCrds skips custom resource definition installation step (Helm's --skip-crds)";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "SkipSchemaValidation skips JSON schema validation (Helm's --skip-schema-validation)";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
+          description = "SkipTests skips test manifest installation step (Helm's --skip-tests).";
           type = types.nullOr types.bool;
         };
         "valueFiles" = mkOption {
@@ -36919,12 +41433,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -36972,6 +41491,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationStatusOperationStateOperationSyncSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "CommonAnnotations is a list of additional annotations to add to rendered manifests";
           type = types.nullOr (types.attrsOf types.str);
@@ -36999,6 +41522,10 @@ with lib; let
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -37032,6 +41559,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -37039,6 +41567,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -37216,7 +41745,7 @@ with lib; let
     "argoproj.io.v1alpha1.ApplicationStatusOperationStateOperationSyncSyncStrategyApply" = {
       options = {
         "force" = mkOption {
-          description = "Force indicates whether or not to supply the --force flag to `kubectl apply`. The --force flag deletes and re-create the resource, when PATCH encounters conflict and has retried for 5 times.";
+          description = "Force indicates whether or not to supply the --force flag to `kubectl apply`.\nThe --force flag deletes and re-create the resource, when PATCH encounters conflict and has\nretried for 5 times.";
           type = types.nullOr types.bool;
         };
       };
@@ -37228,7 +41757,7 @@ with lib; let
     "argoproj.io.v1alpha1.ApplicationStatusOperationStateOperationSyncSyncStrategyHook" = {
       options = {
         "force" = mkOption {
-          description = "Force indicates whether or not to supply the --force flag to `kubectl apply`. The --force flag deletes and re-create the resource, when PATCH encounters conflict and has retried for 5 times.";
+          description = "Force indicates whether or not to supply the --force flag to `kubectl apply`.\nThe --force flag deletes and re-create the resource, when PATCH encounters conflict and has\nretried for 5 times.";
           type = types.nullOr types.bool;
         };
       };
@@ -37262,7 +41791,8 @@ with lib; let
         };
         "sources" = mkOption {
           description = "Source records the application source information of the sync, used for comparing auto-sync";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusOperationStateSyncResultSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationStatusOperationStateSyncResultSources" "name" []);
+          apply = attrsToList;
         };
       };
 
@@ -37298,7 +41828,7 @@ with lib; let
           type = types.str;
         };
         "hookPhase" = mkOption {
-          description = "HookPhase contains the state of any operation associated with this resource OR hook This can also contain values for non-hook resources.";
+          description = "HookPhase contains the state of any operation associated with this resource OR hook\nThis can also contain values for non-hook resources.";
           type = types.nullOr types.str;
         };
         "hookType" = mkOption {
@@ -37361,6 +41891,10 @@ with lib; let
           description = "Kustomize holds kustomize specific options";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusOperationStateSyncResultSourceKustomize");
         };
+        "name" = mkOption {
+          description = "Name is used to refer to a source and is displayed in the UI. It is used in multi-source Applications.";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "Path is a directory path within the Git repository, and is only valid for applications sourced from Git.";
           type = types.nullOr types.str;
@@ -37378,7 +41912,7 @@ with lib; let
           type = types.str;
         };
         "targetRevision" = mkOption {
-          description = "TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.";
+          description = "TargetRevision defines the revision of the source to sync the application to.\nIn case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD.\nIn case of Helm, this is a semver tag for the Chart's version.";
           type = types.nullOr types.str;
         };
       };
@@ -37388,6 +41922,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -37487,6 +42022,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationStatusOperationStateSyncResultSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "FileParameters are file parameters to the helm template";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationStatusOperationStateSyncResultSourceHelmFileParameters" "name" []);
@@ -37495,6 +42034,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "Namespace is an optional namespace to template with. If left empty, defaults to the app's destination namespace.";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation";
@@ -37511,6 +42058,14 @@ with lib; let
         };
         "skipCrds" = mkOption {
           description = "SkipCrds skips custom resource definition installation step (Helm's --skip-crds)";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "SkipSchemaValidation skips JSON schema validation (Helm's --skip-schema-validation)";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
+          description = "SkipTests skips test manifest installation step (Helm's --skip-tests).";
           type = types.nullOr types.bool;
         };
         "valueFiles" = mkOption {
@@ -37532,12 +42087,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -37585,6 +42145,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationStatusOperationStateSyncResultSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "CommonAnnotations is a list of additional annotations to add to rendered manifests";
           type = types.nullOr (types.attrsOf types.str);
@@ -37612,6 +42176,10 @@ with lib; let
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -37645,6 +42213,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -37652,6 +42221,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -37827,6 +42397,10 @@ with lib; let
           description = "Kustomize holds kustomize specific options";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusOperationStateSyncResultSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "Name is used to refer to a source and is displayed in the UI. It is used in multi-source Applications.";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "Path is a directory path within the Git repository, and is only valid for applications sourced from Git.";
           type = types.nullOr types.str;
@@ -37844,7 +42418,7 @@ with lib; let
           type = types.str;
         };
         "targetRevision" = mkOption {
-          description = "TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.";
+          description = "TargetRevision defines the revision of the source to sync the application to.\nIn case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD.\nIn case of Helm, this is a semver tag for the Chart's version.";
           type = types.nullOr types.str;
         };
       };
@@ -37854,6 +42428,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -37953,6 +42528,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationStatusOperationStateSyncResultSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "FileParameters are file parameters to the helm template";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationStatusOperationStateSyncResultSourcesHelmFileParameters" "name" []);
@@ -37961,6 +42540,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "Namespace is an optional namespace to template with. If left empty, defaults to the app's destination namespace.";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation";
@@ -37977,6 +42564,14 @@ with lib; let
         };
         "skipCrds" = mkOption {
           description = "SkipCrds skips custom resource definition installation step (Helm's --skip-crds)";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "SkipSchemaValidation skips JSON schema validation (Helm's --skip-schema-validation)";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
+          description = "SkipTests skips test manifest installation step (Helm's --skip-tests).";
           type = types.nullOr types.bool;
         };
         "valueFiles" = mkOption {
@@ -37998,12 +42593,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -38051,6 +42651,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationStatusOperationStateSyncResultSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "CommonAnnotations is a list of additional annotations to add to rendered manifests";
           type = types.nullOr (types.attrsOf types.str);
@@ -38078,6 +42682,10 @@ with lib; let
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -38111,6 +42719,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -38118,6 +42727,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -38301,6 +42911,10 @@ with lib; let
           description = "";
           type = types.nullOr types.str;
         };
+        "requiresDeletionConfirmation" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "requiresPruning" = mkOption {
           description = "";
           type = types.nullOr types.bool;
@@ -38326,6 +42940,7 @@ with lib; let
         "kind" = mkOverride 1002 null;
         "name" = mkOverride 1002 null;
         "namespace" = mkOverride 1002 null;
+        "requiresDeletionConfirmation" = mkOverride 1002 null;
         "requiresPruning" = mkOverride 1002 null;
         "status" = mkOverride 1002 null;
         "syncWave" = mkOverride 1002 null;
@@ -38334,6 +42949,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationStatusResourcesHealth" = {
       options = {
+        "lastTransitionTime" = mkOption {
+          description = "LastTransitionTime is the time the HealthStatus was set or updated";
+          type = types.nullOr types.str;
+        };
         "message" = mkOption {
           description = "Message is a human-readable informational message describing the health status";
           type = types.nullOr types.str;
@@ -38345,9 +42964,213 @@ with lib; let
       };
 
       config = {
+        "lastTransitionTime" = mkOverride 1002 null;
         "message" = mkOverride 1002 null;
         "status" = mkOverride 1002 null;
       };
+    };
+    "argoproj.io.v1alpha1.ApplicationStatusSourceHydrator" = {
+      options = {
+        "currentOperation" = mkOption {
+          description = "CurrentOperation holds the status of the hydrate operation";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorCurrentOperation");
+        };
+        "lastSuccessfulOperation" = mkOption {
+          description = "LastSuccessfulOperation holds info about the most recent successful hydration";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorLastSuccessfulOperation");
+        };
+      };
+
+      config = {
+        "currentOperation" = mkOverride 1002 null;
+        "lastSuccessfulOperation" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorCurrentOperation" = {
+      options = {
+        "drySHA" = mkOption {
+          description = "DrySHA holds the resolved revision (sha) of the dry source as of the most recent reconciliation";
+          type = types.nullOr types.str;
+        };
+        "finishedAt" = mkOption {
+          description = "FinishedAt indicates when the hydrate operation finished";
+          type = types.nullOr types.str;
+        };
+        "hydratedSHA" = mkOption {
+          description = "HydratedSHA holds the resolved revision (sha) of the hydrated source as of the most recent reconciliation";
+          type = types.nullOr types.str;
+        };
+        "message" = mkOption {
+          description = "Message contains a message describing the current status of the hydrate operation";
+          type = types.str;
+        };
+        "phase" = mkOption {
+          description = "Phase indicates the status of the hydrate operation";
+          type = types.str;
+        };
+        "sourceHydrator" = mkOption {
+          description = "SourceHydrator holds the hydrator config used for the hydrate operation";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorCurrentOperationSourceHydrator");
+        };
+        "startedAt" = mkOption {
+          description = "StartedAt indicates when the hydrate operation started";
+          type = types.nullOr types.str;
+        };
+      };
+
+      config = {
+        "drySHA" = mkOverride 1002 null;
+        "finishedAt" = mkOverride 1002 null;
+        "hydratedSHA" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
+        "startedAt" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorCurrentOperationSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "DrySource specifies where the dry \"don't repeat yourself\" manifest source lives.";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorCurrentOperationSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "HydrateTo specifies an optional \"staging\" location to push hydrated manifests to. An external system would then\nhave to move manifests to the SyncSource, e.g. by pull request.";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorCurrentOperationSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "SyncSource specifies where to sync hydrated manifests from.";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorCurrentOperationSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorCurrentOperationSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "Path is a directory path within the Git repository where the manifests are located";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "RepoURL is the URL to the git repository that contains the application manifests";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "TargetRevision defines the revision of the source to hydrate";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorCurrentOperationSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "TargetBranch is the branch to which hydrated manifests should be committed";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorCurrentOperationSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "Path is a directory path within the git repository where hydrated manifests should be committed to and synced\nfrom. If hydrateTo is set, this is just the path from which hydrated manifests will be synced.";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "TargetBranch is the branch to which hydrated manifests should be committed";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorLastSuccessfulOperation" = {
+      options = {
+        "drySHA" = mkOption {
+          description = "DrySHA holds the resolved revision (sha) of the dry source as of the most recent reconciliation";
+          type = types.nullOr types.str;
+        };
+        "hydratedSHA" = mkOption {
+          description = "HydratedSHA holds the resolved revision (sha) of the hydrated source as of the most recent reconciliation";
+          type = types.nullOr types.str;
+        };
+        "sourceHydrator" = mkOption {
+          description = "SourceHydrator holds the hydrator config used for the hydrate operation";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorLastSuccessfulOperationSourceHydrator");
+        };
+      };
+
+      config = {
+        "drySHA" = mkOverride 1002 null;
+        "hydratedSHA" = mkOverride 1002 null;
+        "sourceHydrator" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorLastSuccessfulOperationSourceHydrator" = {
+      options = {
+        "drySource" = mkOption {
+          description = "DrySource specifies where the dry \"don't repeat yourself\" manifest source lives.";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorLastSuccessfulOperationSourceHydratorDrySource";
+        };
+        "hydrateTo" = mkOption {
+          description = "HydrateTo specifies an optional \"staging\" location to push hydrated manifests to. An external system would then\nhave to move manifests to the SyncSource, e.g. by pull request.";
+          type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorLastSuccessfulOperationSourceHydratorHydrateTo");
+        };
+        "syncSource" = mkOption {
+          description = "SyncSource specifies where to sync hydrated manifests from.";
+          type = submoduleOf "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorLastSuccessfulOperationSourceHydratorSyncSource";
+        };
+      };
+
+      config = {
+        "hydrateTo" = mkOverride 1002 null;
+      };
+    };
+    "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorLastSuccessfulOperationSourceHydratorDrySource" = {
+      options = {
+        "path" = mkOption {
+          description = "Path is a directory path within the Git repository where the manifests are located";
+          type = types.str;
+        };
+        "repoURL" = mkOption {
+          description = "RepoURL is the URL to the git repository that contains the application manifests";
+          type = types.str;
+        };
+        "targetRevision" = mkOption {
+          description = "TargetRevision defines the revision of the source to hydrate";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorLastSuccessfulOperationSourceHydratorHydrateTo" = {
+      options = {
+        "targetBranch" = mkOption {
+          description = "TargetBranch is the branch to which hydrated manifests should be committed";
+          type = types.str;
+        };
+      };
+
+      config = {};
+    };
+    "argoproj.io.v1alpha1.ApplicationStatusSourceHydratorLastSuccessfulOperationSourceHydratorSyncSource" = {
+      options = {
+        "path" = mkOption {
+          description = "Path is a directory path within the git repository where hydrated manifests should be committed to and synced\nfrom. If hydrateTo is set, this is just the path from which hydrated manifests will be synced.";
+          type = types.str;
+        };
+        "targetBranch" = mkOption {
+          description = "TargetBranch is the branch to which hydrated manifests should be committed";
+          type = types.str;
+        };
+      };
+
+      config = {};
     };
     "argoproj.io.v1alpha1.ApplicationStatusSummary" = {
       options = {
@@ -38409,7 +43232,8 @@ with lib; let
         };
         "sources" = mkOption {
           description = "Sources is a reference to the application's multiple sources used for comparison";
-          type = types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusSyncComparedToSources"));
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationStatusSyncComparedToSources" "name" []);
+          apply = attrsToList;
         };
       };
 
@@ -38426,7 +43250,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "namespace" = mkOption {
-          description = "Namespace specifies the target namespace for the application's resources. The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace";
+          description = "Namespace specifies the target namespace for the application's resources.\nThe namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace";
           type = types.nullOr types.str;
         };
         "server" = mkOption {
@@ -38460,7 +43284,7 @@ with lib; let
           type = types.str;
         };
         "managedFieldsManagers" = mkOption {
-          description = "ManagedFieldsManagers is a list of trusted managers. Fields mutated by those managers will take precedence over the desired state defined in the SCM and won't be displayed in diffs";
+          description = "ManagedFieldsManagers is a list of trusted managers. Fields mutated by those managers will take precedence over the\ndesired state defined in the SCM and won't be displayed in diffs";
           type = types.nullOr (types.listOf types.str);
         };
         "name" = mkOption {
@@ -38500,6 +43324,10 @@ with lib; let
           description = "Kustomize holds kustomize specific options";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusSyncComparedToSourceKustomize");
         };
+        "name" = mkOption {
+          description = "Name is used to refer to a source and is displayed in the UI. It is used in multi-source Applications.";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "Path is a directory path within the Git repository, and is only valid for applications sourced from Git.";
           type = types.nullOr types.str;
@@ -38517,7 +43345,7 @@ with lib; let
           type = types.str;
         };
         "targetRevision" = mkOption {
-          description = "TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.";
+          description = "TargetRevision defines the revision of the source to sync the application to.\nIn case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD.\nIn case of Helm, this is a semver tag for the Chart's version.";
           type = types.nullOr types.str;
         };
       };
@@ -38527,6 +43355,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -38626,6 +43455,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationStatusSyncComparedToSourceHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "FileParameters are file parameters to the helm template";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationStatusSyncComparedToSourceHelmFileParameters" "name" []);
@@ -38634,6 +43467,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "Namespace is an optional namespace to template with. If left empty, defaults to the app's destination namespace.";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation";
@@ -38650,6 +43491,14 @@ with lib; let
         };
         "skipCrds" = mkOption {
           description = "SkipCrds skips custom resource definition installation step (Helm's --skip-crds)";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "SkipSchemaValidation skips JSON schema validation (Helm's --skip-schema-validation)";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
+          description = "SkipTests skips test manifest installation step (Helm's --skip-tests).";
           type = types.nullOr types.bool;
         };
         "valueFiles" = mkOption {
@@ -38671,12 +43520,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -38724,6 +43578,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationStatusSyncComparedToSourceKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "CommonAnnotations is a list of additional annotations to add to rendered manifests";
           type = types.nullOr (types.attrsOf types.str);
@@ -38751,6 +43609,10 @@ with lib; let
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -38784,6 +43646,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -38791,6 +43654,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -38966,6 +43830,10 @@ with lib; let
           description = "Kustomize holds kustomize specific options";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusSyncComparedToSourcesKustomize");
         };
+        "name" = mkOption {
+          description = "Name is used to refer to a source and is displayed in the UI. It is used in multi-source Applications.";
+          type = types.nullOr types.str;
+        };
         "path" = mkOption {
           description = "Path is a directory path within the Git repository, and is only valid for applications sourced from Git.";
           type = types.nullOr types.str;
@@ -38983,7 +43851,7 @@ with lib; let
           type = types.str;
         };
         "targetRevision" = mkOption {
-          description = "TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.";
+          description = "TargetRevision defines the revision of the source to sync the application to.\nIn case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD.\nIn case of Helm, this is a semver tag for the Chart's version.";
           type = types.nullOr types.str;
         };
       };
@@ -38993,6 +43861,7 @@ with lib; let
         "directory" = mkOverride 1002 null;
         "helm" = mkOverride 1002 null;
         "kustomize" = mkOverride 1002 null;
+        "name" = mkOverride 1002 null;
         "path" = mkOverride 1002 null;
         "plugin" = mkOverride 1002 null;
         "ref" = mkOverride 1002 null;
@@ -39092,6 +43961,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationStatusSyncComparedToSourcesHelm" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "fileParameters" = mkOption {
           description = "FileParameters are file parameters to the helm template";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.ApplicationStatusSyncComparedToSourcesHelmFileParameters" "name" []);
@@ -39100,6 +43973,14 @@ with lib; let
         "ignoreMissingValueFiles" = mkOption {
           description = "IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values";
           type = types.nullOr types.bool;
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
+        };
+        "namespace" = mkOption {
+          description = "Namespace is an optional namespace to template with. If left empty, defaults to the app's destination namespace.";
+          type = types.nullOr types.str;
         };
         "parameters" = mkOption {
           description = "Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation";
@@ -39116,6 +43997,14 @@ with lib; let
         };
         "skipCrds" = mkOption {
           description = "SkipCrds skips custom resource definition installation step (Helm's --skip-crds)";
+          type = types.nullOr types.bool;
+        };
+        "skipSchemaValidation" = mkOption {
+          description = "SkipSchemaValidation skips JSON schema validation (Helm's --skip-schema-validation)";
+          type = types.nullOr types.bool;
+        };
+        "skipTests" = mkOption {
+          description = "SkipTests skips test manifest installation step (Helm's --skip-tests).";
           type = types.nullOr types.bool;
         };
         "valueFiles" = mkOption {
@@ -39137,12 +44026,17 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "fileParameters" = mkOverride 1002 null;
         "ignoreMissingValueFiles" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
+        "namespace" = mkOverride 1002 null;
         "parameters" = mkOverride 1002 null;
         "passCredentials" = mkOverride 1002 null;
         "releaseName" = mkOverride 1002 null;
         "skipCrds" = mkOverride 1002 null;
+        "skipSchemaValidation" = mkOverride 1002 null;
+        "skipTests" = mkOverride 1002 null;
         "valueFiles" = mkOverride 1002 null;
         "values" = mkOverride 1002 null;
         "valuesObject" = mkOverride 1002 null;
@@ -39190,6 +44084,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.ApplicationStatusSyncComparedToSourcesKustomize" = {
       options = {
+        "apiVersions" = mkOption {
+          description = "APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,\nArgo CD uses the API versions of the target cluster. The format is [group/]version/kind.";
+          type = types.nullOr (types.listOf types.str);
+        };
         "commonAnnotations" = mkOption {
           description = "CommonAnnotations is a list of additional annotations to add to rendered manifests";
           type = types.nullOr (types.attrsOf types.str);
@@ -39217,6 +44115,10 @@ with lib; let
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
+        };
+        "kubeVersion" = mkOption {
+          description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
+          type = types.nullOr types.str;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -39250,6 +44152,7 @@ with lib; let
       };
 
       config = {
+        "apiVersions" = mkOverride 1002 null;
         "commonAnnotations" = mkOverride 1002 null;
         "commonAnnotationsEnvsubst" = mkOverride 1002 null;
         "commonLabels" = mkOverride 1002 null;
@@ -39257,6 +44160,7 @@ with lib; let
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
+        "kubeVersion" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -39421,7 +44325,7 @@ in {
     resources =
       {
         "argoproj.io"."v1alpha1"."AppProject" = mkOption {
-          description = "AppProject provides a logical grouping of applications, providing controls for: * where the apps may deploy to (cluster whitelist) * what may be deployed (repository whitelist, resource whitelist/blacklist) * who can access these applications (roles, OIDC group claims bindings) * and what they can do (RBAC policies) * automation access to these roles (JWT tokens)";
+          description = "AppProject provides a logical grouping of applications, providing controls for:\n* where the apps may deploy to (cluster whitelist)\n* what may be deployed (repository whitelist, resource whitelist/blacklist)\n* who can access these applications (roles, OIDC group claims bindings)\n* and what they can do (RBAC policies)\n* automation access to these roles (JWT tokens)";
           type = types.attrsOf (submoduleForDefinition "argoproj.io.v1alpha1.AppProject" "appprojects" "AppProject" "argoproj.io" "v1alpha1");
           default = {};
         };
@@ -39438,7 +44342,7 @@ in {
       }
       // {
         "appProjects" = mkOption {
-          description = "AppProject provides a logical grouping of applications, providing controls for: * where the apps may deploy to (cluster whitelist) * what may be deployed (repository whitelist, resource whitelist/blacklist) * who can access these applications (roles, OIDC group claims bindings) * and what they can do (RBAC policies) * automation access to these roles (JWT tokens)";
+          description = "AppProject provides a logical grouping of applications, providing controls for:\n* where the apps may deploy to (cluster whitelist)\n* what may be deployed (repository whitelist, resource whitelist/blacklist)\n* who can access these applications (roles, OIDC group claims bindings)\n* and what they can do (RBAC policies)\n* automation access to these roles (JWT tokens)";
           type = types.attrsOf (submoduleForDefinition "argoproj.io.v1alpha1.AppProject" "appprojects" "AppProject" "argoproj.io" "v1alpha1");
           default = {};
         };

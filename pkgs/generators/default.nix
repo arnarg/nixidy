@@ -18,8 +18,8 @@ in {
     src = pkgs.fetchFromGitHub {
       owner = "argoproj";
       repo = "argo-cd";
-      rev = "v2.12.3";
-      hash = "sha256-qSrMqByhOitRltYaVjIeubuoTR74x/pQ1Ad+uTPdpJU=";
+      rev = "v2.14.2";
+      hash = "sha256-HiKTJ6X8py/mIcU+jSRonvYBxQMZ6Onzmu0/SorvPKg=";
     };
     crds = [
       "manifests/crds/application-crd.yaml"
