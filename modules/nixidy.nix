@@ -20,6 +20,10 @@
       };
     };
 in {
+  imports = [
+    (lib.mkRenamedOptionModule ["nixidy" "defaults" "syncPolicy" "autoSync" "enabled"] ["nixidy" "defaults" "syncPolicy" "autoSync" "enable"])
+  ];
+
   options.nixidy = with lib; {
     target = {
       repository = mkOption {
@@ -87,7 +91,7 @@ in {
 
       syncPolicy = {
         autoSync = {
-          enabled = mkOption {
+          enable = mkOption {
             type = types.bool;
             default = false;
             description = ''
@@ -208,7 +212,7 @@ in {
                     inherit (app.destination) server;
                   };
                   syncPolicy =
-                    (lib.optionalAttrs app.syncPolicy.autoSync.enabled {
+                    (lib.optionalAttrs app.syncPolicy.autoSync.enable {
                       automated = {
                         inherit (app.syncPolicy.autoSync) prune selfHeal;
                       };

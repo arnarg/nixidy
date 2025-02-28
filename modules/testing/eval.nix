@@ -1,7 +1,7 @@
 {
   lib,
   config,
-  resourceImports,
+  applicationImports,
   ...
 }: let
   testModuleOptions = {
@@ -55,8 +55,8 @@
 
       {
         nixidy = {
-          # Import all resourceImports
-          inherit resourceImports;
+          # Import all applicationImports
+          inherit applicationImports;
 
           # Set nixidy target
           target = {

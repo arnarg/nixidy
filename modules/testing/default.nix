@@ -7,7 +7,7 @@
   testModule = {
     imports = [./eval.nix];
 
-    _module.args.resourceImports = config.nixidy.resourceImports;
+    _module.args.applicationImports = config.nixidy.applicationImports;
   };
 in {
   options.testing = with lib; {

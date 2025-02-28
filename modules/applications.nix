@@ -3,11 +3,15 @@
   config,
   ...
 }: {
+  imports = [
+    (lib.mkRenamedOptionModule ["nixidy" "resourceImports"] ["nixidy" "applicationImports"])
+  ];
+
   options = with lib; {
     applications = mkOption {
       type = with types;
         attrsOf (submoduleWith {
-          modules = [./applications] ++ config.nixidy.resourceImports;
+          modules = [./applications] ++ config.nixidy.applicationImports;
           specialArgs.nixidyDefaults = config.nixidy.defaults;
         });
       default = {};
@@ -44,10 +48,10 @@
       };
     };
 
-    nixidy.resourceImports = mkOption {
+    nixidy.applicationImports = mkOption {
       type = with types; listOf (oneOf [package path (functionTo attrs)]);
       default = [];
-      description = "List of modules to import for resource defintion options.";
+      description = "List of modules to import into `applications.*` submodule (most useful for resource definition options).";
     };
   };
 }

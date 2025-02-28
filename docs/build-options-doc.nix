@@ -50,7 +50,7 @@
         import ../modules/modules.nix
         ++ [
           {
-            nixidy.resourceImports = [resourcesCompat];
+            nixidy.applicationImports = [resourcesCompat];
           }
         ];
       specialArgs = {

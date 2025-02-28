@@ -12,7 +12,7 @@ in {
     # Turn on auto sync
     syncPolicy = {
       autoSync = {
-        enabled = true;
+        enable = true;
         prune = true;
         selfHeal = true;
       };
@@ -26,7 +26,7 @@ in {
   # Create an applicaton that does override defaults
   applications.test2 = {
     destination.server = "https://kubernetes.default.svc:6443";
-    syncPolicy.autoSync.enabled = false;
+    syncPolicy.autoSync.enable = false;
   };
 
   test = with lib; {

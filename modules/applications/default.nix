@@ -76,6 +76,8 @@ in {
     ./kustomize.nix
     ./yamls.nix
     ./namespaced.nix
+
+    (lib.mkRenamedOptionModule ["syncPolicy" "autoSync" "enabled"] ["syncPolicy" "autoSync" "enable"])
   ];
 
   options = with lib; {
@@ -136,10 +138,10 @@ in {
     };
     syncPolicy = {
       autoSync = {
-        enabled = mkOption {
+        enable = mkOption {
           type = types.bool;
-          default = nixidyDefaults.syncPolicy.autoSync.enabled;
-          defaultText = literalExpression "config.nixidy.defaults.syncPolicy.autoSync.enabled";
+          default = nixidyDefaults.syncPolicy.autoSync.enable;
+          defaultText = literalExpression "config.nixidy.defaults.syncPolicy.autoSync.enable";
           description = ''
             Specifies if application should automatically sync.
           '';

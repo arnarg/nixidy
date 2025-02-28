@@ -19,7 +19,7 @@
         import ../modules/modules.nix
         ++ [
           {
-            nixidy.resourceImports = [
+            nixidy.applicationImports = [
               (kubenix + "/modules/generated/v1.30.nix")
               ../modules/generated/argocd.nix
             ];

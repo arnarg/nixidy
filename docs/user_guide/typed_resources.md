@@ -59,7 +59,7 @@ Thankfully a code generator for generating resource options from CRDs is provide
     }
     ```
 
-    Then running `nix build .#generators.cilium` will produce a nix file that can be copied into place in your repository. After that the generated file has to be added to `nixidy.resourceImports` in your nixidy modules.
+    Then running `nix build .#generators.cilium` will produce a nix file that can be copied into place in your repository. After that the generated file has to be added to `nixidy.applicationImports` in your nixidy modules.
 
 === "flake-less"
     As an example, to generate resource options for Cilium's `CiliumNetworkPolicy` and `CiliumClusterwideNetworkPolicy` the following can be defined in `generate.nix`.
@@ -97,11 +97,11 @@ Thankfully a code generator for generating resource options from CRDs is provide
       }
     ```
 
-    Then running `nix-build generate.nix -A cilium` will produce a nix file that can be copied into place in your repository. After that the generated file has to be added to `nixidy.resourceImports` in your nixidy modules.
+    Then running `nix-build generate.nix -A cilium` will produce a nix file that can be copied into place in your repository. After that the generated file has to be added to `nixidy.applicationImports` in your nixidy modules.
 
 ```nix title="env/dev.nix"
 {
-  nixidy.resourceImports = [
+  nixidy.applicationImports = [
     ./generated/cilium.nix
   ];
 }

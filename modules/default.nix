@@ -17,7 +17,7 @@
       ++ nixidyModules
       ++ [
         {
-          nixidy.resourceImports = [
+          nixidy.applicationImports = [
             (kubenix + "/modules/generated/v1.30.nix")
             ./generated/argocd.nix
           ];
