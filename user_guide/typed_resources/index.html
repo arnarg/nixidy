@@ -697,7 +697,7 @@
   <span class="p">}));</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Then running <code>nix build .#generators.cilium</code> will produce a nix file that can be copied into place in your repository. After that the generated file has to be added to <code>nixidy.resourceImports</code> in your nixidy modules.</p>
+<p>Then running <code>nix build .#generators.cilium</code> will produce a nix file that can be copied into place in your repository. After that the generated file has to be added to <code>nixidy.applicationImports</code> in your nixidy modules.</p>
 </div>
 <div class="tabbed-block">
 <p>As an example, to generate resource options for Cilium's <code>CiliumNetworkPolicy</code> and <code>CiliumClusterwideNetworkPolicy</code> the following can be defined in <code>generate.nix</code>.</p>
@@ -732,12 +732,12 @@
     <span class="p">};</span>
   <span class="p">}</span>
 </code></pre></div>
-<p>Then running <code>nix-build generate.nix -A cilium</code> will produce a nix file that can be copied into place in your repository. After that the generated file has to be added to <code>nixidy.resourceImports</code> in your nixidy modules.</p>
+<p>Then running <code>nix-build generate.nix -A cilium</code> will produce a nix file that can be copied into place in your repository. After that the generated file has to be added to <code>nixidy.applicationImports</code> in your nixidy modules.</p>
 </div>
 </div>
 </div>
 <div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
-  nixidy<span class="o">.</span><span class="ss">resourceImports</span> <span class="o">=</span> <span class="p">[</span>
+  nixidy<span class="o">.</span><span class="ss">applicationImports</span> <span class="o">=</span> <span class="p">[</span>
     <span class="l">./generated/cilium.nix</span>
   <span class="p">];</span>
 <span class="p">}</span>
