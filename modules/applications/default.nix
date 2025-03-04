@@ -263,6 +263,54 @@ in {
         '';
       };
     };
+    ignoreDifferences = let
+      submoduleType = types.submodule ({name, ...}: {
+        options = {
+          group = mkOption {
+            description = "";
+            type = types.nullOr types.str;
+          };
+          jqPathExpressions = mkOption {
+            description = "";
+            type = types.nullOr (types.listOf types.str);
+          };
+          jsonPointers = mkOption {
+            description = "";
+            type = types.nullOr (types.listOf types.str);
+          };
+          kind = mkOption {
+            description = "";
+            type = types.str;
+          };
+          managedFieldsManagers = mkOption {
+            description = "ManagedFieldsManagers is a list of trusted managers. Fields mutated by those managers will take precedence over the\ndesired state defined in the SCM and won't be displayed in diffs";
+            type = types.nullOr (types.listOf types.str);
+          };
+          name = mkOption {
+            description = "";
+            type = types.nullOr types.str;
+          };
+          namespace = mkOption {
+            description = "";
+            type = types.nullOr types.str;
+          };
+        };
+
+        config = {
+          "group" = mkOverride 1002 null;
+          "jqPathExpressions" = mkOverride 1002 null;
+          "jsonPointers" = mkOverride 1002 null;
+          "managedFieldsManagers" = mkOverride 1002 null;
+          "name" = mkOverride 1002 null;
+          "namespace" = mkOverride 1002 null;
+        };
+      });
+    in
+      mkOption {
+        type = with types; nullOr (listOf submoduleType);
+        description = "IgnoreDifferences is a list of resources and their fields which should be ignored during comparison";
+        default = null;
+      };
     objects = mkOption {
       type = with types; listOf attrs;
       apply = unique;

@@ -220,6 +220,7 @@ in {
                     // (lib.optionalAttrs (lib.length app.syncPolicy.finalSyncOpts > 0) {
                       syncOptions = app.syncPolicy.finalSyncOpts;
                     });
+                  inherit (app) ignoreDifferences;
                 };
               };
             }
