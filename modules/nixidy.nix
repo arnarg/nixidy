@@ -219,6 +219,11 @@ in {
                     })
                     // (lib.optionalAttrs (lib.length app.syncPolicy.finalSyncOpts > 0) {
                       syncOptions = app.syncPolicy.finalSyncOpts;
+                    })
+                    // (lib.optionalAttrs (app.syncPolicy.managedNamespaceMetadata.labels != {} || app.syncPolicy.managedNamespaceMetadata.annotations != {}) {
+                      managedNamespaceMetadata = lib.filterAttrs (_: v: v != {}) {
+                        inherit (app.syncPolicy.managedNamespaceMetadata) labels annotations;
+                      };
                     });
                   inherit (app) ignoreDifferences;
                 };
