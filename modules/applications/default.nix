@@ -164,6 +164,22 @@ in {
           '';
         };
       };
+      managedNamespaceMetadata = {
+        labels = mkOption {
+          type = types.attrsOf types.str;
+          default = {};
+          description = ''
+            Labels to apply to the managed namespace when created by Argo CD.
+          '';
+        };
+        annotations = mkOption {
+          type = types.attrsOf types.str;
+          default = {};
+          description = ''
+            Annotations to apply to the managed namespace when created by Argo CD.
+          '';
+        };
+      };
       syncOptions = {
         applyOutOfSyncOnly = mkOption {
           type = types.bool;
@@ -237,6 +253,19 @@ in {
             the cluster by another Application.
           '';
         };
+        createNamespace = mkOption {
+          type = types.bool;
+          default = false;
+          apply = val:
+            if val
+            then "CreateNamespace=true"
+            else null;
+          description = ''
+            Argo CD Application can be configured so it will create the namespace specified in spec.destination.namespace if it doesn't exist already. Without this either declared in the Application manifest or passed in the CLI via --sync-option CreateNamespace=true, the Application will fail to sync if the namespace doesn't exist.
+
+            Note that the namespace to be created must be informed in the spec.destination.namespace field of the Application resource. The metadata.namespace field in the Application's child manifests must match this value, or can be omitted, so resources are created in the proper destination.
+          '';
+        };
       };
       finalSyncOpts = mkOption {
         type = types.listOf types.str;
@@ -263,6 +292,54 @@ in {
         '';
       };
     };
+    ignoreDifferences = let
+      submoduleType = types.submodule ({name, ...}: {
+        options = {
+          group = mkOption {
+            description = "";
+            type = types.nullOr types.str;
+          };
+          jqPathExpressions = mkOption {
+            description = "";
+            type = types.nullOr (types.listOf types.str);
+          };
+          jsonPointers = mkOption {
+            description = "";
+            type = types.nullOr (types.listOf types.str);
+          };
+          kind = mkOption {
+            description = "";
+            type = types.str;
+          };
+          managedFieldsManagers = mkOption {
+            description = "ManagedFieldsManagers is a list of trusted managers. Fields mutated by those managers will take precedence over the\ndesired state defined in the SCM and won't be displayed in diffs";
+            type = types.nullOr (types.listOf types.str);
+          };
+          name = mkOption {
+            description = "";
+            type = types.nullOr types.str;
+          };
+          namespace = mkOption {
+            description = "";
+            type = types.nullOr types.str;
+          };
+        };
+
+        config = {
+          "group" = mkOverride 1002 null;
+          "jqPathExpressions" = mkOverride 1002 null;
+          "jsonPointers" = mkOverride 1002 null;
+          "managedFieldsManagers" = mkOverride 1002 null;
+          "name" = mkOverride 1002 null;
+          "namespace" = mkOverride 1002 null;
+        };
+      });
+    in
+      mkOption {
+        type = with types; nullOr (listOf submoduleType);
+        description = "IgnoreDifferences is a list of resources and their fields which should be ignored during comparison";
+        default = null;
+      };
     objects = mkOption {
       type = with types; listOf attrs;
       apply = unique;
