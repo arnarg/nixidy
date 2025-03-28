@@ -220,7 +220,11 @@ in {
                     // (lib.optionalAttrs (lib.length app.syncPolicy.finalSyncOpts > 0) {
                       syncOptions = app.syncPolicy.finalSyncOpts;
                     });
-                  inherit (app) ignoreDifferences;
+
+                  ignoreDifferences =
+                    if builtins.isAttrs app.ignoreDifferences
+                    then lib.mapAttrsToList (kind: value: value // {inherit kind;}) app.ignoreDifferences
+                    else null;
                 };
               };
             }
