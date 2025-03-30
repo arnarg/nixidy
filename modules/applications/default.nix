@@ -283,6 +283,7 @@ in {
           };
           kind = mkOption {
             description = "";
+            default = name;
             type = types.str;
           };
           managedFieldsManagers = mkOption {
@@ -305,7 +306,11 @@ in {
     in
       mkOption {
         type = with types; nullOr (attrsOf submoduleType);
-        description = "IgnoreDifferences is a list of resources and their fields which should be ignored during comparison";
+        description = ''
+          IgnoreDifferences is a list of resources and their fields which should be ignored during comparison.
+
+          More info [here](https://argo-cd.readthedocs.io/en/stable/user-guide/diffing/).
+        '';
         default = null;
       };
     objects = mkOption {

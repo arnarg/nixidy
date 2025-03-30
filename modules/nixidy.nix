@@ -197,7 +197,7 @@ in {
                     else null;
                 };
                 spec = {
-                  inherit (app) project;
+                  inherit (app) project ignoreDifferences;
 
                   source = {
                     repoURL = cfg.target.repository;
@@ -220,11 +220,6 @@ in {
                     // (lib.optionalAttrs (lib.length app.syncPolicy.finalSyncOpts > 0) {
                       syncOptions = app.syncPolicy.finalSyncOpts;
                     });
-
-                  ignoreDifferences =
-                    if builtins.isAttrs app.ignoreDifferences
-                    then lib.mapAttrsToList (kind: value: value // {inherit kind;}) app.ignoreDifferences
-                    else null;
                 };
               };
             }
