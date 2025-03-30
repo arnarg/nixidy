@@ -197,7 +197,7 @@ in {
                     else null;
                 };
                 spec = {
-                  inherit (app) project;
+                  inherit (app) project ignoreDifferences;
 
                   source = {
                     repoURL = cfg.target.repository;

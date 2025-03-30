@@ -263,6 +263,56 @@ in {
         '';
       };
     };
+    ignoreDifferences = let
+      submoduleType = types.submodule ({name, ...}: {
+        options = {
+          group = mkOption {
+            description = "";
+            default = null;
+            type = types.nullOr types.str;
+          };
+          jqPathExpressions = mkOption {
+            description = "";
+            default = null;
+            type = types.nullOr (types.listOf types.str);
+          };
+          jsonPointers = mkOption {
+            description = "";
+            default = null;
+            type = types.nullOr (types.listOf types.str);
+          };
+          kind = mkOption {
+            description = "";
+            default = name;
+            type = types.str;
+          };
+          managedFieldsManagers = mkOption {
+            description = "ManagedFieldsManagers is a list of trusted managers. Fields mutated by those managers will take precedence over the\ndesired state defined in the SCM and won't be displayed in diffs";
+            default = null;
+            type = types.nullOr (types.listOf types.str);
+          };
+          name = mkOption {
+            description = "";
+            default = null;
+            type = types.nullOr types.str;
+          };
+          namespace = mkOption {
+            description = "";
+            default = null;
+            type = types.nullOr types.str;
+          };
+        };
+      });
+    in
+      mkOption {
+        type = with types; nullOr (attrsOf submoduleType);
+        description = ''
+          IgnoreDifferences is a list of resources and their fields which should be ignored during comparison.
+
+          More info [here](https://argo-cd.readthedocs.io/en/stable/user-guide/diffing/).
+        '';
+        default = null;
+      };
     objects = mkOption {
       type = with types; listOf attrs;
       apply = unique;
