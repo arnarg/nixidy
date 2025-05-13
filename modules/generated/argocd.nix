@@ -469,6 +469,10 @@ with lib; let
     };
     "argoproj.io.v1alpha1.AppProjectSpecSyncWindows" = {
       options = {
+        "andOperator" = mkOption {
+          description = "UseAndOperator use AND operator for matching applications, namespaces and clusters instead of the default OR operator";
+          type = types.nullOr types.bool;
+        };
         "applications" = mkOption {
           description = "Applications contains a list of applications that the window will apply to";
           type = types.nullOr (types.listOf types.str);
@@ -504,6 +508,7 @@ with lib; let
       };
 
       config = {
+        "andOperator" = mkOverride 1002 null;
         "applications" = mkOverride 1002 null;
         "clusters" = mkOverride 1002 null;
         "duration" = mkOverride 1002 null;
@@ -1048,6 +1053,10 @@ with lib; let
           description = "ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "IgnoreMissingComponents prevents kustomize from failing when components do not exist locally by not appending them to kustomization file";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
@@ -1055,6 +1064,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "LabelIncludeTemplates specifies whether to apply common labels to resource templates or not";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -1095,8 +1108,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -1554,6 +1569,10 @@ with lib; let
           description = "ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "IgnoreMissingComponents prevents kustomize from failing when components do not exist locally by not appending them to kustomization file";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
@@ -1561,6 +1580,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "LabelIncludeTemplates specifies whether to apply common labels to resource templates or not";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -1601,8 +1624,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -2523,6 +2548,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -2530,6 +2559,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -2570,8 +2603,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -3029,6 +3064,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -3036,6 +3075,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -3076,8 +3119,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -3910,6 +3955,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -3917,6 +3966,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -3957,8 +4010,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -4416,6 +4471,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -4423,6 +4482,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -4463,8 +4526,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -5304,6 +5369,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -5311,6 +5380,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -5351,8 +5424,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -5810,6 +5885,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -5817,6 +5896,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -5857,8 +5940,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -6649,6 +6734,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -6656,6 +6745,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -6696,8 +6789,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -7155,6 +7250,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -7162,6 +7261,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -7202,8 +7305,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -8118,6 +8223,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -8125,6 +8234,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -8165,8 +8278,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -8624,6 +8739,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -8631,6 +8750,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -8671,8 +8794,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -9505,6 +9630,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -9512,6 +9641,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -9552,8 +9685,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -10011,6 +10146,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -10018,6 +10157,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -10058,8 +10201,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -10899,6 +11044,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -10906,6 +11055,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -10946,8 +11099,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -11405,6 +11560,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -11412,6 +11571,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -11452,8 +11615,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -12244,6 +12409,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -12251,6 +12420,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -12291,8 +12464,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -12750,6 +12925,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -12757,6 +12936,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -12797,8 +12980,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -13620,6 +13805,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -13627,6 +13816,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -13667,8 +13860,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -14126,6 +14321,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -14133,6 +14332,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -14173,8 +14376,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -14475,6 +14680,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplate");
         };
+        "values" = mkOption {
+          description = "";
+          type = types.nullOr (types.attrsOf types.str);
+        };
       };
 
       config = {
@@ -14487,6 +14696,7 @@ with lib; let
         "gitlab" = mkOverride 1002 null;
         "requeueAfterSeconds" = mkOverride 1002 null;
         "template" = mkOverride 1002 null;
+        "values" = mkOverride 1002 null;
       };
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestAzuredevops" = {
@@ -15408,6 +15618,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -15415,6 +15629,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -15455,8 +15673,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -15914,6 +16134,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -15921,6 +16145,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -15961,8 +16189,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -17228,6 +17458,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -17235,6 +17469,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -17275,8 +17513,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -17734,6 +17974,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -17741,6 +17985,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -17781,8 +18029,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -18588,6 +18838,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -18595,6 +18849,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -18635,8 +18893,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -19094,6 +19354,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -19101,6 +19365,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -19141,8 +19409,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -20061,6 +20331,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -20068,6 +20342,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -20108,8 +20386,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -20567,6 +20847,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -20574,6 +20858,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -20614,8 +20902,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -21448,6 +21738,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -21455,6 +21749,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -21495,8 +21793,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -21954,6 +22254,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -21961,6 +22265,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -22001,8 +22309,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -22842,6 +23152,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -22849,6 +23163,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -22889,8 +23207,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -23348,6 +23668,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -23355,6 +23679,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -23395,8 +23723,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -24187,6 +24517,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -24194,6 +24528,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -24234,8 +24572,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -24693,6 +25033,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -24700,6 +25044,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -24740,8 +25088,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -25563,6 +25913,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -25570,6 +25924,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -25610,8 +25968,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -26069,6 +26429,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -26076,6 +26440,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -26116,8 +26484,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -26418,6 +26788,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplate");
         };
+        "values" = mkOption {
+          description = "";
+          type = types.nullOr (types.attrsOf types.str);
+        };
       };
 
       config = {
@@ -26430,6 +26804,7 @@ with lib; let
         "gitlab" = mkOverride 1002 null;
         "requeueAfterSeconds" = mkOverride 1002 null;
         "template" = mkOverride 1002 null;
+        "values" = mkOverride 1002 null;
       };
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestAzuredevops" = {
@@ -27351,6 +27726,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -27358,6 +27737,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -27398,8 +27781,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -27857,6 +28242,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -27864,6 +28253,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -27904,8 +28297,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -29171,6 +29566,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -29178,6 +29577,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -29218,8 +29621,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -29677,6 +30082,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -29684,6 +30093,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -29724,8 +30137,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -30531,6 +30946,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -30538,6 +30957,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -30578,8 +31001,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -31037,6 +31462,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -31044,6 +31473,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -31084,8 +31517,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -31907,6 +32342,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -31914,6 +32353,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -31954,8 +32397,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -32413,6 +32858,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -32420,6 +32869,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -32460,8 +32913,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -32762,6 +33217,10 @@ with lib; let
           description = "";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplate");
         };
+        "values" = mkOption {
+          description = "";
+          type = types.nullOr (types.attrsOf types.str);
+        };
       };
 
       config = {
@@ -32774,6 +33233,7 @@ with lib; let
         "gitlab" = mkOverride 1002 null;
         "requeueAfterSeconds" = mkOverride 1002 null;
         "template" = mkOverride 1002 null;
+        "values" = mkOverride 1002 null;
       };
     };
     "argoproj.io.v1alpha1.ApplicationSetSpecGeneratorsPullRequestAzuredevops" = {
@@ -33695,6 +34155,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -33702,6 +34166,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -33742,8 +34210,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -34201,6 +34671,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -34208,6 +34682,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -34248,8 +34726,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -35515,6 +35995,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -35522,6 +36006,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -35562,8 +36050,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -36021,6 +36511,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -36028,6 +36522,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -36068,8 +36566,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -36999,6 +37499,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -37006,6 +37510,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -37046,8 +37554,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -37505,6 +38015,10 @@ with lib; let
           description = "";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "";
           type = types.nullOr (types.listOf types.str);
@@ -37512,6 +38026,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "";
@@ -37552,8 +38070,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -38475,6 +38995,10 @@ with lib; let
           description = "ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "IgnoreMissingComponents prevents kustomize from failing when components do not exist locally by not appending them to kustomization file";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
@@ -38482,6 +39006,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "LabelIncludeTemplates specifies whether to apply common labels to resource templates or not";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -38522,8 +39050,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -38981,6 +39511,10 @@ with lib; let
           description = "ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "IgnoreMissingComponents prevents kustomize from failing when components do not exist locally by not appending them to kustomization file";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
@@ -38988,6 +39522,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "LabelIncludeTemplates specifies whether to apply common labels to resource templates or not";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -39028,8 +39566,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -39775,6 +40315,10 @@ with lib; let
           description = "ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "IgnoreMissingComponents prevents kustomize from failing when components do not exist locally by not appending them to kustomization file";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
@@ -39782,6 +40326,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "LabelIncludeTemplates specifies whether to apply common labels to resource templates or not";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -39822,8 +40370,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -40281,6 +40831,10 @@ with lib; let
           description = "ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "IgnoreMissingComponents prevents kustomize from failing when components do not exist locally by not appending them to kustomization file";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
@@ -40288,6 +40842,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "LabelIncludeTemplates specifies whether to apply common labels to resource templates or not";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -40328,8 +40886,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -41013,6 +41573,10 @@ with lib; let
           description = "ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "IgnoreMissingComponents prevents kustomize from failing when components do not exist locally by not appending them to kustomization file";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
@@ -41020,6 +41584,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "LabelIncludeTemplates specifies whether to apply common labels to resource templates or not";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -41060,8 +41628,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -41519,6 +42089,10 @@ with lib; let
           description = "ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "IgnoreMissingComponents prevents kustomize from failing when components do not exist locally by not appending them to kustomization file";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
@@ -41526,6 +42100,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "LabelIncludeTemplates specifies whether to apply common labels to resource templates or not";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -41566,8 +42144,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -42173,6 +42753,10 @@ with lib; let
           description = "ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "IgnoreMissingComponents prevents kustomize from failing when components do not exist locally by not appending them to kustomization file";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
@@ -42180,6 +42764,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "LabelIncludeTemplates specifies whether to apply common labels to resource templates or not";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -42220,8 +42808,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -42679,6 +43269,10 @@ with lib; let
           description = "ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "IgnoreMissingComponents prevents kustomize from failing when components do not exist locally by not appending them to kustomization file";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
@@ -42686,6 +43280,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "LabelIncludeTemplates specifies whether to apply common labels to resource templates or not";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -42726,8 +43324,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -42888,47 +43488,47 @@ with lib; let
     "argoproj.io.v1alpha1.ApplicationStatusResources" = {
       options = {
         "group" = mkOption {
-          description = "";
+          description = "Group represents the API group of the resource (e.g., \"apps\" for Deployments).";
           type = types.nullOr types.str;
         };
         "health" = mkOption {
-          description = "HealthStatus contains information about the currently observed health state of an application or resource";
+          description = "Health indicates the health status of the resource (e.g., Healthy, Degraded, Progressing).";
           type = types.nullOr (submoduleOf "argoproj.io.v1alpha1.ApplicationStatusResourcesHealth");
         };
         "hook" = mkOption {
-          description = "";
+          description = "Hook is true if the resource is used as a lifecycle hook in an Argo CD application.";
           type = types.nullOr types.bool;
         };
         "kind" = mkOption {
-          description = "";
+          description = "Kind specifies the type of the resource (e.g., \"Deployment\", \"Service\").";
           type = types.nullOr types.str;
         };
         "name" = mkOption {
-          description = "";
+          description = "Name is the unique name of the resource within the namespace.";
           type = types.nullOr types.str;
         };
         "namespace" = mkOption {
-          description = "";
+          description = "Namespace defines the Kubernetes namespace where the resource is located.";
           type = types.nullOr types.str;
         };
         "requiresDeletionConfirmation" = mkOption {
-          description = "";
+          description = "RequiresDeletionConfirmation is true if the resource requires explicit user confirmation before deletion.";
           type = types.nullOr types.bool;
         };
         "requiresPruning" = mkOption {
-          description = "";
+          description = "RequiresPruning is true if the resource needs to be pruned (deleted) as part of synchronization.";
           type = types.nullOr types.bool;
         };
         "status" = mkOption {
-          description = "SyncStatusCode is a type which represents possible comparison results";
+          description = "Status represents the synchronization state of the resource (e.g., Synced, OutOfSync).";
           type = types.nullOr types.str;
         };
         "syncWave" = mkOption {
-          description = "";
+          description = "SyncWave determines the order in which resources are applied during a sync operation.\nLower values are applied first.";
           type = types.nullOr types.int;
         };
         "version" = mkOption {
-          description = "";
+          description = "Version indicates the API version of the resource (e.g., \"v1\", \"v1beta1\").";
           type = types.nullOr types.str;
         };
       };
@@ -43606,6 +44206,10 @@ with lib; let
           description = "ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "IgnoreMissingComponents prevents kustomize from failing when components do not exist locally by not appending them to kustomization file";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
@@ -43613,6 +44217,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "LabelIncludeTemplates specifies whether to apply common labels to resource templates or not";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -43653,8 +44261,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
@@ -44112,6 +44722,10 @@ with lib; let
           description = "ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps";
           type = types.nullOr types.bool;
         };
+        "ignoreMissingComponents" = mkOption {
+          description = "IgnoreMissingComponents prevents kustomize from failing when components do not exist locally by not appending them to kustomization file";
+          type = types.nullOr types.bool;
+        };
         "images" = mkOption {
           description = "Images is a list of Kustomize image override specifications";
           type = types.nullOr (types.listOf types.str);
@@ -44119,6 +44733,10 @@ with lib; let
         "kubeVersion" = mkOption {
           description = "KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD\nuses the Kubernetes version of the target cluster.";
           type = types.nullOr types.str;
+        };
+        "labelIncludeTemplates" = mkOption {
+          description = "LabelIncludeTemplates specifies whether to apply common labels to resource templates or not";
+          type = types.nullOr types.bool;
         };
         "labelWithoutSelector" = mkOption {
           description = "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not";
@@ -44159,8 +44777,10 @@ with lib; let
         "components" = mkOverride 1002 null;
         "forceCommonAnnotations" = mkOverride 1002 null;
         "forceCommonLabels" = mkOverride 1002 null;
+        "ignoreMissingComponents" = mkOverride 1002 null;
         "images" = mkOverride 1002 null;
         "kubeVersion" = mkOverride 1002 null;
+        "labelIncludeTemplates" = mkOverride 1002 null;
         "labelWithoutSelector" = mkOverride 1002 null;
         "namePrefix" = mkOverride 1002 null;
         "nameSuffix" = mkOverride 1002 null;
