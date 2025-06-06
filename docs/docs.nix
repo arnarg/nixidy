@@ -68,7 +68,11 @@
         - admonition
         - pymdownx.highlight
         - pymdownx.inlinehilite
-        - pymdownx.superfences
+        - pymdownx.superfences:
+            custom_fences:
+            - name: mermaid
+              class: mermaid
+              format: !!python/name:pymdownx.superfences.fence_code_format
         - pymdownx.details
         - pymdownx.tabbed:
             alternate_style: true
@@ -83,6 +87,8 @@
           - 'GitHub Actions': user_guide/github_actions.md
           - 'Transformers': user_guide/transformers.md
           - 'Using nixhelm': user_guide/using_nixhelm.md
+        - 'Developer Guide':
+          - 'Architectural Overview': developer_guide/architecture.md
         - Reference:
           - 'Library Functions': library.md
           - 'Configuration Options': options.md
