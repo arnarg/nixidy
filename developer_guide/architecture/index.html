@@ -1,0 +1,1098 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://arnarg.github.io/nixidy/developer_guide/architecture/">
+      
+      
+        <link rel="prev" href="../../user_guide/using_nixhelm/">
+      
+      
+        <link rel="next" href="../../library/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.39">
+    
+    
+      
+        <title>Architectural Overview - nixidy</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.8c3ca2c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#architectural-overview" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="nixidy" class="md-header__button md-logo" aria-label="nixidy" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            nixidy
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Architectural Overview
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/arnarg/nixidy/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="nixidy" class="md-nav__button md-logo" aria-label="nixidy" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    nixidy
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/arnarg/nixidy/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    User Guide
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            User Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user_guide/getting_started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user_guide/helm_charts/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Using Helm Charts
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user_guide/typed_resources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Typed Resource Options
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user_guide/git_strategies/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Git Strategies
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user_guide/github_actions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GitHub Actions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user_guide/transformers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Transformers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user_guide/using_nixhelm/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Using nixhelm
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Developer Guide
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Architectural Overview
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Architectural Overview
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Concepts
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-architectural-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Architectural Components
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#workflow-data-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Workflow / Data Flow
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architectural-diagram-conceptual" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architectural Diagram (Conceptual)
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../library/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Library Functions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../options/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration Options
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Concepts
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-architectural-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Architectural Components
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#workflow-data-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Workflow / Data Flow
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architectural-diagram-conceptual" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architectural Diagram (Conceptual)
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="architectural-overview">Architectural Overview<a class="headerlink" href="#architectural-overview" title="Permanent link">#</a></h1>
+<div class="admonition warning">
+<p class="admonition-title">LLM Generated</p>
+<p>This entire document is generated by an LLM by feeding the output of <a href="https://github.com/simonw/files-to-prompt">files-to-prompt</a> to Gemini.</p>
+</div>
+<p>Nixidy is a tool designed to manage Kubernetes clusters declaratively using the Nix package manager and its language. It integrates with Argo CD by generating plain Kubernetes YAML manifests, adhering to the GitOps philosophy and the "Rendered Manifests Pattern".</p>
+<h2 id="core-concepts">Core Concepts<a class="headerlink" href="#core-concepts" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Declarative Configuration with Nix:</strong> Users define their entire Kubernetes cluster state, including applications, resources, Helm charts, and Kustomize overlays, within Nix expressions.</li>
+<li><strong>NixOS Module System:</strong> Nixidy leverages a module system similar to NixOS, allowing for structured, modular, and recursively merged configurations. This provides strong typing and discoverability for Kubernetes resource options.</li>
+<li><strong>Manifest Generation:</strong> The primary output of Nixidy is a set of plain Kubernetes YAML manifests and ArgoCD <code>Application</code> custom resources. These are intended to be committed to a Git repository.</li>
+<li><strong>Argo CD Integration:</strong> Nixidy generates manifests in a structure that is easily consumable by Argo CD, typically following an "App of Apps" pattern for bootstrapping.</li>
+<li><strong>No Runtime Dependencies on Nix in Cluster:</strong> Nixidy is a build-time tool. The generated YAMLs are standard Kubernetes manifests that Argo CD can deploy without any Nix-specific components in the cluster.</li>
+<li><strong>Flake-centric (but supports flake-less):</strong> While Nixidy can be used without Nix Flakes, its primary development and examples lean towards a Flake-based setup for managing dependencies and outputs.</li>
+</ul>
+<h2 id="key-architectural-components">Key Architectural Components<a class="headerlink" href="#key-architectural-components" title="Permanent link">#</a></h2>
+<p>Nixidy's architecture can be broken down into several key areas:</p>
+<ol>
+<li>
+<p><strong>User Configuration (Nix Files):</strong></p>
+<ul>
+<li><strong>Entrypoint:</strong> Typically a <code>flake.nix</code> (for Flakes) or a <code>default.nix</code> (for non-Flakes).</li>
+<li><strong>Environment Definition:</strong> Users define one or more "environments" (e.g., <code>dev</code>, <code>prod</code>) using <code>nixidy.lib.mkEnv</code> or <code>nixidy.lib.mkEnvs</code>. Each environment is a collection of Nixidy modules.<ul>
+<li><em>(Document 6: <code>make-env.nix</code>, Document 13: Getting Started)</em></li>
+</ul>
+</li>
+<li><strong>Application Modules:</strong> Within these environment modules, users define <code>applications.&lt;appName&gt;.*</code> options to describe their desired state. This includes:<ul>
+<li>Kubernetes resources directly in Nix syntax (<code>applications.&lt;appName&gt;.resources</code>).</li>
+<li>Helm chart releases (<code>applications.&lt;appName&gt;.helm.releases</code>).</li>
+<li>Kustomize applications (<code>applications.&lt;appName&gt;.kustomize.applications</code>).</li>
+<li>Raw YAML strings (<code>applications.&lt;appName&gt;.yamls</code>).</li>
+<li><em>(Document 2: README example, Document 27: <code>applications.nix</code>, Document 32: <code>modules/applications/default.nix</code>)</em></li>
+</ul>
+</li>
+<li><strong>Nixidy Library (<code>lib.*</code>):</strong> Nixidy provides a set of helper functions (e.g., <code>lib.helm.downloadHelmChart</code>, <code>lib.kube.fromYAML</code>) available to user modules for tasks like fetching charts or parsing YAML.<ul>
+<li><em>(Document 22: <code>lib/default.nix</code>, Document 23: <code>lib/helm.nix</code>, Document 24: <code>lib/kube.nix</code>, Document 25: <code>lib/kustomize.nix</code>)</em></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Nixidy Core Engine:</strong></p>
+<ul>
+<li><strong>Module System:</strong> Located primarily in <code>./modules</code>.<ul>
+<li><code>modules/default.nix</code> (Document 29): Orchestrates the evaluation of user and internal Nixidy modules. It injects an extended <code>lib</code> (Nixpkgs lib + Nixidy lib) and other special arguments.</li>
+<li><code>modules/nixidy.nix</code> (Document 31): Defines global <code>nixidy.*</code> configurations like target Git repository details, default sync policies for ArgoCD applications, and App of Apps settings.</li>
+<li><code>modules/applications/*</code>: A collection of modules that define how applications are processed:<ul>
+<li><code>applications.nix</code> (Document 27): Defines the top-level <code>applications</code> option.</li>
+<li><code>default.nix</code> (Document 32): Defines the submodule for a single application, collecting all resources (from Nix, Helm, Kustomize, YAMLs) into <code>config.objects</code>.</li>
+<li><code>helm.nix</code> (Document 33), <code>kustomize.nix</code> (Document 34), <code>yamls.nix</code> (Document 37): Handle the specifics of rendering Helm charts, Kustomize overlays, and parsing raw YAMLs, respectively. They utilize functions from <code>nixidy.lib</code>.</li>
+<li><code>namespaced.nix</code> (Document 36): Sets default namespaces for namespaced Kubernetes resources.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Build Logic (<code>modules/build.nix</code>, Document 28):</strong><ul>
+<li>Takes the evaluated <code>config.applications.*.objects</code> (a list of Nix attribute sets representing Kubernetes resources).</li>
+<li>Generates the final output directory structure:<ul>
+<li>A directory for each application (e.g., <code>result/demo/</code>).</li>
+<li>YAML files for each resource within its application directory (e.g., <code>Deployment-nginx.yaml</code>). Uses <code>yq-go</code> for pretty-printing YAML.</li>
+<li>An <code>apps/</code> directory containing ArgoCD <code>Application</code> CRs for each user-defined application.</li>
+</ul>
+</li>
+<li>Produces Nix derivations for different purposes:<ul>
+<li><code>environmentPackage</code>: Contains all generated manifests for an environment.</li>
+<li><code>activationPackage</code>: Contains <code>environmentPackage</code> plus an <code>activate</code> script (for <code>nixidy switch</code>).</li>
+<li><code>bootstrapPackage</code>: Contains the "App of Apps" ArgoCD <code>Application</code> manifest (for <code>nixidy bootstrap</code>).</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Nixidy CLI (<code>nixidy/nixidy</code>, Document 42):</strong></p>
+<ul>
+<li>A Bash script that acts as a user-friendly wrapper around underlying <code>nix</code> commands (<code>nix build</code>, <code>nix eval</code>, <code>nix-build</code>, <code>nix-instantiate</code>).</li>
+<li><strong>Commands:</strong><ul>
+<li><code>nixidy build &lt;env&gt;</code>: Builds the <code>environmentPackage</code>.</li>
+<li><code>nixidy switch &lt;env&gt;</code>: Builds the <code>activationPackage</code> and runs its <code>activate</code> script to sync manifests to the local filesystem (defined by <code>nixidy.target.rootPath</code>).</li>
+<li><code>nixidy info &lt;env&gt;</code>: Displays metadata about the specified environment (repository, branch).</li>
+<li><code>nixidy bootstrap &lt;env&gt;</code>: Outputs the "App of Apps" ArgoCD <code>Application</code> manifest for initial cluster bootstrapping.</li>
+</ul>
+</li>
+<li>Handles both Flake-based and traditional Nix (attribute-based) invocations.<ul>
+<li><em>(Document 43: <code>nixidy.nix</code> package definition)</em></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>External Dependencies (Managed by Nix):</strong></p>
+<ul>
+<li><strong>Nixpkgs:</strong> The standard Nix package collection, providing tools like <code>bash</code>, <code>jq</code>, <code>kubectl</code>, <code>yq-go</code>, etc.<ul>
+<li><em>(Document 3: <code>default.nix</code> top-level)</em></li>
+</ul>
+</li>
+<li><strong>Kubenix:</strong><ul>
+<li>Primarily used for its pre-generated Nix modules that provide typed options for standard Kubernetes resources (e.g., <code>Deployment</code>, <code>Service</code>). Nixidy imports these options.</li>
+<li>Nixidy's CRD generator is also heavily inspired by Kubenix's.</li>
+<li><em>(Document 2: Special Thanks, Document 3, Document 5, Document 10, Document 29)</em></li>
+</ul>
+</li>
+<li><strong>Nix-Kube-Generators (<code>kubelib</code>):</strong><ul>
+<li>Provides the core Nix functions for rendering Helm charts and Kustomize overlays. Nixidy's <code>lib.helm</code> and <code>lib.kustomize</code> often wrap or re-export functions from <code>nix-kube-generators</code>.</li>
+<li><em>(Document 2: Special Thanks, Document 3, Document 5, Document 22, Document 23, Document 25)</em></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>CRD and Schema Generation:</strong></p>
+<ul>
+<li><strong><code>fromCRD</code> Generator (<code>pkgs/generators/crd.nix</code>, Document 44):</strong><ul>
+<li>Allows users to generate Nixidy-compatible Nix modules from Kubernetes Custom Resource Definition (CRD) YAML files.</li>
+<li>Uses <code>crd2jsonschema.py</code> (Document 45) to preprocess CRDs into a JSON schema format.</li>
+<li>Then, <code>jsonschema.nix</code> (Document 47) converts this JSON schema into Nix options.</li>
+</ul>
+</li>
+<li><strong>Generated Modules:</strong> The output is a Nix file (e.g., <code>modules/generated/argocd.nix</code> for ArgoCD CRDs, Document 38) that can be imported via <code>nixidy.applicationImports</code> to provide typed options for these CRDs.<ul>
+<li><em>(Document 18: Typed Resource Options)</em></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Documentation System (<code>docs/</code>):</strong></p>
+<ul>
+<li>Uses MkDocs with the Material theme.<ul>
+<li><em>(Document 12: <code>docs.nix</code>)</em></li>
+</ul>
+</li>
+<li>Documentation for configuration options, library functions, and user guides are generated/written.</li>
+<li>Option search is powered by NuschtOS.<ul>
+<li><em>(Document 8, 9, 10, 11)</em></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Testing Framework (<code>modules/testing/</code>, <code>tests/</code>):</strong></p>
+<ul>
+<li><strong>Module Tests (<code>modules/testing/default.nix</code>, <code>eval.nix</code>, Documents 39, 40):</strong> A system for defining and running tests against Nixidy modules. Assertions are made on the evaluated Nix configuration.</li>
+<li><strong>Lib Tests (<code>lib/tests.nix</code>, Document 26):</strong> Unit tests for functions in <code>nixidy.lib</code> using <code>nix-unit</code>.</li>
+<li>Example tests are in <code>tests/</code> (Documents 50-62, 70-72).</li>
+</ul>
+</li>
+<li>
+<p><strong>GitHub Actions (<code>actions/</code>):</strong></p>
+<ul>
+<li>Provides reusable GitHub Actions for CI/CD.<ul>
+<li><code>actions/build/action.yml</code> (Document 49): Wraps <code>nixidy build</code>.</li>
+<li><code>actions/switch/action.yml</code> (Document 48): Wraps <code>nixidy switch</code>.</li>
+<li><em>(Document 15: GitHub Actions user guide)</em></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="workflow-data-flow">Workflow / Data Flow<a class="headerlink" href="#workflow-data-flow" title="Permanent link">#</a></h2>
+<ol>
+<li><strong>Definition:</strong> The user defines their cluster configuration as Nix expressions using <code>nixidy.lib.mkEnv</code> and the Nixidy module system. This includes applications, their resources (Kubernetes objects, Helm charts, Kustomize overlays), namespaces, and ArgoCD settings.</li>
+<li><strong>Evaluation &amp; Processing (Triggered by <code>nixidy</code> CLI):</strong><ul>
+<li>The Nixidy CLI invokes Nix to evaluate the user's configuration.</li>
+<li>Nixidy's core modules process the defined applications:<ul>
+<li>Helm charts are templated via <code>nix-kube-generators</code>.</li>
+<li>Kustomize overlays are built using <code>kubectl kustomize</code> (via <code>nix-kube-generators</code>).</li>
+<li>Plain Nix resources and raw YAMLs are parsed.</li>
+<li>Resource options are validated against types (from Kubenix and generated CRD modules).</li>
+<li>Transformers (<code>lib.kube.*</code>) can be applied to modify rendered manifests.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Manifest Generation:</strong><ul>
+<li>The processed resources (now Nix attribute sets) are converted into Kubernetes YAML strings.</li>
+<li><code>yq-go</code> is used to format these YAMLs.</li>
+<li>The manifests are organized into a directory structure:<ul>
+<li>A root directory for the environment (e.g., <code>result/</code> or specified by <code>nixidy.target.rootPath</code>).</li>
+<li>Subdirectories for each application (e.g., <code>result/demo/</code>).</li>
+<li>An <code>apps/</code> subdirectory containing ArgoCD <code>Application</code> CRs that point to the respective application manifest directories.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Deployment (GitOps via Argo CD):</strong><ul>
+<li>The generated manifests in the <code>result/</code> directory (or the path configured with <code>nixidy switch</code>) are committed to a Git repository.</li>
+<li>Argo CD monitors this Git repository (or specific paths/branches within it).</li>
+<li>Argo CD applies the "App of Apps" manifest from the <code>apps/</code> directory, which in turn manages the deployment of individual applications from their respective manifest directories.</li>
+</ul>
+</li>
+</ol>
+<h2 id="architectural-diagram-conceptual">Architectural Diagram (Conceptual)<a class="headerlink" href="#architectural-diagram-conceptual" title="Permanent link">#</a></h2>
+<pre class="mermaid"><code>graph LR
+    subgraph User Input
+        A[Nix Configuration] -- Defines --&gt; EnvSetup
+    end
+
+    subgraph Nixidy Core
+        EnvSetup[nixidy.lib.mkEnv/.mkEnvs] -- Loads --&gt; NixidyModules[Nixidy Internal Modules]
+        NixidyModules -- Uses --&gt; NixidyLib[Nixidy Library]
+        NixidyLib -- Wraps --&gt; Kubelib[nix-kube-generators]
+        NixidyModules -- Uses --&gt; KubenixTypes[Kubenix Resource Types]
+        NixidyModules -- Uses --&gt; GeneratedCRDTypes[Generated CRD Types]
+
+        subgraph Resource Processing
+            direction LR
+            Helm[Helm Charts] --&gt; NixidyModules
+            Kustomize[Kustomize Overlays] --&gt; NixidyModules
+            NixResources[Direct Nix Resources] --&gt; NixidyModules
+            YAMLStrings[Raw YAML Strings] --&gt; NixidyModules
+        end
+
+        NixidyModules -- Processes &amp; Merges --&gt; AppConfig[Evaluated Application Config]
+        AppConfig -- Input to --&gt; BuildLogic[Build Logic]
+        BuildLogic -- Generates --&gt; OutputPkgs["environmentPackage &lt;br/&gt; activationPackage &lt;br/&gt; bootstrapPackage"]
+    end
+
+    subgraph Nixidy CLI
+        CLI_Build["nixidy build &lt;env&gt;"] -- Triggers --&gt; OutputPkgs
+        CLI_Switch["nixidy switch &lt;env&gt;"] -- Triggers &amp; Executes --&gt; ActivateScript{activate script}
+        CLI_Info["nixidy info &lt;env&gt;"] -- Reads --&gt; EnvSetup
+        CLI_Bootstrap["nixidy bootstrap &lt;env&gt;"] -- Outputs --&gt; AppOfAppsYAML((App of Apps YAML))
+
+        OutputPkgs --&gt; ResultDir[./result]
+        ActivateScript -- Rsyncs --&gt; ResultDir
+        ResultDir --&gt; ArgoCD[Argo CD]
+    end
+
+    subgraph Tooling &amp; Extensibility
+        CRDs[CRD YAMLs] --&gt; CRDGen[CRD Generator]
+        CRDGen --&gt; GeneratedCRDTypes
+        UserDocs[User Guides] --&gt; DocsGen[Documentation Generator]
+        DocsGen --&gt; DocsSite((Static Docs Site))
+        NixidyModules --&gt; Tests[Testing Framework]
+        GitHubActions[GitHub Actions] -- Wraps --&gt; NixidyCLI[Nixidy CLI Commands]
+    end
+
+    A --&gt; NixidyCLI</code></pre>
+<p>This overview highlights Nixidy's reliance on the Nix ecosystem for configuration management and its role in producing standard, GitOps-friendly YAML manifests for Kubernetes deployment via Argo CD. Its modular design, coupled with dependencies like Kubenix and nix-kube-generators, allows it to offer a typed and declarative approach to Kubernetes management.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../../user_guide/using_nixhelm/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Using nixhelm">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Using nixhelm
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../../library/" class="md-footer__link md-footer__link--next" aria-label="Next: Library Functions">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Library Functions
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.footer", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.525ec568.min.js"></script>
+      
+    
+  </body>
+</html>
