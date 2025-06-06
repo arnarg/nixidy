@@ -1,5 +1,7 @@
 # nixidy
 
+[![LICENSE](https://img.shields.io/github/license/arnarg/nixidy)](./LICENSE)
+
 Kubernetes GitOps with nix and Argo CD.
 
 > Kind of sounds like Nix CD.
@@ -93,6 +95,16 @@ tree -l result/
     └── Service-nginx.yaml
 ```
 
+## Key Features
+
+- **Declarative Cluster Management**: Define your entire Kubernetes cluster state using the Nix language.
+- **NixOS-like Experience**: Leverage the power and structure of the NixOS module system for your Kubernetes configurations.
+- **GitOps Ready**: Generates plain YAML manifests, aligning with the "Rendered Manifests Pattern" for Argo CD.
+- **Strongly-Typed Configuration**: Benefit from NixOS' type system for Kubernetes resources, catching errors early.
+- **Simplified Multi-Environment Management**: Easily manage configurations for development, staging, production, etc.
+- **Helm & Kustomize Integration**: Seamlessly incorporate existing Helm charts and Kustomize overlays.
+- **Extensible**: Generate typed Nix options for your Custom Resource Definitions (CRDs).
+
 ## Getting Started
 
 Take a look at the [getting started guide](https://arnarg.github.io/nixidy/user_guide/getting_started/).
@@ -101,7 +113,7 @@ Take a look at the [getting started guide](https://arnarg.github.io/nixidy/user_
 
 - [arnarg's cluster configuration](https://github.com/arnarg/cluster)
 
-## Why?
+## Why nixidy?
 
 It's desirable to manage Kubernetes clusters in a declarative way using a git repository as a source of truth for manifests that should be deployed into the cluster. One popular solution that is often used to achieve this goal is [Argo CD](https://argo-cd.readthedocs.io/).
 
@@ -126,3 +138,11 @@ Therefore I made nixidy as an experiment to see if I can make something better (
 [farcaller/nix-kube-generators](https://github.com/farcaller/nix-kube-generators) is used internally to pull and render Helm charts and some functions are re-exposed in the lib passed to modules in nixidy.
 
 [hall/kubenix](https://github.com/hall/kubenix) project has code generation of nix module options for every standard kubernetes resource. Instead of doing this work in nixidy I import their generated resource options. The resource option generation scripts in nixidy are also a slight modification of kubenix's. Without their work this wouldn't be possible in nixidy.
+
+## Contributing
+
+Contributions are welcome! Whether it's bug reports, feature requests, documentation improvements, or code contributions, please feel free to open an issue or pull request on our [GitHub repository](https://github.com/arnarg/nixidy).
+
+## License
+
+nixidy is licensed under the [MIT License](./LICENSE).
