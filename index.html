@@ -306,6 +306,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Features
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#getting-started" class="md-nav__link">
     <span class="md-ellipsis">
       Getting Started
@@ -324,13 +333,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#why" class="md-nav__link">
+  <a href="#why-nixidy" class="md-nav__link">
     <span class="md-ellipsis">
-      Why?
+      Why nixidy?
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Why?">
+    <nav class="md-nav" aria-label="Why nixidy?">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -351,6 +360,24 @@
   <a href="#special-thanks" class="md-nav__link">
     <span class="md-ellipsis">
       Special Thanks
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Contributing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    <span class="md-ellipsis">
+      License
     </span>
   </a>
   
@@ -736,6 +763,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Features
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#getting-started" class="md-nav__link">
     <span class="md-ellipsis">
       Getting Started
@@ -754,13 +790,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#why" class="md-nav__link">
+  <a href="#why-nixidy" class="md-nav__link">
     <span class="md-ellipsis">
-      Why?
+      Why nixidy?
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Why?">
+    <nav class="md-nav" aria-label="Why nixidy?">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -786,6 +822,24 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#contributing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Contributing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    <span class="md-ellipsis">
+      License
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -805,6 +859,7 @@
 
 
 <h1 id="nixidy">nixidy<a class="headerlink" href="#nixidy" title="Permanent link">#</a></h1>
+<p><a href="./LICENSE"><img alt="LICENSE" src="https://img.shields.io/github/license/arnarg/nixidy" /></a></p>
 <p>Kubernetes GitOps with nix and Argo CD.</p>
 <blockquote>
 <p>Kind of sounds like Nix CD.</p>
@@ -891,13 +946,23 @@
     ├── Namespace-demo.yaml
     └── Service-nginx.yaml
 </code></pre></div>
+<h2 id="key-features">Key Features<a class="headerlink" href="#key-features" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Declarative Cluster Management</strong>: Define your entire Kubernetes cluster state using the Nix language.</li>
+<li><strong>NixOS-like Experience</strong>: Leverage the power and structure of the NixOS module system for your Kubernetes configurations.</li>
+<li><strong>GitOps Ready</strong>: Generates plain YAML manifests, aligning with the "Rendered Manifests Pattern" for Argo CD.</li>
+<li><strong>Strongly-Typed Configuration</strong>: Benefit from NixOS' type system for Kubernetes resources, catching errors early.</li>
+<li><strong>Simplified Multi-Environment Management</strong>: Easily manage configurations for development, staging, production, etc.</li>
+<li><strong>Helm &amp; Kustomize Integration</strong>: Seamlessly incorporate existing Helm charts and Kustomize overlays.</li>
+<li><strong>Extensible</strong>: Generate typed Nix options for your Custom Resource Definitions (CRDs).</li>
+</ul>
 <h2 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">#</a></h2>
 <p>Take a look at the <a href="https://arnarg.github.io/nixidy/user_guide/getting_started/">getting started guide</a>.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">#</a></h2>
 <ul>
 <li><a href="https://github.com/arnarg/cluster">arnarg's cluster configuration</a></li>
 </ul>
-<h2 id="why">Why?<a class="headerlink" href="#why" title="Permanent link">#</a></h2>
+<h2 id="why-nixidy">Why nixidy?<a class="headerlink" href="#why-nixidy" title="Permanent link">#</a></h2>
 <p>It's desirable to manage Kubernetes clusters in a declarative way using a git repository as a source of truth for manifests that should be deployed into the cluster. One popular solution that is often used to achieve this goal is <a href="https://argo-cd.readthedocs.io/">Argo CD</a>.</p>
 <p>Argo CD has a concept of applications. Each application has an entrypoint somewhere in your git repository that is either a Helm chart, kustomize application, jsonnet files or just a directory of YAML files. All the resources that are output when templating the helm chart, kustomizing the kustomize application or are defined in the YAML files in the directory, make up the application and are (usually) deployed into a single namespace.</p>
 <p>For those reasons these git repositories often need quite elaborate designs once many applications should be deployed, requiring use of application sets (generator for applications) or custom Helm charts just to render all the different applications of the repository.</p>
@@ -910,6 +975,10 @@
 <h2 id="special-thanks">Special Thanks<a class="headerlink" href="#special-thanks" title="Permanent link">#</a></h2>
 <p><a href="https://github.com/farcaller/nix-kube-generators">farcaller/nix-kube-generators</a> is used internally to pull and render Helm charts and some functions are re-exposed in the lib passed to modules in nixidy.</p>
 <p><a href="https://github.com/hall/kubenix">hall/kubenix</a> project has code generation of nix module options for every standard kubernetes resource. Instead of doing this work in nixidy I import their generated resource options. The resource option generation scripts in nixidy are also a slight modification of kubenix's. Without their work this wouldn't be possible in nixidy.</p>
+<h2 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">#</a></h2>
+<p>Contributions are welcome! Whether it's bug reports, feature requests, documentation improvements, or code contributions, please feel free to open an issue or pull request on our <a href="https://github.com/arnarg/nixidy">GitHub repository</a>.</p>
+<h2 id="license">License<a class="headerlink" href="#license" title="Permanent link">#</a></h2>
+<p>nixidy is licensed under the <a href="./LICENSE">MIT License</a>.</p>
 
 
 
