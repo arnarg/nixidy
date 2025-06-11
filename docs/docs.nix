@@ -87,11 +87,10 @@
           - 'GitHub Actions': user_guide/github_actions.md
           - 'Transformers': user_guide/transformers.md
           - 'Using nixhelm': user_guide/using_nixhelm.md
-        - 'Developer Guide':
-          - 'Architectural Overview': developer_guide/architecture.md
         - Reference:
           - 'Library Functions': library.md
           - 'Configuration Options': options.md
+          - 'Architectural Overview': developer_guide/architecture.md
       EOF
     '';
 
