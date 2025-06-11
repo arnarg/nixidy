@@ -1,6 +1,4 @@
-# nixidy
-
-[![LICENSE](https://img.shields.io/github/license/arnarg/nixidy)](./LICENSE)
+# nixidy [![License][license-badge]](./LICENSE) ![Latest tag][tag-badge] ![Checks passing][checks-badge]
 
 Kubernetes GitOps with nix and Argo CD.
 
@@ -146,3 +144,7 @@ Contributions are welcome! Whether it's bug reports, feature requests, documenta
 ## License
 
 nixidy is licensed under the [MIT License](./LICENSE).
+
+[license-badge]: https://img.shields.io/github/license/arnarg/nixidy?style=flat
+[tag-badge]: https://img.shields.io/github/v/tag/arnarg/nixidy?style=flat
+[checks-badge]: https://img.shields.io/github/check-runs/arnarg/nixidy/main?style=flat
