@@ -21,8 +21,6 @@ jobs:
         extra_nix_config: |
           extra-experimental-features = nix-command flakes
 
-    - uses: DeterminateSystems/magic-nix-cache-action@v7
-
     - name: Run .#libTests
       run: |
         echo "# Test Results" > $GITHUB_STEP_SUMMARY
@@ -37,8 +35,6 @@ jobs:
       with:
         extra_nix_config: |
           extra-experimental-features = nix-command flakes
-
-    - uses: DeterminateSystems/magic-nix-cache-action@v7
 
     - name: Run .#moduleTests
       run: |

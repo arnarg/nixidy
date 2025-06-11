@@ -33,8 +33,6 @@ jobs:
         extra_nix_config: |
           extra-experimental-features = nix-command flakes
 
-    - uses: DeterminateSystems/magic-nix-cache-action@v7
-
     - uses: arnarg/nixidy/actions/build@main
       id: build
       with:
@@ -94,8 +92,6 @@ jobs:
         # when using nixidy with non-flakes.
         extra_nix_config: |
           extra-experimental-features = nix-command flakes
-
-    - uses: DeterminateSystems/magic-nix-cache-action@v7
 
     - uses: arnarg/nixidy/actions/switch@main
       with:

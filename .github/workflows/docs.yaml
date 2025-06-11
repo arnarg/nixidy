@@ -16,8 +16,6 @@ jobs:
         extra_nix_config: |
           extra-experimental-features = nix-command flakes
 
-    - uses: DeterminateSystems/magic-nix-cache-action@v8
-
     - run: |
         nix-build ./docs -A html --out-link public
 

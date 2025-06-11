@@ -23,8 +23,6 @@ jobs:
         extra_nix_config: |
           extra-experimental-features = nix-command flakes
 
-    - uses: DeterminateSystems/magic-nix-cache-action@v7
-
     - name: Run statix
       run: |
         nix run .#cliTest
