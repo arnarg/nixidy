@@ -11,6 +11,16 @@
 
   nixidyModules = import ./modules.nix;
 
+  kubenix-patched = pkgs.stdenv.mkDerivation {
+    name = "kubenix-patched";
+    src = kubenix;
+    patches = [./kubenix.patch];
+    buildPhase = ''
+      mkdir -p $out
+      cp -r * $out
+    '';
+  };
+
   module = lib.evalModules {
     modules =
       modules
@@ -18,7 +28,7 @@
       ++ [
         {
           nixidy.applicationImports = [
-            (kubenix + "/modules/generated/v1.30.nix")
+            (kubenix-patched + "/modules/generated/v1.30.nix")
             ./generated/argocd.nix
           ];
         }
