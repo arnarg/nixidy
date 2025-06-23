@@ -360,7 +360,7 @@ with lib; let
     with lib;
 
     let
-      hasAttrNotNull = attr: set: hasAttr attr set && !isNull set.''${attr};
+      hasAttrNotNull = attr: set: hasAttr attr set && set.''${attr} != null;
 
       attrsToList = values:
         if values != null
