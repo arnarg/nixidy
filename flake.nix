@@ -5,11 +5,6 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     nix-kube-generators.url = "github:farcaller/nix-kube-generators";
-
-    kubenix = {
-      url = "github:hall/kubenix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs = {
@@ -17,11 +12,9 @@
     nixpkgs,
     flake-utils,
     nix-kube-generators,
-    kubenix,
   }:
     {
       lib = import ./make-env.nix {
-        inherit kubenix;
         kubelib = nix-kube-generators;
       };
     }
@@ -54,19 +47,26 @@
 
       apps = {
         # Generates all generators and copies into place
-        generate = {
+        generate = let
+          generated = pkgs.linkFarm "generated-modules" [
+            {
+              name = "argocd.nix";
+              path = self.packages.${system}.generators.argocd;
+            }
+            {
+              name = "k8s";
+              path = self.packages.${system}.generators.k8s;
+            }
+          ];
+        in {
           type = "app";
-          program = with pkgs.lib;
+          program =
             (pkgs.writeShellScript "generate-modules" ''
               set -eo pipefail
               dest=./modules/generated
 
-              ${concatStringsSep "\n" (mapAttrsToList (
-                n: mod: ''
-                  echo "generating ${n}"
-                  cat ${mod} > $dest/${n}.nix
-                ''
-              ) (removeAttrs self.packages.${system}.generators ["fromCRD"]))}
+              echo "generating modules..."
+              ${pkgs.rsync}/bin/rsync --copy-links --recursive --delete "${generated}/" "$dest"
 
               echo "done!"
             '')

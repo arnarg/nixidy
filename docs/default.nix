@@ -12,13 +12,6 @@
   # as is used by the flake I read the flake.lock
   # and fetch them below.
   flakeLock = builtins.fromJSON (builtins.readFile ../flake.lock);
-  kubenix = let
-    lock = flakeLock.nodes.kubenix.locked;
-  in
-    npkgs.fetchFromGitHub {
-      inherit (lock) owner repo rev;
-      hash = lock.narHash;
-    };
   kubelib = let
     lock = flakeLock.nodes.nix-kube-generators.locked;
   in
@@ -40,7 +33,7 @@
 in
   # Build docs!
   import ./docs.nix {
-    inherit kubenix mkSearch;
+    inherit mkSearch;
     pkgs = npkgs;
     lib = import ../lib {
       inherit kubelib;

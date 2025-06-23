@@ -50,6 +50,7 @@
         import ../modules/modules.nix
         ++ [
           {
+            nixidy.baseImports = false;
             nixidy.applicationImports = [resourcesCompat];
           }
         ];

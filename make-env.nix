@@ -1,7 +1,4 @@
-{
-  kubenix,
-  kubelib,
-}: rec {
+{kubelib}: rec {
   mkEnv = {
     pkgs,
     lib ? pkgs.lib,
@@ -11,7 +8,7 @@
     libOverlay ? null,
   }:
     import ./modules {
-      inherit pkgs lib extraSpecialArgs kubenix kubelib libOverlay;
+      inherit pkgs lib extraSpecialArgs kubelib libOverlay;
       modules =
         modules
         ++ [

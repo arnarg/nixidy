@@ -1,13 +1,12 @@
 {
   pkgs,
   lib ? pkgs.lib,
-  kubenix,
   mkSearch,
 }: let
   optionsMd = import ./build-options-doc.nix {inherit pkgs lib;};
 
   buildSearch = import ./build-options-search.nix {
-    inherit pkgs lib kubenix mkSearch;
+    inherit pkgs lib mkSearch;
   };
 
   libraryMd = import ./build-library-doc.nix {inherit pkgs lib;};

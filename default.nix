@@ -36,8 +36,7 @@
     then pkgs.fetchFromGitHub (removeAttrs lock ["type"])
     else throw "fetcher for type ${lock.type} unsupported";
 
-  # Get kubenix and nix-kube-generators.
-  kubenix = fetchFromFlakeLock "kubenix";
+  # Get nix-kube-generators.
   kubelib = let
     src = fetchFromFlakeLock "nix-kube-generators";
   in {
@@ -45,7 +44,7 @@
   };
 
   # Import the lib functions present in the flake.
-  lib = import ./make-env.nix {inherit kubenix kubelib;};
+  lib = import ./make-env.nix {inherit kubelib;};
 in {
   # Wrap the lib functions to use the pkgs imported above
   # without having the user needing to pass it in.

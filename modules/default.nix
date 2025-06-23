@@ -2,7 +2,6 @@
   modules,
   pkgs,
   kubelib,
-  kubenix,
   lib ? pkgs.lib,
   extraSpecialArgs ? {},
   libOverlay ? null,
@@ -11,28 +10,10 @@
 
   nixidyModules = import ./modules.nix;
 
-  kubenix-patched = pkgs.stdenv.mkDerivation {
-    name = "kubenix-patched";
-    src = kubenix;
-    patches = [./kubenix.patch];
-    buildPhase = ''
-      mkdir -p $out
-      cp -r * $out
-    '';
-  };
-
   module = lib.evalModules {
     modules =
       modules
-      ++ nixidyModules
-      ++ [
-        {
-          nixidy.applicationImports = [
-            (kubenix-patched + "/modules/generated/v1.30.nix")
-            ./generated/argocd.nix
-          ];
-        }
-      ];
+      ++ nixidyModules;
     specialArgs =
       {
         inherit pkgs;

@@ -1,11 +1,9 @@
 {
   pkgs,
   lib,
-  kubenix,
   mkSearch,
 }: let
   nixidyPath = toString ./..;
-  kubenixPath = toString kubenix;
 
   # Borrowed from home-manager :)
   gitHubDeclaration = user: repo: subpath: {
@@ -15,16 +13,7 @@
 
   options =
     (lib.evalModules {
-      modules =
-        import ../modules/modules.nix
-        ++ [
-          {
-            nixidy.applicationImports = [
-              (kubenix + "/modules/generated/v1.30.nix")
-              ../modules/generated/argocd.nix
-            ];
-          }
-        ];
+      modules = import ../modules/modules.nix;
       specialArgs = {
         inherit pkgs lib;
       };
@@ -42,8 +31,6 @@
               decl:
                 if lib.hasPrefix nixidyPath (toString decl)
                 then gitHubDeclaration "arnarg" "nixidy" (lib.removePrefix "/" (lib.removePrefix nixidyPath (toString decl)))
-                else if lib.hasPrefix kubenixPath (toString decl)
-                then gitHubDeclaration "hall" "kubenix" (lib.removePrefix "/" (lib.removePrefix kubenixPath (toString decl)))
                 else if decl == "lib/modules.nix"
                 then gitHubDeclaration "NixOS" "nixpkgs" decl
                 else decl

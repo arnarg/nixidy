@@ -2,7 +2,12 @@
   lib,
   config,
   ...
-}: {
+}: let
+  versions = lib.mapAttrsToList (
+    version: _:
+      builtins.concatStringsSep "." (lib.lists.sublist 0 2 (builtins.splitVersion version))
+  ) (import ../pkgs/generators/versions.nix);
+in {
   imports = [
     (lib.mkRenamedOptionModule ["nixidy" "resourceImports"] ["nixidy" "applicationImports"])
   ];
@@ -48,10 +53,31 @@
       };
     };
 
-    nixidy.applicationImports = mkOption {
-      type = with types; listOf (oneOf [package path (functionTo attrs)]);
-      default = [];
-      description = "List of modules to import into `applications.*` submodule (most useful for resource definition options).";
+    nixidy = {
+      k8sVersion = mkOption {
+        type = with types; enum versions;
+        default = "1.33";
+        description = "The Kubernetes version for generated resource options to use.";
+      };
+      applicationImports = mkOption {
+        type = with types; listOf (oneOf [package path (functionTo attrs)]);
+        default = [];
+        description = "List of modules to import into `applications.*` submodule (most useful for resource definition options).";
+      };
+      baseImports = mkOption {
+        type = with types; bool;
+        default = true;
+        internal = true;
+        visible = false;
+        description = "Controls if the default applicationImports should be included or not. Used by options documentation generation.";
+      };
     };
+  };
+
+  config = lib.mkIf config.nixidy.baseImports {
+    nixidy.applicationImports = [
+      ./generated/argocd.nix
+      ./generated/k8s/v${config.nixidy.k8sVersion}.nix
+    ];
   };
 }
