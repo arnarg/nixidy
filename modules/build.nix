@@ -73,23 +73,15 @@ in {
     build = {
       bootstrapPackage = mkApp config.applications.__bootstrap;
 
-      extrasPackage = pkgs.stdenv.mkDerivation {
-        name = "nixidy-extras-${envName}";
-
-        phases = ["installPhase"];
-
-        installPhase =
-          ''
-            mkdir -p $out
-          ''
-          + (lib.concatStringsSep "\n" (lib.mapAttrsToList (_: file: ''
-              mkdir -p $out/$(dirname ${file.path})
-              cat <<EOF > "$out/${file.path}"
-              ${file.text}
-              EOF
-            '')
-            config.nixidy.extraFiles));
-      };
+      extrasPackage = pkgs.linkFarm "nixidy-extras-${envName}" (
+        lib.mapAttrsToList (
+          _: file: {
+            name = file.path;
+            path = file.source;
+          }
+        )
+        config.nixidy.extraFiles
+      );
 
       environmentPackage = let
         joined = pkgs.linkFarm "nixidy-apps-joined-${envName}" (

@@ -4,21 +4,6 @@
   ...
 }: let
   cfg = config.nixidy;
-
-  extraFilesOpts = with lib;
-    {name, ...}: {
-      options = {
-        path = mkOption {
-          type = types.str;
-          default = name;
-          description = "Path of output file.";
-        };
-        text = mkOption {
-          type = types.lines;
-          description = "Text of the output file.";
-        };
-      };
-    };
 in {
   imports = [
     (lib.mkRenamedOptionModule ["nixidy" "defaults" "syncPolicy" "autoSync" "enabled"] ["nixidy" "defaults" "syncPolicy" "autoSync" "enable"])
@@ -50,14 +35,6 @@ in {
         '';
         description = "The revision being built. Will be written to `.revision` in the environment destination directory.";
       };
-    };
-
-    extraFiles = mkOption {
-      type = types.attrsOf (types.submodule extraFilesOpts);
-      default = {};
-      description = ''
-        Extra files to write in the generated stage.
-      '';
     };
 
     defaults = {
