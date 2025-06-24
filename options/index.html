@@ -989,6 +989,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#nixidybootstrapmanifestenable" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.bootstrapManifest.enable
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#nixidybuildrevision" class="md-nav__link">
     <span class="md-ellipsis">
       nixidy.build.revision
@@ -1082,6 +1091,15 @@
   <a href="#nixidyextrafilesnamepath" class="md-nav__link">
     <span class="md-ellipsis">
       nixidy.extraFiles.&lt;name&gt;.path
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidyextrafilesnamesource" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.extraFiles.&lt;name&gt;.source
     </span>
   </a>
   
@@ -1619,6 +1637,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#nixidybootstrapmanifestenable" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.bootstrapManifest.enable
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#nixidybuildrevision" class="md-nav__link">
     <span class="md-ellipsis">
       nixidy.build.revision
@@ -1712,6 +1739,15 @@
   <a href="#nixidyextrafilesnamepath" class="md-nav__link">
     <span class="md-ellipsis">
       nixidy.extraFiles.&lt;name&gt;.path
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidyextrafilesnamesource" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.extraFiles.&lt;name&gt;.source
     </span>
   </a>
   
@@ -2397,6 +2433,16 @@ list of (package or path or function that evaluates to a(n) (attribute set))</p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/applications.nix">&lt;nixidy/modules/applications.nix&gt;</a></li>
 </ul>
+<h2 id="nixidybootstrapmanifestenable">nixidy.bootstrapManifest.enable<a class="headerlink" href="#nixidybootstrapmanifestenable" title="Permanent link">#</a></h2>
+<p>Automatically include a <code>bootstrap.yaml</code> manifest in the generated output. This can be used to bootstrap the app of apps by running <code>kubectl apply -f bootstrap.yaml</code>.</p>
+<p><strong><em>Type:</em></strong>
+boolean</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="no">false</span></code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/extra-files.nix">&lt;nixidy/modules/extra-files.nix&gt;</a></li>
+</ul>
 <h2 id="nixidybuildrevision">nixidy.build.revision<a class="headerlink" href="#nixidybuildrevision" title="Permanent link">#</a></h2>
 <p>The revision being built. Will be written to <code>.revision</code> in the environment destination directory.</p>
 <p><strong><em>Type:</em></strong>
@@ -2510,7 +2556,7 @@ attribute set of (submodule)</p>
 <code class="highlight"><span class="p">{</span> <span class="p">}</span></code></p>
 <p><strong><em>Declared by:</em></strong></p>
 <ul>
-<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/extra-files.nix">&lt;nixidy/modules/extra-files.nix&gt;</a></li>
 </ul>
 <h2 id="nixidyextrafilesnamepath">nixidy.extraFiles.&lt;name&gt;.path<a class="headerlink" href="#nixidyextrafilesnamepath" title="Permanent link">#</a></h2>
 <p>Path of output file.</p>
@@ -2520,15 +2566,25 @@ string</p>
 <code class="highlight"><span class="s2">&quot;‹name›&quot;</span></code></p>
 <p><strong><em>Declared by:</em></strong></p>
 <ul>
-<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/extra-files.nix">&lt;nixidy/modules/extra-files.nix&gt;</a></li>
+</ul>
+<h2 id="nixidyextrafilesnamesource">nixidy.extraFiles.&lt;name&gt;.source<a class="headerlink" href="#nixidyextrafilesnamesource" title="Permanent link">#</a></h2>
+<p>Path of the source file.</p>
+<p><strong><em>Type:</em></strong>
+path</p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/extra-files.nix">&lt;nixidy/modules/extra-files.nix&gt;</a></li>
 </ul>
 <h2 id="nixidyextrafilesnametext">nixidy.extraFiles.&lt;name&gt;.text<a class="headerlink" href="#nixidyextrafilesnametext" title="Permanent link">#</a></h2>
 <p>Text of the output file.</p>
 <p><strong><em>Type:</em></strong>
-strings concatenated with "\n"</p>
+null or strings concatenated with "\n"</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="no">null</span></code></p>
 <p><strong><em>Declared by:</em></strong></p>
 <ul>
-<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/extra-files.nix">&lt;nixidy/modules/extra-files.nix&gt;</a></li>
 </ul>
 <h2 id="nixidyk8sversion">nixidy.k8sVersion<a class="headerlink" href="#nixidyk8sversion" title="Permanent link">#</a></h2>
 <p>The Kubernetes version for generated resource options to use.</p>
