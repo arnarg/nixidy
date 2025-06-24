@@ -45017,6 +45017,8 @@ in {
         mkAliasDefinitions options.resources."applicationSets";
     };
 
+    # make all namespaced resources default to the
+    # application's namespace
     defaults = [
       {
         group = "argoproj.io";

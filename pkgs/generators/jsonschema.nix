@@ -491,6 +491,8 @@ with lib; let
       latestResourceTypesByKind)}
         };
 
+        # make all namespaced resources default to the
+        # application's namespace
         defaults = [${concatStrings (mapAttrsToList (_: rt: ''      {
           group = "${rt.group}";
           version = "${rt.version}";

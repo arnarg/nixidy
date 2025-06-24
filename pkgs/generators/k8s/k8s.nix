@@ -7,6 +7,7 @@
   pkgs,
   lib,
   spec,
+  namespaced,
 }:
 with lib; let
   gen = rec {
@@ -337,6 +338,13 @@ with lib; let
 
   latestResourceTypesByKind = mapAttrs (_kind: last) resourcesTypesByKindSortByVersion;
 
+  namespacedResourceTypes =
+    filterAttrs (
+      _: type:
+        lib.attrByPath [type.group type.version type.kind] false namespaced
+    )
+    resourceTypes;
+
   genResourceOptions = resource:
     with gen; let
       submoduleForDefinition' = definition:
@@ -538,6 +546,16 @@ with lib; let
       '')
       latestResourceTypesByKind)}
         };
+
+        # make all namespaced resources default to the
+        # application's namespace
+        defaults = [${concatStrings (mapAttrsToList (_: rt: ''      {
+          group = "${rt.group}";
+          version = "${rt.version}";
+          kind = "${rt.kind}";
+          default.metadata.namespace = lib.mkDefault config.namespace;
+        }'')
+    namespacedResourceTypes)}];
       };
     }
   '';

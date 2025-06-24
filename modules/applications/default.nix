@@ -75,7 +75,6 @@ in {
     ./helm.nix
     ./kustomize.nix
     ./yamls.nix
-    ./namespaced.nix
 
     (lib.mkRenamedOptionModule ["syncPolicy" "autoSync" "enabled"] ["syncPolicy" "autoSync" "enable"])
   ];

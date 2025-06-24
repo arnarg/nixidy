@@ -2,11 +2,6 @@
   pkgs,
   lib ? pkgs.lib,
 }: let
-  fromSpec = name: spec:
-    import ./k8s.nix {
-      inherit pkgs lib name spec;
-    };
-
   fromCRD = {
     name,
     src,
@@ -17,6 +12,8 @@
     };
 in {
   inherit fromCRD;
+
+  k8s = import ./k8s {inherit pkgs lib;};
 
   argocd = fromCRD {
     name = "argocd";
@@ -32,19 +29,4 @@ in {
       "manifests/crds/appproject-crd.yaml"
     ];
   };
-
-  k8s = pkgs.linkFarm "k8s-generated" (
-    builtins.attrValues (
-      builtins.mapAttrs (version: sha: let
-        short = builtins.concatStringsSep "." (lib.lists.sublist 0 2 (builtins.splitVersion version));
-      in {
-        name = "v${short}.nix";
-        path = fromSpec "v${short}" (builtins.fetchurl {
-          url = "https://github.com/kubernetes/kubernetes/raw/v${version}/api/openapi-spec/swagger.json";
-          sha256 = sha;
-        });
-      })
-      (import ./versions.nix)
-    )
-  );
 }

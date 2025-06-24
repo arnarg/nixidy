@@ -6,7 +6,7 @@
   versions = lib.mapAttrsToList (
     version: _:
       builtins.concatStringsSep "." (lib.lists.sublist 0 2 (builtins.splitVersion version))
-  ) (import ../pkgs/generators/versions.nix);
+  ) (import ../pkgs/generators/k8s/versions.nix);
 in {
   imports = [
     (lib.mkRenamedOptionModule ["nixidy" "resourceImports"] ["nixidy" "applicationImports"])

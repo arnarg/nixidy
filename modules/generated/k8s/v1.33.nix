@@ -20338,5 +20338,250 @@ in {
       "storage.k8s.io"."v1beta1"."VolumeAttributesClass" =
         mkAliasDefinitions options.resources."volumeAttributesClasses";
     };
+
+    # make all namespaced resources default to the
+    # application's namespace
+    defaults = [
+      {
+        group = "apps";
+        version = "v1";
+        kind = "ControllerRevision";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "apps";
+        version = "v1";
+        kind = "DaemonSet";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "apps";
+        version = "v1";
+        kind = "Deployment";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "apps";
+        version = "v1";
+        kind = "ReplicaSet";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "apps";
+        version = "v1";
+        kind = "StatefulSet";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "authorization.k8s.io";
+        version = "v1";
+        kind = "LocalSubjectAccessReview";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "autoscaling";
+        version = "v1";
+        kind = "HorizontalPodAutoscaler";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "autoscaling";
+        version = "v2";
+        kind = "HorizontalPodAutoscaler";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "batch";
+        version = "v1";
+        kind = "CronJob";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "batch";
+        version = "v1";
+        kind = "Job";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "coordination.k8s.io";
+        version = "v1";
+        kind = "Lease";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "coordination.k8s.io";
+        version = "v1alpha2";
+        kind = "LeaseCandidate";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "coordination.k8s.io";
+        version = "v1beta1";
+        kind = "LeaseCandidate";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "core";
+        version = "v1";
+        kind = "Binding";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "core";
+        version = "v1";
+        kind = "ConfigMap";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "core";
+        version = "v1";
+        kind = "Endpoints";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "core";
+        version = "v1";
+        kind = "Event";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "core";
+        version = "v1";
+        kind = "LimitRange";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "core";
+        version = "v1";
+        kind = "PersistentVolumeClaim";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "core";
+        version = "v1";
+        kind = "Pod";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "core";
+        version = "v1";
+        kind = "PodTemplate";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "core";
+        version = "v1";
+        kind = "ReplicationController";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "core";
+        version = "v1";
+        kind = "ResourceQuota";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "core";
+        version = "v1";
+        kind = "Secret";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "core";
+        version = "v1";
+        kind = "Service";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "core";
+        version = "v1";
+        kind = "ServiceAccount";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "discovery.k8s.io";
+        version = "v1";
+        kind = "EndpointSlice";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "events.k8s.io";
+        version = "v1";
+        kind = "Event";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "networking.k8s.io";
+        version = "v1";
+        kind = "Ingress";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "networking.k8s.io";
+        version = "v1";
+        kind = "NetworkPolicy";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "policy";
+        version = "v1";
+        kind = "PodDisruptionBudget";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "rbac.authorization.k8s.io";
+        version = "v1";
+        kind = "Role";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "rbac.authorization.k8s.io";
+        version = "v1";
+        kind = "RoleBinding";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "resource.k8s.io";
+        version = "v1alpha3";
+        kind = "ResourceClaim";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "resource.k8s.io";
+        version = "v1alpha3";
+        kind = "ResourceClaimTemplate";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "resource.k8s.io";
+        version = "v1beta1";
+        kind = "ResourceClaim";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "resource.k8s.io";
+        version = "v1beta1";
+        kind = "ResourceClaimTemplate";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "resource.k8s.io";
+        version = "v1beta2";
+        kind = "ResourceClaim";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "resource.k8s.io";
+        version = "v1beta2";
+        kind = "ResourceClaimTemplate";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+      {
+        group = "storage.k8s.io";
+        version = "v1";
+        kind = "CSIStorageCapacity";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+    ];
   };
 }
