@@ -24,7 +24,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - uses: cachix/install-nix-action@v20
+    - uses: cachix/install-nix-action@v31
       with:
         # The `arnarg/nixidy/actions/build` action depends
         # on nix flakes to run the actual nixidy cli.
@@ -84,7 +84,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - uses: cachix/install-nix-action@v20
+    - uses: cachix/install-nix-action@v31
       with:
         # The `arnarg/nixidy/actions/switch` action depends
         # on nix flakes to run the actual nixidy cli.
