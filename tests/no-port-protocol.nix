@@ -30,12 +30,25 @@ in {
     ];
   };
 
+  applications.test3.resources.services.nginx-service.spec = {
+    ports = [
+      {
+        name = "dns";
+        port = 53;
+        protocol = "UDP";
+      }
+      {
+        port = 53;
+      }
+    ];
+  };
+
   test = {
-    name = "container port with/without protocol";
+    name = "service/container port with/without protocol";
     description = "Check that specifying a port without protocol works.";
     assertions = [
       {
-        description = "Ports defined using attrset.";
+        description = "Pod ports defined using attrset.";
 
         expression = lib.findFirst (obj: obj.metadata.name == "nginx-pod") null apps.test1.objects;
 
@@ -59,7 +72,7 @@ in {
       }
 
       {
-        description = "Ports defined using list.";
+        description = "Pod ports defined using list.";
 
         expression = lib.findFirst (obj: obj.metadata.name == "nginx-pod") null apps.test2.objects;
 
@@ -80,6 +93,29 @@ in {
           pod
           != null
           && (checkPodPorts pod);
+      }
+
+      {
+        description = "Service ports defined using list.";
+
+        expression = lib.findFirst (obj: obj.metadata.name == "nginx-service") null apps.test3.objects;
+
+        assertion = service: let
+          checkServicePorts = service: let
+            ports = service.spec.ports;
+            port1 = builtins.elemAt ports 0;
+            port2 = builtins.elemAt ports 1;
+          in
+            port1.name == "dns"
+            && port1.port == 53
+            && port1.protocol == "UDP"
+            && port2.port == 53
+            && !(builtins.hasAttr "name" port2)
+            && !(builtins.hasAttr "protocol" port2);
+        in
+          service
+          != null
+          && (checkServicePorts service);
       }
     ];
   };

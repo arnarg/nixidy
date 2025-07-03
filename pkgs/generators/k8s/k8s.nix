@@ -189,6 +189,7 @@ with lib; let
                                     builtins.any (n: _name == n) [
                                       "io.k8s.api.core.v1.Container"
                                       "io.k8s.api.core.v1.EphemeralContainer"
+                                      "io.k8s.api.core.v1.ServiceSpec"
                                     ]
                                     && propName == "ports"
                                   then builtins.filter (x: x != "protocol") property."x-kubernetes-list-map-keys"
