@@ -5,42 +5,44 @@
 }: let
   apps = config.applications;
 in {
-  applications.test1.resources.pods.nginx-pod.spec.containers.nginx = {
-    image = "nginx:latest";
-    ports = {
-      dns = {
-        containerPort = 53;
-        protocol = "UDP";
+  applications = {
+    test1.resources.pods.nginx-pod.spec.containers.nginx = {
+      image = "nginx:latest";
+      ports = {
+        dns = {
+          containerPort = 53;
+          protocol = "UDP";
+        };
+        dnstcp.containerPort = 53;
       };
-      dnstcp.containerPort = 53;
     };
-  };
 
-  applications.test2.resources.pods.nginx-pod.spec.containers.nginx = {
-    image = "nginx:latest";
-    ports = [
-      {
-        name = "dns";
-        containerPort = 53;
-        protocol = "UDP";
-      }
-      {
-        containerPort = 53;
-      }
-    ];
-  };
+    test2.resources.pods.nginx-pod.spec.containers.nginx = {
+      image = "nginx:latest";
+      ports = [
+        {
+          name = "dns";
+          containerPort = 53;
+          protocol = "UDP";
+        }
+        {
+          containerPort = 53;
+        }
+      ];
+    };
 
-  applications.test3.resources.services.nginx-service.spec = {
-    ports = [
-      {
-        name = "dns";
-        port = 53;
-        protocol = "UDP";
-      }
-      {
-        port = 53;
-      }
-    ];
+    test3.resources.services.nginx-service.spec = {
+      ports = [
+        {
+          name = "dns";
+          port = 53;
+          protocol = "UDP";
+        }
+        {
+          port = 53;
+        }
+      ];
+    };
   };
 
   test = {
