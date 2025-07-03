@@ -10604,7 +10604,7 @@ with lib; let
         };
         "ports" = mkOption {
           description = "The list of ports that are exposed by this service. More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ServicePort" "name" ["port" "protocol"]);
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ServicePort" "name" ["port"]);
           apply = attrsToList;
         };
         "publishNotReadyAddresses" = mkOption {
