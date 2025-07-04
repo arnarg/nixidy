@@ -97,9 +97,13 @@ def generate_jsonschema(files):
                 definition['type'] = 'object'
                 return definition
 
-            # The nix generator doesn't support anyOf
             elif 'anyOf' in definition:
-                newDef = definition['anyOf'][0]
+                if definition.get('x-kubernetes-int-or-string', False):
+                    # Patch the definition based on the custom x-kubernetes-int-or-string
+                    newDef = { 'type': 'string', 'format': 'int-or-string' }
+                else:
+                    # The nix generator doesn't support anyOf
+                    newDef = definition['anyOf'][0]
                 newDef['description'] = definition.get('description', '')
                 return newDef
 
