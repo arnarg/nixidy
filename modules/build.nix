@@ -126,7 +126,10 @@ in {
           if ! ${pkgs.diffutils}/bin/diff -q -r --exclude .revision "${config.build.environmentPackage}" "\$dest" &>/dev/null; then
             echo "switching manifests"
 
-            ${pkgs.rsync}/bin/rsync --recursive --delete -L "${config.build.environmentPackage}/" "\$dest"
+            ${pkgs.rsync}/bin/rsync \
+              --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r \
+              --recursive --delete --copy-links \
+              "${config.build.environmentPackage}/" "\$dest"
 
             echo "done!"
           else

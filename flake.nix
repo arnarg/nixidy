@@ -66,7 +66,10 @@
               dest=./modules/generated
 
               echo "generating modules..."
-              ${pkgs.rsync}/bin/rsync --copy-links --recursive --delete "${generated}/" "$dest"
+              ${pkgs.rsync}/bin/rsync \
+                --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r \
+                --copy-links --recursive --delete \
+                "${generated}/" "$dest"
 
               echo "done!"
             '')
