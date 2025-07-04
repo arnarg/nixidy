@@ -6,9 +6,13 @@
     name,
     src,
     crds,
+    # Mapping of CRD definitionKey to attrName
+    # Useful to avoid breaking collisions or shorten long type names
+    # Ex: {"authenticationflow.keycloak.crossplane.io.v1alpha1.Bindings" = "keycloakBindings";}
+    attrNameOverrides ? {},
   }:
     import ./crd.nix {
-      inherit pkgs lib name src crds;
+      inherit pkgs lib name src crds attrNameOverrides;
     };
 in {
   inherit fromCRD;

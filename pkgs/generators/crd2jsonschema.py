@@ -29,7 +29,7 @@ def gen_attr_name(kind, plural):
 def uppercase_first(name):
     return name[0].upper() + name[1:]
 
-def generate_jsonschema(files):
+def generate_jsonschema(files, attr_name_overrides):
     schema = {'definitions': {}, 'roots': []}
 
     for file in files:
@@ -55,7 +55,7 @@ def generate_jsonschema(files):
                                                'version': version,
                                                'kind': kind,
                                                'name': plural,
-                                               'attrName': gen_attr_name(kind, plural),
+                                               'attrName': attr_name_overrides.get(definitionKey, gen_attr_name(kind, plural)),
                                                'description': ver['schema']['openAPIV3Schema'].get('description', ''),
                                                'namespaced': namespaced,
                                            })
@@ -134,6 +134,6 @@ def generate_jsonschema(files):
     return schema
 
 if __name__ == "__main__":
-    files = sys.argv[1:]
-    schema = generate_jsonschema(files)
+    [attr_name_overrides, *files] = sys.argv[1:]
+    schema = generate_jsonschema(files, json.loads(attr_name_overrides))
     print(json.dumps(schema, indent=2))

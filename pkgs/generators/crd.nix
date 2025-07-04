@@ -4,6 +4,7 @@
   name,
   src,
   crds,
+  attrNameOverrides,
 }: let
   # The nix code generator is slightly modified from kubenix's
   # generator and as it kind of depends on the jsonschema to be
@@ -22,7 +23,7 @@
       phases = ["unpackPhase" "installPhase"];
 
       installPhase = ''
-        ${pythonWithYaml}/bin/python ${./crd2jsonschema.py} ${lib.concatStringsSep " " crds} > $out
+        ${pythonWithYaml}/bin/python ${./crd2jsonschema.py} "${builtins.toJSON attrNameOverrides}" ${lib.concatStringsSep " " crds} > $out
       '';
     };
 in
