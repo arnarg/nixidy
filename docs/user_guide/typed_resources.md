@@ -106,3 +106,31 @@ Thankfully a code generator for generating resource options from CRDs is provide
   ];
 }
 ```
+
+### Resolving Naming Conflicts
+
+Sometimes, multiple Custom Resource Definitions from different sources might define the same resource `kind`. This can lead to conflicts in the generated attribute names. For instance, if two different operators both define a CRD with the kind `Database`, they would both try to generate options for `resources.databases`.
+
+To resolve this, the `fromCRD` function accepts a `namePrefix` argument. This prefix will be added to the generated attribute name, making it unique.
+
+For example, if you have two operators that both provide a `Database` CRD, you can distinguish them like this:
+
+```nix
+{
+  # For postgres-operator
+  postgres = nixidy.generators.fromCRD {
+    name = "postgres-operator";
+    namePrefix = "postgres";
+    # ...
+  };
+
+  # For mysql-operator
+  mysql = nixidy.generators.fromCRD {
+    name = "mysql-operator";
+    namePrefix = "mysql";
+    # ...
+  };
+}
+```
+
+This will generate `resources.postgresDatabases` and `resources.mysqlDatabases` respectively, avoiding any conflicts.

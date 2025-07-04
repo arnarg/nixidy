@@ -6,9 +6,10 @@
     name,
     src,
     crds,
+    namePrefix ? "",
   }:
-    import ./crd.nix {
-      inherit pkgs lib name src crds;
+    import ./crd/default.nix {
+      inherit pkgs lib name src crds namePrefix;
     };
 in {
   inherit fromCRD;

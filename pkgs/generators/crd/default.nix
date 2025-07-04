@@ -4,9 +4,14 @@
   name,
   src,
   crds,
+  namePrefix,
 }: let
+  options = pkgs.writeText "${name}-crd2jsonschema-options.json" (builtins.toJSON {
+    inherit crds namePrefix;
+  });
+
   # The nix code generator is slightly modified from kubenix's
-  # generator and as it kind of depends on the jsonschema to be
+  # generator. As it kind of depends on the jsonschema to be
   # flattened with `$ref`s we first pre-process the CRD with
   # a crude python script to flatten it before running the
   # generator.
@@ -22,7 +27,7 @@
       phases = ["unpackPhase" "installPhase"];
 
       installPhase = ''
-        ${pythonWithYaml}/bin/python ${./crd2jsonschema.py} ${lib.concatStringsSep " " crds} > $out
+        ${pythonWithYaml}/bin/python ${./crd2jsonschema.py} "${options}" > $out
       '';
     };
 in
