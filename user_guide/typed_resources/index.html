@@ -404,6 +404,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Generating your own resource options from CRDs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#resolving-naming-conflicts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resolving Naming Conflicts
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -644,6 +659,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Generating your own resource options from CRDs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#resolving-naming-conflicts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resolving Naming Conflicts
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -763,6 +793,27 @@
   <span class="p">];</span>
 <span class="p">}</span>
 </code></pre></div>
+<h3 id="resolving-naming-conflicts">Resolving Naming Conflicts<a class="headerlink" href="#resolving-naming-conflicts" title="Permanent link">#</a></h3>
+<p>Sometimes, multiple Custom Resource Definitions from different sources might define the same resource <code>kind</code>. This can lead to conflicts in the generated attribute names. For instance, if two different operators both define a CRD with the kind <code>Database</code>, they would both try to generate options for <code>resources.databases</code>.</p>
+<p>To resolve this, the <code>fromCRD</code> function accepts a <code>namePrefix</code> argument. This prefix will be added to the generated attribute name, making it unique.</p>
+<p>For example, if you have two operators that both provide a <code>Database</code> CRD, you can distinguish them like this:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+  <span class="c1"># For postgres-operator</span>
+  <span class="ss">postgres</span> <span class="o">=</span> nixidy<span class="o">.</span>generators<span class="o">.</span>fromCRD <span class="p">{</span>
+    <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;postgres-operator&quot;</span><span class="p">;</span>
+    <span class="ss">namePrefix</span> <span class="o">=</span> <span class="s2">&quot;postgres&quot;</span><span class="p">;</span>
+    <span class="c1"># ...</span>
+  <span class="p">};</span>
+
+  <span class="c1"># For mysql-operator</span>
+  <span class="ss">mysql</span> <span class="o">=</span> nixidy<span class="o">.</span>generators<span class="o">.</span>fromCRD <span class="p">{</span>
+    <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;mysql-operator&quot;</span><span class="p">;</span>
+    <span class="ss">namePrefix</span> <span class="o">=</span> <span class="s2">&quot;mysql&quot;</span><span class="p">;</span>
+    <span class="c1"># ...</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>This will generate <code>resources.postgresDatabases</code> and <code>resources.mysqlDatabases</code> respectively, avoiding any conflicts.</p>
 
 
 
