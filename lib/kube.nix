@@ -107,7 +107,7 @@
     in
       lib.attrsets.updateManyAttrsByPath (
         # If metadata.labels is present, it should be filtered
-        (lib.optional (manifest.metadata ? labels) {
+        (lib.optional (hasLabelPath ["metadata" "labels"] manifest) {
           path = ["metadata" "labels"];
           update = updateFunc;
         })
