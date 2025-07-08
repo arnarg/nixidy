@@ -134,3 +134,31 @@ For example, if you have two operators that both provide a `Database` CRD, you c
 ```
 
 This will generate `resources.postgresDatabases` and `resources.mysqlDatabases` respectively, avoiding any conflicts.
+
+If the heuristics for attribute name generation still create conflicts, for example within the same chart, or if you wish to further customize the name for ergonomics, `fromCRD` also accepts an `attrNameOverrides` argument which takes precedence over all other methods.
+
+This argument is a mapping from the CRD's name (`<plural>.<group>`) to the desired attribute name. For example:
+
+```nix
+{
+  keycloak = nixidy.generators.fromCRD {
+    name = "keycloak";
+    src = pkgs.fetchFromGitHub {
+      owner = "crossplane-contrib";
+      repo = "provider-keycloak";
+      ...
+    };
+    crds = [
+      # This CRD conflicts with Kubernetes builtin Binding
+      "package/crds/authenticationflow.keycloak.crossplane.io_bindings.yaml"
+      # These CRDs have identical plural references
+      "package/crds/group.keycloak.crossplane.io_groups.yaml"
+      "package/crds/user.keycloak.crossplane.io_groups.yaml"
+    ];
+    namePrefix = "keycloak";
+    attrNameOverrides."groups.user.keycloak.crossplane.io" = "keycloakUserGroups";
+  };
+}
+```
+
+will expose `keycloakBindings`, `keycloakGroups`, and `keycloakUserGroups` under an application's `resources`.

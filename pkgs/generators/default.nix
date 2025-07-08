@@ -7,9 +7,10 @@
     src,
     crds,
     namePrefix ? "",
+    attrNameOverrides ? {},
   }:
     import ./crd/default.nix {
-      inherit pkgs lib name src crds namePrefix;
+      inherit pkgs lib name src crds namePrefix attrNameOverrides;
     };
 in {
   inherit fromCRD;
