@@ -1,6 +1,7 @@
 {kubelib}: rec {
   mkEnv = {
     pkgs,
+    env,
     lib ? pkgs.lib,
     modules ? [],
     extraSpecialArgs ? {},
@@ -9,6 +10,7 @@
   }:
     import ./modules {
       inherit pkgs lib extraSpecialArgs kubelib libOverlay;
+      extraSpecialArgs = extraSpecialArgs // {inherit env;};
       modules =
         modules
         ++ [
@@ -30,7 +32,7 @@
     lib.mapAttrs (
       env: conf:
         mkEnv {
-          inherit pkgs lib charts libOverlay;
+          inherit pkgs lib charts libOverlay env;
           extraSpecialArgs = extraSpecialArgs // (conf.extraSpecialArgs or {});
           modules =
             [{nixidy.target.rootPath = lib.mkDefault "./manifests/${env}";}]
