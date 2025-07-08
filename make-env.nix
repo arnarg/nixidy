@@ -9,7 +9,7 @@
     libOverlay ? null,
   }:
     import ./modules {
-      inherit pkgs lib extraSpecialArgs kubelib libOverlay;
+      inherit pkgs lib kubelib libOverlay;
       extraSpecialArgs = extraSpecialArgs // {inherit env;};
       modules =
         modules

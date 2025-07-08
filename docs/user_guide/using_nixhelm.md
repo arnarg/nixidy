@@ -35,6 +35,7 @@
       in {
         nixidyEnvs.dev = nixidy.lib.mkEnv {
           inherit pkgs;
+          env = "dev";
 
           # Pass nixhelm to all nixidy modules.
           charts = nixhelm.chartsDerivations.${system};
