@@ -5,9 +5,10 @@
   src,
   crds,
   namePrefix,
+  attrNameOverrides,
 }: let
   options = pkgs.writeText "${name}-crd2jsonschema-options.json" (builtins.toJSON {
-    inherit crds namePrefix;
+    inherit crds namePrefix attrNameOverrides;
   });
 
   # The nix code generator is slightly modified from kubenix's
