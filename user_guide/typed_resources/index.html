@@ -814,6 +814,29 @@
 <span class="p">}</span>
 </code></pre></div>
 <p>This will generate <code>resources.postgresDatabases</code> and <code>resources.mysqlDatabases</code> respectively, avoiding any conflicts.</p>
+<p>If the heuristics for attribute name generation still create conflicts, for example within the same chart, or if you wish to further customize the name for ergonomics, <code>fromCRD</code> also accepts an <code>attrNameOverrides</code> argument which takes precedence over all other methods.</p>
+<p>This argument is a mapping from the CRD's name (<code>&lt;plural&gt;.&lt;group&gt;</code>) to the desired attribute name. For example:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+  <span class="ss">keycloak</span> <span class="o">=</span> nixidy<span class="o">.</span>generators<span class="o">.</span>fromCRD <span class="p">{</span>
+    <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;keycloak&quot;</span><span class="p">;</span>
+    <span class="ss">src</span> <span class="o">=</span> pkgs<span class="o">.</span>fetchFromGitHub <span class="p">{</span>
+      <span class="ss">owner</span> <span class="o">=</span> <span class="s2">&quot;crossplane-contrib&quot;</span><span class="p">;</span>
+      <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;provider-keycloak&quot;</span><span class="p">;</span>
+      <span class="o">...</span>
+    <span class="p">};</span>
+    <span class="ss">crds</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="c1"># This CRD conflicts with Kubernetes builtin Binding</span>
+      <span class="s2">&quot;package/crds/authenticationflow.keycloak.crossplane.io_bindings.yaml&quot;</span>
+      <span class="c1"># These CRDs have identical plural references</span>
+      <span class="s2">&quot;package/crds/group.keycloak.crossplane.io_groups.yaml&quot;</span>
+      <span class="s2">&quot;package/crds/user.keycloak.crossplane.io_groups.yaml&quot;</span>
+    <span class="p">];</span>
+    <span class="ss">namePrefix</span> <span class="o">=</span> <span class="s2">&quot;keycloak&quot;</span><span class="p">;</span>
+    attrNameOverrides<span class="o">.</span><span class="s2">&quot;groups.user.keycloak.crossplane.io&quot;</span> <span class="o">=</span> <span class="s2">&quot;keycloakUserGroups&quot;</span><span class="p">;</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>will expose <code>keycloakBindings</code>, <code>keycloakGroups</code>, and <code>keycloakUserGroups</code> under an application's <code>resources</code>.</p>
 
 
 
