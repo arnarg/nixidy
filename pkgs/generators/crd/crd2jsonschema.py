@@ -67,7 +67,10 @@ def generate_jsonschema(prefix, files, attr_name_overrides):
                             "version": version,
                             "kind": kind,
                             "name": plural,
-                            "attrName": attr_name_overrides.get(data["metadata"]["name"], gen_attr_name(kind, plural, prefix)),
+                            "attrName": attr_name_overrides.get(
+                                data["metadata"]["name"],
+                                gen_attr_name(kind, plural, prefix),
+                            ),
                             "description": ver["schema"]["openAPIV3Schema"].get(
                                 "description", ""
                             ),

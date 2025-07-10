@@ -147,6 +147,17 @@
             .outPath;
         };
 
+        # Run tests for crd2jsonschema
+        crd2jsonschemaTest = {
+          type = "app";
+          program = let
+            pythonWithYaml = pkgs.python3.withPackages (ps: [ps.pyyaml]);
+          in
+            (pkgs.writeShellScript "crd2jsonschema-test" ''
+              ${pythonWithYaml}/bin/python ${self}/pkgs/generators/crd/test_crd2jsonschema.py
+            '').outPath;
+        };
+
         # Serve docs
         docsServe = {
           type = "app";
