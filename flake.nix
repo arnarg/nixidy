@@ -37,7 +37,6 @@
       moduleTests =
         (self.lib.mkEnv {
           inherit pkgs;
-          env = "test";
           modules = [
             ./modules/testing
             ./tests

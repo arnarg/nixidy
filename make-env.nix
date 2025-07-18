@@ -1,7 +1,7 @@
 {kubelib}: rec {
   mkEnv = {
     pkgs,
-    env,
+    env ? "default",
     lib ? pkgs.lib,
     modules ? [],
     extraSpecialArgs ? {},
