@@ -16,9 +16,11 @@
       ./helm/transformer.nix
       ./helm/resource-override.nix
       ./helm/extra-opts.nix
+      ./helm/flatten-lists.nix
       ./kustomize/base.nix
       ./kustomize/overlay.nix
       ./kustomize/resource-override.nix
+      ./kustomize/flatten-lists.nix
     ];
   };
 }
