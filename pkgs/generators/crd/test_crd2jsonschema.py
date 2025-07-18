@@ -22,6 +22,11 @@ class TestGenAttrName(unittest.TestCase):
             "ciliumNetworkPolicies",
         )
 
+    def test_leading_acronym(self):
+        self.assertEqual(gen_attr_name("HTTPRoute", "httproutes", ""), "httpRoutes")
+
+    def test_leading_acronym_prefix(self):
+        self.assertEqual(gen_attr_name("HTTPRoute", "httproutes", "gateway"), "gatewayHTTPRoutes")
 
 if __name__ == "__main__":
     unittest.main()

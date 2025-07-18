@@ -2,12 +2,14 @@ import sys
 import yaml
 import json
 import string
-
+import re
 
 # Generate an attribute name for use in nix options.
 # Example:
-# Deployments   -> deployments
-# NetworkPolicy -> networkPolicies
+# Deployments     -> deployments
+# NetworkPolicy   -> networkPolicies
+# HTTPRoute       -> httpRoutes
+# CiliumCIDRGroup -> ciliumCIDRGroups
 #
 # We want these to be in the plural form but the
 # plural form given in CRDs is always all lowercase
@@ -17,19 +19,23 @@ import string
 # of the kind's PascalCase form that is pluralized.
 # So we can just go through both forms until a letter
 # doesn't match and at that point splice them together.
+#
+# If an acronym is detected at the beginning, it should
+# be made lowercase as a single unit.
 def gen_attr_name(kind, plural, prefix):
-    first = kind[0]
-    if prefix == "":
-        first = first.lower()
+    # Extract leading acronym, lowercasing if no prefix
+    acronym_match = re.match(r"^([A-Z]+)(?=[A-Z][a-z]|$)", kind)
+    acronym = acronym_match.group(1) if acronym_match else kind[0]
+    head = prefix + acronym if prefix else acronym.lower()
 
-    for i, c in enumerate(kind):
-        if c.lower() != plural[i].lower():
-            return prefix + first + kind[1:i] + plural[i : len(plural)]
+    # Where plural diverges from kind becomes the final suffix
+    diverge_index = len(kind)
+    for i, (kind_char, plural_char) in enumerate(zip(kind, plural)):
+        if kind_char.lower() != plural_char.lower():
+            diverge_index = i
+            break
 
-    # We got through the entire string so we can just concatinate
-    # the rest of the plural form on it.
-    return prefix + first + kind[1 : len(kind)] + plural[len(kind) : len(plural)]
-
+    return head + kind[len(acronym):diverge_index] + plural[diverge_index:]
 
 # Kind of PascalCase.
 def uppercase_first(name):
