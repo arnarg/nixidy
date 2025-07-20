@@ -1,5 +1,5 @@
 lib:
-with lib; {
+with lib; rec {
   getGVK = object: let
     splitApiVersion = splitString "/" object.apiVersion;
   in {
@@ -14,4 +14,10 @@ with lib; {
       then elemAt splitApiVersion 0
       else elemAt splitApiVersion 1;
   };
+  # Recursively flatten *List objects
+  flattenListObjects = builtins.concatMap (object:
+    if builtins.match "^.*List$" object.kind != null
+    then flattenListObjects object.items
+    else [object]
+  );
 }
