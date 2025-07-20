@@ -94,12 +94,6 @@ in {
   };
 
   config = with lib; let
-    # Recursively flatten *List objects
-    flattenListObjects = builtins.concatMap (object:
-      if builtins.match "^.*List$" object.kind != null
-      then flattenListObjects object.items
-      else [object]
-    );
     groupedObjects = mapAttrs (_: release:
       {
         resources = [];
@@ -113,7 +107,7 @@ in {
             then "resources"
             else "objects"
         )
-        (flattenListObjects release.objects)))
+        (helpers.flattenListObjects release.objects)))
     config.helm.releases;
 
     allResources = flatten (mapAttrsToList (_: groups: groups.resources) groupedObjects);
