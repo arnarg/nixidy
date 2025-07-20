@@ -2,9 +2,9 @@
   lib,
   pkgs,
   config,
-  env,
   ...
 }: let
+  inherit (config.nixidy) env;
   mkApp = app: let
     resources =
       map (obj: rec {

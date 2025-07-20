@@ -10,6 +10,12 @@ in {
   ];
 
   options.nixidy = with lib; {
+    env = mkOption {
+      type = types.str;
+      default = "default";
+      description = "The environment name for this configuration.";
+    };
+
     target = {
       repository = mkOption {
         type = types.str;
