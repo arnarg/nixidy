@@ -49,6 +49,20 @@ in {
 
         expected = [];
       }
+      {
+        description = "CustomList should be rendered intact.";
+
+        expression = filter (x: x.kind == "CustomList") apps.test1.objects;
+
+        expected = [
+          {
+            apiVersion = "custom/v1";
+            kind = "CustomList";
+            metadata.name = "custom-list";
+            spec.items = [1];
+          }
+        ];
+      }
     ];
   };
 }

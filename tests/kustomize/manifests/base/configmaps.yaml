@@ -22,3 +22,11 @@ items:
       name: cm-3
     data:
       key: value
+---
+apiVersion: custom/v1
+kind: CustomList
+metadata:
+  name: custom-list
+spec:
+  items:
+    - 1
