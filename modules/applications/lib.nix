@@ -14,9 +14,10 @@ with lib; rec {
       then elemAt splitApiVersion 0
       else elemAt splitApiVersion 1;
   };
+
   # Recursively flatten *List objects
   flattenListObjects = builtins.concatMap (object:
-    if builtins.match "^.*List$" object.kind != null
+    if builtins.match "^.*List$" object.kind != null && builtins.isList (object.items or null)
     then flattenListObjects object.items
     else [object]
   );
