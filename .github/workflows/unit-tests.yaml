@@ -22,6 +22,7 @@ jobs:
           extra-experimental-features = nix-command flakes
 
     - name: Run .#libTests
+      shell: bash
       run: |
         echo "# Test Results" > $GITHUB_STEP_SUMMARY
         nix run .#libTests | tee -a $GITHUB_STEP_SUMMARY
@@ -37,6 +38,7 @@ jobs:
           extra-experimental-features = nix-command flakes
 
     - name: Run .#moduleTests
+      shell: bash
       run: |
         echo "# Test Results" > $GITHUB_STEP_SUMMARY
         nix run .#moduleTests | tee -a $GITHUB_STEP_SUMMARY

@@ -24,5 +24,7 @@ jobs:
           extra-experimental-features = nix-command flakes
 
     - name: Run statix
+      shell: bash
       run: |
-        nix run .#cliTest
+        echo "# Test Results" > $GITHUB_STEP_SUMMARY
+        nix run .#cliTest | tee -a $GITHUB_STEP_SUMMARY
