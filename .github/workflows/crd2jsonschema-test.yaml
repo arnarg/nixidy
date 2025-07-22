@@ -24,6 +24,7 @@ jobs:
           extra-experimental-features = nix-command flakes
 
     - name: Run crd2jsonschema unit tests
+      shell: bash
       run: |
         echo "# Test Results" > $GITHUB_STEP_SUMMARY
         nix run .#crd2jsonschemaTest | tee -a $GITHUB_STEP_SUMMARY
