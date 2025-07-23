@@ -33,7 +33,12 @@
           inherit pkgs lib charts libOverlay;
           extraSpecialArgs = extraSpecialArgs // (conf.extraSpecialArgs or {});
           modules =
-            [{nixidy.target.rootPath = lib.mkDefault "./manifests/${env}";}]
+            [
+              {
+                nixidy.env = lib.mkDefault env;
+                nixidy.target.rootPath = lib.mkDefault "./manifests/${env}";
+              }
+            ]
             ++ modules
             ++ (conf.modules or []);
         }

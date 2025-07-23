@@ -4,8 +4,7 @@
   config,
   ...
 }: let
-  envName = lib.replaceStrings ["/"] ["-"] config.nixidy.target.branch;
-
+  inherit (config.nixidy) env;
   mkApp = app: let
     resources =
       map (obj: rec {
@@ -73,7 +72,7 @@ in {
     build = {
       bootstrapPackage = mkApp config.applications.__bootstrap;
 
-      extrasPackage = pkgs.linkFarm "nixidy-extras-${envName}" (
+      extrasPackage = pkgs.linkFarm "nixidy-extras-${env}" (
         lib.mapAttrsToList (
           _: file: {
             name = file.path;
@@ -84,7 +83,7 @@ in {
       );
 
       environmentPackage = let
-        joined = pkgs.linkFarm "nixidy-apps-joined-${envName}" (
+        joined = pkgs.linkFarm "nixidy-apps-joined-${env}" (
           map (name: let
             app = config.applications.${name};
           in {
@@ -95,7 +94,7 @@ in {
         );
       in
         pkgs.symlinkJoin {
-          name = "nixidy-environment-${envName}";
+          name = "nixidy-environment-${env}";
           paths = [
             joined
             config.build.extrasPackage
@@ -103,7 +102,7 @@ in {
         };
 
       activationPackage = pkgs.stdenv.mkDerivation {
-        name = "nixidy-activation-environment-${envName}";
+        name = "nixidy-activation-environment-${env}";
         phases = ["installPhase"];
 
         installPhase = ''
