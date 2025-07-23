@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMapList
+items:
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: cm-1
+  data:
+    key: value
+- apiVersion: v1
+  kind: ConfigMapList
+  items:
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: cm-2
+    data:
+      key: value
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: cm-3
+    data:
+      key: value
+---
+apiVersion: custom/v1
+kind: CustomList
+metadata:
+  name: custom-list
+spec:
+  items:
+    - 1

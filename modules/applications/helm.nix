@@ -107,7 +107,7 @@ in {
             then "resources"
             else "objects"
         )
-        release.objects))
+        (helpers.flattenListObjects release.objects)))
     config.helm.releases;
 
     allResources = flatten (mapAttrsToList (_: groups: groups.resources) groupedObjects);
