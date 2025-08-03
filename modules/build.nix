@@ -6,41 +6,38 @@
 }: let
   inherit (config.nixidy) env;
   mkApp = app: let
-    resources =
-      map (obj: rec {
-        filename = "${obj.kind}-${builtins.replaceStrings ["."] ["-"] obj.metadata.name}.yaml";
-        manifest = let
-          resource = builtins.toJSON obj;
-        in
-          pkgs.stdenv.mkDerivation {
-            inherit resource;
+    writeManifests =
+      ''
+        set -e
 
-            name = "nixidy-app-${app.name}-${filename}";
+        out=$1
 
-            passAsFile = ["resource"];
+      ''
+      + (lib.concatStringsSep "\n" (map (obj: let
+          filename = "${obj.kind}-${builtins.replaceStrings ["."] ["-"] obj.metadata.name}.yaml";
+        in ''
+          echo "Writing ${filename}"
 
-            phases = ["installPhase"];
-
-            installPhase = ''
-              cat $resourcePath | ${pkgs.yq-go}/bin/yq -P > $out
-            '';
-          };
-      })
-      app.objects;
+          cat <<'EOF' | ${pkgs.yq-go}/bin/yq -P > $out/${filename}
+          ${builtins.toJSON obj}
+          EOF
+        '')
+        app.objects));
   in
     pkgs.stdenv.mkDerivation {
+      inherit writeManifests;
+
       name = "nixidy-app-${app.name}";
+
+      passAsFile = ["writeManifests"];
 
       phases = ["installPhase"];
 
-      installPhase =
-        ''
-          mkdir -p $out
-        ''
-        + (lib.concatStringsSep "\n" (map (res: ''
-            ln -s ${res.manifest} $out/${res.filename}
-          '')
-          resources));
+      installPhase = ''
+        mkdir -p $out
+
+        sh $writeManifestsPath $out
+      '';
     };
 in {
   options = with lib; {
