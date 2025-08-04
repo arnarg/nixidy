@@ -107,7 +107,7 @@ in {
             then "resources"
             else "objects"
         )
-        (helpers.flattenListObjects release.objects)))
+        release.objects))
     config.kustomize.applications;
 
     allResources = flatten (mapAttrsToList (_: groups: groups.resources) groupedObjects);
