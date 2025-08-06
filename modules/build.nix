@@ -62,6 +62,11 @@ in {
         internal = true;
         description = "The package containing all the applications and an activation script.";
       };
+      declarativePackage = mkOption {
+        type = types.package;
+        internal = true;
+        description = "The package containing manifests meant to be deployed directly using `kubectl apply --prune`.";
+      };
     };
   };
 
@@ -136,6 +141,100 @@ in {
           chmod +x $out/activate
         '';
       };
+
+      declarativePackage = let
+        apps =
+          lib.filterAttrs
+          (n: _: n != config.nixidy.appOfApps.name && !(lib.hasPrefix "__" n))
+          config.applications;
+
+        labelPrefix = "app.nixidy.io";
+
+        classify = obj:
+          if obj.kind == "CustomResourceDefinition"
+          then "crds"
+          else if obj.kind == "Namespace"
+          then "namespaces"
+          else "manifests";
+
+        labelObjects = app: objs:
+          map (
+            obj: let
+              label = "${labelPrefix}/${classify obj}";
+            in
+              obj
+              // {
+                metadata =
+                  obj.metadata
+                  // {
+                    labels =
+                      (obj.metadata.labels or {})
+                      // {
+                        "app.nixidy.io/application" = app;
+                        "${label}" = env;
+                      };
+                  };
+              }
+          )
+          objs;
+
+        manifests = with lib;
+          pipe apps
+          [
+            (mapAttrsToList (_: app:
+              labelObjects
+              app.name
+              app.objects))
+            flatten
+            (groupBy classify)
+            builtins.toJSON
+          ];
+      in
+        pkgs.stdenv.mkDerivation {
+          inherit manifests;
+
+          name = "nixidy-declarative-package-${env}";
+
+          passAsFile = ["manifests"];
+
+          phases = ["installPhase"];
+
+          installPhase = ''
+            mkdir -p $out
+
+            # Write different stages of manifests to YAML files
+            cat $manifestsPath | \
+              ${pkgs.yq-go}/bin/yq '.crds[] | split_doc' -P > $out/crds.yml
+            cat $manifestsPath | \
+              ${pkgs.yq-go}/bin/yq '.namespaces[] | split_doc' -P > $out/namespaces.yml
+            cat $manifestsPath | \
+              ${pkgs.yq-go}/bin/yq '.manifests[] | split_doc' -P > $out/manifests.yml
+
+            # Write apply script
+            cat <<EOF > $out/apply
+            #!/usr/bin/env bash
+
+            echo "Applying CRDs"
+            ${pkgs.kubectl}/bin/kubectl apply \
+              -f $out/crds.yml \
+              --prune --selector "app.nixidy.io/crds=${env}"
+
+            echo ""
+            echo "Applying namespaces"
+            ${pkgs.kubectl}/bin/kubectl apply \
+              -f $out/namespaces.yml \
+              --prune --selector "app.nixidy.io/namespaces=${env}"
+
+            echo ""
+            echo "Applying manifests"
+            ${pkgs.kubectl}/bin/kubectl apply \
+              -f $out/manifests.yml \
+              --prune --selector "app.nixidy.io/manifests=${env}"
+            EOF
+
+            chmod +x $out/apply
+          '';
+        };
     };
   };
 }
