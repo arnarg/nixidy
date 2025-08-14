@@ -148,7 +148,7 @@ in {
           (n: _: n != config.nixidy.appOfApps.name && !(lib.hasPrefix "__" n))
           config.applications;
 
-        labelPrefix = "app.nixidy.io";
+        labelPrefix = "apps.nixidy.dev";
 
         classify = obj:
           if obj.kind == "CustomResourceDefinition"
@@ -170,7 +170,7 @@ in {
                     labels =
                       (obj.metadata.labels or {})
                       // {
-                        "app.nixidy.io/application" = app;
+                        "${labelPrefix}/application" = app;
                         "${label}" = env;
                       };
                   };
@@ -217,19 +217,21 @@ in {
             echo "Applying CRDs"
             ${pkgs.kubectl}/bin/kubectl apply \
               -f $out/crds.yml \
-              --prune --selector "app.nixidy.io/crds=${env}"
+              --prune --selector "${labelPrefix}/crds=${env}" \
+              --prune-allowlist "apiextensions.k8s.io/v1/CustomResourceDefinition"
 
             echo ""
             echo "Applying namespaces"
             ${pkgs.kubectl}/bin/kubectl apply \
               -f $out/namespaces.yml \
-              --prune --selector "app.nixidy.io/namespaces=${env}"
+              --prune --selector "${labelPrefix}/namespaces=${env}" \
+              --prune-allowlist "core/v1/Namespace"
 
             echo ""
             echo "Applying manifests"
             ${pkgs.kubectl}/bin/kubectl apply \
               -f $out/manifests.yml \
-              --prune --selector "app.nixidy.io/manifests=${env}"
+              --prune --selector "${labelPrefix}/manifests=${env}"
             EOF
 
             chmod +x $out/apply
