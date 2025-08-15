@@ -124,6 +124,36 @@ function doSwitchFlake() {
   "${ENVIRON}/activate"
 }
 
+function doApply() {
+  if [[ "$USE_FLAKE" == true ]]; then
+    doApplyFlake
+  else
+    doApplyAttr
+  fi
+}
+
+function doApplyAttr() {
+  if [[ -z $ENV_PARAM ]]; then
+    doHelp
+    exit 1
+  fi
+
+  OUTPUT=$(nix-build "$FILE_PARAM" -A "$ENV_PARAM.declarativePackage" --no-link)
+
+  "${OUTPUT}/apply"
+}
+
+function doApplyFlake() {
+  if [[ -z "$FLAKE_ENV" ]]; then
+    doHelp
+    exit 1
+  fi
+
+  OUTPUT=$(nix build "${FLAKE_ROOT}#nixidyEnvs.${NIX_SYSTEM}.${FLAKE_ENV}.declarativePackage" --no-link --print-out-paths)
+
+  "${OUTPUT}/apply"
+}
+
 function doBootstrap() {
   if [[ "$USE_FLAKE" == true ]]; then
     doBootstrapFlake
@@ -198,6 +228,9 @@ function doHelp() {
     echo
     echo "  bootstrap ENV    Output a manifest to bootstrap appOfApps."
     echo "                   Example: .#prod"
+    echo
+    echo "  apply ENV        Build and apply declarative manifests to Kubernetes."
+    echo "                   Example: .#prod"
 }
 
 COMMAND=""
@@ -212,7 +245,7 @@ while [[ $# -gt 0 ]]; do
   opt="$1"
   shift
   case $opt in
-    build|switch|info|bootstrap|help)
+    build|switch|info|bootstrap|help|apply)
       COMMAND="$opt"
       ;;
     --no-link)
@@ -267,6 +300,9 @@ case $COMMAND in
     ;;
   bootstrap)
     doBootstrap
+    ;;
+  apply)
+    doApply
     ;;
   help)
     doHelp
