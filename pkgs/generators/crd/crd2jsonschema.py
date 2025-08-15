@@ -130,14 +130,14 @@ def generate_jsonschema(prefix, files, attr_name_overrides):
 
             # If a definition contains `x-kubernetes-preserve-unknown-fields` without
             # any `type` set, we assume the `type` is `object`.
-            elif (
-                "type" not in definition
-                and definition.get("x-kubernetes-preserve-unknown-fields", False)
-                == True
-            ):
+            elif "type" not in definition:
+              if definition.get("x-kubernetes-preserve-unknown-fields", False)  == True:
                 definition["type"] = "object"
                 return definition
-
+              if definition.get("x-kubernetes-int-or-string", False) == True:
+                definition["type"] = "string"
+                definition["format"] = "int-or-string"
+                return definition
             # The nix generator doesn't support anyOf
             elif "anyOf" in definition:
                 if definition.get("x-kubernetes-int-or-string", False):
