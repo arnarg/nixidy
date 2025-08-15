@@ -150,6 +150,18 @@ with lib; let
                           then types.unspecified # do not allow self-referential values
                           else requiredOrNot (submoduleOf definitions (refDefinition property));
                       }
+                    # "x-kubernetes-int-or-string" and "x-kubernetes-preserve-unknown-fields" are two exceptional field with which "type" field is not required. ref:https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#specifying-a-structural-schema
+                    else if hasAttr "x-kubernetes-int-or-string" property && property.x-kubernetes-int-or-string 
+                    then
+                      {
+                        type = requiredOrNot (mapType { type = "string"; format = "int-or-string"; });
+                      }
+                    else if
+                      hasAttr "x-kubernetes-preserve-unknown-fields" property && property.x-kubernetes-preserve-unknown-fields 
+                    then
+                      {
+                        type = requiredOrNot types.attrs;
+                      }
                     # if property has an array type
                     else if property.type == "array"
                     then
