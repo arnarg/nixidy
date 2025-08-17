@@ -156,20 +156,9 @@ def generate_jsonschema(prefix, files, attr_name_overrides):
             newProps = {}
 
             for prop, val in definition["properties"].items():
-                # CRDs never have the type information for metadata and
-                # as we already have this type information from kubenix's
-                # generated options we create a special `$ref` with
-                # '#/global' prefix that we handle specially in our code
-                # generator.
-                if root and prop == "metadata":
-                    newProps[prop] = {
-                        "description": "Standard object's metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata",
-                        "$ref": "#/global/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta",
-                    }
-                else:
-                    newProps[prop] = flatten_ref(
-                        val, key + uppercase_first(prop), False
-                    )
+                newProps[prop] = flatten_ref(
+                    val, key + uppercase_first(prop), False
+                )
 
             definition["properties"] = newProps
 
@@ -177,10 +166,48 @@ def generate_jsonschema(prefix, files, attr_name_overrides):
 
     for root in schema["roots"]:
         key = root["ref"]
-        schema["definitions"][key] = flatten_ref(schema["definitions"][key], key)
+        schema["definitions"][key] = flatten_ref(set_builtin_fields(schema["definitions"][key]), key)
 
     return schema
 
+def set_builtin_fields(definition):
+    definition = definition.copy()
+    if "properties" not in definition: 
+        definition["properties"] = {}
+
+    if "apiVersion" not in definition["properties"]:
+        definition["properties"]["apiVersion"] = {
+            "description": """
+APIVersion defines the versioned schema of this representation of an object.
+Servers should convert recognized schemas to the latest internal value, and
+may reject unrecognized values.
+More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+""",
+            "type": "string",
+        }
+    if "kind" not in definition["properties"]:
+        definition["properties"]["kind"] = {
+            "description": """
+Kind is a string value representing the REST resource this object represents.
+Servers may infer this from the endpoint the client submits requests to.
+Cannot be updated.
+In CamelCase.
+More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+""",
+            "type": "string",
+        }
+
+    # CRDs never have the type information for metadata and
+    # as we already have this type information from kubenix's
+    # generated options we create a special `$ref` with
+    # '#/global' prefix that we handle specially in our code
+    # generator.
+    definition["properties"]["metadata"] = {
+        "description": "Standard object's metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata",
+        "$ref": "#/global/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta",
+    }
+
+    return definition
 
 if __name__ == "__main__":
     optionsPath = sys.argv[1]
