@@ -1,8 +1,8 @@
 import sys
 import yaml
 import json
-import string
 import re
+
 
 # Generate an attribute name for use in nix options.
 # Example:
@@ -35,7 +35,8 @@ def gen_attr_name(kind, plural, prefix):
             diverge_index = i
             break
 
-    return head + kind[len(acronym):diverge_index] + plural[diverge_index:]
+    return head + kind[len(acronym) : diverge_index] + plural[diverge_index:]
+
 
 # Kind of PascalCase.
 def uppercase_first(name):
@@ -58,7 +59,7 @@ def generate_jsonschema(prefix, files, attr_name_overrides):
                 )
 
                 for ver in data["spec"]["versions"]:
-                    if "deprecated" in ver and ver["deprecated"] == True:
+                    if "deprecated" in ver and ver["deprecated"] is True:
                         continue
 
                     version = ver["name"]
@@ -107,12 +108,10 @@ def generate_jsonschema(prefix, files, attr_name_overrides):
                         # If additionalProperties only contains 'x-kubernetes-preserve-unknown-fields'
                         # we can just drop the `additionalProperties` entirely and the generator
                         # will generate `types.attrs` (`types.attrsOf types.any`).
-                        if (
-                            "type" not in definition["additionalProperties"]
-                            and definition["additionalProperties"].get(
-                                "x-kubernetes-preserve-unknown-fields", False
-                            )
-                            == True
+                        if "type" not in definition[
+                            "additionalProperties"
+                        ] and definition["additionalProperties"].get(
+                            "x-kubernetes-preserve-unknown-fields", False
                         ):
                             del definition["additionalProperties"]
 
@@ -128,16 +127,6 @@ def generate_jsonschema(prefix, files, attr_name_overrides):
                 definition["items"] = flatten_ref(definition["items"], key, False)
                 return definition
 
-            # If a definition contains `x-kubernetes-preserve-unknown-fields` without
-            # any `type` set, we assume the `type` is `object`.
-            elif "type" not in definition:
-              if definition.get("x-kubernetes-preserve-unknown-fields", False)  == True:
-                definition["type"] = "object"
-                return definition
-              if definition.get("x-kubernetes-int-or-string", False) == True:
-                definition["type"] = "string"
-                definition["format"] = "int-or-string"
-                return definition
             # The nix generator doesn't support anyOf
             elif "anyOf" in definition:
                 if definition.get("x-kubernetes-int-or-string", False):
@@ -149,6 +138,21 @@ def generate_jsonschema(prefix, files, attr_name_overrides):
                 newDef["description"] = definition.get("description", "")
                 return newDef
 
+            # Try to infer type from special kubernetes fields
+            elif "type" not in definition:
+                # If a definition contains `x-kubernetes-preserve-unknown-fields` without
+                # any `type` set, we assume the `type` is `object`.
+                if definition.get("x-kubernetes-preserve-unknown-fields", False):
+                    definition["type"] = "object"
+                    return definition
+
+                # If a definition contains `x-kubernetes-int-or-string` without any `type`
+                # set, we use `type: string` with `format: int-or-string`.
+                if definition.get("x-kubernetes-int-or-string", False):
+                    definition["type"] = "string"
+                    definition["format"] = "int-or-string"
+                    return definition
+
             else:
                 return definition
 
@@ -156,9 +160,7 @@ def generate_jsonschema(prefix, files, attr_name_overrides):
             newProps = {}
 
             for prop, val in definition["properties"].items():
-                newProps[prop] = flatten_ref(
-                    val, key + uppercase_first(prop), False
-                )
+                newProps[prop] = flatten_ref(val, key + uppercase_first(prop), False)
 
             definition["properties"] = newProps
 
@@ -166,13 +168,16 @@ def generate_jsonschema(prefix, files, attr_name_overrides):
 
     for root in schema["roots"]:
         key = root["ref"]
-        schema["definitions"][key] = flatten_ref(set_builtin_fields(schema["definitions"][key]), key)
+        schema["definitions"][key] = flatten_ref(
+            set_builtin_fields(schema["definitions"][key]), key
+        )
 
     return schema
 
+
 def set_builtin_fields(definition):
     definition = definition.copy()
-    if "properties" not in definition: 
+    if "properties" not in definition:
         definition["properties"] = {}
 
     if "apiVersion" not in definition["properties"]:
@@ -185,6 +190,7 @@ More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-
 """,
             "type": "string",
         }
+
     if "kind" not in definition["properties"]:
         definition["properties"]["kind"] = {
             "description": """
@@ -208,6 +214,7 @@ More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-
     }
 
     return definition
+
 
 if __name__ == "__main__":
     optionsPath = sys.argv[1]
