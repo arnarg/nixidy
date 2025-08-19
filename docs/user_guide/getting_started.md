@@ -321,6 +321,9 @@ See [App of Apps Pattern](https://argo-cd.readthedocs.io/en/stable/operator-manu
 
 Running `nixidy switch .#dev` will create the `./manifests/dev` relative to the current working directory and sync the newly generated manifests into it.
 
+!!! info
+    While nixidy is primary a tool for doing GitOps using Argo CD it also has support for [directly applying manifests](./direct_apply.md) to a Kubernetes cluster.
+
 ## Bootstrapping Cluster
 
 After creating a git repository that is specified in `nixidy.target.repository` and pushing the generated manifests (e.g. by running `nixidy switch .#dev`) to the branch specified in `nixidy.target.branch`, your cluster can be bootstrapped.

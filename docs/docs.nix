@@ -31,7 +31,7 @@
 
       cat <<EOF > mkdocs.yml
         site_name: nixidy
-        site_url: https://arnarg.github.io/nixidy/
+        site_url: https://nixidy.dev/
         site_dir: $out
 
         repo_url: https://github.com/arnarg/nixidy/
@@ -86,6 +86,7 @@
           - 'GitHub Actions': user_guide/github_actions.md
           - 'Transformers': user_guide/transformers.md
           - 'Using nixhelm': user_guide/using_nixhelm.md
+          - 'Directly Apply Manifests': user_guide/direct_apply.md
         - Reference:
           - 'Library Functions': library.md
           - 'Configuration Options': options.md
