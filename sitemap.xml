@@ -1,47 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://arnarg.github.io/nixidy/</loc>
+         <loc>https://nixidy.dev/</loc>
          <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://arnarg.github.io/nixidy/library/</loc>
+         <loc>https://nixidy.dev/library/</loc>
          <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://arnarg.github.io/nixidy/options/</loc>
+         <loc>https://nixidy.dev/options/</loc>
          <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://arnarg.github.io/nixidy/developer_guide/architecture/</loc>
+         <loc>https://nixidy.dev/developer_guide/architecture/</loc>
          <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://arnarg.github.io/nixidy/user_guide/getting_started/</loc>
+         <loc>https://nixidy.dev/user_guide/direct_apply/</loc>
          <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://arnarg.github.io/nixidy/user_guide/git_strategies/</loc>
+         <loc>https://nixidy.dev/user_guide/getting_started/</loc>
          <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://arnarg.github.io/nixidy/user_guide/github_actions/</loc>
+         <loc>https://nixidy.dev/user_guide/git_strategies/</loc>
          <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://arnarg.github.io/nixidy/user_guide/helm_charts/</loc>
+         <loc>https://nixidy.dev/user_guide/github_actions/</loc>
          <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://arnarg.github.io/nixidy/user_guide/transformers/</loc>
+         <loc>https://nixidy.dev/user_guide/helm_charts/</loc>
          <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://arnarg.github.io/nixidy/user_guide/typed_resources/</loc>
+         <loc>https://nixidy.dev/user_guide/transformers/</loc>
          <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://arnarg.github.io/nixidy/user_guide/using_nixhelm/</loc>
+         <loc>https://nixidy.dev/user_guide/typed_resources/</loc>
+         <lastmod>1980-01-01</lastmod>
+    </url>
+    <url>
+         <loc>https://nixidy.dev/user_guide/using_nixhelm/</loc>
          <lastmod>1980-01-01</lastmod>
     </url>
 </urlset>
