@@ -28,6 +28,7 @@
       cat $optionsMdPath > docs/options.md
       cp ${libraryMd}/lib.md docs/library.md
       cp ${../README.md} docs/index.md
+      cp ${../logo.svg} docs/logo.svg
 
       cat <<EOF > mkdocs.yml
         site_name: nixidy
@@ -43,14 +44,19 @@
         theme:
           name: material
 
+          logo: images/icon.svg
+          favicon: images/icon.svg
+
           palette:
           - media: "(prefers-color-scheme: light)"
             scheme: default
+            primary: indigo
             toggle:
               icon: material/brightness-7
               name: Switch to dark mode
           - media: "(prefers-color-scheme: dark)"
             scheme: slate
+            primary: indigo
             toggle:
               icon: material/brightness-4
               name: Switch to light mode
