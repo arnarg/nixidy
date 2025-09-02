@@ -1,8 +1,11 @@
-# nixidy [![License][license-badge]](https://github.com/arnarg/nixidy/blob/main/LICENSE) [![Latest tag][tag-badge]](https://github.com/arnarg/nixidy/releases) ![Checks passing][checks-badge]
+<p align="center">
+  <a href="https://nixidy.dev"><img alt="nixidy logo" src="./logo.svg" /></a><br />
+  <a href="https://github.com/arnarg/nixidy/blob/main/LICENSE"><img src="https://img.shields.io/github/license/arnarg/nixidy?style=flat" alt="License Badge" /></a>
+  <a href="https://github.com/arnarg/nixidy/releases"><img src="https://img.shields.io/github/v/tag/arnarg/nixidy?style=flat&label=release&color=0a7cbd" alt="Latest Release Badge" /></a>
+  <img src="https://img.shields.io/github/check-runs/arnarg/nixidy/main?style=flat" alt="Checks Passing Badge" />
+</p>
 
-Kubernetes GitOps with nix and Argo CD.
-
-> Kind of sounds like Nix CD.
+<p align="center">Kubernetes GitOps with nix and Argo CD.</p>
 
 ## What is it?
 
