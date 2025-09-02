@@ -15,7 +15,7 @@
         <link rel="next" href="user_guide/getting_started/">
       
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="images/icon.svg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#nixidy" class="md-skip">
+        <a href="#what-is-it" class="md-skip">
           Skip to content
         </a>
       
@@ -90,8 +90,7 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="." title="nixidy" class="md-header__button md-logo" aria-label="nixidy" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="images/icon.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -226,8 +225,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="." title="nixidy" class="md-nav__button md-logo" aria-label="nixidy" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="images/icon.svg" alt="logo">
 
     </a>
     nixidy
@@ -260,8 +258,6 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
-        
-      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
@@ -293,8 +289,6 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
-  
-    
   
   
     <label class="md-nav__title" for="__toc">
@@ -758,8 +752,6 @@
   
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -873,11 +865,17 @@
   
 
 
-<h1 id="nixidy">nixidy <a href="https://github.com/arnarg/nixidy/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/arnarg/nixidy?style=flat" /></a> <a href="https://github.com/arnarg/nixidy/releases"><img alt="Latest tag" src="https://img.shields.io/github/v/tag/arnarg/nixidy?style=flat&amp;label=release&amp;color=0a7cbd" /></a> <img alt="Checks passing" src="https://img.shields.io/github/check-runs/arnarg/nixidy/main?style=flat" /><a class="headerlink" href="#nixidy" title="Permanent link">#</a></h1>
-<p>Kubernetes GitOps with nix and Argo CD.</p>
-<blockquote>
-<p>Kind of sounds like Nix CD.</p>
-</blockquote>
+  <h1>Home</h1>
+
+<p align="center">
+  <a href="https://nixidy.dev"><img alt="nixidy logo" src="./logo.svg" /></a><br />
+  <a href="https://github.com/arnarg/nixidy/blob/main/LICENSE"><img src="https://img.shields.io/github/license/arnarg/nixidy?style=flat" alt="License Badge" /></a>
+  <a href="https://github.com/arnarg/nixidy/releases"><img src="https://img.shields.io/github/v/tag/arnarg/nixidy?style=flat&label=release&color=0a7cbd" alt="Latest Release Badge" /></a>
+  <img src="https://img.shields.io/github/check-runs/arnarg/nixidy/main?style=flat" alt="Checks Passing Badge" />
+</p>
+
+<p align="center">Kubernetes GitOps with nix and Argo CD.</p>
+
 <h2 id="what-is-it">What is it?<a class="headerlink" href="#what-is-it" title="Permanent link">#</a></h2>
 <p>Manage an entire Kubernetes cluster like it's NixOS, then have CI generate plain YAML manifests for ArgoCD.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
