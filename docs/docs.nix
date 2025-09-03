@@ -27,8 +27,14 @@
     patchPhase = ''
       cat $optionsMdPath > docs/options.md
       cp ${libraryMd}/lib.md docs/library.md
-      cp ${../README.md} docs/index.md
       cp ${../logo.svg} docs/logo.svg
+
+      cat <<EOF > docs/index.md
+      ---
+      template: home.html
+      ---
+      EOF
+      cat ${../README.md} >> docs/index.md
 
       cat <<EOF > mkdocs.yml
         site_name: nixidy
@@ -40,9 +46,14 @@
         exclude_docs: |
           *.nix
           /npins/
+          /overrides/
+
+        extra_css:
+        - stylesheets/extra.css
 
         theme:
           name: material
+          custom_dir: docs/overrides
 
           logo: images/icon.svg
           favicon: images/icon.svg
@@ -50,13 +61,13 @@
           palette:
           - media: "(prefers-color-scheme: light)"
             scheme: default
-            primary: indigo
+            primary: custom
             toggle:
               icon: material/brightness-7
               name: Switch to dark mode
           - media: "(prefers-color-scheme: dark)"
             scheme: slate
-            primary: indigo
+            primary: custom
             toggle:
               icon: material/brightness-4
               name: Switch to light mode

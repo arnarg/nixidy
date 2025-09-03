@@ -1,0 +1,29 @@
+{#-
+  This file was automatically generated - do not edit
+-#}
+{% extends "base.html" %}
+{% block htmltitle %}
+    {% if page.meta and page.meta.title %}
+        <title>{{ page.meta.title }}</title>
+    {% elif page.title and not page.is_homepage %}
+        <title>{{ page.title | striptags }}</title>
+    {% else %}
+        <title>{{ config.site_name }}</title>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if "material/tags" in config.plugins and tags %}
+      {% include "partials/tags.html" %}
+    {% endif %}
+    {% include "partials/actions.html" %}
+    {{ page.content }}
+    {% include "partials/source-file.html" %}
+    {% include "partials/feedback.html" %}
+    {% include "partials/comments.html" %}
+{% endblock %}
+
+{% block extrahead %}
+    <style>.md-content__button {display:none !important}; </style>
+    <style>.md-header__topic {font-weight:700 !important}</style>
+{% endblock %}
