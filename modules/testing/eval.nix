@@ -53,6 +53,9 @@
       # Import test module options
       testModuleOptions
 
+      # Include templates
+      ../templates.nix
+
       {
         nixidy = {
           # Import all applicationImports

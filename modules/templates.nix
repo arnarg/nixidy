@@ -8,7 +8,7 @@
   # This function turns a template name, options and `output` function
   # into a module that can be imported with `applicationImports`.
   mkImportable = name: opts: func: {config, ...} @ args: let
-    mod = {...}: {
+    mod = {
       options = opts;
     };
   in {
