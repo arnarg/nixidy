@@ -13,6 +13,7 @@
   module = lib.evalModules {
     modules =
       modules
+      ++ [./templates.nix]
       ++ nixidyModules;
     specialArgs =
       {

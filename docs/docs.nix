@@ -99,6 +99,7 @@
           - 'Getting Started': user_guide/getting_started.md
           - 'Using Helm Charts': user_guide/helm_charts.md
           - 'Typed Resource Options': user_guide/typed_resources.md
+          - 'Templates': user_guide/templates.md
           - 'Git Strategies': user_guide/git_strategies.md
           - 'GitHub Actions': user_guide/github_actions.md
           - 'Transformers': user_guide/transformers.md

@@ -11,6 +11,7 @@
       ./override-name.nix
       ./internal-apps.nix
       ./no-port-protocol.nix
+      ./templates.nix
       ./helm/no-values.nix
       ./helm/with-values.nix
       ./helm/transformer.nix

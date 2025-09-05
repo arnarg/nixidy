@@ -44,6 +44,125 @@
       };
   };
 
+  # We need to re-define this here because `templates.options`
+  # defines a recursive type and the options doc generator
+  # ends up in an infinite recursion.
+  # TODO: Fix "declared by" for templates options
+  templatesCompat = let
+    mod = {
+      options = with lib; {
+        options = let
+          optType = mkOptionType {
+            name = "option";
+            description = "option";
+            descriptionClass = "noun";
+            check = isOption;
+            merge = mergeEqualOption;
+          };
+        in
+          mkOption {
+            type = with lib.types; attrsOf optType;
+            description = ''
+              A set of module options that define the configurable parameters for your template.
+            '';
+          };
+        output = mkOption {
+          type = with lib.types; functionTo (attrsOf anything);
+          description = ''
+            A Nix function that takes the template instance's `name` and its `config` (derived from the `options` you defined) and returns a set of nixidy resources (e.g., deployments, services, ingresses).
+          '';
+        };
+      };
+    };
+  in {
+    options.templates = lib.mkOption {
+      type = with lib.types; attrsOf (submodule mod);
+      default = {};
+      description = ''
+        Defines reusable templates that can be used in applications. See [documentation](/user_guide/templates/).
+      '';
+      example = lib.literalMD ''
+        {
+          webApplication = {
+            options = with lib; {
+              image = mkOption {
+                type = lib.types.str;
+                description = "The image to use in the web application deployment";
+              };
+              replicas = mkOption {
+                type = lib.types.int;
+                default = 3;
+                description = "The number of replicas for the web application deployment.";
+              };
+              port = mkOption {
+                type = lib.types.port;
+                default = 8080;
+                description = "The web application's port.";
+              };
+              ingressHost = mkOption {
+                type = with lib.types; nullOr str;
+                default = null;
+                description = "The application's ingress host. Set to null to disable ingress.";
+              };
+            };
+
+            output = {
+              name,
+              config,
+              ...
+            }: let
+              cfg = config;
+              appLabels = {
+                "app.kubernetes.io/name" = name;
+                "app.kubernetes.io/instance" = name;
+              };
+            in {
+              deployments."''${name}".spec = {
+                replicas = cfg.replicas;
+                selector.matchLabels = appLabels;
+                template = {
+                  metadata.labels = appLabels;
+                  spec.containers."''${name}" = {
+                    image = cfg.image;
+                    ports."http".containerPort = cfg.port;
+                  };
+                };
+              };
+
+              services."''${name}".spec = {
+                selector = appLabels;
+                ports.http = {
+                  port = cfg.port;
+                  targetPort = cfg.port;
+                };
+              };
+
+              ingresses = lib.mkIf (cfg.ingressHost != null) {
+                "''${name}".spec = {
+                  rules = [
+                    {
+                      host = cfg.ingressHost;
+                      http.paths = [
+                        {
+                          path = "/";
+                          pathType = "Prefix";
+                          backend.service = {
+                            inherit name;
+                            port.number = cfg.port;
+                          };
+                        }
+                      ];
+                    }
+                  ];
+                };
+              };
+            };
+          };
+        };
+      '';
+    };
+  };
+
   options =
     (lib.evalModules {
       modules =
@@ -53,6 +172,7 @@
             nixidy.baseImports = false;
             nixidy.applicationImports = [resourcesCompat];
           }
+          templatesCompat
         ];
       specialArgs = {
         inherit pkgs lib;
@@ -120,18 +240,22 @@
 
             ''
           )))
-        + ''
-          ***Declared by:***
+        + (
+          if (length opt.declarations > 0)
+          then ''
+            ***Declared by:***
 
-          ${
-            concatStringsSep "\n" (map (
-                decl: ''
-                  - [&lt;${decl.name}&gt;](${decl.url})
-                ''
-              )
-              opt.declarations)
-          }
-        '')
+            ${
+              concatStringsSep "\n" (map (
+                  decl: ''
+                    - [&lt;${decl.name}&gt;](${decl.url})
+                  ''
+                )
+                opt.declarations)
+            }
+          ''
+          else ""
+        ))
       optionsDoc.optionsNix));
 in
   optsMd
