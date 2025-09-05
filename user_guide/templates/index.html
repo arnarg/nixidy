@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://nixidy.dev/user_guide/typed_resources/">
+        <link rel="canonical" href="https://nixidy.dev/user_guide/templates/">
       
       
-        <link rel="prev" href="../helm_charts/">
+        <link rel="prev" href="../typed_resources/">
       
       
-        <link rel="next" href="../templates/">
+        <link rel="next" href="../git_strategies/">
       
       
       <link rel="icon" href="../../images/icon.svg">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Typed Resource Options - nixidy</title>
+        <title>Templates - nixidy</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#typed-resource-options" class="md-skip">
+        <a href="#templates" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Typed Resource Options
+              Templates
             
           </span>
         </div>
@@ -361,6 +361,29 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../typed_resources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Typed Resource Options
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -378,7 +401,7 @@
   
   
   <span class="md-ellipsis">
-    Typed Resource Options
+    Templates
     
   </span>
   
@@ -391,7 +414,7 @@
   
   
   <span class="md-ellipsis">
-    Typed Resource Options
+    Templates
     
   </span>
   
@@ -414,19 +437,19 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#generating-your-own-resource-options-from-crds" class="md-nav__link">
+  <a href="#defining-a-template" class="md-nav__link">
     <span class="md-ellipsis">
-      Generating your own resource options from CRDs
+      Defining a Template
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Generating your own resource options from CRDs">
+    <nav class="md-nav" aria-label="Defining a Template">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#resolving-naming-conflicts" class="md-nav__link">
+  <a href="#example-webapplication-template" class="md-nav__link">
     <span class="md-ellipsis">
-      Resolving Naming Conflicts
+      Example: webApplication Template
     </span>
   </a>
   
@@ -437,33 +460,19 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#using-a-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using a Template
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../templates/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Templates
-    
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -732,19 +741,19 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#generating-your-own-resource-options-from-crds" class="md-nav__link">
+  <a href="#defining-a-template" class="md-nav__link">
     <span class="md-ellipsis">
-      Generating your own resource options from CRDs
+      Defining a Template
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Generating your own resource options from CRDs">
+    <nav class="md-nav" aria-label="Defining a Template">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#resolving-naming-conflicts" class="md-nav__link">
+  <a href="#example-webapplication-template" class="md-nav__link">
     <span class="md-ellipsis">
-      Resolving Naming Conflicts
+      Example: webApplication Template
     </span>
   </a>
   
@@ -752,6 +761,15 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-a-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using a Template
+    </span>
+  </a>
   
 </li>
       
@@ -774,149 +792,133 @@
   
 
 
-<h1 id="typed-resource-options">Typed Resource Options<a class="headerlink" href="#typed-resource-options" title="Permanent link">#</a></h1>
-<p><a href="https://github.com/hall/kubenix/">Kubenix</a> has done a great work with generating nix options definitions from official JSON schemas and nixidy builds on top of this.</p>
-<p>All core Kubernetes resources are imported by default in nixidy along with Argo CD's <code>Application</code> and <code>AppProject</code>. Every resource can be defined under <code>applications.&lt;applicationName&gt;.resources.&lt;group&gt;.&lt;version&gt;.&lt;kind&gt;</code> but is also offered as an alias <code>applications.&lt;applicationName&gt;.resources.&lt;attrName&gt;</code> where <code>&lt;attrName&gt;</code> is the plural form of the kind in camelCase.</p>
-<p>For example:</p>
+<h1 id="templates">Templates<a class="headerlink" href="#templates" title="Permanent link">#</a></h1>
+<p>Templates provide a powerful way to define reusable configurations for your applications, reducing duplication and promoting consistency. A template encapsulates a set of configurable options and a function to generate Kubernetes resources based on those options.</p>
+<h2 id="defining-a-template">Defining a Template<a class="headerlink" href="#defining-a-template" title="Permanent link">#</a></h2>
+<p>You define templates within the <code>templates</code> option in your nixidy configuration. Each template requires two main attributes:</p>
 <ul>
-<li><code>resources.core.v1.Service</code> -&gt; <code>resources.services</code></li>
-<li><code>resources."networking.k8s.io".v1.NetworkPolicy</code> -&gt; <code>resources.networkPolicies</code></li>
+<li><code>options</code>: A set of module options that define the configurable parameters for your template.</li>
+<li><code>output</code>: A Nix function that takes the template instance's <code>name</code> and its <code>config</code> (derived from the <code>options</code> you defined) and returns a set of nixidy resources (e.g., deployments, services, ingresses).</li>
 </ul>
-<p>The lack of availability of typed resource options only hinders the ability to define the resources in nix. Any manifests that are rendered from a Helm Chart or defined in <code>applications.&lt;applicationName&gt;.yamls</code> and do not have defined resource options for that group, version and kind will go straight to the output for the application and can not be patched by nixidy.</p>
-<h2 id="generating-your-own-resource-options-from-crds">Generating your own resource options from CRDs<a class="headerlink" href="#generating-your-own-resource-options-from-crds" title="Permanent link">#</a></h2>
-<p>Thankfully a code generator for generating resource options from CRDs is provided by nixidy (this is based heavily on kubenix's code generator).</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">flakes</label><label for="__tabbed_1_2">flake-less</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<p>As an example, to generate resource options for Cilium's <code>CiliumNetworkPolicy</code> and <code>CiliumClusterwideNetworkPolicy</code> the following can be defined in <code>flake.nix</code>.</p>
-<div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
-  <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;My ArgoCD configuration with nixidy.&quot;</span><span class="p">;</span>
-
-  inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:nixos/nixpkgs/nixos-unstable&quot;</span><span class="p">;</span>
-  inputs<span class="o">.</span>flake-utils<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:numtide/flake-utils&quot;</span><span class="p">;</span>
-
-  inputs<span class="o">.</span><span class="ss">nixidy</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:arnarg/nixidy&quot;</span><span class="p">;</span>
-    inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">follows</span> <span class="o">=</span> <span class="s2">&quot;nixpkgs&quot;</span><span class="p">;</span>
-  <span class="p">};</span>
-
-  <span class="ss">outputs</span> <span class="o">=</span> <span class="p">{</span>
-    self<span class="p">,</span>
-    nixpkgs<span class="p">,</span>
-    flake-utils<span class="p">,</span>
-    nixidy<span class="p">,</span>
-  <span class="p">}:</span> <span class="p">(</span>flake-utils<span class="o">.</span>lib<span class="o">.</span>eachDefaultSystem <span class="p">(</span>system<span class="p">:</span> <span class="k">let</span>
-    <span class="ss">pkgs</span> <span class="o">=</span> <span class="nb">import</span> nixpkgs <span class="p">{</span>
-      <span class="k">inherit</span> system<span class="p">;</span>
-    <span class="p">};</span>
-  <span class="k">in</span> <span class="p">{</span>
-    <span class="ss">packages</span> <span class="o">=</span> <span class="p">{</span>
-      generators<span class="o">.</span><span class="ss">cilium</span> <span class="o">=</span> nixidy<span class="o">.</span>packages<span class="o">.</span><span class="si">${</span>system<span class="si">}</span><span class="o">.</span>generators<span class="o">.</span>fromCRD <span class="p">{</span>
-        <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;cilium&quot;</span><span class="p">;</span>
-        <span class="ss">src</span> <span class="o">=</span> pkgs<span class="o">.</span>fetchFromGitHub <span class="p">{</span>
-          <span class="ss">owner</span> <span class="o">=</span> <span class="s2">&quot;cilium&quot;</span><span class="p">;</span>
-          <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;cilium&quot;</span><span class="p">;</span>
-          <span class="ss">rev</span> <span class="o">=</span> <span class="s2">&quot;v1.15.6&quot;</span><span class="p">;</span>
-          <span class="ss">hash</span> <span class="o">=</span> <span class="s2">&quot;sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=&quot;</span><span class="p">;</span>
-        <span class="p">};</span>
-        <span class="ss">crds</span> <span class="o">=</span> <span class="p">[</span>
-          <span class="s2">&quot;pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml&quot;</span>
-          <span class="s2">&quot;pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml&quot;</span>
-        <span class="p">];</span>
+<h3 id="example-webapplication-template">Example: <code>webApplication</code> Template<a class="headerlink" href="#example-webapplication-template" title="Permanent link">#</a></h3>
+<p>Let's look at an example of a <code>webApplication</code> template, which defines common settings for a web application and generates a Kubernetes Deployment, Service, and an optional Ingress.</p>
+<div class="highlight"><span class="filename">modules/templates.nix</span><pre><span></span><code><span class="p">{</span>lib<span class="p">,</span> <span class="o">...</span><span class="p">}:</span> <span class="p">{</span>
+  templates<span class="o">.</span><span class="ss">webApplication</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ss">options</span> <span class="o">=</span> <span class="k">with</span> lib<span class="p">;</span> <span class="p">{</span>
+      <span class="ss">image</span> <span class="o">=</span> mkOption <span class="p">{</span>
+        <span class="ss">type</span> <span class="o">=</span> lib<span class="o">.</span>types<span class="o">.</span>str<span class="p">;</span>
+        <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;The image to use in the web application deployment&quot;</span><span class="p">;</span>
+      <span class="p">};</span>
+      <span class="ss">replicas</span> <span class="o">=</span> mkOption <span class="p">{</span>
+        <span class="ss">type</span> <span class="o">=</span> lib<span class="o">.</span>types<span class="o">.</span>int<span class="p">;</span>
+        <span class="ss">default</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+        <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;The number of replicas for the web application deployment.&quot;</span><span class="p">;</span>
+      <span class="p">};</span>
+      <span class="ss">port</span> <span class="o">=</span> mkOption <span class="p">{</span>
+        <span class="ss">type</span> <span class="o">=</span> lib<span class="o">.</span>types<span class="o">.</span>port<span class="p">;</span>
+        <span class="ss">default</span> <span class="o">=</span> <span class="mi">8080</span><span class="p">;</span>
+        <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;The web application&#39;s port.&quot;</span><span class="p">;</span>
+      <span class="p">};</span>
+      <span class="ss">ingressHost</span> <span class="o">=</span> mkOption <span class="p">{</span>
+        <span class="ss">type</span> <span class="o">=</span> <span class="k">with</span> lib<span class="o">.</span>types<span class="p">;</span> nullOr str<span class="p">;</span>
+        <span class="ss">default</span> <span class="o">=</span> <span class="no">null</span><span class="p">;</span>
+        <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;The application&#39;s ingress host. Set to null to disable ingress.&quot;</span><span class="p">;</span>
       <span class="p">};</span>
     <span class="p">};</span>
-  <span class="p">}));</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>Then running <code>nix build .#generators.cilium</code> will produce a nix file that can be copied into place in your repository. After that the generated file has to be added to <code>nixidy.applicationImports</code> in your nixidy modules.</p>
-</div>
-<div class="tabbed-block">
-<p>As an example, to generate resource options for Cilium's <code>CiliumNetworkPolicy</code> and <code>CiliumClusterwideNetworkPolicy</code> the following can be defined in <code>generate.nix</code>.</p>
-<div class="highlight"><span class="filename">generate.nix</span><pre><span></span><code><span class="k">let</span>
-  <span class="c1"># With npins</span>
-  <span class="ss">sources</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./npins</span><span class="p">;</span>
-  <span class="c1"># With niv</span>
-  <span class="c1"># sources = import ./nix/sources.nix;</span>
 
-  <span class="c1"># nixpkgs added with:</span>
-  <span class="c1">#   npins: `npins add --name nixpkgs channel nixos-unstable`</span>
-  <span class="c1">#   niv: `niv add github nixos/nixpkgs -b nixos-unstable`</span>
-  <span class="ss">nixpkgs</span> <span class="o">=</span> sources<span class="o">.</span>nixpkgs<span class="p">;</span>
-  <span class="ss">pkgs</span> <span class="o">=</span> <span class="nb">import</span> nixpkgs <span class="p">{};</span>
-
-  <span class="c1"># Import nixidy</span>
-  <span class="ss">nixidy</span> <span class="o">=</span> <span class="nb">import</span> sources<span class="o">.</span>nixidy <span class="p">{</span><span class="k">inherit</span> nixpkgs<span class="p">;};</span>
-<span class="k">in</span>
-  <span class="p">{</span>
-    <span class="ss">cilium</span> <span class="o">=</span> nixidy<span class="o">.</span>generators<span class="o">.</span>fromCRD <span class="p">{</span>
-      <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;cilium&quot;</span><span class="p">;</span>
-      <span class="ss">src</span> <span class="o">=</span> pkgs<span class="o">.</span>fetchFromGitHub <span class="p">{</span>
-        <span class="ss">owner</span> <span class="o">=</span> <span class="s2">&quot;cilium&quot;</span><span class="p">;</span>
-        <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;cilium&quot;</span><span class="p">;</span>
-        <span class="ss">rev</span> <span class="o">=</span> <span class="s2">&quot;v1.15.6&quot;</span><span class="p">;</span>
-        <span class="ss">hash</span> <span class="o">=</span> <span class="s2">&quot;sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=&quot;</span><span class="p">;</span>
-      <span class="p">};</span>
-      <span class="ss">crds</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml&quot;</span>
-        <span class="s2">&quot;pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml&quot;</span>
-      <span class="p">];</span>
-    <span class="p">};</span>
-  <span class="p">}</span>
-</code></pre></div>
-<p>Then running <code>nix-build generate.nix -A cilium</code> will produce a nix file that can be copied into place in your repository. After that the generated file has to be added to <code>nixidy.applicationImports</code> in your nixidy modules.</p>
-</div>
-</div>
-</div>
-<div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
-  nixidy<span class="o">.</span><span class="ss">applicationImports</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="l">./generated/cilium.nix</span>
-  <span class="p">];</span>
-<span class="p">}</span>
-</code></pre></div>
-<h3 id="resolving-naming-conflicts">Resolving Naming Conflicts<a class="headerlink" href="#resolving-naming-conflicts" title="Permanent link">#</a></h3>
-<p>Sometimes, multiple Custom Resource Definitions from different sources might define the same resource <code>kind</code>. This can lead to conflicts in the generated attribute names. For instance, if two different operators both define a CRD with the kind <code>Database</code>, they would both try to generate options for <code>resources.databases</code>.</p>
-<p>To resolve this, the <code>fromCRD</code> function accepts a <code>namePrefix</code> argument. This prefix will be added to the generated attribute name, making it unique.</p>
-<p>For example, if you have two operators that both provide a <code>Database</code> CRD, you can distinguish them like this:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-  <span class="c1"># For postgres-operator</span>
-  <span class="ss">postgres</span> <span class="o">=</span> nixidy<span class="o">.</span>generators<span class="o">.</span>fromCRD <span class="p">{</span>
-    <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;postgres-operator&quot;</span><span class="p">;</span>
-    <span class="ss">namePrefix</span> <span class="o">=</span> <span class="s2">&quot;postgres&quot;</span><span class="p">;</span>
-    <span class="c1"># ...</span>
-  <span class="p">};</span>
-
-  <span class="c1"># For mysql-operator</span>
-  <span class="ss">mysql</span> <span class="o">=</span> nixidy<span class="o">.</span>generators<span class="o">.</span>fromCRD <span class="p">{</span>
-    <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;mysql-operator&quot;</span><span class="p">;</span>
-    <span class="ss">namePrefix</span> <span class="o">=</span> <span class="s2">&quot;mysql&quot;</span><span class="p">;</span>
-    <span class="c1"># ...</span>
-  <span class="p">};</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>This will generate <code>resources.postgresDatabases</code> and <code>resources.mysqlDatabases</code> respectively, avoiding any conflicts.</p>
-<p>If the heuristics for attribute name generation still create conflicts, for example within the same chart, or if you wish to further customize the name for ergonomics, <code>fromCRD</code> also accepts an <code>attrNameOverrides</code> argument which takes precedence over all other methods.</p>
-<p>This argument is a mapping from the CRD's name (<code>&lt;plural&gt;.&lt;group&gt;</code>) to the desired attribute name. For example:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-  <span class="ss">keycloak</span> <span class="o">=</span> nixidy<span class="o">.</span>generators<span class="o">.</span>fromCRD <span class="p">{</span>
-    <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;keycloak&quot;</span><span class="p">;</span>
-    <span class="ss">src</span> <span class="o">=</span> pkgs<span class="o">.</span>fetchFromGitHub <span class="p">{</span>
-      <span class="ss">owner</span> <span class="o">=</span> <span class="s2">&quot;crossplane-contrib&quot;</span><span class="p">;</span>
-      <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;provider-keycloak&quot;</span><span class="p">;</span>
+    <span class="ss">output</span> <span class="o">=</span> <span class="p">{</span>
+      name<span class="p">,</span>
+      config<span class="p">,</span>
       <span class="o">...</span>
+    <span class="p">}:</span> <span class="k">let</span>
+      <span class="ss">cfg</span> <span class="o">=</span> config<span class="p">;</span>
+      <span class="ss">appLabels</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;app.kubernetes.io/name&quot;</span> <span class="o">=</span> name<span class="p">;</span>
+        <span class="s2">&quot;app.kubernetes.io/instance&quot;</span> <span class="o">=</span> name<span class="p">;</span>
+      <span class="p">};</span>
+    <span class="k">in</span> <span class="p">{</span>
+      deployments<span class="o">.</span><span class="s2">&quot;</span><span class="si">${</span>name<span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="ss">spec</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="ss">replicas</span> <span class="o">=</span> cfg<span class="o">.</span>replicas<span class="p">;</span>
+        selector<span class="o">.</span><span class="ss">matchLabels</span> <span class="o">=</span> appLabels<span class="p">;</span>
+        <span class="ss">template</span> <span class="o">=</span> <span class="p">{</span>
+          metadata<span class="o">.</span><span class="ss">labels</span> <span class="o">=</span> appLabels<span class="p">;</span>
+          spec<span class="o">.</span>containers<span class="o">.</span><span class="s2">&quot;</span><span class="si">${</span>name<span class="si">}</span><span class="s2">&quot;</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="ss">image</span> <span class="o">=</span> cfg<span class="o">.</span>image<span class="p">;</span>
+            ports<span class="o">.</span><span class="s2">&quot;http&quot;</span><span class="o">.</span><span class="ss">containerPort</span> <span class="o">=</span> cfg<span class="o">.</span>port<span class="p">;</span>
+          <span class="p">};</span>
+        <span class="p">};</span>
+      <span class="p">};</span>
+
+      services<span class="o">.</span><span class="s2">&quot;</span><span class="si">${</span>name<span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="ss">spec</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="ss">selector</span> <span class="o">=</span> appLabels<span class="p">;</span>
+        ports<span class="o">.</span><span class="ss">http</span> <span class="o">=</span> <span class="p">{</span>
+          <span class="ss">port</span> <span class="o">=</span> cfg<span class="o">.</span>port<span class="p">;</span>
+          <span class="ss">targetPort</span> <span class="o">=</span> cfg<span class="o">.</span>port<span class="p">;</span>
+        <span class="p">};</span>
+      <span class="p">};</span>
+
+      <span class="ss">ingresses</span> <span class="o">=</span> lib<span class="o">.</span>mkIf <span class="p">(</span>cfg<span class="o">.</span>ingressHost <span class="o">!=</span> <span class="no">null</span><span class="p">)</span> <span class="p">{</span>
+        <span class="s2">&quot;</span><span class="si">${</span>name<span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="ss">spec</span> <span class="o">=</span> <span class="p">{</span>
+          <span class="ss">rules</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span>
+              <span class="ss">host</span> <span class="o">=</span> cfg<span class="o">.</span>ingressHost<span class="p">;</span>
+              http<span class="o">.</span><span class="ss">paths</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="ss">path</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="p">;</span>
+                  <span class="ss">pathType</span> <span class="o">=</span> <span class="s2">&quot;Prefix&quot;</span><span class="p">;</span>
+                  backend<span class="o">.</span><span class="ss">service</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="k">inherit</span> name<span class="p">;</span>
+                    port<span class="o">.</span><span class="ss">number</span> <span class="o">=</span> cfg<span class="o">.</span>port<span class="p">;</span>
+                  <span class="p">};</span>
+                <span class="p">}</span>
+              <span class="p">];</span>
+            <span class="p">}</span>
+          <span class="p">];</span>
+        <span class="p">};</span>
+      <span class="p">};</span>
     <span class="p">};</span>
-    <span class="ss">crds</span> <span class="o">=</span> <span class="p">[</span>
-      <span class="c1"># This CRD conflicts with Kubernetes builtin Binding</span>
-      <span class="s2">&quot;package/crds/authenticationflow.keycloak.crossplane.io_bindings.yaml&quot;</span>
-      <span class="c1"># These CRDs have identical plural references</span>
-      <span class="s2">&quot;package/crds/group.keycloak.crossplane.io_groups.yaml&quot;</span>
-      <span class="s2">&quot;package/crds/user.keycloak.crossplane.io_groups.yaml&quot;</span>
-    <span class="p">];</span>
-    <span class="ss">namePrefix</span> <span class="o">=</span> <span class="s2">&quot;keycloak&quot;</span><span class="p">;</span>
-    attrNameOverrides<span class="o">.</span><span class="s2">&quot;groups.user.keycloak.crossplane.io&quot;</span> <span class="o">=</span> <span class="s2">&quot;keycloakUserGroups&quot;</span><span class="p">;</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>will expose <code>keycloakBindings</code>, <code>keycloakGroups</code>, and <code>keycloakUserGroups</code> under an application's <code>resources</code>.</p>
+<p>In this example:</p>
+<ul>
+<li>The <code>webApplication</code> template defines <code>image</code>, <code>replicas</code>, <code>port</code>, and <code>ingressHost</code> as configurable options.</li>
+<li>The <code>output</code> function takes the <code>name</code> of the instance and its <code>config</code> (which will contain the values for <code>image</code>, <code>replicas</code>, etc.). It then uses these values to construct Kubernetes Deployment, Service, and Ingress resources.</li>
+</ul>
+<h2 id="using-a-template">Using a Template<a class="headerlink" href="#using-a-template" title="Permanent link">#</a></h2>
+<p>Once a template is defined you can use it within an application by referring to it under the <code>templates</code> attribute set of your application.</p>
+<div class="highlight"><span class="filename">modules/webapp.nix</span><pre><span></span><code><span class="p">{</span> config<span class="p">,</span> lib<span class="p">,</span> <span class="o">...</span> <span class="p">}:</span> <span class="p">{</span>
+  <span class="ss">imports</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="l">./templates.nix</span>
+  <span class="p">];</span>
+
+  applications<span class="o">.</span><span class="ss">webapp</span> <span class="o">=</span> <span class="p">{</span>
+    templates<span class="o">.</span><span class="ss">webApplication</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="c1"># Use the template in an application.</span>
+      <span class="ss">frontend</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="ss">image</span> <span class="o">=</span> <span class="s2">&quot;frontend:latest&quot;</span><span class="p">;</span>
+        <span class="ss">replicas</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="ss">ingressHost</span> <span class="o">=</span> <span class="s2">&quot;example.com&quot;</span><span class="p">;</span>
+      <span class="p">};</span>
+    <span class="p">};</span>
+
+    <span class="c1"># You can still modify the generated resources.</span>
+    <span class="ss">resources</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="c1"># Add extra label to the deployment.</span>
+      deployments<span class="o">.</span>frontend<span class="o">.</span>metadata<span class="o">.</span><span class="ss">labels</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;custom-label&quot;</span> <span class="o">=</span> <span class="s2">&quot;frontend&quot;</span><span class="p">;</span>
+      <span class="p">};</span>
+    <span class="p">};</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Here, <code>applications.webapp.templates.webApplication.frontend</code> instantiates the <code>webApplication</code> template.</p>
+<ul>
+<li><code>webApplication</code> refers to the name of the template we defined.</li>
+<li><code>frontend</code> is the instance name for this specific use of the template. This name is passed to the <code>output</code> function as <code>name</code>.</li>
+<li>The attributes <code>image</code>, <code>replicas</code>, and <code>ingressHost</code> are the options we're setting for this <code>frontend</code> instance of the <code>webApplication</code> template. The <code>port</code> option is omitted, so it will use its default value of <code>8080</code>.</li>
+</ul>
+<p>When nixidy evaluates this configuration, it will call the <code>output</code> function of the <code>webApplication</code> template with <code>name = "frontend"</code> and <code>config</code> containing the provided options, generating the corresponding Kubernetes resources under <code>applications.webapp.resources</code>.</p>
 
 
 
@@ -948,7 +950,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../helm_charts/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Using Helm Charts">
+          <a href="../typed_resources/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Typed Resource Options">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -958,20 +960,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Using Helm Charts
+                Typed Resource Options
               </div>
             </div>
           </a>
         
         
           
-          <a href="../templates/" class="md-footer__link md-footer__link--next" aria-label="Next: Templates">
+          <a href="../git_strategies/" class="md-footer__link md-footer__link--next" aria-label="Next: Git Strategies">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Templates
+                Git Strategies
               </div>
             </div>
             <div class="md-footer__button md-icon">

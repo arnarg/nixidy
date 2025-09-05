@@ -385,6 +385,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../user_guide/templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Templates
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../user_guide/git_strategies/" class="md-nav__link">
         
   
@@ -1213,6 +1236,33 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      templates
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#templatesnameoptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      templates.&lt;name&gt;.options
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#templatesnameoutput" class="md-nav__link">
+    <span class="md-ellipsis">
+      templates.&lt;name&gt;.output
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1867,6 +1917,33 @@
   <a href="#nixidytargetrootpath" class="md-nav__link">
     <span class="md-ellipsis">
       nixidy.target.rootPath
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      templates
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#templatesnameoptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      templates.&lt;name&gt;.options
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#templatesnameoutput" class="md-nav__link">
+    <span class="md-ellipsis">
+      templates.&lt;name&gt;.output
     </span>
   </a>
   
@@ -2707,6 +2784,99 @@ string</p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
 </ul>
+<h2 id="templates">templates<a class="headerlink" href="#templates" title="Permanent link">#</a></h2>
+<p>Defines reusable templates that can be used in applications. See <a href="/user_guide/templates/">documentation</a>.</p>
+<p><strong><em>Type:</em></strong>
+attribute set of (submodule)</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="p">{</span> <span class="p">}</span></code></p>
+<p><strong><em>Example:</em></strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+  <span class="ss">webApplication</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ss">options</span> <span class="o">=</span> <span class="k">with</span> lib<span class="p">;</span> <span class="p">{</span>
+      <span class="ss">image</span> <span class="o">=</span> mkOption <span class="p">{</span>
+        <span class="ss">type</span> <span class="o">=</span> lib<span class="o">.</span>types<span class="o">.</span>str<span class="p">;</span>
+        <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;The image to use in the web application deployment&quot;</span><span class="p">;</span>
+      <span class="p">};</span>
+      <span class="ss">replicas</span> <span class="o">=</span> mkOption <span class="p">{</span>
+        <span class="ss">type</span> <span class="o">=</span> lib<span class="o">.</span>types<span class="o">.</span>int<span class="p">;</span>
+        <span class="ss">default</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+        <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;The number of replicas for the web application deployment.&quot;</span><span class="p">;</span>
+      <span class="p">};</span>
+      <span class="ss">port</span> <span class="o">=</span> mkOption <span class="p">{</span>
+        <span class="ss">type</span> <span class="o">=</span> lib<span class="o">.</span>types<span class="o">.</span>port<span class="p">;</span>
+        <span class="ss">default</span> <span class="o">=</span> <span class="mi">8080</span><span class="p">;</span>
+        <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;The web application&#39;s port.&quot;</span><span class="p">;</span>
+      <span class="p">};</span>
+      <span class="ss">ingressHost</span> <span class="o">=</span> mkOption <span class="p">{</span>
+        <span class="ss">type</span> <span class="o">=</span> <span class="k">with</span> lib<span class="o">.</span>types<span class="p">;</span> nullOr str<span class="p">;</span>
+        <span class="ss">default</span> <span class="o">=</span> <span class="no">null</span><span class="p">;</span>
+        <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;The application&#39;s ingress host. Set to null to disable ingress.&quot;</span><span class="p">;</span>
+      <span class="p">};</span>
+    <span class="p">};</span>
+
+    <span class="ss">output</span> <span class="o">=</span> <span class="p">{</span>
+      name<span class="p">,</span>
+      config<span class="p">,</span>
+      <span class="o">...</span>
+    <span class="p">}:</span> <span class="k">let</span>
+      <span class="ss">cfg</span> <span class="o">=</span> config<span class="p">;</span>
+      <span class="ss">appLabels</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;app.kubernetes.io/name&quot;</span> <span class="o">=</span> name<span class="p">;</span>
+        <span class="s2">&quot;app.kubernetes.io/instance&quot;</span> <span class="o">=</span> name<span class="p">;</span>
+      <span class="p">};</span>
+    <span class="k">in</span> <span class="p">{</span>
+      deployments<span class="o">.</span><span class="s2">&quot;</span><span class="si">${</span>name<span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="ss">spec</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="ss">replicas</span> <span class="o">=</span> cfg<span class="o">.</span>replicas<span class="p">;</span>
+        selector<span class="o">.</span><span class="ss">matchLabels</span> <span class="o">=</span> appLabels<span class="p">;</span>
+        <span class="ss">template</span> <span class="o">=</span> <span class="p">{</span>
+          metadata<span class="o">.</span><span class="ss">labels</span> <span class="o">=</span> appLabels<span class="p">;</span>
+          spec<span class="o">.</span>containers<span class="o">.</span><span class="s2">&quot;</span><span class="si">${</span>name<span class="si">}</span><span class="s2">&quot;</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="ss">image</span> <span class="o">=</span> cfg<span class="o">.</span>image<span class="p">;</span>
+            ports<span class="o">.</span><span class="s2">&quot;http&quot;</span><span class="o">.</span><span class="ss">containerPort</span> <span class="o">=</span> cfg<span class="o">.</span>port<span class="p">;</span>
+          <span class="p">};</span>
+        <span class="p">};</span>
+      <span class="p">};</span>
+
+      services<span class="o">.</span><span class="s2">&quot;</span><span class="si">${</span>name<span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="ss">spec</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="ss">selector</span> <span class="o">=</span> appLabels<span class="p">;</span>
+        ports<span class="o">.</span><span class="ss">http</span> <span class="o">=</span> <span class="p">{</span>
+          <span class="ss">port</span> <span class="o">=</span> cfg<span class="o">.</span>port<span class="p">;</span>
+          <span class="ss">targetPort</span> <span class="o">=</span> cfg<span class="o">.</span>port<span class="p">;</span>
+        <span class="p">};</span>
+      <span class="p">};</span>
+
+      <span class="ss">ingresses</span> <span class="o">=</span> lib<span class="o">.</span>mkIf <span class="p">(</span>cfg<span class="o">.</span>ingressHost <span class="o">!=</span> <span class="no">null</span><span class="p">)</span> <span class="p">{</span>
+        <span class="s2">&quot;</span><span class="si">${</span>name<span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="ss">spec</span> <span class="o">=</span> <span class="p">{</span>
+          <span class="ss">rules</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span>
+              <span class="ss">host</span> <span class="o">=</span> cfg<span class="o">.</span>ingressHost<span class="p">;</span>
+              http<span class="o">.</span><span class="ss">paths</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="ss">path</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="p">;</span>
+                  <span class="ss">pathType</span> <span class="o">=</span> <span class="s2">&quot;Prefix&quot;</span><span class="p">;</span>
+                  backend<span class="o">.</span><span class="ss">service</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="k">inherit</span> name<span class="p">;</span>
+                    port<span class="o">.</span><span class="ss">number</span> <span class="o">=</span> cfg<span class="o">.</span>port<span class="p">;</span>
+                  <span class="p">};</span>
+                <span class="p">}</span>
+              <span class="p">];</span>
+            <span class="p">}</span>
+          <span class="p">];</span>
+        <span class="p">};</span>
+      <span class="p">};</span>
+    <span class="p">};</span>
+  <span class="p">};</span>
+<span class="p">};</span>
+</code></pre></div>
+<h2 id="templatesnameoptions">templates.&lt;name&gt;.options<a class="headerlink" href="#templatesnameoptions" title="Permanent link">#</a></h2>
+<p>A set of module options that define the configurable parameters for your template.</p>
+<p><strong><em>Type:</em></strong>
+attribute set of option</p>
+<h2 id="templatesnameoutput">templates.&lt;name&gt;.output<a class="headerlink" href="#templatesnameoutput" title="Permanent link">#</a></h2>
+<p>A Nix function that takes the template instance's <code>name</code> and its <code>config</code> (derived from the <code>options</code> you defined) and returns a set of nixidy resources (e.g., deployments, services, ingresses).</p>
+<p><strong><em>Type:</em></strong>
+function that evaluates to a(n) attribute set of anything</p>
 
 
 
