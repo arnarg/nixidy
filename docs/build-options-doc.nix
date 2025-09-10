@@ -47,7 +47,6 @@
   # We need to re-define this here because `templates.options`
   # defines a recursive type and the options doc generator
   # ends up in an infinite recursion.
-  # TODO: Fix "declared by" for templates options
   templatesCompat = let
     mod = {
       options = with lib; {
@@ -75,6 +74,9 @@
       };
     };
   in {
+    # For setting correct "declared by" in docs.
+    _file = ../modules/templates.nix;
+
     options.templates = lib.mkOption {
       type = with lib.types; attrsOf (submodule mod);
       default = {};
