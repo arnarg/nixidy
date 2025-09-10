@@ -1,0 +1,17 @@
+[project]
+name = "nixidy"
+version = "0.17.0"
+description = "CLI for nixidy"
+
+requires-python = ">=3.12"
+
+dependencies = [
+    "click>=8.1.0",
+]
+
+[project.scripts]
+nixidy = "nixidy.nixidy:cli"
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"

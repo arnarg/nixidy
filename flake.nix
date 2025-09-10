@@ -26,6 +26,7 @@
     in {
       packages = {
         default = packages.nixidy;
+        cli = pkgs.callPackage ./cli {};
         generators = import ./pkgs/generators {inherit pkgs;};
       };
 
