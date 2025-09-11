@@ -49,7 +49,7 @@
   moduleToAttrs = with lib;
     value:
       if isAttrs value
-      then mapAttrs (_n: moduleToAttrs) (filterAttrs (n: v: v != null && !(hasPrefix "_" n)) value)
+      then mapAttrs (_n: moduleToAttrs) (filterAttrs (n: v: v != null && !(hasPrefix "_priority" n)) value)
       else if isList value
       then map moduleToAttrs value
       else value;
