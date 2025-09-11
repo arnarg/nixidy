@@ -846,7 +846,7 @@
 <li><code>applications.nix</code> (Document 27): Defines the top-level <code>applications</code> option.</li>
 <li><code>default.nix</code> (Document 32): Defines the submodule for a single application, collecting all resources (from Nix, Helm, Kustomize, YAMLs) into <code>config.objects</code>.</li>
 <li><code>helm.nix</code> (Document 33), <code>kustomize.nix</code> (Document 34), <code>yamls.nix</code> (Document 37): Handle the specifics of rendering Helm charts, Kustomize overlays, and parsing raw YAMLs, respectively. They utilize functions from <code>nixidy.lib</code>.</li>
-<li><code>namespaced.nix</code> (Document 36): Sets default namespaces for namespaced Kubernetes resources.</li>
+<li><code>extra-files.nix</code>: Handles extra files processing.</li>
 </ul>
 </li>
 </ul>
@@ -894,8 +894,7 @@
 </ul>
 </li>
 <li><strong>Kubenix:</strong><ul>
-<li>Primarily used for its pre-generated Nix modules that provide typed options for standard Kubernetes resources (e.g., <code>Deployment</code>, <code>Service</code>). Nixidy imports these options.</li>
-<li>Nixidy's CRD generator is also heavily inspired by Kubenix's.</li>
+<li>Nixidy's CRD generator is forked from Kubenix's code generator.</li>
 <li><em>(Document 2: Special Thanks, Document 3, Document 5, Document 10, Document 29)</em></li>
 </ul>
 </li>
@@ -909,7 +908,7 @@
 <li>
 <p><strong>CRD and Schema Generation:</strong></p>
 <ul>
-<li><strong><code>fromCRD</code> Generator (<code>pkgs/generators/crd.nix</code>, Document 44):</strong><ul>
+<li><strong><code>fromCRD</code> Generator (<code>pkgs/generators/crd/default.nix</code>, Document 44):</strong><ul>
 <li>Allows users to generate Nixidy-compatible Nix modules from Kubernetes Custom Resource Definition (CRD) YAML files.</li>
 <li>Uses <code>crd2jsonschema.py</code> (Document 45) to preprocess CRDs into a JSON schema format.</li>
 <li>Then, <code>jsonschema.nix</code> (Document 47) converts this JSON schema into Nix options.</li>
@@ -919,6 +918,7 @@
 <li><em>(Document 18: Typed Resource Options)</em></li>
 </ul>
 </li>
+<li><strong>Kubernetes Resource Modules:</strong> Nixidy now generates its own Kubernetes resource modules (in <code>modules/generated/k8s/</code>) that provide typed options for standard Kubernetes resources (e.g., <code>Deployment</code>, <code>Service</code>), rather than importing them directly from Kubenix.</li>
 </ul>
 </li>
 <li>
