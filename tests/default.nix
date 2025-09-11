@@ -6,6 +6,7 @@
       ./defaults.nix
       ./sync-options.nix
       ./compare-options.nix
+      ./configmap.nix
       ./create-namespace.nix
       ./yamls.nix
       ./override-name.nix
