@@ -40,7 +40,7 @@ Nixidy's architecture can be broken down into several key areas:
             *   `applications.nix` (Document 27): Defines the top-level `applications` option.
             *   `default.nix` (Document 32): Defines the submodule for a single application, collecting all resources (from Nix, Helm, Kustomize, YAMLs) into `config.objects`.
             *   `helm.nix` (Document 33), `kustomize.nix` (Document 34), `yamls.nix` (Document 37): Handle the specifics of rendering Helm charts, Kustomize overlays, and parsing raw YAMLs, respectively. They utilize functions from `nixidy.lib`.
-            *   `namespaced.nix` (Document 36): Sets default namespaces for namespaced Kubernetes resources.
+            *   `extra-files.nix`: Handles extra files processing.
     *   **Build Logic (`modules/build.nix`, Document 28):**
         *   Takes the evaluated `config.applications.*.objects` (a list of Nix attribute sets representing Kubernetes resources).
         *   Generates the final output directory structure:
@@ -66,20 +66,20 @@ Nixidy's architecture can be broken down into several key areas:
     *   **Nixpkgs:** The standard Nix package collection, providing tools like `bash`, `jq`, `kubectl`, `yq-go`, etc.
         *   *(Document 3: `default.nix` top-level)*
     *   **Kubenix:**
-        *   Primarily used for its pre-generated Nix modules that provide typed options for standard Kubernetes resources (e.g., `Deployment`, `Service`). Nixidy imports these options.
-        *   Nixidy's CRD generator is also heavily inspired by Kubenix's.
+        *   Nixidy's CRD generator is forked from Kubenix's code generator.
         *   *(Document 2: Special Thanks, Document 3, Document 5, Document 10, Document 29)*
     *   **Nix-Kube-Generators (`kubelib`):**
         *   Provides the core Nix functions for rendering Helm charts and Kustomize overlays. Nixidy's `lib.helm` and `lib.kustomize` often wrap or re-export functions from `nix-kube-generators`.
         *   *(Document 2: Special Thanks, Document 3, Document 5, Document 22, Document 23, Document 25)*
 
 5.  **CRD and Schema Generation:**
-    *   **`fromCRD` Generator (`pkgs/generators/crd.nix`, Document 44):**
+    *   **`fromCRD` Generator (`pkgs/generators/crd/default.nix`, Document 44):**
         *   Allows users to generate Nixidy-compatible Nix modules from Kubernetes Custom Resource Definition (CRD) YAML files.
         *   Uses `crd2jsonschema.py` (Document 45) to preprocess CRDs into a JSON schema format.
         *   Then, `jsonschema.nix` (Document 47) converts this JSON schema into Nix options.
     *   **Generated Modules:** The output is a Nix file (e.g., `modules/generated/argocd.nix` for ArgoCD CRDs, Document 38) that can be imported via `nixidy.applicationImports` to provide typed options for these CRDs.
         *   *(Document 18: Typed Resource Options)*
+    *   **Kubernetes Resource Modules:** Nixidy now generates its own Kubernetes resource modules (in `modules/generated/k8s/`) that provide typed options for standard Kubernetes resources (e.g., `Deployment`, `Service`), rather than importing them directly from Kubenix.
 
 6.  **Documentation System (`docs/`):**
     *   Uses MkDocs with the Material theme.
