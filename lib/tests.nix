@@ -1,9 +1,11 @@
 {
   pkgs,
   kubelib,
-}: let
-  lib = import ./default.nix {inherit pkgs kubelib;};
-in {
+}:
+let
+  lib = import ./default.nix { inherit pkgs kubelib; };
+in
+{
   kube = {
     fromYAML = {
       testSingleObject = {
@@ -61,7 +63,7 @@ in {
 
     removeLabels = {
       testLabelPresent = {
-        expr = lib.kube.removeLabels ["helm.sh/chart"] {
+        expr = lib.kube.removeLabels [ "helm.sh/chart" ] {
           apiVersion = "v1";
           kind = "ConfigMap";
           metadata = {
@@ -84,7 +86,7 @@ in {
         };
       };
       testLabelAbsent = {
-        expr = lib.kube.removeLabels ["helm.sh/chart"] {
+        expr = lib.kube.removeLabels [ "helm.sh/chart" ] {
           apiVersion = "v1";
           kind = "ConfigMap";
           metadata = {
@@ -108,7 +110,7 @@ in {
         };
       };
       testNoLabels = {
-        expr = lib.kube.removeLabels ["helm.sh/chart"] {
+        expr = lib.kube.removeLabels [ "helm.sh/chart" ] {
           apiVersion = "apps/v1";
           kind = "Deployment";
           metadata = {
@@ -124,7 +126,7 @@ in {
         };
       };
       testSpecialTemplateLabels = {
-        expr = lib.kube.removeLabels ["helm.sh/chart"] {
+        expr = lib.kube.removeLabels [ "helm.sh/chart" ] {
           apiVersion = "apps/v1";
           kind = "Deployment";
           metadata = {
@@ -208,7 +210,7 @@ in {
         };
       };
       testCronJobTemplateLabels = {
-        expr = lib.kube.removeLabels ["helm.sh/chart"] {
+        expr = lib.kube.removeLabels [ "helm.sh/chart" ] {
           apiVersion = "batch/v1";
           kind = "CronJob";
           metadata = {
@@ -299,7 +301,7 @@ in {
         };
       };
       testDeploymentMatchLabels = {
-        expr = lib.kube.removeLabels ["helm.sh/chart"] {
+        expr = lib.kube.removeLabels [ "helm.sh/chart" ] {
           apiVersion = "apps/v1";
           kind = "Deployment";
           metadata = {

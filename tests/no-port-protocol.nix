@@ -2,9 +2,11 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   apps = config.applications;
-in {
+in
+{
   applications = {
     test1.resources.pods.nginx-pod.spec.containers.nginx = {
       image = "nginx:latest";
@@ -54,23 +56,24 @@ in {
 
         expression = lib.findFirst (obj: obj.metadata.name == "nginx-pod") null apps.test1.objects;
 
-        assertion = pod: let
-          checkPodPorts = pod: let
-            ports = (builtins.head pod.spec.containers).ports;
-            port1 = builtins.elemAt ports 0;
-            port2 = builtins.elemAt ports 1;
+        assertion =
+          pod:
+          let
+            checkPodPorts =
+              pod:
+              let
+                ports = (builtins.head pod.spec.containers).ports;
+                port1 = builtins.elemAt ports 0;
+                port2 = builtins.elemAt ports 1;
+              in
+              port1.name == "dns"
+              && port1.containerPort == 53
+              && port1.protocol == "UDP"
+              && port2.name == "dnstcp"
+              && port2.containerPort == 53
+              && !(builtins.hasAttr "protocol" port2);
           in
-            port1.name
-            == "dns"
-            && port1.containerPort == 53
-            && port1.protocol == "UDP"
-            && port2.name == "dnstcp"
-            && port2.containerPort == 53
-            && !(builtins.hasAttr "protocol" port2);
-        in
-          pod
-          != null
-          && (checkPodPorts pod);
+          pod != null && (checkPodPorts pod);
       }
 
       {
@@ -78,23 +81,24 @@ in {
 
         expression = lib.findFirst (obj: obj.metadata.name == "nginx-pod") null apps.test2.objects;
 
-        assertion = pod: let
-          checkPodPorts = pod: let
-            ports = (builtins.head pod.spec.containers).ports;
-            port1 = builtins.elemAt ports 0;
-            port2 = builtins.elemAt ports 1;
+        assertion =
+          pod:
+          let
+            checkPodPorts =
+              pod:
+              let
+                ports = (builtins.head pod.spec.containers).ports;
+                port1 = builtins.elemAt ports 0;
+                port2 = builtins.elemAt ports 1;
+              in
+              port1.name == "dns"
+              && port1.containerPort == 53
+              && port1.protocol == "UDP"
+              && port2.containerPort == 53
+              && !(builtins.hasAttr "name" port2)
+              && !(builtins.hasAttr "protocol" port2);
           in
-            port1.name
-            == "dns"
-            && port1.containerPort == 53
-            && port1.protocol == "UDP"
-            && port2.containerPort == 53
-            && !(builtins.hasAttr "name" port2)
-            && !(builtins.hasAttr "protocol" port2);
-        in
-          pod
-          != null
-          && (checkPodPorts pod);
+          pod != null && (checkPodPorts pod);
       }
 
       {
@@ -102,22 +106,24 @@ in {
 
         expression = lib.findFirst (obj: obj.metadata.name == "nginx-service") null apps.test3.objects;
 
-        assertion = service: let
-          checkServicePorts = service: let
-            ports = service.spec.ports;
-            port1 = builtins.elemAt ports 0;
-            port2 = builtins.elemAt ports 1;
+        assertion =
+          service:
+          let
+            checkServicePorts =
+              service:
+              let
+                ports = service.spec.ports;
+                port1 = builtins.elemAt ports 0;
+                port2 = builtins.elemAt ports 1;
+              in
+              port1.name == "dns"
+              && port1.port == 53
+              && port1.protocol == "UDP"
+              && port2.port == 53
+              && !(builtins.hasAttr "name" port2)
+              && !(builtins.hasAttr "protocol" port2);
           in
-            port1.name == "dns"
-            && port1.port == 53
-            && port1.protocol == "UDP"
-            && port2.port == 53
-            && !(builtins.hasAttr "name" port2)
-            && !(builtins.hasAttr "protocol" port2);
-        in
-          service
-          != null
-          && (checkServicePorts service);
+          service != null && (checkServicePorts service);
       }
     ];
   };

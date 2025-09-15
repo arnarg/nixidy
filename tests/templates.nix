@@ -2,9 +2,11 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   apps = config.applications;
-in {
+in
+{
   # Define a webApplication template
   templates.webApplication = {
     options = with lib; {
@@ -25,57 +27,60 @@ in {
       };
     };
 
-    output = {
-      name,
-      config,
-      ...
-    }: let
-      cfg = config;
-      appLabels = {
-        "app.kubernetes.io/name" = name;
-        "app.kubernetes.io/instance" = name;
-      };
-    in {
-      deployments."${name}".spec = {
-        replicas = cfg.replicas;
-        selector.matchLabels = appLabels;
-        template = {
-          metadata.labels = appLabels;
-          spec.containers."${name}" = {
-            image = cfg.image;
-            ports."http".containerPort = cfg.port;
+    output =
+      {
+        name,
+        config,
+        ...
+      }:
+      let
+        cfg = config;
+        appLabels = {
+          "app.kubernetes.io/name" = name;
+          "app.kubernetes.io/instance" = name;
+        };
+      in
+      {
+        deployments."${name}".spec = {
+          replicas = cfg.replicas;
+          selector.matchLabels = appLabels;
+          template = {
+            metadata.labels = appLabels;
+            spec.containers."${name}" = {
+              image = cfg.image;
+              ports."http".containerPort = cfg.port;
+            };
+          };
+        };
+
+        services."${name}".spec = {
+          selector = appLabels;
+          ports.http = {
+            port = cfg.port;
+            targetPort = cfg.port;
+          };
+        };
+
+        ingresses = lib.mkIf (cfg.ingress.host != null) {
+          "${name}".spec = {
+            rules = [
+              {
+                host = cfg.ingress.host;
+                http.paths = [
+                  {
+                    path = "/";
+                    pathType = "Prefix";
+                    backend.service = {
+                      inherit name;
+                      port.number = cfg.port;
+                    };
+                  }
+                ];
+              }
+            ];
           };
         };
       };
-
-      services."${name}".spec = {
-        selector = appLabels;
-        ports.http = {
-          port = cfg.port;
-          targetPort = cfg.port;
-        };
-      };
-
-      ingresses = lib.mkIf (cfg.ingress.host != null) {
-        "${name}".spec = {
-          rules = [
-            {
-              host = cfg.ingress.host;
-              http.paths = [
-                {
-                  path = "/";
-                  pathType = "Prefix";
-                  backend.service = {
-                    inherit name;
-                    port.number = cfg.port;
-                  };
-                }
-              ];
-            }
-          ];
-        };
-      };
-    };
   };
 
   # Use the template in an application
@@ -95,89 +100,84 @@ in {
       {
         description = "Deployment should be rendered correctly";
 
-        expression =
-          findFirst
-          (x: x.kind == "Deployment" && x.metadata.name == "app1")
-          null
-          apps.test1.objects;
+        expression = findFirst (
+          x: x.kind == "Deployment" && x.metadata.name == "app1"
+        ) null apps.test1.objects;
 
-        assertion = obj: let
-          checkPorts = ports: let
-            port = builtins.head ports;
-          in
-            port.name
-            == "http"
-            && port.containerPort == 8080;
+        assertion =
+          obj:
+          let
+            checkPorts =
+              ports:
+              let
+                port = builtins.head ports;
+              in
+              port.name == "http" && port.containerPort == 8080;
 
-          checkContainer = cnts: let
-            cnt = builtins.head cnts;
+            checkContainer =
+              cnts:
+              let
+                cnt = builtins.head cnts;
+              in
+              cnt.name == "app1" && cnt.image == "test-image:latest" && checkPorts cnt.ports;
           in
-            cnt.name
-            == "app1"
-            && cnt.image == "test-image:latest"
-            && checkPorts cnt.ports;
-        in
-          obj
-          != null
+          obj != null
           && obj.metadata.name == "app1"
           && obj.spec.replicas == 1
-          && obj.spec.selector.matchLabels
-          == {
-            "app.kubernetes.io/name" = "app1";
-            "app.kubernetes.io/instance" = "app1";
-          }
-          && obj.spec.template.metadata.labels
-          == {
-            "app.kubernetes.io/name" = "app1";
-            "app.kubernetes.io/instance" = "app1";
-          }
+          &&
+            obj.spec.selector.matchLabels == {
+              "app.kubernetes.io/name" = "app1";
+              "app.kubernetes.io/instance" = "app1";
+            }
+          &&
+            obj.spec.template.metadata.labels == {
+              "app.kubernetes.io/name" = "app1";
+              "app.kubernetes.io/instance" = "app1";
+            }
           && checkContainer obj.spec.template.spec.containers;
       }
 
       {
         description = "Service should be rendered correctly";
 
-        expression =
-          findFirst
-          (x: x.kind == "Service" && x.metadata.name == "app1")
-          null
-          apps.test1.objects;
+        expression = findFirst (
+          x: x.kind == "Service" && x.metadata.name == "app1"
+        ) null apps.test1.objects;
 
-        assertion = obj: let
-          checkPorts = ports: let
-            port = builtins.head ports;
+        assertion =
+          obj:
+          let
+            checkPorts =
+              ports:
+              let
+                port = builtins.head ports;
+              in
+              port.name == "http" && port.port == 8080 && port.targetPort == 8080;
           in
-            port.name
-            == "http"
-            && port.port == 8080
-            && port.targetPort == 8080;
-        in
-          obj
-          != null
+          obj != null
           && obj.metadata.name == "app1"
-          && obj.spec.selector
-          == {
-            "app.kubernetes.io/name" = "app1";
-            "app.kubernetes.io/instance" = "app1";
-          }
+          &&
+            obj.spec.selector == {
+              "app.kubernetes.io/name" = "app1";
+              "app.kubernetes.io/instance" = "app1";
+            }
           && checkPorts obj.spec.ports;
       }
 
       {
         description = "Ingress should be rendered correctly";
 
-        expression =
-          findFirst
-          (x: x.kind == "Ingress" && x.metadata.name == "app1")
-          null
-          apps.test1.objects;
+        expression = findFirst (
+          x: x.kind == "Ingress" && x.metadata.name == "app1"
+        ) null apps.test1.objects;
 
-        assertion = obj: let
-          rule = builtins.head obj.spec.rules;
-          path = builtins.head rule.http.paths;
-        in
-          obj
-          != null
+        assertion =
+          obj:
+          let
+            rule = builtins.head obj.spec.rules;
+            path = builtins.head rule.http.paths;
+          in
+          obj != null
           && obj.metadata.name == "app1"
           && rule.host == "app1.example.com"
           && path.path == "/"

@@ -2,24 +2,26 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   versions = lib.mapAttrsToList (
-    version: _:
-      builtins.concatStringsSep "." (lib.lists.sublist 0 2 (builtins.splitVersion version))
+    version: _: builtins.concatStringsSep "." (lib.lists.sublist 0 2 (builtins.splitVersion version))
   ) (import ../pkgs/generators/k8s/versions.nix);
-in {
+in
+{
   imports = [
-    (lib.mkRenamedOptionModule ["nixidy" "resourceImports"] ["nixidy" "applicationImports"])
+    (lib.mkRenamedOptionModule [ "nixidy" "resourceImports" ] [ "nixidy" "applicationImports" ])
   ];
 
   options = with lib; {
     applications = mkOption {
-      type = with types;
+      type =
+        with types;
         attrsOf (submoduleWith {
-          modules = [./applications] ++ config.nixidy.applicationImports;
+          modules = [ ./applications ] ++ config.nixidy.applicationImports;
           specialArgs.nixidyDefaults = config.nixidy.defaults;
         });
-      default = {};
+      default = { };
       description = ''
         An application is a single Argo CD application that will be rendered by nixidy.
 
@@ -60,8 +62,14 @@ in {
         description = "The Kubernetes version for generated resource options to use.";
       };
       applicationImports = mkOption {
-        type = with types; listOf (oneOf [package path (functionTo attrs)]);
-        default = [];
+        type =
+          with types;
+          listOf (oneOf [
+            package
+            path
+            (functionTo attrs)
+          ]);
+        default = [ ];
         description = "List of modules to import into `applications.*` submodule (most useful for resource definition options).";
       };
       baseImports = mkOption {

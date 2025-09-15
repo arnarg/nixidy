@@ -2,13 +2,15 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   helpers = import ./lib.nix lib;
-in {
+in
+{
   options = with lib; {
     yamls = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
       example = [
         ''
           apiVersion: v1
@@ -26,28 +28,34 @@ in {
     };
   };
 
-  config = with lib; let
-    groupedObjects =
-      {
-        resources = [];
-        objects = [];
+  config =
+    with lib;
+    let
+      groupedObjects = {
+        resources = [ ];
+        objects = [ ];
       }
       // (groupBy (
-        object: let
+        object:
+        let
           gvk = helpers.getGVK object;
         in
-          if config.types ? "${gvk.group}/${gvk.version}/${gvk.kind}"
-          then "resources"
-          else "objects"
+        if config.types ? "${gvk.group}/${gvk.version}/${gvk.kind}" then "resources" else "objects"
       ) (concatMap kube.fromYAML config.yamls));
-  in {
-    inherit (groupedObjects) objects;
+    in
+    {
+      inherit (groupedObjects) objects;
 
-    resources = mkMerge (map (object: let
-        gvk = helpers.getGVK object;
-      in {
-        ${gvk.group}.${gvk.version}.${gvk.kind}.${object.metadata.name} = object;
-      })
-      groupedObjects.resources);
-  };
+      resources = mkMerge (
+        map (
+          object:
+          let
+            gvk = helpers.getGVK object;
+          in
+          {
+            ${gvk.group}.${gvk.version}.${gvk.kind}.${object.metadata.name} = object;
+          }
+        ) groupedObjects.resources
+      );
+    };
 }

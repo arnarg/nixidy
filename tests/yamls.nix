@@ -2,9 +2,11 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   apps = config.applications;
-in {
+in
+{
   applications = {
     # Create an application with yamls
     test1.yamls = [
@@ -75,11 +77,9 @@ in {
       {
         description = "Service should be parsed correctly.";
 
-        expression =
-          findFirst
-          (x: x.kind == "Service" && x.metadata.name == "my-svc")
-          null
-          apps.test1.objects;
+        expression = findFirst (
+          x: x.kind == "Service" && x.metadata.name == "my-svc"
+        ) null apps.test1.objects;
 
         expected = {
           apiVersion = "v1";
@@ -107,11 +107,9 @@ in {
       {
         description = "Custom yaml of unsupported resource types should still be in the resources output.";
 
-        expression =
-          findFirst
-          (x: x.kind == "Issuer" && x.metadata.name == "ca-issuer")
-          null
-          apps.test1.objects;
+        expression = findFirst (
+          x: x.kind == "Issuer" && x.metadata.name == "ca-issuer"
+        ) null apps.test1.objects;
 
         expected = {
           apiVersion = "cert-manager.io/v1";
@@ -124,11 +122,9 @@ in {
       {
         description = "Service should be overridden correctly.";
 
-        expression =
-          findFirst
-          (x: x.kind == "Service" && x.metadata.name == "my-svc")
-          null
-          apps.test2.objects;
+        expression = findFirst (
+          x: x.kind == "Service" && x.metadata.name == "my-svc"
+        ) null apps.test2.objects;
 
         expected = {
           apiVersion = "v1";

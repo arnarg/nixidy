@@ -6,18 +6,20 @@
   findutils,
   jq,
 }:
-runCommand "nixidy" {
-  preferLocalBuild = true;
-} ''
-  install -v -D -m755  ${./nixidy} $out/bin/nixidy
+runCommand "nixidy"
+  {
+    preferLocalBuild = true;
+  }
+  ''
+    install -v -D -m755  ${./nixidy} $out/bin/nixidy
 
-  substituteInPlace $out/bin/nixidy \
-    --subst-var-by bash "${bash}" \
-    --subst-var-by DEP_PATH "${
-    lib.makeBinPath [
-      coreutils
-      findutils
-      jq
-    ]
-  }"
-''
+    substituteInPlace $out/bin/nixidy \
+      --subst-var-by bash "${bash}" \
+      --subst-var-by DEP_PATH "${
+        lib.makeBinPath [
+          coreutils
+          findutils
+          jq
+        ]
+      }"
+  ''

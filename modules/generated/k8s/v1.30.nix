@@ -5,150 +5,164 @@
   config,
   ...
 }:
-with lib; let
+with lib;
+let
   hasAttrNotNull = attr: set: hasAttr attr set && set.${attr} != null;
 
-  attrsToList = values:
-    if values != null
-    then
+  attrsToList =
+    values:
+    if values != null then
       sort (
         a: b:
-          if (hasAttrNotNull "_priority" a && hasAttrNotNull "_priority" b)
-          then a._priority < b._priority
-          else false
+        if (hasAttrNotNull "_priority" a && hasAttrNotNull "_priority" b) then
+          a._priority < b._priority
+        else
+          false
       ) (mapAttrsToList (n: v: v) values)
-    else values;
+    else
+      values;
 
-  getDefaults = resource: group: version: kind:
-    catAttrs "default" (filter (
+  getDefaults =
+    resource: group: version: kind:
+    catAttrs "default" (
+      filter (
         default:
-          (default.resource == null || default.resource == resource)
-          && (default.group == null || default.group == group)
-          && (default.version == null || default.version == version)
-          && (default.kind == null || default.kind == kind)
-      )
-      config.defaults);
+        (default.resource == null || default.resource == resource)
+        && (default.group == null || default.group == group)
+        && (default.version == null || default.version == version)
+        && (default.kind == null || default.kind == kind)
+      ) config.defaults
+    );
 
-  types =
-    lib.types
-    // rec {
-      str = mkOptionType {
-        name = "str";
-        description = "string";
-        check = isString;
-        merge = mergeEqualOption;
-      };
-
-      # Either value of type `finalType` or `coercedType`, the latter is
-      # converted to `finalType` using `coerceFunc`.
-      coercedTo = coercedType: coerceFunc: finalType:
-        mkOptionType rec {
-          name = "coercedTo";
-          description = "${finalType.description} or ${coercedType.description}";
-          check = x: finalType.check x || coercedType.check x;
-          merge = loc: defs: let
-            coerceVal = val:
-              if finalType.check val
-              then val
-              else let
-                coerced = coerceFunc val;
-              in
-                assert finalType.check coerced; coerced;
-          in
-            finalType.merge loc (map (def: def // {value = coerceVal def.value;}) defs);
-          getSubOptions = finalType.getSubOptions;
-          getSubModules = finalType.getSubModules;
-          substSubModules = m: coercedTo coercedType coerceFunc (finalType.substSubModules m);
-          typeMerge = t1: t2: null;
-          functor = (defaultFunctor name) // {wrapped = finalType;};
-        };
+  types = lib.types // rec {
+    str = mkOptionType {
+      name = "str";
+      description = "string";
+      check = isString;
+      merge = mergeEqualOption;
     };
+
+    # Either value of type `finalType` or `coercedType`, the latter is
+    # converted to `finalType` using `coerceFunc`.
+    coercedTo =
+      coercedType: coerceFunc: finalType:
+      mkOptionType rec {
+        name = "coercedTo";
+        description = "${finalType.description} or ${coercedType.description}";
+        check = x: finalType.check x || coercedType.check x;
+        merge =
+          loc: defs:
+          let
+            coerceVal =
+              val:
+              if finalType.check val then
+                val
+              else
+                let
+                  coerced = coerceFunc val;
+                in
+                assert finalType.check coerced;
+                coerced;
+          in
+          finalType.merge loc (map (def: def // { value = coerceVal def.value; }) defs);
+        getSubOptions = finalType.getSubOptions;
+        getSubModules = finalType.getSubModules;
+        substSubModules = m: coercedTo coercedType coerceFunc (finalType.substSubModules m);
+        typeMerge = t1: t2: null;
+        functor = (defaultFunctor name) // {
+          wrapped = finalType;
+        };
+      };
+  };
 
   mkOptionDefault = mkOverride 1001;
 
-  mergeValuesByKey = attrMergeKey: listMergeKeys: values:
-    listToAttrs (imap0
-      (i: value:
+  mergeValuesByKey =
+    attrMergeKey: listMergeKeys: values:
+    listToAttrs (
+      imap0 (
+        i: value:
         nameValuePair (
-          if hasAttr attrMergeKey value
-          then
-            if isAttrs value.${attrMergeKey}
-            then toString value.${attrMergeKey}.content
-            else (toString value.${attrMergeKey})
+          if hasAttr attrMergeKey value then
+            if isAttrs value.${attrMergeKey} then
+              toString value.${attrMergeKey}.content
+            else
+              (toString value.${attrMergeKey})
           else
             # generate merge key for list elements if it's not present
             "__kubenix_list_merge_key_"
-            + (concatStringsSep "" (map (
-                key:
-                  if isAttrs value.${key}
-                  then toString value.${key}.content
-                  else (toString value.${key})
-              )
-              listMergeKeys))
-        ) (value // {_priority = i;}))
-      values);
+            + (concatStringsSep "" (
+              map (
+                key: if isAttrs value.${key} then toString value.${key}.content else (toString value.${key})
+              ) listMergeKeys
+            ))
+        ) (value // { _priority = i; })
+      ) values
+    );
 
-  submoduleOf = ref:
-    types.submodule ({name, ...}: {
-      options = definitions."${ref}".options or {};
-      config = definitions."${ref}".config or {};
-    });
+  submoduleOf =
+    ref:
+    types.submodule (
+      { name, ... }:
+      {
+        options = definitions."${ref}".options or { };
+        config = definitions."${ref}".config or { };
+      }
+    );
 
-  submoduleWithMergeOf = ref: mergeKey:
-    types.submodule ({name, ...}: let
-      convertName = name:
-        if definitions."${ref}".options.${mergeKey}.type == types.int
-        then toInt name
-        else name;
-    in {
-      options =
-        definitions."${ref}".options
-        // {
+  submoduleWithMergeOf =
+    ref: mergeKey:
+    types.submodule (
+      { name, ... }:
+      let
+        convertName =
+          name: if definitions."${ref}".options.${mergeKey}.type == types.int then toInt name else name;
+      in
+      {
+        options = definitions."${ref}".options // {
           # position in original array
           _priority = mkOption {
             type = types.nullOr types.int;
             default = null;
           };
         };
-      config =
-        definitions."${ref}".config
-        // {
+        config = definitions."${ref}".config // {
           ${mergeKey} = mkOverride 1002 (
             # use name as mergeKey only if it is not coming from mergeValuesByKey
-            if (!hasPrefix "__kubenix_list_merge_key_" name)
-            then convertName name
-            else null
+            if (!hasPrefix "__kubenix_list_merge_key_" name) then convertName name else null
           );
         };
-    });
+      }
+    );
 
-  submoduleForDefinition = ref: resource: kind: group: version: let
-    apiVersion =
-      if group == "core"
-      then version
-      else "${group}/${version}";
-  in
-    types.submodule ({name, ...}: {
-      imports = getDefaults resource group version kind;
-      options = definitions."${ref}".options;
-      config = mkMerge [
-        definitions."${ref}".config
-        {
-          kind = mkOptionDefault kind;
-          apiVersion = mkOptionDefault apiVersion;
+  submoduleForDefinition =
+    ref: resource: kind: group: version:
+    let
+      apiVersion = if group == "core" then version else "${group}/${version}";
+    in
+    types.submodule (
+      { name, ... }:
+      {
+        imports = getDefaults resource group version kind;
+        options = definitions."${ref}".options;
+        config = mkMerge [
+          definitions."${ref}".config
+          {
+            kind = mkOptionDefault kind;
+            apiVersion = mkOptionDefault apiVersion;
 
-          # metdata.name cannot use option default, due deep config
-          metadata.name = mkOptionDefault name;
-        }
-      ];
-    });
+            # metdata.name cannot use option default, due deep config
+            metadata.name = mkOptionDefault name;
+          }
+        ];
+      }
+    );
 
-  coerceAttrsOfSubmodulesToListByKey = ref: attrMergeKey: listMergeKeys: (
-    types.coercedTo
-    (types.listOf (submoduleOf ref))
-    (mergeValuesByKey attrMergeKey listMergeKeys)
-    (types.attrsOf (submoduleWithMergeOf ref attrMergeKey))
-  );
+  coerceAttrsOfSubmodulesToListByKey =
+    ref: attrMergeKey: listMergeKeys:
+    (types.coercedTo (types.listOf (submoduleOf ref)) (mergeValuesByKey attrMergeKey listMergeKeys) (
+      types.attrsOf (submoduleWithMergeOf ref attrMergeKey)
+    ));
 
   definitions = {
     "io.k8s.api.admissionregistration.v1.AuditAnnotation" = {
@@ -163,7 +177,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.admissionregistration.v1.ExpressionWarning" = {
       options = {
@@ -177,7 +191,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.admissionregistration.v1.MatchCondition" = {
       options = {
@@ -191,13 +205,15 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.admissionregistration.v1.MatchResources" = {
       options = {
         "excludeResourceRules" = mkOption {
           description = "ExcludeResourceRules describes what operations on what resources/subresources the ValidatingAdmissionPolicy should not care about. The exclude rules take precedence over include rules (if a resource matches both, it is excluded)";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1.NamedRuleWithOperations"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1.NamedRuleWithOperations")
+          );
         };
         "matchPolicy" = mkOption {
           description = "matchPolicy defines how the \"MatchResources\" list is used to match incoming requests. Allowed values are \"Exact\" or \"Equivalent\".\n\n- Exact: match a request only if it exactly matches a specified rule. For example, if deployments can be modified via apps/v1, apps/v1beta1, and extensions/v1beta1, but \"rules\" only included `apiGroups:[\"apps\"], apiVersions:[\"v1\"], resources: [\"deployments\"]`, a request to apps/v1beta1 or extensions/v1beta1 would not be sent to the ValidatingAdmissionPolicy.\n\n- Equivalent: match a request if modifies a resource listed in rules, even via another API group or version. For example, if deployments can be modified via apps/v1, apps/v1beta1, and extensions/v1beta1, and \"rules\" only included `apiGroups:[\"apps\"], apiVersions:[\"v1\"], resources: [\"deployments\"]`, a request to apps/v1beta1 or extensions/v1beta1 would be converted to apps/v1 and sent to the ValidatingAdmissionPolicy.\n\nDefaults to \"Equivalent\"";
@@ -213,7 +229,9 @@ with lib; let
         };
         "resourceRules" = mkOption {
           description = "ResourceRules describes what operations on what resources/subresources the ValidatingAdmissionPolicy matches. The policy cares about an operation if it matches _any_ Rule.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1.NamedRuleWithOperations"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1.NamedRuleWithOperations")
+          );
         };
       };
 
@@ -241,7 +259,9 @@ with lib; let
         };
         "matchConditions" = mkOption {
           description = "MatchConditions is a list of conditions that must be met for a request to be sent to this webhook. Match conditions filter requests that have already been matched by the rules, namespaceSelector, and objectSelector. An empty list of matchConditions matches all requests. There are a maximum of 64 match conditions allowed.\n\nThe exact matching logic is (in order):\n  1. If ANY matchCondition evaluates to FALSE, the webhook is skipped.\n  2. If ALL matchConditions evaluate to TRUE, the webhook is called.\n  3. If any matchCondition evaluates to an error (but none are FALSE):\n     - If failurePolicy=Fail, reject the request\n     - If failurePolicy=Ignore, the error is ignored and the webhook is skipped";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1.MatchCondition" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1.MatchCondition" "name" [ ]
+          );
           apply = attrsToList;
         };
         "matchPolicy" = mkOption {
@@ -266,7 +286,9 @@ with lib; let
         };
         "rules" = mkOption {
           description = "Rules describes what operations on what resources/subresources the webhook cares about. The webhook cares about an operation if it matches _any_ Rule. However, in order to prevent ValidatingAdmissionWebhooks and MutatingAdmissionWebhooks from putting the cluster in a state which cannot be recovered from without completely disabling the plugin, ValidatingAdmissionWebhooks and MutatingAdmissionWebhooks are never called on admission requests for ValidatingWebhookConfiguration and MutatingWebhookConfiguration objects.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1.RuleWithOperations"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1.RuleWithOperations")
+          );
         };
         "sideEffects" = mkOption {
           description = "SideEffects states whether this webhook has side effects. Acceptable values are: None, NoneOnDryRun (webhooks created via v1beta1 may also specify Some or Unknown). Webhooks with side effects MUST implement a reconciliation system, since a request may be rejected by a future step in the admission chain and the side effects therefore need to be undone. Requests with the dryRun attribute will be auto-rejected if they match a webhook with sideEffects == Unknown or Some.";
@@ -305,7 +327,9 @@ with lib; let
         };
         "webhooks" = mkOption {
           description = "Webhooks is a list of webhooks and the affected resources and operations.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1.MutatingWebhook" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1.MutatingWebhook" "name" [ ]
+          );
           apply = attrsToList;
         };
       };
@@ -325,7 +349,9 @@ with lib; let
         };
         "items" = mkOption {
           description = "List of MutatingWebhookConfiguration.";
-          type = types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1.MutatingWebhookConfiguration");
+          type = types.listOf (
+            submoduleOf "io.k8s.api.admissionregistration.v1.MutatingWebhookConfiguration"
+          );
         };
         "kind" = mkOption {
           description = "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds";
@@ -485,7 +511,9 @@ with lib; let
       options = {
         "expressionWarnings" = mkOption {
           description = "The type checking warnings for each expression.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1.ExpressionWarning"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1.ExpressionWarning")
+          );
         };
       };
 
@@ -509,11 +537,15 @@ with lib; let
         };
         "spec" = mkOption {
           description = "Specification of the desired behavior of the ValidatingAdmissionPolicy.";
-          type = types.nullOr (submoduleOf "io.k8s.api.admissionregistration.v1.ValidatingAdmissionPolicySpec");
+          type = types.nullOr (
+            submoduleOf "io.k8s.api.admissionregistration.v1.ValidatingAdmissionPolicySpec"
+          );
         };
         "status" = mkOption {
           description = "The status of the ValidatingAdmissionPolicy, including warnings that are useful to determine if the policy behaves in the expected way. Populated by the system. Read-only.";
-          type = types.nullOr (submoduleOf "io.k8s.api.admissionregistration.v1.ValidatingAdmissionPolicyStatus");
+          type = types.nullOr (
+            submoduleOf "io.k8s.api.admissionregistration.v1.ValidatingAdmissionPolicyStatus"
+          );
         };
       };
 
@@ -541,7 +573,9 @@ with lib; let
         };
         "spec" = mkOption {
           description = "Specification of the desired behavior of the ValidatingAdmissionPolicyBinding.";
-          type = types.nullOr (submoduleOf "io.k8s.api.admissionregistration.v1.ValidatingAdmissionPolicyBindingSpec");
+          type = types.nullOr (
+            submoduleOf "io.k8s.api.admissionregistration.v1.ValidatingAdmissionPolicyBindingSpec"
+          );
         };
       };
 
@@ -560,7 +594,9 @@ with lib; let
         };
         "items" = mkOption {
           description = "List of PolicyBinding.";
-          type = types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1.ValidatingAdmissionPolicyBinding");
+          type = types.listOf (
+            submoduleOf "io.k8s.api.admissionregistration.v1.ValidatingAdmissionPolicyBinding"
+          );
         };
         "kind" = mkOption {
           description = "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds";
@@ -635,7 +671,9 @@ with lib; let
       options = {
         "auditAnnotations" = mkOption {
           description = "auditAnnotations contains CEL expressions which are used to produce audit annotations for the audit event of the API request. validations and auditAnnotations may not both be empty; a least one of validations or auditAnnotations is required.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1.AuditAnnotation"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1.AuditAnnotation")
+          );
         };
         "failurePolicy" = mkOption {
           description = "failurePolicy defines how to handle failures for the admission policy. Failures can occur from CEL expression parse errors, type check errors, runtime errors and invalid or mis-configured policy definitions or bindings.\n\nA policy is invalid if spec.paramKind refers to a non-existent Kind. A binding is invalid if spec.paramRef.name refers to a non-existent resource.\n\nfailurePolicy does not define how validations that evaluate to false are handled.\n\nWhen failurePolicy is set to Fail, ValidatingAdmissionPolicyBinding validationActions define how failures are enforced.\n\nAllowed values are Ignore or Fail. Defaults to Fail.";
@@ -643,7 +681,9 @@ with lib; let
         };
         "matchConditions" = mkOption {
           description = "MatchConditions is a list of conditions that must be met for a request to be validated. Match conditions filter requests that have already been matched by the rules, namespaceSelector, and objectSelector. An empty list of matchConditions matches all requests. There are a maximum of 64 match conditions allowed.\n\nIf a parameter object is provided, it can be accessed via the `params` handle in the same manner as validation expressions.\n\nThe exact matching logic is (in order):\n  1. If ANY matchCondition evaluates to FALSE, the policy is skipped.\n  2. If ALL matchConditions evaluate to TRUE, the policy is evaluated.\n  3. If any matchCondition evaluates to an error (but none are FALSE):\n     - If failurePolicy=Fail, reject the request\n     - If failurePolicy=Ignore, the policy is skipped";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1.MatchCondition" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1.MatchCondition" "name" [ ]
+          );
           apply = attrsToList;
         };
         "matchConstraints" = mkOption {
@@ -660,7 +700,9 @@ with lib; let
         };
         "variables" = mkOption {
           description = "Variables contain definitions of variables that can be used in composition of other expressions. Each variable is defined as a named CEL expression. The variables defined here will be available under `variables` in other expressions of the policy except MatchConditions because MatchConditions are evaluated before the rest of the policy.\n\nThe expression of a variable can refer to other variables defined earlier in the list but not those after. Thus, Variables must be sorted by the order of first appearance and acyclic.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1.Variable" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1.Variable" "name" [ ]
+          );
           apply = attrsToList;
         };
       };
@@ -713,7 +755,9 @@ with lib; let
         };
         "matchConditions" = mkOption {
           description = "MatchConditions is a list of conditions that must be met for a request to be sent to this webhook. Match conditions filter requests that have already been matched by the rules, namespaceSelector, and objectSelector. An empty list of matchConditions matches all requests. There are a maximum of 64 match conditions allowed.\n\nThe exact matching logic is (in order):\n  1. If ANY matchCondition evaluates to FALSE, the webhook is skipped.\n  2. If ALL matchConditions evaluate to TRUE, the webhook is called.\n  3. If any matchCondition evaluates to an error (but none are FALSE):\n     - If failurePolicy=Fail, reject the request\n     - If failurePolicy=Ignore, the error is ignored and the webhook is skipped";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1.MatchCondition" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1.MatchCondition" "name" [ ]
+          );
           apply = attrsToList;
         };
         "matchPolicy" = mkOption {
@@ -734,7 +778,9 @@ with lib; let
         };
         "rules" = mkOption {
           description = "Rules describes what operations on what resources/subresources the webhook cares about. The webhook cares about an operation if it matches _any_ Rule. However, in order to prevent ValidatingAdmissionWebhooks and MutatingAdmissionWebhooks from putting the cluster in a state which cannot be recovered from without completely disabling the plugin, ValidatingAdmissionWebhooks and MutatingAdmissionWebhooks are never called on admission requests for ValidatingWebhookConfiguration and MutatingWebhookConfiguration objects.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1.RuleWithOperations"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1.RuleWithOperations")
+          );
         };
         "sideEffects" = mkOption {
           description = "SideEffects states whether this webhook has side effects. Acceptable values are: None, NoneOnDryRun (webhooks created via v1beta1 may also specify Some or Unknown). Webhooks with side effects MUST implement a reconciliation system, since a request may be rejected by a future step in the admission chain and the side effects therefore need to be undone. Requests with the dryRun attribute will be auto-rejected if they match a webhook with sideEffects == Unknown or Some.";
@@ -772,7 +818,10 @@ with lib; let
         };
         "webhooks" = mkOption {
           description = "Webhooks is a list of webhooks and the affected resources and operations.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1.ValidatingWebhook" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1.ValidatingWebhook" "name"
+              [ ]
+          );
           apply = attrsToList;
         };
       };
@@ -792,7 +841,9 @@ with lib; let
         };
         "items" = mkOption {
           description = "List of ValidatingWebhookConfiguration.";
-          type = types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1.ValidatingWebhookConfiguration");
+          type = types.listOf (
+            submoduleOf "io.k8s.api.admissionregistration.v1.ValidatingWebhookConfiguration"
+          );
         };
         "kind" = mkOption {
           description = "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds";
@@ -848,7 +899,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.admissionregistration.v1.WebhookClientConfig" = {
       options = {
@@ -884,7 +935,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.admissionregistration.v1alpha1.ExpressionWarning" = {
       options = {
@@ -898,7 +949,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.admissionregistration.v1alpha1.MatchCondition" = {
       options = {
@@ -912,13 +963,15 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.admissionregistration.v1alpha1.MatchResources" = {
       options = {
         "excludeResourceRules" = mkOption {
           description = "ExcludeResourceRules describes what operations on what resources/subresources the ValidatingAdmissionPolicy should not care about. The exclude rules take precedence over include rules (if a resource matches both, it is excluded)";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1alpha1.NamedRuleWithOperations"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1alpha1.NamedRuleWithOperations")
+          );
         };
         "matchPolicy" = mkOption {
           description = "matchPolicy defines how the \"MatchResources\" list is used to match incoming requests. Allowed values are \"Exact\" or \"Equivalent\".\n\n- Exact: match a request only if it exactly matches a specified rule. For example, if deployments can be modified via apps/v1, apps/v1beta1, and extensions/v1beta1, but \"rules\" only included `apiGroups:[\"apps\"], apiVersions:[\"v1\"], resources: [\"deployments\"]`, a request to apps/v1beta1 or extensions/v1beta1 would not be sent to the ValidatingAdmissionPolicy.\n\n- Equivalent: match a request if modifies a resource listed in rules, even via another API group or version. For example, if deployments can be modified via apps/v1, apps/v1beta1, and extensions/v1beta1, and \"rules\" only included `apiGroups:[\"apps\"], apiVersions:[\"v1\"], resources: [\"deployments\"]`, a request to apps/v1beta1 or extensions/v1beta1 would be converted to apps/v1 and sent to the ValidatingAdmissionPolicy.\n\nDefaults to \"Equivalent\"";
@@ -934,7 +987,9 @@ with lib; let
         };
         "resourceRules" = mkOption {
           description = "ResourceRules describes what operations on what resources/subresources the ValidatingAdmissionPolicy matches. The policy cares about an operation if it matches _any_ Rule.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1alpha1.NamedRuleWithOperations"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1alpha1.NamedRuleWithOperations")
+          );
         };
       };
 
@@ -1031,7 +1086,9 @@ with lib; let
       options = {
         "expressionWarnings" = mkOption {
           description = "The type checking warnings for each expression.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1alpha1.ExpressionWarning"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1alpha1.ExpressionWarning")
+          );
         };
       };
 
@@ -1055,11 +1112,15 @@ with lib; let
         };
         "spec" = mkOption {
           description = "Specification of the desired behavior of the ValidatingAdmissionPolicy.";
-          type = types.nullOr (submoduleOf "io.k8s.api.admissionregistration.v1alpha1.ValidatingAdmissionPolicySpec");
+          type = types.nullOr (
+            submoduleOf "io.k8s.api.admissionregistration.v1alpha1.ValidatingAdmissionPolicySpec"
+          );
         };
         "status" = mkOption {
           description = "The status of the ValidatingAdmissionPolicy, including warnings that are useful to determine if the policy behaves in the expected way. Populated by the system. Read-only.";
-          type = types.nullOr (submoduleOf "io.k8s.api.admissionregistration.v1alpha1.ValidatingAdmissionPolicyStatus");
+          type = types.nullOr (
+            submoduleOf "io.k8s.api.admissionregistration.v1alpha1.ValidatingAdmissionPolicyStatus"
+          );
         };
       };
 
@@ -1087,7 +1148,9 @@ with lib; let
         };
         "spec" = mkOption {
           description = "Specification of the desired behavior of the ValidatingAdmissionPolicyBinding.";
-          type = types.nullOr (submoduleOf "io.k8s.api.admissionregistration.v1alpha1.ValidatingAdmissionPolicyBindingSpec");
+          type = types.nullOr (
+            submoduleOf "io.k8s.api.admissionregistration.v1alpha1.ValidatingAdmissionPolicyBindingSpec"
+          );
         };
       };
 
@@ -1106,7 +1169,9 @@ with lib; let
         };
         "items" = mkOption {
           description = "List of PolicyBinding.";
-          type = types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1alpha1.ValidatingAdmissionPolicyBinding");
+          type = types.listOf (
+            submoduleOf "io.k8s.api.admissionregistration.v1alpha1.ValidatingAdmissionPolicyBinding"
+          );
         };
         "kind" = mkOption {
           description = "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds";
@@ -1159,7 +1224,9 @@ with lib; let
         };
         "items" = mkOption {
           description = "List of ValidatingAdmissionPolicy.";
-          type = types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1alpha1.ValidatingAdmissionPolicy");
+          type = types.listOf (
+            submoduleOf "io.k8s.api.admissionregistration.v1alpha1.ValidatingAdmissionPolicy"
+          );
         };
         "kind" = mkOption {
           description = "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds";
@@ -1181,7 +1248,9 @@ with lib; let
       options = {
         "auditAnnotations" = mkOption {
           description = "auditAnnotations contains CEL expressions which are used to produce audit annotations for the audit event of the API request. validations and auditAnnotations may not both be empty; a least one of validations or auditAnnotations is required.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1alpha1.AuditAnnotation"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1alpha1.AuditAnnotation")
+          );
         };
         "failurePolicy" = mkOption {
           description = "failurePolicy defines how to handle failures for the admission policy. Failures can occur from CEL expression parse errors, type check errors, runtime errors and invalid or mis-configured policy definitions or bindings.\n\nA policy is invalid if spec.paramKind refers to a non-existent Kind. A binding is invalid if spec.paramRef.name refers to a non-existent resource.\n\nfailurePolicy does not define how validations that evaluate to false are handled.\n\nWhen failurePolicy is set to Fail, ValidatingAdmissionPolicyBinding validationActions define how failures are enforced.\n\nAllowed values are Ignore or Fail. Defaults to Fail.";
@@ -1189,7 +1258,10 @@ with lib; let
         };
         "matchConditions" = mkOption {
           description = "MatchConditions is a list of conditions that must be met for a request to be validated. Match conditions filter requests that have already been matched by the rules, namespaceSelector, and objectSelector. An empty list of matchConditions matches all requests. There are a maximum of 64 match conditions allowed.\n\nIf a parameter object is provided, it can be accessed via the `params` handle in the same manner as validation expressions.\n\nThe exact matching logic is (in order):\n  1. If ANY matchCondition evaluates to FALSE, the policy is skipped.\n  2. If ALL matchConditions evaluate to TRUE, the policy is evaluated.\n  3. If any matchCondition evaluates to an error (but none are FALSE):\n     - If failurePolicy=Fail, reject the request\n     - If failurePolicy=Ignore, the policy is skipped";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1alpha1.MatchCondition" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1alpha1.MatchCondition" "name"
+              [ ]
+          );
           apply = attrsToList;
         };
         "matchConstraints" = mkOption {
@@ -1202,11 +1274,15 @@ with lib; let
         };
         "validations" = mkOption {
           description = "Validations contain CEL expressions which is used to apply the validation. Validations and AuditAnnotations may not both be empty; a minimum of one Validations or AuditAnnotations is required.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1alpha1.Validation"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1alpha1.Validation")
+          );
         };
         "variables" = mkOption {
           description = "Variables contain definitions of variables that can be used in composition of other expressions. Each variable is defined as a named CEL expression. The variables defined here will be available under `variables` in other expressions of the policy except MatchConditions because MatchConditions are evaluated before the rest of the policy.\n\nThe expression of a variable can refer to other variables defined earlier in the list but not those after. Thus, Variables must be sorted by the order of first appearance and acyclic.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1alpha1.Variable" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1alpha1.Variable" "name" [ ]
+          );
           apply = attrsToList;
         };
       };
@@ -1281,7 +1357,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.admissionregistration.v1beta1.AuditAnnotation" = {
       options = {
@@ -1295,7 +1371,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.admissionregistration.v1beta1.ExpressionWarning" = {
       options = {
@@ -1309,7 +1385,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.admissionregistration.v1beta1.MatchCondition" = {
       options = {
@@ -1323,13 +1399,15 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.admissionregistration.v1beta1.MatchResources" = {
       options = {
         "excludeResourceRules" = mkOption {
           description = "ExcludeResourceRules describes what operations on what resources/subresources the ValidatingAdmissionPolicy should not care about. The exclude rules take precedence over include rules (if a resource matches both, it is excluded)";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1beta1.NamedRuleWithOperations"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1beta1.NamedRuleWithOperations")
+          );
         };
         "matchPolicy" = mkOption {
           description = "matchPolicy defines how the \"MatchResources\" list is used to match incoming requests. Allowed values are \"Exact\" or \"Equivalent\".\n\n- Exact: match a request only if it exactly matches a specified rule. For example, if deployments can be modified via apps/v1, apps/v1beta1, and extensions/v1beta1, but \"rules\" only included `apiGroups:[\"apps\"], apiVersions:[\"v1\"], resources: [\"deployments\"]`, a request to apps/v1beta1 or extensions/v1beta1 would not be sent to the ValidatingAdmissionPolicy.\n\n- Equivalent: match a request if modifies a resource listed in rules, even via another API group or version. For example, if deployments can be modified via apps/v1, apps/v1beta1, and extensions/v1beta1, and \"rules\" only included `apiGroups:[\"apps\"], apiVersions:[\"v1\"], resources: [\"deployments\"]`, a request to apps/v1beta1 or extensions/v1beta1 would be converted to apps/v1 and sent to the ValidatingAdmissionPolicy.\n\nDefaults to \"Equivalent\"";
@@ -1345,7 +1423,9 @@ with lib; let
         };
         "resourceRules" = mkOption {
           description = "ResourceRules describes what operations on what resources/subresources the ValidatingAdmissionPolicy matches. The policy cares about an operation if it matches _any_ Rule.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1beta1.NamedRuleWithOperations"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1beta1.NamedRuleWithOperations")
+          );
         };
       };
 
@@ -1442,7 +1522,9 @@ with lib; let
       options = {
         "expressionWarnings" = mkOption {
           description = "The type checking warnings for each expression.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1beta1.ExpressionWarning"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1beta1.ExpressionWarning")
+          );
         };
       };
 
@@ -1466,11 +1548,15 @@ with lib; let
         };
         "spec" = mkOption {
           description = "Specification of the desired behavior of the ValidatingAdmissionPolicy.";
-          type = types.nullOr (submoduleOf "io.k8s.api.admissionregistration.v1beta1.ValidatingAdmissionPolicySpec");
+          type = types.nullOr (
+            submoduleOf "io.k8s.api.admissionregistration.v1beta1.ValidatingAdmissionPolicySpec"
+          );
         };
         "status" = mkOption {
           description = "The status of the ValidatingAdmissionPolicy, including warnings that are useful to determine if the policy behaves in the expected way. Populated by the system. Read-only.";
-          type = types.nullOr (submoduleOf "io.k8s.api.admissionregistration.v1beta1.ValidatingAdmissionPolicyStatus");
+          type = types.nullOr (
+            submoduleOf "io.k8s.api.admissionregistration.v1beta1.ValidatingAdmissionPolicyStatus"
+          );
         };
       };
 
@@ -1498,7 +1584,9 @@ with lib; let
         };
         "spec" = mkOption {
           description = "Specification of the desired behavior of the ValidatingAdmissionPolicyBinding.";
-          type = types.nullOr (submoduleOf "io.k8s.api.admissionregistration.v1beta1.ValidatingAdmissionPolicyBindingSpec");
+          type = types.nullOr (
+            submoduleOf "io.k8s.api.admissionregistration.v1beta1.ValidatingAdmissionPolicyBindingSpec"
+          );
         };
       };
 
@@ -1517,7 +1605,9 @@ with lib; let
         };
         "items" = mkOption {
           description = "List of PolicyBinding.";
-          type = types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1beta1.ValidatingAdmissionPolicyBinding");
+          type = types.listOf (
+            submoduleOf "io.k8s.api.admissionregistration.v1beta1.ValidatingAdmissionPolicyBinding"
+          );
         };
         "kind" = mkOption {
           description = "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds";
@@ -1570,7 +1660,9 @@ with lib; let
         };
         "items" = mkOption {
           description = "List of ValidatingAdmissionPolicy.";
-          type = types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1beta1.ValidatingAdmissionPolicy");
+          type = types.listOf (
+            submoduleOf "io.k8s.api.admissionregistration.v1beta1.ValidatingAdmissionPolicy"
+          );
         };
         "kind" = mkOption {
           description = "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds";
@@ -1592,7 +1684,9 @@ with lib; let
       options = {
         "auditAnnotations" = mkOption {
           description = "auditAnnotations contains CEL expressions which are used to produce audit annotations for the audit event of the API request. validations and auditAnnotations may not both be empty; a least one of validations or auditAnnotations is required.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1beta1.AuditAnnotation"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1beta1.AuditAnnotation")
+          );
         };
         "failurePolicy" = mkOption {
           description = "failurePolicy defines how to handle failures for the admission policy. Failures can occur from CEL expression parse errors, type check errors, runtime errors and invalid or mis-configured policy definitions or bindings.\n\nA policy is invalid if spec.paramKind refers to a non-existent Kind. A binding is invalid if spec.paramRef.name refers to a non-existent resource.\n\nfailurePolicy does not define how validations that evaluate to false are handled.\n\nWhen failurePolicy is set to Fail, ValidatingAdmissionPolicyBinding validationActions define how failures are enforced.\n\nAllowed values are Ignore or Fail. Defaults to Fail.";
@@ -1600,7 +1694,10 @@ with lib; let
         };
         "matchConditions" = mkOption {
           description = "MatchConditions is a list of conditions that must be met for a request to be validated. Match conditions filter requests that have already been matched by the rules, namespaceSelector, and objectSelector. An empty list of matchConditions matches all requests. There are a maximum of 64 match conditions allowed.\n\nIf a parameter object is provided, it can be accessed via the `params` handle in the same manner as validation expressions.\n\nThe exact matching logic is (in order):\n  1. If ANY matchCondition evaluates to FALSE, the policy is skipped.\n  2. If ALL matchConditions evaluate to TRUE, the policy is evaluated.\n  3. If any matchCondition evaluates to an error (but none are FALSE):\n     - If failurePolicy=Fail, reject the request\n     - If failurePolicy=Ignore, the policy is skipped";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1beta1.MatchCondition" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1beta1.MatchCondition" "name"
+              [ ]
+          );
           apply = attrsToList;
         };
         "matchConstraints" = mkOption {
@@ -1613,11 +1710,15 @@ with lib; let
         };
         "validations" = mkOption {
           description = "Validations contain CEL expressions which is used to apply the validation. Validations and AuditAnnotations may not both be empty; a minimum of one Validations or AuditAnnotations is required.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1beta1.Validation"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.admissionregistration.v1beta1.Validation")
+          );
         };
         "variables" = mkOption {
           description = "Variables contain definitions of variables that can be used in composition of other expressions. Each variable is defined as a named CEL expression. The variables defined here will be available under `variables` in other expressions of the policy except MatchConditions because MatchConditions are evaluated before the rest of the policy.\n\nThe expression of a variable can refer to other variables defined earlier in the list but not those after. Thus, Variables must be sorted by the order of first appearance and acyclic.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1beta1.Variable" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.admissionregistration.v1beta1.Variable" "name" [ ]
+          );
           apply = attrsToList;
         };
       };
@@ -1692,7 +1793,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.apiserverinternal.v1alpha1.ServerStorageVersion" = {
       options = {
@@ -1820,11 +1921,15 @@ with lib; let
         };
         "conditions" = mkOption {
           description = "The latest available observations of the storageVersion's state.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.apiserverinternal.v1alpha1.StorageVersionCondition"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.apiserverinternal.v1alpha1.StorageVersionCondition")
+          );
         };
         "storageVersions" = mkOption {
           description = "The reported versions per API server instance.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.apiserverinternal.v1alpha1.ServerStorageVersion"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.apiserverinternal.v1alpha1.ServerStorageVersion")
+          );
         };
       };
 
@@ -2017,7 +2122,9 @@ with lib; let
         };
         "conditions" = mkOption {
           description = "Represents the latest available observations of a DaemonSet's current state.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.apps.v1.DaemonSetCondition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.apps.v1.DaemonSetCondition" "type" [ ]
+          );
           apply = attrsToList;
         };
         "currentNumberScheduled" = mkOption {
@@ -2230,7 +2337,9 @@ with lib; let
         };
         "conditions" = mkOption {
           description = "Represents the latest available observations of a deployment's current state.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.apps.v1.DeploymentCondition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.apps.v1.DeploymentCondition" "type" [ ]
+          );
           apply = attrsToList;
         };
         "observedGeneration" = mkOption {
@@ -2405,7 +2514,9 @@ with lib; let
         };
         "conditions" = mkOption {
           description = "Represents the latest available observations of a replica set's current state.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.apps.v1.ReplicaSetCondition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.apps.v1.ReplicaSetCondition" "type" [ ]
+          );
           apply = attrsToList;
         };
         "fullyLabeledReplicas" = mkOption {
@@ -2614,7 +2725,9 @@ with lib; let
         };
         "persistentVolumeClaimRetentionPolicy" = mkOption {
           description = "persistentVolumeClaimRetentionPolicy describes the lifecycle of persistent volume claims created from volumeClaimTemplates. By default, all persistent volume claims are created as needed and retained until manually deleted. This policy allows the lifecycle to be altered, for example by deleting persistent volume claims when their stateful set is deleted, or when their pod is scaled down. This requires the StatefulSetAutoDeletePVC feature gate to be enabled, which is alpha.  +optional";
-          type = types.nullOr (submoduleOf "io.k8s.api.apps.v1.StatefulSetPersistentVolumeClaimRetentionPolicy");
+          type = types.nullOr (
+            submoduleOf "io.k8s.api.apps.v1.StatefulSetPersistentVolumeClaimRetentionPolicy"
+          );
         };
         "podManagementPolicy" = mkOption {
           description = "podManagementPolicy controls how pods are created during initial scale up, when replacing pods on nodes, or when scaling down. The default policy is `OrderedReady`, where pods are created in increasing order (pod-0, then pod-1, etc) and the controller will wait until each pod is ready before continuing. When scaling down, the pods are removed in the opposite order. The alternative policy is `Parallel` which will create pods in parallel to match the desired scale without waiting, and on scale down will delete all pods at once.";
@@ -2673,7 +2786,9 @@ with lib; let
         };
         "conditions" = mkOption {
           description = "Represents the latest available observations of a statefulset's current state.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.apps.v1.StatefulSetCondition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.apps.v1.StatefulSetCondition" "type" [ ]
+          );
           apply = attrsToList;
         };
         "currentReplicas" = mkOption {
@@ -2865,7 +2980,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.authentication.v1.TokenReview" = {
       options = {
@@ -3597,7 +3712,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.autoscaling.v2.ContainerResourceMetricStatus" = {
       options = {
@@ -3615,7 +3730,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.autoscaling.v2.CrossVersionObjectReference" = {
       options = {
@@ -3649,7 +3764,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.autoscaling.v2.ExternalMetricStatus" = {
       options = {
@@ -3663,7 +3778,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.autoscaling.v2.HPAScalingPolicy" = {
       options = {
@@ -3681,7 +3796,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.autoscaling.v2.HPAScalingRules" = {
       options = {
@@ -3844,7 +3959,11 @@ with lib; let
       options = {
         "conditions" = mkOption {
           description = "conditions is the set of conditions required for this autoscaler to scale its target, and indicates whether or not those conditions are met.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerCondition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerCondition"
+              "type"
+              [ ]
+          );
           apply = attrsToList;
         };
         "currentMetrics" = mkOption {
@@ -4029,7 +4148,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.autoscaling.v2.ObjectMetricStatus" = {
       options = {
@@ -4047,7 +4166,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.autoscaling.v2.PodsMetricSource" = {
       options = {
@@ -4061,7 +4180,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.autoscaling.v2.PodsMetricStatus" = {
       options = {
@@ -4075,7 +4194,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.autoscaling.v2.ResourceMetricSource" = {
       options = {
@@ -4089,7 +4208,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.autoscaling.v2.ResourceMetricStatus" = {
       options = {
@@ -4103,7 +4222,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.batch.v1.CronJob" = {
       options = {
@@ -4212,7 +4331,9 @@ with lib; let
       options = {
         "active" = mkOption {
           description = "A list of pointers to currently running jobs.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ObjectReference" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ObjectReference" "name" [ ]
+          );
           apply = attrsToList;
         };
         "lastScheduleTime" = mkOption {
@@ -4426,7 +4547,9 @@ with lib; let
         };
         "conditions" = mkOption {
           description = "The latest available observations of an object's current state. When a Job fails, one of the conditions will have type \"Failed\" and status true. When a Job is suspended, one of the conditions will have type \"Suspended\" and status true; when the Job is resumed, the status of this condition will become false. When a Job is completed, one of the conditions will have type \"Complete\" and status true.\n\nA job is considered finished when it is in a terminal condition, either \"Complete\" or \"Failed\". A Job cannot have both the \"Complete\" and \"Failed\" conditions. Additionally, it cannot be in the \"Complete\" and \"FailureTarget\" conditions. The \"Complete\", \"Failed\" and \"FailureTarget\" conditions cannot be disabled.\n\nMore info: https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.batch.v1.JobCondition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.batch.v1.JobCondition" "type" [ ]
+          );
           apply = attrsToList;
         };
         "failed" = mkOption {
@@ -4498,7 +4621,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.batch.v1.PodFailurePolicyOnExitCodesRequirement" = {
       options = {
@@ -4532,7 +4655,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.batch.v1.PodFailurePolicyRule" = {
       options = {
@@ -4546,7 +4669,9 @@ with lib; let
         };
         "onPodConditions" = mkOption {
           description = "Represents the requirement on the pod conditions. The requirement is represented as a list of pod condition patterns. The requirement is satisfied if at least one pattern matches an actual pod condition. At most 20 elements are allowed.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.batch.v1.PodFailurePolicyOnPodConditionsPattern"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.batch.v1.PodFailurePolicyOnPodConditionsPattern")
+          );
         };
       };
 
@@ -4563,7 +4688,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.batch.v1.SuccessPolicyRule" = {
       options = {
@@ -4744,7 +4869,9 @@ with lib; let
         };
         "conditions" = mkOption {
           description = "conditions applied to the request. Known conditions are \"Approved\", \"Denied\", and \"Failed\".";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.certificates.v1.CertificateSigningRequestCondition"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.certificates.v1.CertificateSigningRequestCondition")
+          );
         };
       };
 
@@ -4982,7 +5109,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.AzureDiskVolumeSource" = {
       options = {
@@ -5410,7 +5537,9 @@ with lib; let
         };
         "conditions" = mkOption {
           description = "List of component conditions observed";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ComponentCondition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ComponentCondition" "type" [ ]
+          );
           apply = attrsToList;
         };
         "kind" = mkOption {
@@ -5647,7 +5776,7 @@ with lib; let
         };
         "env" = mkOption {
           description = "List of environment variables to set in the container. Cannot be updated.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.EnvVar" "name" []);
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.EnvVar" "name" [ ]);
           apply = attrsToList;
         };
         "envFrom" = mkOption {
@@ -5676,7 +5805,9 @@ with lib; let
         };
         "ports" = mkOption {
           description = "List of ports to expose from the container. Not specifying a port here DOES NOT prevent that port from being exposed. Any port which is listening on the default \"0.0.0.0\" address inside a container will be accessible from the network. Modifying this array with strategic merge patch may corrupt the data. For more information See https://github.com/kubernetes/kubernetes/issues/108255. Cannot be updated.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ContainerPort" "name" ["containerPort"]);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ContainerPort" "name" [ "containerPort" ]
+          );
           apply = attrsToList;
         };
         "readinessProbe" = mkOption {
@@ -5725,12 +5856,16 @@ with lib; let
         };
         "volumeDevices" = mkOption {
           description = "volumeDevices is the list of block devices to be used by the container.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.VolumeDevice" "devicePath" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.VolumeDevice" "devicePath" [ ]
+          );
           apply = attrsToList;
         };
         "volumeMounts" = mkOption {
           description = "Pod volumes to mount into the container's filesystem. Cannot be updated.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.VolumeMount" "mountPath" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.VolumeMount" "mountPath" [ ]
+          );
           apply = attrsToList;
         };
         "workingDir" = mkOption {
@@ -5825,7 +5960,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.ContainerState" = {
       options = {
@@ -5967,7 +6102,9 @@ with lib; let
         };
         "volumeMounts" = mkOption {
           description = "Status of volume mounts.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.VolumeMountStatus" "mountPath" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.VolumeMountStatus" "mountPath" [ ]
+          );
           apply = attrsToList;
         };
       };
@@ -5990,7 +6127,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.DownwardAPIProjection" = {
       options = {
@@ -6128,7 +6265,9 @@ with lib; let
         };
         "ports" = mkOption {
           description = "Port numbers available on the related IP addresses.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.EndpointPort" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.EndpointPort" "name" [ ]
+          );
           apply = attrsToList;
         };
       };
@@ -6274,7 +6413,7 @@ with lib; let
         };
         "env" = mkOption {
           description = "List of environment variables to set in the container. Cannot be updated.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.EnvVar" "name" []);
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.EnvVar" "name" [ ]);
           apply = attrsToList;
         };
         "envFrom" = mkOption {
@@ -6303,7 +6442,9 @@ with lib; let
         };
         "ports" = mkOption {
           description = "Ports are not allowed for ephemeral containers.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ContainerPort" "name" ["containerPort"]);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ContainerPort" "name" [ "containerPort" ]
+          );
           apply = attrsToList;
         };
         "readinessProbe" = mkOption {
@@ -6356,12 +6497,16 @@ with lib; let
         };
         "volumeDevices" = mkOption {
           description = "volumeDevices is the list of block devices to be used by the container.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.VolumeDevice" "devicePath" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.VolumeDevice" "devicePath" [ ]
+          );
           apply = attrsToList;
         };
         "volumeMounts" = mkOption {
           description = "Pod volumes to mount into the container's filesystem. Subpath mounts are not allowed for ephemeral containers. Cannot be updated.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.VolumeMount" "mountPath" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.VolumeMount" "mountPath" [ ]
+          );
           apply = attrsToList;
         };
         "workingDir" = mkOption {
@@ -6798,7 +6943,7 @@ with lib; let
         };
         "httpHeaders" = mkOption {
           description = "Custom headers to set in the request. HTTP allows repeated headers.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.HTTPHeader" "name" []);
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.HTTPHeader" "name" [ ]);
           apply = attrsToList;
         };
         "path" = mkOption {
@@ -6834,7 +6979,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.HostAlias" = {
       options = {
@@ -6860,7 +7005,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.HostPathVolumeSource" = {
       options = {
@@ -7157,7 +7302,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.LoadBalancerIngress" = {
       options = {
@@ -7366,7 +7511,9 @@ with lib; let
       options = {
         "conditions" = mkOption {
           description = "Represents the latest available observations of a namespace's current state.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.NamespaceCondition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.NamespaceCondition" "type" [ ]
+          );
           apply = attrsToList;
         };
         "phase" = mkOption {
@@ -7424,7 +7571,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.NodeAffinity" = {
       options = {
@@ -7592,7 +7739,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.NodeSelectorRequirement" = {
       options = {
@@ -7677,7 +7824,9 @@ with lib; let
       options = {
         "addresses" = mkOption {
           description = "List of addresses reachable to the node. Queried from cloud provider, if available. More info: https://kubernetes.io/docs/concepts/nodes/node/#addresses Note: This field is declared as mergeable, but the merge key is not sufficiently unique, which can cause data corruption when it is merged. Callers should instead use a full-replacement patch. See https://pr.k8s.io/79391 for an example. Consumers should assume that addresses can change during the lifetime of a Node. However, there are some exceptions where this may not be possible, such as Pods that inherit a Node's address in its own status or consumers of the downward API (status.hostIP).";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.NodeAddress" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.NodeAddress" "type" [ ]
+          );
           apply = attrsToList;
         };
         "allocatable" = mkOption {
@@ -7690,7 +7839,9 @@ with lib; let
         };
         "conditions" = mkOption {
           description = "Conditions is an array of current observed node conditions. More info: https://kubernetes.io/docs/concepts/nodes/node/#condition";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.NodeCondition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.NodeCondition" "type" [ ]
+          );
           apply = attrsToList;
         };
         "config" = mkOption {
@@ -7715,12 +7866,16 @@ with lib; let
         };
         "runtimeHandlers" = mkOption {
           description = "The available runtime handlers.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.NodeRuntimeHandler" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.NodeRuntimeHandler" "name" [ ]
+          );
           apply = attrsToList;
         };
         "volumesAttached" = mkOption {
           description = "List of volumes that are attached to the node.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.AttachedVolume" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.AttachedVolume" "name" [ ]
+          );
           apply = attrsToList;
         };
         "volumesInUse" = mkOption {
@@ -7788,7 +7943,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.ObjectFieldSelector" = {
       options = {
@@ -8045,7 +8200,9 @@ with lib; let
         };
         "conditions" = mkOption {
           description = "conditions is the current Condition of persistent volume claim. If underlying persistent volume is being resized then the Condition will be set to 'Resizing'.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.PersistentVolumeClaimCondition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.PersistentVolumeClaimCondition" "type" [ ]
+          );
           apply = attrsToList;
         };
         "currentVolumeAttributesClassName" = mkOption {
@@ -8481,7 +8638,9 @@ with lib; let
         };
         "options" = mkOption {
           description = "A list of DNS resolver options. This will be merged with the base options generated from DNSPolicy. Duplicated entries will be removed. Resolution options given in Options will override those that appear in the base DNSPolicy.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.PodDNSConfigOption" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.PodDNSConfigOption" "name" [ ]
+          );
           apply = attrsToList;
         };
         "searches" = mkOption {
@@ -8521,7 +8680,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.PodList" = {
       options = {
@@ -8557,7 +8716,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.PodReadinessGate" = {
       options = {
@@ -8567,7 +8726,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.PodResourceClaim" = {
       options = {
@@ -8609,7 +8768,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.PodSecurityContext" = {
       options = {
@@ -8651,7 +8810,7 @@ with lib; let
         };
         "sysctls" = mkOption {
           description = "Sysctls hold a list of namespaced sysctls used for the pod. Pods with unsupported sysctls (by the container runtime) might fail to launch. Note that this field cannot be set when spec.os.name is windows.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.Sysctl" "name" []);
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.Sysctl" "name" [ ]);
           apply = attrsToList;
         };
         "windowsOptions" = mkOption {
@@ -8690,7 +8849,7 @@ with lib; let
         };
         "containers" = mkOption {
           description = "List of containers belonging to the pod. Containers cannot currently be added or removed. There must be at least one container in a Pod. Cannot be updated.";
-          type = coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.Container" "name" [];
+          type = coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.Container" "name" [ ];
           apply = attrsToList;
         };
         "dnsConfig" = mkOption {
@@ -8707,12 +8866,14 @@ with lib; let
         };
         "ephemeralContainers" = mkOption {
           description = "List of ephemeral containers run in this pod. Ephemeral containers may be run in an existing pod to perform user-initiated actions such as debugging. This list cannot be specified when creating a pod, and it cannot be modified by updating the pod spec. In order to add an ephemeral container to an existing pod, use the pod's ephemeralcontainers subresource.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.EphemeralContainer" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.EphemeralContainer" "name" [ ]
+          );
           apply = attrsToList;
         };
         "hostAliases" = mkOption {
           description = "HostAliases is an optional list of hosts and IPs that will be injected into the pod's hosts file if specified.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.HostAlias" "ip" []);
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.HostAlias" "ip" [ ]);
           apply = attrsToList;
         };
         "hostIPC" = mkOption {
@@ -8737,12 +8898,14 @@ with lib; let
         };
         "imagePullSecrets" = mkOption {
           description = "ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec. If specified, these secrets will be passed to individual puller implementations for them to use. More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.LocalObjectReference" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.LocalObjectReference" "name" [ ]
+          );
           apply = attrsToList;
         };
         "initContainers" = mkOption {
           description = "List of initialization containers belonging to the pod. Init containers are executed in order prior to containers being started. If any init container fails, the pod is considered to have failed and is handled according to its restartPolicy. The name for an init container or normal container must be unique among all containers. Init containers may not have Lifecycle actions, Readiness probes, Liveness probes, or Startup probes. The resourceRequirements of an init container are taken into account during scheduling by finding the highest request/limit for each resource type, and then using the max of of that value or the sum of the normal containers. Limits are applied to init containers in a similar fashion. Init containers cannot currently be added or removed. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.Container" "name" []);
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.Container" "name" [ ]);
           apply = attrsToList;
         };
         "nodeName" = mkOption {
@@ -8779,7 +8942,9 @@ with lib; let
         };
         "resourceClaims" = mkOption {
           description = "ResourceClaims defines which ResourceClaims must be allocated and reserved before the Pod is allowed to start. The resources will be made available to those containers which consume them by name.\n\nThis is an alpha field and requires enabling the DynamicResourceAllocation feature gate.\n\nThis field is immutable.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.PodResourceClaim" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.PodResourceClaim" "name" [ ]
+          );
           apply = attrsToList;
         };
         "restartPolicy" = mkOption {
@@ -8796,7 +8961,9 @@ with lib; let
         };
         "schedulingGates" = mkOption {
           description = "SchedulingGates is an opaque list of values that if specified will block scheduling the pod. If schedulingGates is not empty, the pod will stay in the SchedulingGated state and the scheduler will not attempt to schedule the pod.\n\nSchedulingGates can only be set at pod creation time, and be removed only afterwards.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.PodSchedulingGate" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.PodSchedulingGate" "name" [ ]
+          );
           apply = attrsToList;
         };
         "securityContext" = mkOption {
@@ -8837,7 +9004,7 @@ with lib; let
         };
         "volumes" = mkOption {
           description = "List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.Volume" "name" []);
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.Volume" "name" [ ]);
           apply = attrsToList;
         };
       };
@@ -8887,17 +9054,23 @@ with lib; let
       options = {
         "conditions" = mkOption {
           description = "Current service state of pod. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.PodCondition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.PodCondition" "type" [ ]
+          );
           apply = attrsToList;
         };
         "containerStatuses" = mkOption {
           description = "The list has one entry per container in the manifest. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-and-container-status";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ContainerStatus" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ContainerStatus" "name" [ ]
+          );
           apply = attrsToList;
         };
         "ephemeralContainerStatuses" = mkOption {
           description = "Status for any ephemeral containers that have run in this pod.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ContainerStatus" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ContainerStatus" "name" [ ]
+          );
           apply = attrsToList;
         };
         "hostIP" = mkOption {
@@ -8906,12 +9079,14 @@ with lib; let
         };
         "hostIPs" = mkOption {
           description = "hostIPs holds the IP addresses allocated to the host. If this field is specified, the first entry must match the hostIP field. This list is empty if the pod has not started yet. A pod can be assigned to a node that has a problem in kubelet which in turns means that HostIPs will not be updated even if there is a node is assigned to this pod.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.HostIP" "ip" []);
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.HostIP" "ip" [ ]);
           apply = attrsToList;
         };
         "initContainerStatuses" = mkOption {
           description = "The list has one entry per init container in the manifest. The most recent successful init container will have ready = true, the most recently started container will have startTime set. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-and-container-status";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ContainerStatus" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ContainerStatus" "name" [ ]
+          );
           apply = attrsToList;
         };
         "message" = mkOption {
@@ -8932,7 +9107,7 @@ with lib; let
         };
         "podIPs" = mkOption {
           description = "podIPs holds the IP addresses allocated to the pod. If this field is specified, the 0th entry must match the podIP field. Pods may be allocated at most 1 value for each of IPv4 and IPv6. This list is empty if no IPs have been allocated yet.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.PodIP" "ip" []);
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.PodIP" "ip" [ ]);
           apply = attrsToList;
         };
         "qosClass" = mkOption {
@@ -8949,7 +9124,9 @@ with lib; let
         };
         "resourceClaimStatuses" = mkOption {
           description = "Status of resource claims.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.PodResourceClaimStatus" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.PodResourceClaimStatus" "name" [ ]
+          );
           apply = attrsToList;
         };
         "startTime" = mkOption {
@@ -9100,7 +9277,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.Probe" = {
       options = {
@@ -9424,7 +9601,9 @@ with lib; let
         };
         "conditions" = mkOption {
           description = "Represents the latest available observations of a replication controller's current state.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ReplicationControllerCondition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ReplicationControllerCondition" "type" [ ]
+          );
           apply = attrsToList;
         };
         "fullyLabeledReplicas" = mkOption {
@@ -9461,7 +9640,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.ResourceFieldSelector" = {
       options = {
@@ -9585,7 +9764,9 @@ with lib; let
       options = {
         "claims" = mkOption {
           description = "Claims lists the names of resources, defined in spec.resourceClaims, that are used by this container.\n\nThis is an alpha field and requires enabling the DynamicResourceAllocation feature gate.\n\nThis field is immutable. It can only be set for containers.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ResourceClaim" "name" ["name"]);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ResourceClaim" "name" [ "name" ]
+          );
           apply = attrsToList;
         };
         "limits" = mkOption {
@@ -9743,7 +9924,9 @@ with lib; let
       options = {
         "matchExpressions" = mkOption {
           description = "A list of scope selector requirements by scope of the resources.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.core.v1.ScopedResourceSelectorRequirement"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.core.v1.ScopedResourceSelectorRequirement")
+          );
         };
       };
 
@@ -10070,7 +10253,9 @@ with lib; let
         };
         "imagePullSecrets" = mkOption {
           description = "ImagePullSecrets is a list of references to secrets in the same namespace to use for pulling any images in pods that reference this ServiceAccount. ImagePullSecrets are distinct from Secrets because Secrets can be mounted in the pod, but ImagePullSecrets are only accessed by the kubelet. More info: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.LocalObjectReference" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.LocalObjectReference" "name" [ ]
+          );
           apply = attrsToList;
         };
         "kind" = mkOption {
@@ -10083,7 +10268,9 @@ with lib; let
         };
         "secrets" = mkOption {
           description = "Secrets is a list of the secrets in the same namespace that pods running using this ServiceAccount are allowed to use. Pods are only limited to this list if this service account has a \"kubernetes.io/enforce-mountable-secrets\" annotation set to \"true\". This field should not be used to find auto-generated service account token secrets for use outside of pods. Instead, tokens can be requested directly using the TokenRequest API, or service account token secrets can be manually created. More info: https://kubernetes.io/docs/concepts/configuration/secret";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ObjectReference" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ObjectReference" "name" [ ]
+          );
           apply = attrsToList;
         };
       };
@@ -10262,7 +10449,9 @@ with lib; let
         };
         "ports" = mkOption {
           description = "The list of ports that are exposed by this service. More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ServicePort" "name" ["port"]);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.core.v1.ServicePort" "name" [ "port" ]
+          );
           apply = attrsToList;
         };
         "publishNotReadyAddresses" = mkOption {
@@ -10318,7 +10507,9 @@ with lib; let
       options = {
         "conditions" = mkOption {
           description = "Current service state";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.apimachinery.pkg.apis.meta.v1.Condition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.apimachinery.pkg.apis.meta.v1.Condition" "type" [ ]
+          );
           apply = attrsToList;
         };
         "loadBalancer" = mkOption {
@@ -10352,7 +10543,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.StorageOSPersistentVolumeSource" = {
       options = {
@@ -10430,7 +10621,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.TCPSocketAction" = {
       options = {
@@ -10517,13 +10708,15 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.TopologySelectorTerm" = {
       options = {
         "matchLabelExpressions" = mkOption {
           description = "A list of topology selector requirements by labels.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.core.v1.TopologySelectorLabelRequirement"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.core.v1.TopologySelectorLabelRequirement")
+          );
         };
       };
 
@@ -10788,7 +10981,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.VolumeMount" = {
       options = {
@@ -10954,7 +11147,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.core.v1.WindowsSecurityContextOptions" = {
       options = {
@@ -11055,7 +11248,9 @@ with lib; let
       options = {
         "forZones" = mkOption {
           description = "forZones indicates the zone(s) this endpoint should be consumed by to enable topology aware routing.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.discovery.v1.ForZone" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.discovery.v1.ForZone" "name" [ ]
+          );
           apply = attrsToList;
         };
       };
@@ -11115,7 +11310,9 @@ with lib; let
         };
         "ports" = mkOption {
           description = "ports specifies the list of network ports exposed by each endpoint in this slice. Each port must have a unique name. When ports is empty, it indicates that there are no defined ports. When a port is defined with a nil port value, it indicates \"all ports\". Each slice may include a maximum of 100 ports.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.discovery.v1.EndpointPort" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.discovery.v1.EndpointPort" "name" [ ]
+          );
           apply = attrsToList;
         };
       };
@@ -11161,7 +11358,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.events.v1.Event" = {
       options = {
@@ -11292,7 +11489,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.flowcontrol.v1.ExemptPriorityLevelConfiguration" = {
       options = {
@@ -11319,7 +11516,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.flowcontrol.v1.FlowSchema" = {
       options = {
@@ -11427,7 +11624,9 @@ with lib; let
         };
         "rules" = mkOption {
           description = "`rules` describes which requests will match this flow schema. This FlowSchema matches a request if and only if at least one member of rules matches the request. if it is an empty slice, there will be no requests matching the FlowSchema.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.flowcontrol.v1.PolicyRulesWithSubjects"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.flowcontrol.v1.PolicyRulesWithSubjects")
+          );
         };
       };
 
@@ -11441,7 +11640,9 @@ with lib; let
       options = {
         "conditions" = mkOption {
           description = "`conditions` is a list of the current states of FlowSchema.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.flowcontrol.v1.FlowSchemaCondition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.flowcontrol.v1.FlowSchemaCondition" "type" [ ]
+          );
           apply = attrsToList;
         };
       };
@@ -11458,7 +11659,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.flowcontrol.v1.LimitResponse" = {
       options = {
@@ -11515,7 +11716,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.flowcontrol.v1.PolicyRulesWithSubjects" = {
       options = {
@@ -11636,7 +11837,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.flowcontrol.v1.PriorityLevelConfigurationSpec" = {
       options = {
@@ -11663,7 +11864,11 @@ with lib; let
       options = {
         "conditions" = mkOption {
           description = "`conditions` is the current state of \"request-priority\".";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.flowcontrol.v1.PriorityLevelConfigurationCondition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.flowcontrol.v1.PriorityLevelConfigurationCondition"
+              "type"
+              [ ]
+          );
           apply = attrsToList;
         };
       };
@@ -11735,7 +11940,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.flowcontrol.v1.Subject" = {
       options = {
@@ -11771,7 +11976,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.flowcontrol.v1beta3.ExemptPriorityLevelConfiguration" = {
       options = {
@@ -11798,7 +12003,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.flowcontrol.v1beta3.FlowSchema" = {
       options = {
@@ -11906,7 +12111,9 @@ with lib; let
         };
         "rules" = mkOption {
           description = "`rules` describes which requests will match this flow schema. This FlowSchema matches a request if and only if at least one member of rules matches the request. if it is an empty slice, there will be no requests matching the FlowSchema.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.flowcontrol.v1beta3.PolicyRulesWithSubjects"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.flowcontrol.v1beta3.PolicyRulesWithSubjects")
+          );
         };
       };
 
@@ -11920,7 +12127,9 @@ with lib; let
       options = {
         "conditions" = mkOption {
           description = "`conditions` is a list of the current states of FlowSchema.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.flowcontrol.v1beta3.FlowSchemaCondition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.flowcontrol.v1beta3.FlowSchemaCondition" "type" [ ]
+          );
           apply = attrsToList;
         };
       };
@@ -11937,7 +12146,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.flowcontrol.v1beta3.LimitResponse" = {
       options = {
@@ -11994,17 +12203,21 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.flowcontrol.v1beta3.PolicyRulesWithSubjects" = {
       options = {
         "nonResourceRules" = mkOption {
           description = "`nonResourceRules` is a list of NonResourcePolicyRules that identify matching requests according to their verb and the target non-resource URL.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.flowcontrol.v1beta3.NonResourcePolicyRule"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.flowcontrol.v1beta3.NonResourcePolicyRule")
+          );
         };
         "resourceRules" = mkOption {
           description = "`resourceRules` is a slice of ResourcePolicyRules that identify matching requests according to their verb and the target resource. At least one of `resourceRules` and `nonResourceRules` has to be non-empty.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.flowcontrol.v1beta3.ResourcePolicyRule"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.flowcontrol.v1beta3.ResourcePolicyRule")
+          );
         };
         "subjects" = mkOption {
           description = "subjects is the list of normal user, serviceaccount, or group that this rule cares about. There must be at least one member in this slice. A slice that includes both the system:authenticated and system:unauthenticated user groups matches every request. Required.";
@@ -12115,7 +12328,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.flowcontrol.v1beta3.PriorityLevelConfigurationSpec" = {
       options = {
@@ -12125,7 +12338,9 @@ with lib; let
         };
         "limited" = mkOption {
           description = "`limited` specifies how requests are handled for a Limited priority level. This field must be non-empty if and only if `type` is `\"Limited\"`.";
-          type = types.nullOr (submoduleOf "io.k8s.api.flowcontrol.v1beta3.LimitedPriorityLevelConfiguration");
+          type = types.nullOr (
+            submoduleOf "io.k8s.api.flowcontrol.v1beta3.LimitedPriorityLevelConfiguration"
+          );
         };
         "type" = mkOption {
           description = "`type` indicates whether this priority level is subject to limitation on request execution.  A value of `\"Exempt\"` means that requests of this priority level are not subject to a limit (and thus are never queued) and do not detract from the capacity made available to other priority levels.  A value of `\"Limited\"` means that (a) requests of this priority level _are_ subject to limits and (b) some of the server's limited capacity is made available exclusively to this priority level. Required.";
@@ -12142,7 +12357,12 @@ with lib; let
       options = {
         "conditions" = mkOption {
           description = "`conditions` is the current state of \"request-priority\".";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.flowcontrol.v1beta3.PriorityLevelConfigurationCondition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey
+              "io.k8s.api.flowcontrol.v1beta3.PriorityLevelConfigurationCondition"
+              "type"
+              [ ]
+          );
           apply = attrsToList;
         };
       };
@@ -12214,7 +12434,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.flowcontrol.v1beta3.Subject" = {
       options = {
@@ -12250,7 +12470,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.networking.v1.HTTPIngressPath" = {
       options = {
@@ -12280,7 +12500,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.networking.v1.IPBlock" = {
       options = {
@@ -12499,7 +12719,9 @@ with lib; let
       options = {
         "ingress" = mkOption {
           description = "ingress is a list containing ingress points for the load-balancer.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.networking.v1.IngressLoadBalancerIngress"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.networking.v1.IngressLoadBalancerIngress")
+          );
         };
       };
 
@@ -12755,7 +12977,9 @@ with lib; let
         };
         "ingress" = mkOption {
           description = "ingress is a list of ingress rules to be applied to the selected pods. Traffic is allowed to a pod if there are no NetworkPolicies selecting the pod (and cluster policy otherwise allows the traffic), OR if the traffic source is the pod's local node, OR if the traffic matches at least one ingress rule across all of the NetworkPolicy objects whose podSelector matches the pod. If this field is empty then this NetworkPolicy does not allow any traffic (and serves solely to ensure that the pods it selects are isolated by default)";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.api.networking.v1.NetworkPolicyIngressRule"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.api.networking.v1.NetworkPolicyIngressRule")
+          );
         };
         "podSelector" = mkOption {
           description = "podSelector selects the pods to which this NetworkPolicy object applies. The array of ingress rules is applied to any pods selected by this field. Multiple network policies can select the same set of pods. In this case, the ingress rules for each are combined additively. This field is NOT optional and follows standard label selector semantics. An empty podSelector matches all pods in this namespace.";
@@ -12851,7 +13075,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.networking.v1alpha1.ParentReference" = {
       options = {
@@ -12952,7 +13176,9 @@ with lib; let
       options = {
         "conditions" = mkOption {
           description = "conditions holds an array of metav1.Condition that describe the state of the ServiceCIDR. Current service state";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.apimachinery.pkg.apis.meta.v1.Condition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.apimachinery.pkg.apis.meta.v1.Condition" "type" [ ]
+          );
           apply = attrsToList;
         };
       };
@@ -13168,7 +13394,9 @@ with lib; let
       options = {
         "conditions" = mkOption {
           description = "Conditions contain conditions for PDB. The disruption controller sets the DisruptionAllowed condition. The following are known values for the reason field (additional reasons could be added in the future): - SyncFailed: The controller encountered an error and wasn't able to compute\n              the number of allowed disruptions. Therefore no disruptions are\n              allowed and the status of the condition will be False.\n- InsufficientPods: The number of pods are either at or below the number\n                    required by the PodDisruptionBudget. No disruptions are\n                    allowed and the status of the condition will be False.\n- SufficientPods: There are more pods than required by the PodDisruptionBudget.\n                  The condition will be True, and the number of allowed\n                  disruptions are provided by the disruptionsAllowed property.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.apimachinery.pkg.apis.meta.v1.Condition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.apimachinery.pkg.apis.meta.v1.Condition" "type" [ ]
+          );
           apply = attrsToList;
         };
         "currentHealthy" = mkOption {
@@ -13207,7 +13435,9 @@ with lib; let
       options = {
         "clusterRoleSelectors" = mkOption {
           description = "ClusterRoleSelectors holds a list of selectors which will be used to find ClusterRoles and create the rules. If any of the selectors match, then the ClusterRole's permissions will be added";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector")
+          );
         };
       };
 
@@ -13267,7 +13497,7 @@ with lib; let
         };
         "subjects" = mkOption {
           description = "Subjects holds references to the objects the role applies to.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.rbac.v1.Subject" "name" []);
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.rbac.v1.Subject" "name" [ ]);
           apply = attrsToList;
         };
       };
@@ -13409,7 +13639,7 @@ with lib; let
         };
         "subjects" = mkOption {
           description = "Subjects holds references to the objects the role applies to.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.rbac.v1.Subject" "name" []);
+          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.rbac.v1.Subject" "name" [ ]);
           apply = attrsToList;
         };
       };
@@ -13489,7 +13719,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.rbac.v1.Subject" = {
       options = {
@@ -13585,7 +13815,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.resource.v1alpha2.NamedResourcesAttribute" = {
       options = {
@@ -13641,13 +13871,15 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.resource.v1alpha2.NamedResourcesInstance" = {
       options = {
         "attributes" = mkOption {
           description = "Attributes defines the attributes of this resource instance. The name of each attribute must be unique.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.resource.v1alpha2.NamedResourcesAttribute" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.resource.v1alpha2.NamedResourcesAttribute" "name" [ ]
+          );
           apply = attrsToList;
         };
         "name" = mkOption {
@@ -13668,7 +13900,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.resource.v1alpha2.NamedResourcesRequest" = {
       options = {
@@ -13678,18 +13910,20 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.resource.v1alpha2.NamedResourcesResources" = {
       options = {
         "instances" = mkOption {
           description = "The list of all individual resources instances currently available.";
-          type = coerceAttrsOfSubmodulesToListByKey "io.k8s.api.resource.v1alpha2.NamedResourcesInstance" "name" [];
+          type =
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.resource.v1alpha2.NamedResourcesInstance" "name"
+              [ ];
           apply = attrsToList;
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.resource.v1alpha2.NamedResourcesStringSlice" = {
       options = {
@@ -13699,7 +13933,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.resource.v1alpha2.PodSchedulingContext" = {
       options = {
@@ -13779,7 +14013,11 @@ with lib; let
       options = {
         "resourceClaims" = mkOption {
           description = "ResourceClaims describes resource availability for each pod.spec.resourceClaim entry where the corresponding ResourceClaim uses \"WaitForFirstConsumer\" allocation mode.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.resource.v1alpha2.ResourceClaimSchedulingStatus" "name" ["name"]);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.resource.v1alpha2.ResourceClaimSchedulingStatus"
+              "name"
+              [ "name" ]
+          );
           apply = attrsToList;
         };
       };
@@ -14006,7 +14244,11 @@ with lib; let
         };
         "reservedFor" = mkOption {
           description = "ReservedFor indicates which entities are currently allowed to use the claim. A Pod which references a ResourceClaim which is not reserved for that Pod will not be started.\n\nThere can be at most 32 such reservations. This may get increased in the future, but not reduced.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.resource.v1alpha2.ResourceClaimConsumerReference" "uid" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.resource.v1alpha2.ResourceClaimConsumerReference"
+              "uid"
+              [ ]
+          );
           apply = attrsToList;
         };
       };
@@ -14649,12 +14891,12 @@ with lib; let
       options = {
         "drivers" = mkOption {
           description = "drivers is a list of information of all CSI Drivers existing on a node. If all drivers in the list are uninstalled, this can become empty.";
-          type = coerceAttrsOfSubmodulesToListByKey "io.k8s.api.storage.v1.CSINodeDriver" "name" [];
+          type = coerceAttrsOfSubmodulesToListByKey "io.k8s.api.storage.v1.CSINodeDriver" "name" [ ];
           apply = attrsToList;
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.storage.v1.CSIStorageCapacity" = {
       options = {
@@ -14911,7 +15153,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.api.storage.v1.VolumeAttachmentStatus" = {
       options = {
@@ -15093,11 +15335,15 @@ with lib; let
         };
         "spec" = mkOption {
           description = "Specification of the migration.";
-          type = types.nullOr (submoduleOf "io.k8s.api.storagemigration.v1alpha1.StorageVersionMigrationSpec");
+          type = types.nullOr (
+            submoduleOf "io.k8s.api.storagemigration.v1alpha1.StorageVersionMigrationSpec"
+          );
         };
         "status" = mkOption {
           description = "Status of the migration.";
-          type = types.nullOr (submoduleOf "io.k8s.api.storagemigration.v1alpha1.StorageVersionMigrationStatus");
+          type = types.nullOr (
+            submoduleOf "io.k8s.api.storagemigration.v1alpha1.StorageVersionMigrationStatus"
+          );
         };
       };
 
@@ -15117,7 +15363,10 @@ with lib; let
         };
         "items" = mkOption {
           description = "Items is the list of StorageVersionMigration";
-          type = coerceAttrsOfSubmodulesToListByKey "io.k8s.api.storagemigration.v1alpha1.StorageVersionMigration" "type" [];
+          type =
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.storagemigration.v1alpha1.StorageVersionMigration"
+              "type"
+              [ ];
           apply = attrsToList;
         };
         "kind" = mkOption {
@@ -15156,7 +15405,10 @@ with lib; let
       options = {
         "conditions" = mkOption {
           description = "The latest available observations of the migration's current state.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.api.storagemigration.v1alpha1.MigrationCondition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.api.storagemigration.v1alpha1.MigrationCondition" "type"
+              [ ]
+          );
           apply = attrsToList;
         };
         "resourceVersion" = mkOption {
@@ -15212,7 +15464,9 @@ with lib; let
         };
         "webhook" = mkOption {
           description = "webhook describes how to call the conversion webhook. Required when `strategy` is set to `\"Webhook\"`.";
-          type = types.nullOr (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.WebhookConversion");
+          type = types.nullOr (
+            submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.WebhookConversion"
+          );
         };
       };
 
@@ -15240,7 +15494,9 @@ with lib; let
         };
         "status" = mkOption {
           description = "status indicates the actual state of the CustomResourceDefinition";
-          type = types.nullOr (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceDefinitionStatus");
+          type = types.nullOr (
+            submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceDefinitionStatus"
+          );
         };
       };
 
@@ -15289,7 +15545,9 @@ with lib; let
         };
         "items" = mkOption {
           description = "items list individual CustomResourceDefinition objects";
-          type = types.listOf (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceDefinition");
+          type = types.listOf (
+            submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceDefinition"
+          );
         };
         "kind" = mkOption {
           description = "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds";
@@ -15346,7 +15604,9 @@ with lib; let
       options = {
         "conversion" = mkOption {
           description = "conversion defines conversion settings for the CRD.";
-          type = types.nullOr (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceConversion");
+          type = types.nullOr (
+            submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceConversion"
+          );
         };
         "group" = mkOption {
           description = "group is the API group of the defined custom resource. The custom resources are served under `/apis/<group>/...`. Must match the name of the CustomResourceDefinition (in the form `<names.plural>.<group>`).";
@@ -15366,7 +15626,11 @@ with lib; let
         };
         "versions" = mkOption {
           description = "versions is the list of all API versions of the defined custom resource. Version names are used to compute the order in which served versions are listed in API discovery. If the version string is \"kube-like\", it will sort above non \"kube-like\" version strings, which are ordered lexicographically. \"Kube-like\" versions start with a \"v\", then are followed by a number (the major version), then optionally the string \"alpha\" or \"beta\" and another number (the minor version). These are sorted first by GA > beta > alpha (where GA is a version with no suffix such as beta or alpha), and then by comparing major version, then minor version. An example sorted list of versions: v10, v2, v1, v11beta2, v10beta3, v3beta1, v12alpha1, v11alpha2, foo1, foo10.";
-          type = coerceAttrsOfSubmodulesToListByKey "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceDefinitionVersion" "name" [];
+          type =
+            coerceAttrsOfSubmodulesToListByKey
+              "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceDefinitionVersion"
+              "name"
+              [ ];
           apply = attrsToList;
         };
       };
@@ -15380,11 +15644,17 @@ with lib; let
       options = {
         "acceptedNames" = mkOption {
           description = "acceptedNames are the names that are actually being used to serve discovery. They may be different than the names in spec.";
-          type = types.nullOr (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceDefinitionNames");
+          type = types.nullOr (
+            submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceDefinitionNames"
+          );
         };
         "conditions" = mkOption {
           description = "conditions indicate state for particular aspects of a CustomResourceDefinition";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceDefinitionCondition"));
+          type = types.nullOr (
+            types.listOf (
+              submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceDefinitionCondition"
+            )
+          );
         };
         "storedVersions" = mkOption {
           description = "storedVersions lists all versions of CustomResources that were ever persisted. Tracking these versions allows a migration path for stored versions in etcd. The field is mutable so a migration controller can finish a migration to another version (ensuring no old objects are left in storage), and then remove the rest of the versions from this list. Versions may not be removed from `spec.versions` while they exist in this list.";
@@ -15402,7 +15672,12 @@ with lib; let
       options = {
         "additionalPrinterColumns" = mkOption {
           description = "additionalPrinterColumns specifies additional columns returned in Table output. See https://kubernetes.io/docs/reference/using-api/api-concepts/#receiving-resources-as-tables for details. If no columns are specified, a single column displaying the age of the custom resource is used.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceColumnDefinition" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey
+              "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceColumnDefinition"
+              "name"
+              [ ]
+          );
           apply = attrsToList;
         };
         "deprecated" = mkOption {
@@ -15419,11 +15694,17 @@ with lib; let
         };
         "schema" = mkOption {
           description = "schema describes the schema used for validation, pruning, and defaulting of this version of the custom resource.";
-          type = types.nullOr (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceValidation");
+          type = types.nullOr (
+            submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceValidation"
+          );
         };
         "selectableFields" = mkOption {
           description = "selectableFields specifies paths to fields that may be used as field selectors. A maximum of 8 selectable fields are allowed. See https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.SelectableField"));
+          type = types.nullOr (
+            types.listOf (
+              submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.SelectableField"
+            )
+          );
         };
         "served" = mkOption {
           description = "served is a flag enabling/disabling this version from being served via REST APIs";
@@ -15435,7 +15716,9 @@ with lib; let
         };
         "subresources" = mkOption {
           description = "subresources specify what subresources this version of the defined custom resource have.";
-          type = types.nullOr (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceSubresources");
+          type = types.nullOr (
+            submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceSubresources"
+          );
         };
       };
 
@@ -15474,11 +15757,15 @@ with lib; let
       options = {
         "scale" = mkOption {
           description = "scale indicates the custom resource should serve a `/scale` subresource that returns an `autoscaling/v1` Scale object.";
-          type = types.nullOr (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceSubresourceScale");
+          type = types.nullOr (
+            submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceSubresourceScale"
+          );
         };
         "status" = mkOption {
           description = "status indicates the custom resource should serve a `/status` subresource. When enabled: 1. requests to the custom resource primary endpoint ignore changes to the `status` stanza of the object. 2. requests to the custom resource `/status` subresource ignore changes to anything other than the `status` stanza of the object.";
-          type = types.nullOr (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceSubresourceStatus");
+          type = types.nullOr (
+            submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceSubresourceStatus"
+          );
         };
       };
 
@@ -15491,7 +15778,9 @@ with lib; let
       options = {
         "openAPIV3Schema" = mkOption {
           description = "openAPIV3Schema is the OpenAPI v3 schema to use for validation and pruning.";
-          type = types.nullOr (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.JSONSchemaProps");
+          type = types.nullOr (
+            submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.JSONSchemaProps"
+          );
         };
       };
 
@@ -15530,11 +15819,15 @@ with lib; let
         };
         "additionalItems" = mkOption {
           description = "";
-          type = types.nullOr (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.JSONSchemaPropsOrBool");
+          type = types.nullOr (
+            submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.JSONSchemaPropsOrBool"
+          );
         };
         "additionalProperties" = mkOption {
           description = "";
-          type = types.nullOr (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.JSONSchemaPropsOrBool");
+          type = types.nullOr (
+            submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.JSONSchemaPropsOrBool"
+          );
         };
         "allOf" = mkOption {
           description = "";
@@ -15562,7 +15855,9 @@ with lib; let
         };
         "enum" = mkOption {
           description = "";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.JSON"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.JSON")
+          );
         };
         "example" = mkOption {
           description = "";
@@ -15578,7 +15873,9 @@ with lib; let
         };
         "externalDocs" = mkOption {
           description = "";
-          type = types.nullOr (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.ExternalDocumentation");
+          type = types.nullOr (
+            submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.ExternalDocumentation"
+          );
         };
         "format" = mkOption {
           description = "format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated:\n\n- bsonobjectid: a bson object ID, i.e. a 24 characters hex string - uri: an URI as parsed by Golang net/url.ParseRequestURI - email: an email address as parsed by Golang net/mail.ParseAddress - hostname: a valid representation for an Internet host name, as defined by RFC 1034, section 3.1 [RFC1034]. - ipv4: an IPv4 IP as parsed by Golang net.ParseIP - ipv6: an IPv6 IP as parsed by Golang net.ParseIP - cidr: a CIDR as parsed by Golang net.ParseCIDR - mac: a MAC address as parsed by Golang net.ParseMAC - uuid: an UUID that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$ - uuid3: an UUID3 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$ - uuid4: an UUID4 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$ - uuid5: an UUID5 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$ - isbn: an ISBN10 or ISBN13 number string like \"0321751043\" or \"978-0321751041\" - isbn10: an ISBN10 number string like \"0321751043\" - isbn13: an ISBN13 number string like \"978-0321751041\" - creditcard: a credit card number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\d{3})\\d{11})$ with any non digit characters mixed in - ssn: a U.S. social security number following the regex ^\\d{3}[- ]?\\d{2}[- ]?\\d{4}$ - hexcolor: an hexadecimal color code like \"#FFFFFF: following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$ - rgbcolor: an RGB color code like rgb like \"rgb(255,255,2559\" - byte: base64 encoded binary data - password: any kind of string - date: a date string like \"2006-01-02\" as defined by full-date in RFC3339 - duration: a duration string like \"22 ns\" as parsed by Golang time.ParseDuration or compatible with Scala duration format - datetime: a date time string like \"2014-12-15T19:30:20.000Z\" as defined by date-time in RFC3339.";
@@ -15590,7 +15887,9 @@ with lib; let
         };
         "items" = mkOption {
           description = "";
-          type = types.nullOr (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.JSONSchemaPropsOrArray");
+          type = types.nullOr (
+            submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.JSONSchemaPropsOrArray"
+          );
         };
         "maxItems" = mkOption {
           description = "";
@@ -15694,7 +15993,12 @@ with lib; let
         };
         "x-kubernetes-validations" = mkOption {
           description = "x-kubernetes-validations describes a list of validation rules written in the CEL expression language. This field is an alpha-level. Using this field requires the feature gate `CustomResourceValidationExpressions` to be enabled.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.ValidationRule" "rule" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey
+              "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.ValidationRule"
+              "rule"
+              [ ]
+          );
           apply = attrsToList;
         };
       };
@@ -15760,7 +16064,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.ServiceReference" = {
       options = {
@@ -15831,7 +16135,9 @@ with lib; let
         };
         "service" = mkOption {
           description = "service is a reference to the service for this webhook. Either service or url must be specified.\n\nIf the webhook is running within the cluster, then you should use `service`.";
-          type = types.nullOr (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.ServiceReference");
+          type = types.nullOr (
+            submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.ServiceReference"
+          );
         };
         "url" = mkOption {
           description = "url gives the location of the webhook, in standard URL form (`scheme://host:port/path`). Exactly one of `url` or `service` must be specified.\n\nThe `host` should not refer to a service running in the cluster; use the `service` field instead. The host might be resolved via external DNS in some apiservers (e.g., `kube-apiserver` cannot resolve in-cluster DNS as that would be a layering violation). `host` may also be an IP address.\n\nPlease note that using `localhost` or `127.0.0.1` as a `host` is risky unless you take great care to run this webhook on all hosts which run an apiserver which might need to make calls to this webhook. Such installs are likely to be non-portable, i.e., not easy to turn up in a new cluster.\n\nThe scheme must be \"https\"; the URL must begin with \"https://\".\n\nA path is optional, and if present may be any string permissible in a URL. You may use the path to pass an arbitrary string to the webhook, for example, a cluster identifier.\n\nAttempting to use a user or basic auth e.g. \"user:password@\" is not allowed. Fragments (\"#...\") and query parameters (\"?...\") are not allowed, either.";
@@ -15849,7 +16155,9 @@ with lib; let
       options = {
         "clientConfig" = mkOption {
           description = "clientConfig is the instructions for how to call the webhook if strategy is `Webhook`.";
-          type = types.nullOr (submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.WebhookClientConfig");
+          type = types.nullOr (
+            submoduleOf "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.WebhookClientConfig"
+          );
         };
         "conversionReviewVersions" = mkOption {
           description = "conversionReviewVersions is an ordered list of preferred `ConversionReview` versions the Webhook expects. The API server will use the first version in the list which it supports. If none of the versions specified in this list are supported by API server, conversion will fail for the custom resource. If a persisted Webhook configuration specifies allowed versions and does not include any versions known to the API Server, calls to the webhook will fail.";
@@ -15883,7 +16191,9 @@ with lib; let
         };
         "serverAddressByClientCIDRs" = mkOption {
           description = "a map of client CIDR to server address that is serving this group. This is to help clients reach servers in the most network-efficient way possible. Clients can use the appropriate server address as per the CIDR that they match. In case of multiple matches, clients should use the longest matching CIDR. The server returns only those CIDRs that it thinks that the client can match. For example: the master will return an internal IP CIDR only, if the client reaches the server using an internal IP. Server looks at X-Forwarded-For header or X-Real-Ip header or request.RemoteAddr (in that order) to get the client IP.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.apimachinery.pkg.apis.meta.v1.ServerAddressByClientCIDR"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.apimachinery.pkg.apis.meta.v1.ServerAddressByClientCIDR")
+          );
         };
         "versions" = mkOption {
           description = "versions are the versions supported in this group.";
@@ -15906,7 +16216,9 @@ with lib; let
         };
         "groups" = mkOption {
           description = "groups is a list of APIGroup.";
-          type = coerceAttrsOfSubmodulesToListByKey "io.k8s.apimachinery.pkg.apis.meta.v1.APIGroup" "name" [];
+          type =
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.apimachinery.pkg.apis.meta.v1.APIGroup" "name"
+              [ ];
           apply = attrsToList;
         };
         "kind" = mkOption {
@@ -15988,7 +16300,9 @@ with lib; let
         };
         "resources" = mkOption {
           description = "resources contains the name of the resources and if they are namespaced.";
-          type = coerceAttrsOfSubmodulesToListByKey "io.k8s.apimachinery.pkg.apis.meta.v1.APIResource" "name" [];
+          type =
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.apimachinery.pkg.apis.meta.v1.APIResource" "name"
+              [ ];
           apply = attrsToList;
         };
       };
@@ -16111,13 +16425,15 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector" = {
       options = {
         "matchExpressions" = mkOption {
           description = "matchExpressions is a list of label selector requirements. The requirements are ANDed.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelectorRequirement"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelectorRequirement")
+          );
         };
         "matchLabels" = mkOption {
           description = "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.";
@@ -16257,7 +16573,9 @@ with lib; let
         };
         "managedFields" = mkOption {
           description = "ManagedFields maps workflow-id and version to the set of fields that are managed by that workflow. This is mostly for internal housekeeping, and users typically shouldn't need to set or understand this field. A workflow can be the user's name, a controller's name, or the name of a specific apply path like \"ci-cd\". The set of fields is always in the version that the workflow used when modifying the object.";
-          type = types.nullOr (types.listOf (submoduleOf "io.k8s.apimachinery.pkg.apis.meta.v1.ManagedFieldsEntry"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "io.k8s.apimachinery.pkg.apis.meta.v1.ManagedFieldsEntry")
+          );
         };
         "name" = mkOption {
           description = "Name must be unique within a namespace. Is required when creating resources, although some resources may allow a client to request the generation of an appropriate name automatically. Name is primarily intended for creation idempotence and configuration definition. Cannot be updated. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#names";
@@ -16269,7 +16587,9 @@ with lib; let
         };
         "ownerReferences" = mkOption {
           description = "List of objects depended by this object. If ALL objects in the list have been deleted, this object will be garbage collected. If this object is managed by a controller, then an entry in this list will point to this controller, with the controller field set to true. There cannot be more than one managing controller.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.apimachinery.pkg.apis.meta.v1.OwnerReference" "uid" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "io.k8s.apimachinery.pkg.apis.meta.v1.OwnerReference" "uid" [ ]
+          );
           apply = attrsToList;
         };
         "resourceVersion" = mkOption {
@@ -16368,7 +16688,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.apimachinery.pkg.apis.meta.v1.Status" = {
       options = {
@@ -16490,7 +16810,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.apimachinery.pkg.runtime.RawExtension" = {
     };
@@ -16536,7 +16856,7 @@ with lib; let
         };
       };
 
-      config = {};
+      config = { };
     };
     "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1.APIService" = {
       options = {
@@ -16554,11 +16874,15 @@ with lib; let
         };
         "spec" = mkOption {
           description = "Spec contains information for locating and communicating with a server";
-          type = types.nullOr (submoduleOf "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1.APIServiceSpec");
+          type = types.nullOr (
+            submoduleOf "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1.APIServiceSpec"
+          );
         };
         "status" = mkOption {
           description = "Status contains derived information about an API server";
-          type = types.nullOr (submoduleOf "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1.APIServiceStatus");
+          type = types.nullOr (
+            submoduleOf "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1.APIServiceStatus"
+          );
         };
       };
 
@@ -16646,7 +16970,9 @@ with lib; let
         };
         "service" = mkOption {
           description = "Service is a reference to the service for this API server.  It must communicate on port 443. If the Service is nil, that means the handling for the API groupversion is handled locally on this server. The call will simply delegate to the normal handler chain to be fulfilled.";
-          type = types.nullOr (submoduleOf "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1.ServiceReference");
+          type = types.nullOr (
+            submoduleOf "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1.ServiceReference"
+          );
         };
         "version" = mkOption {
           description = "Version is the API version this server hosts.  For example, \"v1\"";
@@ -16670,7 +16996,12 @@ with lib; let
       options = {
         "conditions" = mkOption {
           description = "Current service state of apiService.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1.APIServiceCondition" "type" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey
+              "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1.APIServiceCondition"
+              "type"
+              [ ]
+          );
           apply = attrsToList;
         };
       };
@@ -16702,774 +17033,1382 @@ with lib; let
       };
     };
   };
-in {
+in
+{
   # all resource versions
   options = {
-    resources =
-      {
-        "admissionregistration.k8s.io"."v1"."MutatingWebhookConfiguration" = mkOption {
-          description = "MutatingWebhookConfiguration describes the configuration of and admission webhook that accept or reject and may change the object.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1.MutatingWebhookConfiguration" "mutatingwebhookconfigurations" "MutatingWebhookConfiguration" "admissionregistration.k8s.io" "v1");
-          default = {};
-        };
-        "admissionregistration.k8s.io"."v1"."ValidatingAdmissionPolicy" = mkOption {
-          description = "ValidatingAdmissionPolicy describes the definition of an admission validation policy that accepts or rejects an object without changing it.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1.ValidatingAdmissionPolicy" "validatingadmissionpolicies" "ValidatingAdmissionPolicy" "admissionregistration.k8s.io" "v1");
-          default = {};
-        };
-        "admissionregistration.k8s.io"."v1"."ValidatingAdmissionPolicyBinding" = mkOption {
-          description = "ValidatingAdmissionPolicyBinding binds the ValidatingAdmissionPolicy with paramerized resources. ValidatingAdmissionPolicyBinding and parameter CRDs together define how cluster administrators configure policies for clusters.\n\nFor a given admission request, each binding will cause its policy to be evaluated N times, where N is 1 for policies/bindings that don't use params, otherwise N is the number of parameters selected by the binding.\n\nThe CEL expressions of a policy must have a computed CEL cost below the maximum CEL budget. Each evaluation of the policy is given an independent CEL cost budget. Adding/removing policies, bindings, or params can not affect whether a given (policy, binding, param) combination is within its own CEL budget.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1.ValidatingAdmissionPolicyBinding" "validatingadmissionpolicybindings" "ValidatingAdmissionPolicyBinding" "admissionregistration.k8s.io" "v1");
-          default = {};
-        };
-        "admissionregistration.k8s.io"."v1"."ValidatingWebhookConfiguration" = mkOption {
-          description = "ValidatingWebhookConfiguration describes the configuration of and admission webhook that accept or reject and object without changing it.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1.ValidatingWebhookConfiguration" "validatingwebhookconfigurations" "ValidatingWebhookConfiguration" "admissionregistration.k8s.io" "v1");
-          default = {};
-        };
-        "admissionregistration.k8s.io"."v1alpha1"."ValidatingAdmissionPolicy" = mkOption {
-          description = "ValidatingAdmissionPolicy describes the definition of an admission validation policy that accepts or rejects an object without changing it.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1alpha1.ValidatingAdmissionPolicy" "validatingadmissionpolicies" "ValidatingAdmissionPolicy" "admissionregistration.k8s.io" "v1alpha1");
-          default = {};
-        };
-        "admissionregistration.k8s.io"."v1alpha1"."ValidatingAdmissionPolicyBinding" = mkOption {
-          description = "ValidatingAdmissionPolicyBinding binds the ValidatingAdmissionPolicy with paramerized resources. ValidatingAdmissionPolicyBinding and parameter CRDs together define how cluster administrators configure policies for clusters.\n\nFor a given admission request, each binding will cause its policy to be evaluated N times, where N is 1 for policies/bindings that don't use params, otherwise N is the number of parameters selected by the binding.\n\nThe CEL expressions of a policy must have a computed CEL cost below the maximum CEL budget. Each evaluation of the policy is given an independent CEL cost budget. Adding/removing policies, bindings, or params can not affect whether a given (policy, binding, param) combination is within its own CEL budget.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1alpha1.ValidatingAdmissionPolicyBinding" "validatingadmissionpolicybindings" "ValidatingAdmissionPolicyBinding" "admissionregistration.k8s.io" "v1alpha1");
-          default = {};
-        };
-        "admissionregistration.k8s.io"."v1beta1"."ValidatingAdmissionPolicy" = mkOption {
-          description = "ValidatingAdmissionPolicy describes the definition of an admission validation policy that accepts or rejects an object without changing it.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1beta1.ValidatingAdmissionPolicy" "validatingadmissionpolicies" "ValidatingAdmissionPolicy" "admissionregistration.k8s.io" "v1beta1");
-          default = {};
-        };
-        "admissionregistration.k8s.io"."v1beta1"."ValidatingAdmissionPolicyBinding" = mkOption {
-          description = "ValidatingAdmissionPolicyBinding binds the ValidatingAdmissionPolicy with paramerized resources. ValidatingAdmissionPolicyBinding and parameter CRDs together define how cluster administrators configure policies for clusters.\n\nFor a given admission request, each binding will cause its policy to be evaluated N times, where N is 1 for policies/bindings that don't use params, otherwise N is the number of parameters selected by the binding.\n\nThe CEL expressions of a policy must have a computed CEL cost below the maximum CEL budget. Each evaluation of the policy is given an independent CEL cost budget. Adding/removing policies, bindings, or params can not affect whether a given (policy, binding, param) combination is within its own CEL budget.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1beta1.ValidatingAdmissionPolicyBinding" "validatingadmissionpolicybindings" "ValidatingAdmissionPolicyBinding" "admissionregistration.k8s.io" "v1beta1");
-          default = {};
-        };
-        "internal.apiserver.k8s.io"."v1alpha1"."StorageVersion" = mkOption {
-          description = "Storage version of a specific resource.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.apiserverinternal.v1alpha1.StorageVersion" "storageversions" "StorageVersion" "internal.apiserver.k8s.io" "v1alpha1");
-          default = {};
-        };
-        "apps"."v1"."ControllerRevision" = mkOption {
-          description = "ControllerRevision implements an immutable snapshot of state data. Clients are responsible for serializing and deserializing the objects that contain their internal state. Once a ControllerRevision has been successfully created, it can not be updated. The API Server will fail validation of all requests that attempt to mutate the Data field. ControllerRevisions may, however, be deleted. Note that, due to its use by both the DaemonSet and StatefulSet controllers for update and rollback, this object is beta. However, it may be subject to name and representation changes in future releases, and clients should not depend on its stability. It is primarily for internal use by controllers.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.ControllerRevision" "controllerrevisions" "ControllerRevision" "apps" "v1");
-          default = {};
-        };
-        "apps"."v1"."DaemonSet" = mkOption {
-          description = "DaemonSet represents the configuration of a daemon set.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.DaemonSet" "daemonsets" "DaemonSet" "apps" "v1");
-          default = {};
-        };
-        "apps"."v1"."Deployment" = mkOption {
-          description = "Deployment enables declarative updates for Pods and ReplicaSets.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.Deployment" "deployments" "Deployment" "apps" "v1");
-          default = {};
-        };
-        "apps"."v1"."ReplicaSet" = mkOption {
-          description = "ReplicaSet ensures that a specified number of pod replicas are running at any given time.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.ReplicaSet" "replicasets" "ReplicaSet" "apps" "v1");
-          default = {};
-        };
-        "apps"."v1"."StatefulSet" = mkOption {
-          description = "StatefulSet represents a set of pods with consistent identities. Identities are defined as:\n  - Network: A single stable DNS and hostname.\n  - Storage: As many VolumeClaims as requested.\n\nThe StatefulSet guarantees that a given network identity will always map to the same storage identity.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.StatefulSet" "statefulsets" "StatefulSet" "apps" "v1");
-          default = {};
-        };
-        "authentication.k8s.io"."v1"."SelfSubjectReview" = mkOption {
-          description = "SelfSubjectReview contains the user information that the kube-apiserver has about the user making this request. When using impersonation, users will receive the user info of the user being impersonated.  If impersonation or request header authentication is used, any extra keys will have their case ignored and returned as lowercase.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.authentication.v1.SelfSubjectReview" "selfsubjectreviews" "SelfSubjectReview" "authentication.k8s.io" "v1");
-          default = {};
-        };
-        "authentication.k8s.io"."v1"."TokenRequest" = mkOption {
-          description = "TokenRequest requests a token for a given service account.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.authentication.v1.TokenRequest" "token" "TokenRequest" "authentication.k8s.io" "v1");
-          default = {};
-        };
-        "authentication.k8s.io"."v1"."TokenReview" = mkOption {
-          description = "TokenReview attempts to authenticate a token to a known user. Note: TokenReview requests may be cached by the webhook token authenticator plugin in the kube-apiserver.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.authentication.v1.TokenReview" "tokenreviews" "TokenReview" "authentication.k8s.io" "v1");
-          default = {};
-        };
-        "authentication.k8s.io"."v1alpha1"."SelfSubjectReview" = mkOption {
-          description = "SelfSubjectReview contains the user information that the kube-apiserver has about the user making this request. When using impersonation, users will receive the user info of the user being impersonated.  If impersonation or request header authentication is used, any extra keys will have their case ignored and returned as lowercase.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.authentication.v1alpha1.SelfSubjectReview" "selfsubjectreviews" "SelfSubjectReview" "authentication.k8s.io" "v1alpha1");
-          default = {};
-        };
-        "authentication.k8s.io"."v1beta1"."SelfSubjectReview" = mkOption {
-          description = "SelfSubjectReview contains the user information that the kube-apiserver has about the user making this request. When using impersonation, users will receive the user info of the user being impersonated.  If impersonation or request header authentication is used, any extra keys will have their case ignored and returned as lowercase.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.authentication.v1beta1.SelfSubjectReview" "selfsubjectreviews" "SelfSubjectReview" "authentication.k8s.io" "v1beta1");
-          default = {};
-        };
-        "authorization.k8s.io"."v1"."LocalSubjectAccessReview" = mkOption {
-          description = "LocalSubjectAccessReview checks whether or not a user or group can perform an action in a given namespace. Having a namespace scoped resource makes it much easier to grant namespace scoped policy that includes permissions checking.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.LocalSubjectAccessReview" "localsubjectaccessreviews" "LocalSubjectAccessReview" "authorization.k8s.io" "v1");
-          default = {};
-        };
-        "authorization.k8s.io"."v1"."SelfSubjectAccessReview" = mkOption {
-          description = "SelfSubjectAccessReview checks whether or the current user can perform an action.  Not filling in a spec.namespace means \"in all namespaces\".  Self is a special case, because users should always be able to check whether they can perform an action";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.SelfSubjectAccessReview" "selfsubjectaccessreviews" "SelfSubjectAccessReview" "authorization.k8s.io" "v1");
-          default = {};
-        };
-        "authorization.k8s.io"."v1"."SelfSubjectRulesReview" = mkOption {
-          description = "SelfSubjectRulesReview enumerates the set of actions the current user can perform within a namespace. The returned list of actions may be incomplete depending on the server's authorization mode, and any errors experienced during the evaluation. SelfSubjectRulesReview should be used by UIs to show/hide actions, or to quickly let an end user reason about their permissions. It should NOT Be used by external systems to drive authorization decisions as this raises confused deputy, cache lifetime/revocation, and correctness concerns. SubjectAccessReview, and LocalAccessReview are the correct way to defer authorization decisions to the API server.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.SelfSubjectRulesReview" "selfsubjectrulesreviews" "SelfSubjectRulesReview" "authorization.k8s.io" "v1");
-          default = {};
-        };
-        "authorization.k8s.io"."v1"."SubjectAccessReview" = mkOption {
-          description = "SubjectAccessReview checks whether or not a user or group can perform an action.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.SubjectAccessReview" "subjectaccessreviews" "SubjectAccessReview" "authorization.k8s.io" "v1");
-          default = {};
-        };
-        "autoscaling"."v1"."HorizontalPodAutoscaler" = mkOption {
-          description = "configuration of a horizontal pod autoscaler.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.autoscaling.v1.HorizontalPodAutoscaler" "horizontalpodautoscalers" "HorizontalPodAutoscaler" "autoscaling" "v1");
-          default = {};
-        };
-        "autoscaling"."v2"."HorizontalPodAutoscaler" = mkOption {
-          description = "HorizontalPodAutoscaler is the configuration for a horizontal pod autoscaler, which automatically manages the replica count of any resource implementing the scale subresource based on the metrics specified.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.autoscaling.v2.HorizontalPodAutoscaler" "horizontalpodautoscalers" "HorizontalPodAutoscaler" "autoscaling" "v2");
-          default = {};
-        };
-        "batch"."v1"."CronJob" = mkOption {
-          description = "CronJob represents the configuration of a single cron job.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.batch.v1.CronJob" "cronjobs" "CronJob" "batch" "v1");
-          default = {};
-        };
-        "batch"."v1"."Job" = mkOption {
-          description = "Job represents the configuration of a single job.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.batch.v1.Job" "jobs" "Job" "batch" "v1");
-          default = {};
-        };
-        "certificates.k8s.io"."v1"."CertificateSigningRequest" = mkOption {
-          description = "CertificateSigningRequest objects provide a mechanism to obtain x509 certificates by submitting a certificate signing request, and having it asynchronously approved and issued.\n\nKubelets use this API to obtain:\n 1. client certificates to authenticate to kube-apiserver (with the \"kubernetes.io/kube-apiserver-client-kubelet\" signerName).\n 2. serving certificates for TLS endpoints kube-apiserver can connect to securely (with the \"kubernetes.io/kubelet-serving\" signerName).\n\nThis API can be used to request client certificates to authenticate to kube-apiserver (with the \"kubernetes.io/kube-apiserver-client\" signerName), or to obtain certificates from custom non-Kubernetes signers.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.certificates.v1.CertificateSigningRequest" "certificatesigningrequests" "CertificateSigningRequest" "certificates.k8s.io" "v1");
-          default = {};
-        };
-        "certificates.k8s.io"."v1alpha1"."ClusterTrustBundle" = mkOption {
-          description = "ClusterTrustBundle is a cluster-scoped container for X.509 trust anchors (root certificates).\n\nClusterTrustBundle objects are considered to be readable by any authenticated user in the cluster, because they can be mounted by pods using the `clusterTrustBundle` projection.  All service accounts have read access to ClusterTrustBundles by default.  Users who only have namespace-level access to a cluster can read ClusterTrustBundles by impersonating a serviceaccount that they have access to.\n\nIt can be optionally associated with a particular assigner, in which case it contains one valid set of trust anchors for that signer. Signers may have multiple associated ClusterTrustBundles; each is an independent set of trust anchors for that signer. Admission control is used to enforce that only users with permissions on the signer can create or modify the corresponding bundle.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.certificates.v1alpha1.ClusterTrustBundle" "clustertrustbundles" "ClusterTrustBundle" "certificates.k8s.io" "v1alpha1");
-          default = {};
-        };
-        "coordination.k8s.io"."v1"."Lease" = mkOption {
-          description = "Lease defines a lease concept.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.coordination.v1.Lease" "leases" "Lease" "coordination.k8s.io" "v1");
-          default = {};
-        };
-        "core"."v1"."Binding" = mkOption {
-          description = "Binding ties one object to another; for example, a pod is bound to a node by a scheduler. Deprecated in 1.7, please use the bindings subresource of pods instead.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Binding" "bindings" "Binding" "core" "v1");
-          default = {};
-        };
-        "core"."v1"."ConfigMap" = mkOption {
-          description = "ConfigMap holds configuration data for pods to consume.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.ConfigMap" "configmaps" "ConfigMap" "core" "v1");
-          default = {};
-        };
-        "core"."v1"."Endpoints" = mkOption {
-          description = "Endpoints is a collection of endpoints that implement the actual service. Example:\n\n\t Name: \"mysvc\",\n\t Subsets: [\n\t   {\n\t     Addresses: [{\"ip\": \"10.10.1.1\"}, {\"ip\": \"10.10.2.2\"}],\n\t     Ports: [{\"name\": \"a\", \"port\": 8675}, {\"name\": \"b\", \"port\": 309}]\n\t   },\n\t   {\n\t     Addresses: [{\"ip\": \"10.10.3.3\"}],\n\t     Ports: [{\"name\": \"a\", \"port\": 93}, {\"name\": \"b\", \"port\": 76}]\n\t   },\n\t]";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Endpoints" "endpoints" "Endpoints" "core" "v1");
-          default = {};
-        };
-        "core"."v1"."Event" = mkOption {
-          description = "Event is a report of an event somewhere in the cluster.  Events have a limited retention time and triggers and messages may evolve with time.  Event consumers should not rely on the timing of an event with a given Reason reflecting a consistent underlying trigger, or the continued existence of events with that Reason.  Events should be treated as informative, best-effort, supplemental data.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Event" "events" "Event" "core" "v1");
-          default = {};
-        };
-        "core"."v1"."LimitRange" = mkOption {
-          description = "LimitRange sets resource usage limits for each kind of resource in a Namespace.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.LimitRange" "limitranges" "LimitRange" "core" "v1");
-          default = {};
-        };
-        "core"."v1"."Namespace" = mkOption {
-          description = "Namespace provides a scope for Names. Use of multiple namespaces is optional.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Namespace" "namespaces" "Namespace" "core" "v1");
-          default = {};
-        };
-        "core"."v1"."Node" = mkOption {
-          description = "Node is a worker node in Kubernetes. Each node will have a unique identifier in the cache (i.e. in etcd).";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Node" "nodes" "Node" "core" "v1");
-          default = {};
-        };
-        "core"."v1"."PersistentVolume" = mkOption {
-          description = "PersistentVolume (PV) is a storage resource provisioned by an administrator. It is analogous to a node. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.PersistentVolume" "persistentvolumes" "PersistentVolume" "core" "v1");
-          default = {};
-        };
-        "core"."v1"."PersistentVolumeClaim" = mkOption {
-          description = "PersistentVolumeClaim is a user's request for and claim to a persistent volume";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.PersistentVolumeClaim" "persistentvolumeclaims" "PersistentVolumeClaim" "core" "v1");
-          default = {};
-        };
-        "core"."v1"."Pod" = mkOption {
-          description = "Pod is a collection of containers that can run on a host. This resource is created by clients and scheduled onto hosts.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Pod" "pods" "Pod" "core" "v1");
-          default = {};
-        };
-        "core"."v1"."PodTemplate" = mkOption {
-          description = "PodTemplate describes a template for creating copies of a predefined pod.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.PodTemplate" "podtemplates" "PodTemplate" "core" "v1");
-          default = {};
-        };
-        "core"."v1"."ReplicationController" = mkOption {
-          description = "ReplicationController represents the configuration of a replication controller.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.ReplicationController" "replicationcontrollers" "ReplicationController" "core" "v1");
-          default = {};
-        };
-        "core"."v1"."ResourceQuota" = mkOption {
-          description = "ResourceQuota sets aggregate quota restrictions enforced per namespace";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.ResourceQuota" "resourcequotas" "ResourceQuota" "core" "v1");
-          default = {};
-        };
-        "core"."v1"."Secret" = mkOption {
-          description = "Secret holds secret data of a certain type. The total bytes of the values in the Data field must be less than MaxSecretSize bytes.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Secret" "secrets" "Secret" "core" "v1");
-          default = {};
-        };
-        "core"."v1"."Service" = mkOption {
-          description = "Service is a named abstraction of software service (for example, mysql) consisting of local port (for example 3306) that the proxy listens on, and the selector that determines which pods will answer requests sent through the proxy.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Service" "services" "Service" "core" "v1");
-          default = {};
-        };
-        "core"."v1"."ServiceAccount" = mkOption {
-          description = "ServiceAccount binds together: * a name, understood by users, and perhaps by peripheral systems, for an identity * a principal that can be authenticated and authorized * a set of secrets";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.ServiceAccount" "serviceaccounts" "ServiceAccount" "core" "v1");
-          default = {};
-        };
-        "discovery.k8s.io"."v1"."EndpointSlice" = mkOption {
-          description = "EndpointSlice represents a subset of the endpoints that implement a service. For a given service there may be multiple EndpointSlice objects, selected by labels, which must be joined to produce the full set of endpoints.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.discovery.v1.EndpointSlice" "endpointslices" "EndpointSlice" "discovery.k8s.io" "v1");
-          default = {};
-        };
-        "events.k8s.io"."v1"."Event" = mkOption {
-          description = "Event is a report of an event somewhere in the cluster. It generally denotes some state change in the system. Events have a limited retention time and triggers and messages may evolve with time.  Event consumers should not rely on the timing of an event with a given Reason reflecting a consistent underlying trigger, or the continued existence of events with that Reason.  Events should be treated as informative, best-effort, supplemental data.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.events.v1.Event" "events" "Event" "events.k8s.io" "v1");
-          default = {};
-        };
-        "flowcontrol.apiserver.k8s.io"."v1"."FlowSchema" = mkOption {
-          description = "FlowSchema defines the schema of a group of flows. Note that a flow is made up of a set of inbound API requests with similar attributes and is identified by a pair of strings: the name of the FlowSchema and a \"flow distinguisher\".";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.flowcontrol.v1.FlowSchema" "flowschemas" "FlowSchema" "flowcontrol.apiserver.k8s.io" "v1");
-          default = {};
-        };
-        "flowcontrol.apiserver.k8s.io"."v1"."PriorityLevelConfiguration" = mkOption {
-          description = "PriorityLevelConfiguration represents the configuration of a priority level.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.flowcontrol.v1.PriorityLevelConfiguration" "prioritylevelconfigurations" "PriorityLevelConfiguration" "flowcontrol.apiserver.k8s.io" "v1");
-          default = {};
-        };
-        "flowcontrol.apiserver.k8s.io"."v1beta3"."FlowSchema" = mkOption {
-          description = "FlowSchema defines the schema of a group of flows. Note that a flow is made up of a set of inbound API requests with similar attributes and is identified by a pair of strings: the name of the FlowSchema and a \"flow distinguisher\".";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.flowcontrol.v1beta3.FlowSchema" "flowschemas" "FlowSchema" "flowcontrol.apiserver.k8s.io" "v1beta3");
-          default = {};
-        };
-        "flowcontrol.apiserver.k8s.io"."v1beta3"."PriorityLevelConfiguration" = mkOption {
-          description = "PriorityLevelConfiguration represents the configuration of a priority level.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.flowcontrol.v1beta3.PriorityLevelConfiguration" "prioritylevelconfigurations" "PriorityLevelConfiguration" "flowcontrol.apiserver.k8s.io" "v1beta3");
-          default = {};
-        };
-        "networking.k8s.io"."v1"."Ingress" = mkOption {
-          description = "Ingress is a collection of rules that allow inbound connections to reach the endpoints defined by a backend. An Ingress can be configured to give services externally-reachable urls, load balance traffic, terminate SSL, offer name based virtual hosting etc.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.networking.v1.Ingress" "ingresses" "Ingress" "networking.k8s.io" "v1");
-          default = {};
-        };
-        "networking.k8s.io"."v1"."IngressClass" = mkOption {
-          description = "IngressClass represents the class of the Ingress, referenced by the Ingress Spec. The `ingressclass.kubernetes.io/is-default-class` annotation can be used to indicate that an IngressClass should be considered default. When a single IngressClass resource has this annotation set to true, new Ingress resources without a class specified will be assigned this default class.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.networking.v1.IngressClass" "ingressclasses" "IngressClass" "networking.k8s.io" "v1");
-          default = {};
-        };
-        "networking.k8s.io"."v1"."NetworkPolicy" = mkOption {
-          description = "NetworkPolicy describes what network traffic is allowed for a set of Pods";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.networking.v1.NetworkPolicy" "networkpolicies" "NetworkPolicy" "networking.k8s.io" "v1");
-          default = {};
-        };
-        "networking.k8s.io"."v1alpha1"."IPAddress" = mkOption {
-          description = "IPAddress represents a single IP of a single IP Family. The object is designed to be used by APIs that operate on IP addresses. The object is used by the Service core API for allocation of IP addresses. An IP address can be represented in different formats, to guarantee the uniqueness of the IP, the name of the object is the IP address in canonical format, four decimal digits separated by dots suppressing leading zeros for IPv4 and the representation defined by RFC 5952 for IPv6. Valid: 192.168.1.5 or 2001:db8::1 or 2001:db8:aaaa:bbbb:cccc:dddd:eeee:1 Invalid: 10.01.2.3 or 2001:db8:0:0:0::1";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.networking.v1alpha1.IPAddress" "ipaddresses" "IPAddress" "networking.k8s.io" "v1alpha1");
-          default = {};
-        };
-        "networking.k8s.io"."v1alpha1"."ServiceCIDR" = mkOption {
-          description = "ServiceCIDR defines a range of IP addresses using CIDR format (e.g. 192.168.0.0/24 or 2001:db2::/64). This range is used to allocate ClusterIPs to Service objects.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.networking.v1alpha1.ServiceCIDR" "servicecidrs" "ServiceCIDR" "networking.k8s.io" "v1alpha1");
-          default = {};
-        };
-        "node.k8s.io"."v1"."RuntimeClass" = mkOption {
-          description = "RuntimeClass defines a class of container runtime supported in the cluster. The RuntimeClass is used to determine which container runtime is used to run all containers in a pod. RuntimeClasses are manually defined by a user or cluster provisioner, and referenced in the PodSpec. The Kubelet is responsible for resolving the RuntimeClassName reference before running the pod.  For more details, see https://kubernetes.io/docs/concepts/containers/runtime-class/";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.node.v1.RuntimeClass" "runtimeclasses" "RuntimeClass" "node.k8s.io" "v1");
-          default = {};
-        };
-        "policy"."v1"."Eviction" = mkOption {
-          description = "Eviction evicts a pod from its node subject to certain policies and safety constraints. This is a subresource of Pod.  A request to cause such an eviction is created by POSTing to .../pods/<pod name>/evictions.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.policy.v1.Eviction" "eviction" "Eviction" "policy" "v1");
-          default = {};
-        };
-        "policy"."v1"."PodDisruptionBudget" = mkOption {
-          description = "PodDisruptionBudget is an object to define the max disruption that can be caused to a collection of pods";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.policy.v1.PodDisruptionBudget" "poddisruptionbudgets" "PodDisruptionBudget" "policy" "v1");
-          default = {};
-        };
-        "rbac.authorization.k8s.io"."v1"."ClusterRole" = mkOption {
-          description = "ClusterRole is a cluster level, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding or ClusterRoleBinding.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.ClusterRole" "clusterroles" "ClusterRole" "rbac.authorization.k8s.io" "v1");
-          default = {};
-        };
-        "rbac.authorization.k8s.io"."v1"."ClusterRoleBinding" = mkOption {
-          description = "ClusterRoleBinding references a ClusterRole, but not contain it.  It can reference a ClusterRole in the global namespace, and adds who information via Subject.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.ClusterRoleBinding" "clusterrolebindings" "ClusterRoleBinding" "rbac.authorization.k8s.io" "v1");
-          default = {};
-        };
-        "rbac.authorization.k8s.io"."v1"."Role" = mkOption {
-          description = "Role is a namespaced, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.Role" "roles" "Role" "rbac.authorization.k8s.io" "v1");
-          default = {};
-        };
-        "rbac.authorization.k8s.io"."v1"."RoleBinding" = mkOption {
-          description = "RoleBinding references a role, but does not contain it.  It can reference a Role in the same namespace or a ClusterRole in the global namespace. It adds who information via Subjects and namespace information by which namespace it exists in.  RoleBindings in a given namespace only have effect in that namespace.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.RoleBinding" "rolebindings" "RoleBinding" "rbac.authorization.k8s.io" "v1");
-          default = {};
-        };
-        "resource.k8s.io"."v1alpha2"."PodSchedulingContext" = mkOption {
-          description = "PodSchedulingContext objects hold information that is needed to schedule a Pod with ResourceClaims that use \"WaitForFirstConsumer\" allocation mode.\n\nThis is an alpha type and requires enabling the DynamicResourceAllocation feature gate.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.resource.v1alpha2.PodSchedulingContext" "podschedulingcontexts" "PodSchedulingContext" "resource.k8s.io" "v1alpha2");
-          default = {};
-        };
-        "resource.k8s.io"."v1alpha2"."ResourceClaim" = mkOption {
-          description = "ResourceClaim describes which resources are needed by a resource consumer. Its status tracks whether the resource has been allocated and what the resulting attributes are.\n\nThis is an alpha type and requires enabling the DynamicResourceAllocation feature gate.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClaim" "resourceclaims" "ResourceClaim" "resource.k8s.io" "v1alpha2");
-          default = {};
-        };
-        "resource.k8s.io"."v1alpha2"."ResourceClaimParameters" = mkOption {
-          description = "ResourceClaimParameters defines resource requests for a ResourceClaim in an in-tree format understood by Kubernetes.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClaimParameters" "resourceclaimparameters" "ResourceClaimParameters" "resource.k8s.io" "v1alpha2");
-          default = {};
-        };
-        "resource.k8s.io"."v1alpha2"."ResourceClaimTemplate" = mkOption {
-          description = "ResourceClaimTemplate is used to produce ResourceClaim objects.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClaimTemplate" "resourceclaimtemplates" "ResourceClaimTemplate" "resource.k8s.io" "v1alpha2");
-          default = {};
-        };
-        "resource.k8s.io"."v1alpha2"."ResourceClass" = mkOption {
-          description = "ResourceClass is used by administrators to influence how resources are allocated.\n\nThis is an alpha type and requires enabling the DynamicResourceAllocation feature gate.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClass" "resourceclasses" "ResourceClass" "resource.k8s.io" "v1alpha2");
-          default = {};
-        };
-        "resource.k8s.io"."v1alpha2"."ResourceClassParameters" = mkOption {
-          description = "ResourceClassParameters defines resource requests for a ResourceClass in an in-tree format understood by Kubernetes.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClassParameters" "resourceclassparameters" "ResourceClassParameters" "resource.k8s.io" "v1alpha2");
-          default = {};
-        };
-        "resource.k8s.io"."v1alpha2"."ResourceSlice" = mkOption {
-          description = "ResourceSlice provides information about available resources on individual nodes.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceSlice" "resourceslices" "ResourceSlice" "resource.k8s.io" "v1alpha2");
-          default = {};
-        };
-        "scheduling.k8s.io"."v1"."PriorityClass" = mkOption {
-          description = "PriorityClass defines mapping from a priority class name to the priority integer value. The value can be any valid integer.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.scheduling.v1.PriorityClass" "priorityclasses" "PriorityClass" "scheduling.k8s.io" "v1");
-          default = {};
-        };
-        "storage.k8s.io"."v1"."CSIDriver" = mkOption {
-          description = "CSIDriver captures information about a Container Storage Interface (CSI) volume driver deployed on the cluster. Kubernetes attach detach controller uses this object to determine whether attach is required. Kubelet uses this object to determine whether pod information needs to be passed on mount. CSIDriver objects are non-namespaced.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1.CSIDriver" "csidrivers" "CSIDriver" "storage.k8s.io" "v1");
-          default = {};
-        };
-        "storage.k8s.io"."v1"."CSINode" = mkOption {
-          description = "CSINode holds information about all CSI drivers installed on a node. CSI drivers do not need to create the CSINode object directly. As long as they use the node-driver-registrar sidecar container, the kubelet will automatically populate the CSINode object for the CSI driver as part of kubelet plugin registration. CSINode has the same name as a node. If the object is missing, it means either there are no CSI Drivers available on the node, or the Kubelet version is low enough that it doesn't create this object. CSINode has an OwnerReference that points to the corresponding node object.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1.CSINode" "csinodes" "CSINode" "storage.k8s.io" "v1");
-          default = {};
-        };
-        "storage.k8s.io"."v1"."CSIStorageCapacity" = mkOption {
-          description = "CSIStorageCapacity stores the result of one CSI GetCapacity call. For a given StorageClass, this describes the available capacity in a particular topology segment.  This can be used when considering where to instantiate new PersistentVolumes.\n\nFor example this can express things like: - StorageClass \"standard\" has \"1234 GiB\" available in \"topology.kubernetes.io/zone=us-east1\" - StorageClass \"localssd\" has \"10 GiB\" available in \"kubernetes.io/hostname=knode-abc123\"\n\nThe following three cases all imply that no capacity is available for a certain combination: - no object exists with suitable topology and storage class name - such an object exists, but the capacity is unset - such an object exists, but the capacity is zero\n\nThe producer of these objects can decide which approach is more suitable.\n\nThey are consumed by the kube-scheduler when a CSI driver opts into capacity-aware scheduling with CSIDriverSpec.StorageCapacity. The scheduler compares the MaximumVolumeSize against the requested size of pending volumes to filter out unsuitable nodes. If MaximumVolumeSize is unset, it falls back to a comparison against the less precise Capacity. If that is also unset, the scheduler assumes that capacity is insufficient and tries some other node.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1.CSIStorageCapacity" "csistoragecapacities" "CSIStorageCapacity" "storage.k8s.io" "v1");
-          default = {};
-        };
-        "storage.k8s.io"."v1"."StorageClass" = mkOption {
-          description = "StorageClass describes the parameters for a class of storage for which PersistentVolumes can be dynamically provisioned.\n\nStorageClasses are non-namespaced; the name of the storage class according to etcd is in ObjectMeta.Name.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1.StorageClass" "storageclasses" "StorageClass" "storage.k8s.io" "v1");
-          default = {};
-        };
-        "storage.k8s.io"."v1"."VolumeAttachment" = mkOption {
-          description = "VolumeAttachment captures the intent to attach or detach the specified volume to/from the specified node.\n\nVolumeAttachment objects are non-namespaced.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1.VolumeAttachment" "volumeattachments" "VolumeAttachment" "storage.k8s.io" "v1");
-          default = {};
-        };
-        "storage.k8s.io"."v1alpha1"."VolumeAttributesClass" = mkOption {
-          description = "VolumeAttributesClass represents a specification of mutable volume attributes defined by the CSI driver. The class can be specified during dynamic provisioning of PersistentVolumeClaims, and changed in the PersistentVolumeClaim spec after provisioning.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1alpha1.VolumeAttributesClass" "volumeattributesclasses" "VolumeAttributesClass" "storage.k8s.io" "v1alpha1");
-          default = {};
-        };
-        "storagemigration.k8s.io"."v1alpha1"."StorageVersionMigration" = mkOption {
-          description = "StorageVersionMigration represents a migration of stored data to the latest storage version.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.storagemigration.v1alpha1.StorageVersionMigration" "storageversionmigrations" "StorageVersionMigration" "storagemigration.k8s.io" "v1alpha1");
-          default = {};
-        };
-        "apiextensions.k8s.io"."v1"."CustomResourceDefinition" = mkOption {
-          description = "CustomResourceDefinition represents a resource that should be exposed on the API server.  Its name MUST be in the format <.spec.name>.<.spec.group>.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceDefinition" "customresourcedefinitions" "CustomResourceDefinition" "apiextensions.k8s.io" "v1");
-          default = {};
-        };
-        "apiregistration.k8s.io"."v1"."APIService" = mkOption {
-          description = "APIService represents a server for a particular GroupVersion. Name must be \"version.group\".";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1.APIService" "apiservices" "APIService" "apiregistration.k8s.io" "v1");
-          default = {};
-        };
-      }
-      // {
-        "APIServices" = mkOption {
-          description = "APIService represents a server for a particular GroupVersion. Name must be \"version.group\".";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1.APIService" "apiservices" "APIService" "apiregistration.k8s.io" "v1");
-          default = {};
-        };
-        "bindings" = mkOption {
-          description = "Binding ties one object to another; for example, a pod is bound to a node by a scheduler. Deprecated in 1.7, please use the bindings subresource of pods instead.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Binding" "bindings" "Binding" "core" "v1");
-          default = {};
-        };
-        "cSIDrivers" = mkOption {
-          description = "CSIDriver captures information about a Container Storage Interface (CSI) volume driver deployed on the cluster. Kubernetes attach detach controller uses this object to determine whether attach is required. Kubelet uses this object to determine whether pod information needs to be passed on mount. CSIDriver objects are non-namespaced.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1.CSIDriver" "csidrivers" "CSIDriver" "storage.k8s.io" "v1");
-          default = {};
-        };
-        "cSINodes" = mkOption {
-          description = "CSINode holds information about all CSI drivers installed on a node. CSI drivers do not need to create the CSINode object directly. As long as they use the node-driver-registrar sidecar container, the kubelet will automatically populate the CSINode object for the CSI driver as part of kubelet plugin registration. CSINode has the same name as a node. If the object is missing, it means either there are no CSI Drivers available on the node, or the Kubelet version is low enough that it doesn't create this object. CSINode has an OwnerReference that points to the corresponding node object.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1.CSINode" "csinodes" "CSINode" "storage.k8s.io" "v1");
-          default = {};
-        };
-        "cSIStorageCapacities" = mkOption {
-          description = "CSIStorageCapacity stores the result of one CSI GetCapacity call. For a given StorageClass, this describes the available capacity in a particular topology segment.  This can be used when considering where to instantiate new PersistentVolumes.\n\nFor example this can express things like: - StorageClass \"standard\" has \"1234 GiB\" available in \"topology.kubernetes.io/zone=us-east1\" - StorageClass \"localssd\" has \"10 GiB\" available in \"kubernetes.io/hostname=knode-abc123\"\n\nThe following three cases all imply that no capacity is available for a certain combination: - no object exists with suitable topology and storage class name - such an object exists, but the capacity is unset - such an object exists, but the capacity is zero\n\nThe producer of these objects can decide which approach is more suitable.\n\nThey are consumed by the kube-scheduler when a CSI driver opts into capacity-aware scheduling with CSIDriverSpec.StorageCapacity. The scheduler compares the MaximumVolumeSize against the requested size of pending volumes to filter out unsuitable nodes. If MaximumVolumeSize is unset, it falls back to a comparison against the less precise Capacity. If that is also unset, the scheduler assumes that capacity is insufficient and tries some other node.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1.CSIStorageCapacity" "csistoragecapacities" "CSIStorageCapacity" "storage.k8s.io" "v1");
-          default = {};
-        };
-        "certificateSigningRequests" = mkOption {
-          description = "CertificateSigningRequest objects provide a mechanism to obtain x509 certificates by submitting a certificate signing request, and having it asynchronously approved and issued.\n\nKubelets use this API to obtain:\n 1. client certificates to authenticate to kube-apiserver (with the \"kubernetes.io/kube-apiserver-client-kubelet\" signerName).\n 2. serving certificates for TLS endpoints kube-apiserver can connect to securely (with the \"kubernetes.io/kubelet-serving\" signerName).\n\nThis API can be used to request client certificates to authenticate to kube-apiserver (with the \"kubernetes.io/kube-apiserver-client\" signerName), or to obtain certificates from custom non-Kubernetes signers.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.certificates.v1.CertificateSigningRequest" "certificatesigningrequests" "CertificateSigningRequest" "certificates.k8s.io" "v1");
-          default = {};
-        };
-        "clusterRoles" = mkOption {
-          description = "ClusterRole is a cluster level, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding or ClusterRoleBinding.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.ClusterRole" "clusterroles" "ClusterRole" "rbac.authorization.k8s.io" "v1");
-          default = {};
-        };
-        "clusterRoleBindings" = mkOption {
-          description = "ClusterRoleBinding references a ClusterRole, but not contain it.  It can reference a ClusterRole in the global namespace, and adds who information via Subject.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.ClusterRoleBinding" "clusterrolebindings" "ClusterRoleBinding" "rbac.authorization.k8s.io" "v1");
-          default = {};
-        };
-        "clusterTrustBundles" = mkOption {
-          description = "ClusterTrustBundle is a cluster-scoped container for X.509 trust anchors (root certificates).\n\nClusterTrustBundle objects are considered to be readable by any authenticated user in the cluster, because they can be mounted by pods using the `clusterTrustBundle` projection.  All service accounts have read access to ClusterTrustBundles by default.  Users who only have namespace-level access to a cluster can read ClusterTrustBundles by impersonating a serviceaccount that they have access to.\n\nIt can be optionally associated with a particular assigner, in which case it contains one valid set of trust anchors for that signer. Signers may have multiple associated ClusterTrustBundles; each is an independent set of trust anchors for that signer. Admission control is used to enforce that only users with permissions on the signer can create or modify the corresponding bundle.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.certificates.v1alpha1.ClusterTrustBundle" "clustertrustbundles" "ClusterTrustBundle" "certificates.k8s.io" "v1alpha1");
-          default = {};
-        };
-        "configMaps" = mkOption {
-          description = "ConfigMap holds configuration data for pods to consume.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.ConfigMap" "configmaps" "ConfigMap" "core" "v1");
-          default = {};
-        };
-        "controllerRevisions" = mkOption {
-          description = "ControllerRevision implements an immutable snapshot of state data. Clients are responsible for serializing and deserializing the objects that contain their internal state. Once a ControllerRevision has been successfully created, it can not be updated. The API Server will fail validation of all requests that attempt to mutate the Data field. ControllerRevisions may, however, be deleted. Note that, due to its use by both the DaemonSet and StatefulSet controllers for update and rollback, this object is beta. However, it may be subject to name and representation changes in future releases, and clients should not depend on its stability. It is primarily for internal use by controllers.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.ControllerRevision" "controllerrevisions" "ControllerRevision" "apps" "v1");
-          default = {};
-        };
-        "cronJobs" = mkOption {
-          description = "CronJob represents the configuration of a single cron job.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.batch.v1.CronJob" "cronjobs" "CronJob" "batch" "v1");
-          default = {};
-        };
-        "customResourceDefinitions" = mkOption {
-          description = "CustomResourceDefinition represents a resource that should be exposed on the API server.  Its name MUST be in the format <.spec.name>.<.spec.group>.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceDefinition" "customresourcedefinitions" "CustomResourceDefinition" "apiextensions.k8s.io" "v1");
-          default = {};
-        };
-        "daemonSets" = mkOption {
-          description = "DaemonSet represents the configuration of a daemon set.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.DaemonSet" "daemonsets" "DaemonSet" "apps" "v1");
-          default = {};
-        };
-        "deployments" = mkOption {
-          description = "Deployment enables declarative updates for Pods and ReplicaSets.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.Deployment" "deployments" "Deployment" "apps" "v1");
-          default = {};
-        };
-        "endpointSlices" = mkOption {
-          description = "EndpointSlice represents a subset of the endpoints that implement a service. For a given service there may be multiple EndpointSlice objects, selected by labels, which must be joined to produce the full set of endpoints.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.discovery.v1.EndpointSlice" "endpointslices" "EndpointSlice" "discovery.k8s.io" "v1");
-          default = {};
-        };
-        "endpoints" = mkOption {
-          description = "Endpoints is a collection of endpoints that implement the actual service. Example:\n\n\t Name: \"mysvc\",\n\t Subsets: [\n\t   {\n\t     Addresses: [{\"ip\": \"10.10.1.1\"}, {\"ip\": \"10.10.2.2\"}],\n\t     Ports: [{\"name\": \"a\", \"port\": 8675}, {\"name\": \"b\", \"port\": 309}]\n\t   },\n\t   {\n\t     Addresses: [{\"ip\": \"10.10.3.3\"}],\n\t     Ports: [{\"name\": \"a\", \"port\": 93}, {\"name\": \"b\", \"port\": 76}]\n\t   },\n\t]";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Endpoints" "endpoints" "Endpoints" "core" "v1");
-          default = {};
-        };
-        "events" = mkOption {
-          description = "Event is a report of an event somewhere in the cluster.  Events have a limited retention time and triggers and messages may evolve with time.  Event consumers should not rely on the timing of an event with a given Reason reflecting a consistent underlying trigger, or the continued existence of events with that Reason.  Events should be treated as informative, best-effort, supplemental data.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Event" "events" "Event" "core" "v1");
-          default = {};
-        };
-        "eviction" = mkOption {
-          description = "Eviction evicts a pod from its node subject to certain policies and safety constraints. This is a subresource of Pod.  A request to cause such an eviction is created by POSTing to .../pods/<pod name>/evictions.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.policy.v1.Eviction" "eviction" "Eviction" "policy" "v1");
-          default = {};
-        };
-        "flowSchemas" = mkOption {
-          description = "FlowSchema defines the schema of a group of flows. Note that a flow is made up of a set of inbound API requests with similar attributes and is identified by a pair of strings: the name of the FlowSchema and a \"flow distinguisher\".";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.flowcontrol.v1.FlowSchema" "flowschemas" "FlowSchema" "flowcontrol.apiserver.k8s.io" "v1");
-          default = {};
-        };
-        "horizontalPodAutoscalers" = mkOption {
-          description = "HorizontalPodAutoscaler is the configuration for a horizontal pod autoscaler, which automatically manages the replica count of any resource implementing the scale subresource based on the metrics specified.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.autoscaling.v2.HorizontalPodAutoscaler" "horizontalpodautoscalers" "HorizontalPodAutoscaler" "autoscaling" "v2");
-          default = {};
-        };
-        "iPAddresses" = mkOption {
-          description = "IPAddress represents a single IP of a single IP Family. The object is designed to be used by APIs that operate on IP addresses. The object is used by the Service core API for allocation of IP addresses. An IP address can be represented in different formats, to guarantee the uniqueness of the IP, the name of the object is the IP address in canonical format, four decimal digits separated by dots suppressing leading zeros for IPv4 and the representation defined by RFC 5952 for IPv6. Valid: 192.168.1.5 or 2001:db8::1 or 2001:db8:aaaa:bbbb:cccc:dddd:eeee:1 Invalid: 10.01.2.3 or 2001:db8:0:0:0::1";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.networking.v1alpha1.IPAddress" "ipaddresses" "IPAddress" "networking.k8s.io" "v1alpha1");
-          default = {};
-        };
-        "ingresses" = mkOption {
-          description = "Ingress is a collection of rules that allow inbound connections to reach the endpoints defined by a backend. An Ingress can be configured to give services externally-reachable urls, load balance traffic, terminate SSL, offer name based virtual hosting etc.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.networking.v1.Ingress" "ingresses" "Ingress" "networking.k8s.io" "v1");
-          default = {};
-        };
-        "ingressClasses" = mkOption {
-          description = "IngressClass represents the class of the Ingress, referenced by the Ingress Spec. The `ingressclass.kubernetes.io/is-default-class` annotation can be used to indicate that an IngressClass should be considered default. When a single IngressClass resource has this annotation set to true, new Ingress resources without a class specified will be assigned this default class.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.networking.v1.IngressClass" "ingressclasses" "IngressClass" "networking.k8s.io" "v1");
-          default = {};
-        };
-        "jobs" = mkOption {
-          description = "Job represents the configuration of a single job.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.batch.v1.Job" "jobs" "Job" "batch" "v1");
-          default = {};
-        };
-        "leases" = mkOption {
-          description = "Lease defines a lease concept.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.coordination.v1.Lease" "leases" "Lease" "coordination.k8s.io" "v1");
-          default = {};
-        };
-        "limitRanges" = mkOption {
-          description = "LimitRange sets resource usage limits for each kind of resource in a Namespace.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.LimitRange" "limitranges" "LimitRange" "core" "v1");
-          default = {};
-        };
-        "localSubjectAccessReviews" = mkOption {
-          description = "LocalSubjectAccessReview checks whether or not a user or group can perform an action in a given namespace. Having a namespace scoped resource makes it much easier to grant namespace scoped policy that includes permissions checking.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.LocalSubjectAccessReview" "localsubjectaccessreviews" "LocalSubjectAccessReview" "authorization.k8s.io" "v1");
-          default = {};
-        };
-        "mutatingWebhookConfigurations" = mkOption {
-          description = "MutatingWebhookConfiguration describes the configuration of and admission webhook that accept or reject and may change the object.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1.MutatingWebhookConfiguration" "mutatingwebhookconfigurations" "MutatingWebhookConfiguration" "admissionregistration.k8s.io" "v1");
-          default = {};
-        };
-        "namespaces" = mkOption {
-          description = "Namespace provides a scope for Names. Use of multiple namespaces is optional.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Namespace" "namespaces" "Namespace" "core" "v1");
-          default = {};
-        };
-        "networkPolicies" = mkOption {
-          description = "NetworkPolicy describes what network traffic is allowed for a set of Pods";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.networking.v1.NetworkPolicy" "networkpolicies" "NetworkPolicy" "networking.k8s.io" "v1");
-          default = {};
-        };
-        "nodes" = mkOption {
-          description = "Node is a worker node in Kubernetes. Each node will have a unique identifier in the cache (i.e. in etcd).";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Node" "nodes" "Node" "core" "v1");
-          default = {};
-        };
-        "persistentVolumes" = mkOption {
-          description = "PersistentVolume (PV) is a storage resource provisioned by an administrator. It is analogous to a node. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.PersistentVolume" "persistentvolumes" "PersistentVolume" "core" "v1");
-          default = {};
-        };
-        "persistentVolumeClaims" = mkOption {
-          description = "PersistentVolumeClaim is a user's request for and claim to a persistent volume";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.PersistentVolumeClaim" "persistentvolumeclaims" "PersistentVolumeClaim" "core" "v1");
-          default = {};
-        };
-        "pods" = mkOption {
-          description = "Pod is a collection of containers that can run on a host. This resource is created by clients and scheduled onto hosts.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Pod" "pods" "Pod" "core" "v1");
-          default = {};
-        };
-        "podDisruptionBudgets" = mkOption {
-          description = "PodDisruptionBudget is an object to define the max disruption that can be caused to a collection of pods";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.policy.v1.PodDisruptionBudget" "poddisruptionbudgets" "PodDisruptionBudget" "policy" "v1");
-          default = {};
-        };
-        "podSchedulingContexts" = mkOption {
-          description = "PodSchedulingContext objects hold information that is needed to schedule a Pod with ResourceClaims that use \"WaitForFirstConsumer\" allocation mode.\n\nThis is an alpha type and requires enabling the DynamicResourceAllocation feature gate.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.resource.v1alpha2.PodSchedulingContext" "podschedulingcontexts" "PodSchedulingContext" "resource.k8s.io" "v1alpha2");
-          default = {};
-        };
-        "podTemplates" = mkOption {
-          description = "PodTemplate describes a template for creating copies of a predefined pod.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.PodTemplate" "podtemplates" "PodTemplate" "core" "v1");
-          default = {};
-        };
-        "priorityClasses" = mkOption {
-          description = "PriorityClass defines mapping from a priority class name to the priority integer value. The value can be any valid integer.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.scheduling.v1.PriorityClass" "priorityclasses" "PriorityClass" "scheduling.k8s.io" "v1");
-          default = {};
-        };
-        "priorityLevelConfigurations" = mkOption {
-          description = "PriorityLevelConfiguration represents the configuration of a priority level.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.flowcontrol.v1.PriorityLevelConfiguration" "prioritylevelconfigurations" "PriorityLevelConfiguration" "flowcontrol.apiserver.k8s.io" "v1");
-          default = {};
-        };
-        "replicaSets" = mkOption {
-          description = "ReplicaSet ensures that a specified number of pod replicas are running at any given time.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.ReplicaSet" "replicasets" "ReplicaSet" "apps" "v1");
-          default = {};
-        };
-        "replicationControllers" = mkOption {
-          description = "ReplicationController represents the configuration of a replication controller.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.ReplicationController" "replicationcontrollers" "ReplicationController" "core" "v1");
-          default = {};
-        };
-        "resourceClaims" = mkOption {
-          description = "ResourceClaim describes which resources are needed by a resource consumer. Its status tracks whether the resource has been allocated and what the resulting attributes are.\n\nThis is an alpha type and requires enabling the DynamicResourceAllocation feature gate.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClaim" "resourceclaims" "ResourceClaim" "resource.k8s.io" "v1alpha2");
-          default = {};
-        };
-        "resourceClaimParameters" = mkOption {
-          description = "ResourceClaimParameters defines resource requests for a ResourceClaim in an in-tree format understood by Kubernetes.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClaimParameters" "resourceclaimparameters" "ResourceClaimParameters" "resource.k8s.io" "v1alpha2");
-          default = {};
-        };
-        "resourceClaimTemplates" = mkOption {
-          description = "ResourceClaimTemplate is used to produce ResourceClaim objects.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClaimTemplate" "resourceclaimtemplates" "ResourceClaimTemplate" "resource.k8s.io" "v1alpha2");
-          default = {};
-        };
-        "resourceClasses" = mkOption {
-          description = "ResourceClass is used by administrators to influence how resources are allocated.\n\nThis is an alpha type and requires enabling the DynamicResourceAllocation feature gate.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClass" "resourceclasses" "ResourceClass" "resource.k8s.io" "v1alpha2");
-          default = {};
-        };
-        "resourceClassParameters" = mkOption {
-          description = "ResourceClassParameters defines resource requests for a ResourceClass in an in-tree format understood by Kubernetes.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClassParameters" "resourceclassparameters" "ResourceClassParameters" "resource.k8s.io" "v1alpha2");
-          default = {};
-        };
-        "resourceQuotas" = mkOption {
-          description = "ResourceQuota sets aggregate quota restrictions enforced per namespace";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.ResourceQuota" "resourcequotas" "ResourceQuota" "core" "v1");
-          default = {};
-        };
-        "resourceSlices" = mkOption {
-          description = "ResourceSlice provides information about available resources on individual nodes.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceSlice" "resourceslices" "ResourceSlice" "resource.k8s.io" "v1alpha2");
-          default = {};
-        };
-        "roles" = mkOption {
-          description = "Role is a namespaced, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.Role" "roles" "Role" "rbac.authorization.k8s.io" "v1");
-          default = {};
-        };
-        "roleBindings" = mkOption {
-          description = "RoleBinding references a role, but does not contain it.  It can reference a Role in the same namespace or a ClusterRole in the global namespace. It adds who information via Subjects and namespace information by which namespace it exists in.  RoleBindings in a given namespace only have effect in that namespace.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.RoleBinding" "rolebindings" "RoleBinding" "rbac.authorization.k8s.io" "v1");
-          default = {};
-        };
-        "runtimeClasses" = mkOption {
-          description = "RuntimeClass defines a class of container runtime supported in the cluster. The RuntimeClass is used to determine which container runtime is used to run all containers in a pod. RuntimeClasses are manually defined by a user or cluster provisioner, and referenced in the PodSpec. The Kubelet is responsible for resolving the RuntimeClassName reference before running the pod.  For more details, see https://kubernetes.io/docs/concepts/containers/runtime-class/";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.node.v1.RuntimeClass" "runtimeclasses" "RuntimeClass" "node.k8s.io" "v1");
-          default = {};
-        };
-        "secrets" = mkOption {
-          description = "Secret holds secret data of a certain type. The total bytes of the values in the Data field must be less than MaxSecretSize bytes.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Secret" "secrets" "Secret" "core" "v1");
-          default = {};
-        };
-        "selfSubjectAccessReviews" = mkOption {
-          description = "SelfSubjectAccessReview checks whether or the current user can perform an action.  Not filling in a spec.namespace means \"in all namespaces\".  Self is a special case, because users should always be able to check whether they can perform an action";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.SelfSubjectAccessReview" "selfsubjectaccessreviews" "SelfSubjectAccessReview" "authorization.k8s.io" "v1");
-          default = {};
-        };
-        "selfSubjectReviews" = mkOption {
-          description = "SelfSubjectReview contains the user information that the kube-apiserver has about the user making this request. When using impersonation, users will receive the user info of the user being impersonated.  If impersonation or request header authentication is used, any extra keys will have their case ignored and returned as lowercase.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.authentication.v1.SelfSubjectReview" "selfsubjectreviews" "SelfSubjectReview" "authentication.k8s.io" "v1");
-          default = {};
-        };
-        "selfSubjectRulesReviews" = mkOption {
-          description = "SelfSubjectRulesReview enumerates the set of actions the current user can perform within a namespace. The returned list of actions may be incomplete depending on the server's authorization mode, and any errors experienced during the evaluation. SelfSubjectRulesReview should be used by UIs to show/hide actions, or to quickly let an end user reason about their permissions. It should NOT Be used by external systems to drive authorization decisions as this raises confused deputy, cache lifetime/revocation, and correctness concerns. SubjectAccessReview, and LocalAccessReview are the correct way to defer authorization decisions to the API server.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.SelfSubjectRulesReview" "selfsubjectrulesreviews" "SelfSubjectRulesReview" "authorization.k8s.io" "v1");
-          default = {};
-        };
-        "services" = mkOption {
-          description = "Service is a named abstraction of software service (for example, mysql) consisting of local port (for example 3306) that the proxy listens on, and the selector that determines which pods will answer requests sent through the proxy.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Service" "services" "Service" "core" "v1");
-          default = {};
-        };
-        "serviceAccounts" = mkOption {
-          description = "ServiceAccount binds together: * a name, understood by users, and perhaps by peripheral systems, for an identity * a principal that can be authenticated and authorized * a set of secrets";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.ServiceAccount" "serviceaccounts" "ServiceAccount" "core" "v1");
-          default = {};
-        };
-        "serviceCIDRs" = mkOption {
-          description = "ServiceCIDR defines a range of IP addresses using CIDR format (e.g. 192.168.0.0/24 or 2001:db2::/64). This range is used to allocate ClusterIPs to Service objects.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.networking.v1alpha1.ServiceCIDR" "servicecidrs" "ServiceCIDR" "networking.k8s.io" "v1alpha1");
-          default = {};
-        };
-        "statefulSets" = mkOption {
-          description = "StatefulSet represents a set of pods with consistent identities. Identities are defined as:\n  - Network: A single stable DNS and hostname.\n  - Storage: As many VolumeClaims as requested.\n\nThe StatefulSet guarantees that a given network identity will always map to the same storage identity.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.StatefulSet" "statefulsets" "StatefulSet" "apps" "v1");
-          default = {};
-        };
-        "storageClasses" = mkOption {
-          description = "StorageClass describes the parameters for a class of storage for which PersistentVolumes can be dynamically provisioned.\n\nStorageClasses are non-namespaced; the name of the storage class according to etcd is in ObjectMeta.Name.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1.StorageClass" "storageclasses" "StorageClass" "storage.k8s.io" "v1");
-          default = {};
-        };
-        "storageVersions" = mkOption {
-          description = "Storage version of a specific resource.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.apiserverinternal.v1alpha1.StorageVersion" "storageversions" "StorageVersion" "internal.apiserver.k8s.io" "v1alpha1");
-          default = {};
-        };
-        "storageVersionMigrations" = mkOption {
-          description = "StorageVersionMigration represents a migration of stored data to the latest storage version.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.storagemigration.v1alpha1.StorageVersionMigration" "storageversionmigrations" "StorageVersionMigration" "storagemigration.k8s.io" "v1alpha1");
-          default = {};
-        };
-        "subjectAccessReviews" = mkOption {
-          description = "SubjectAccessReview checks whether or not a user or group can perform an action.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.SubjectAccessReview" "subjectaccessreviews" "SubjectAccessReview" "authorization.k8s.io" "v1");
-          default = {};
-        };
-        "token" = mkOption {
-          description = "TokenRequest requests a token for a given service account.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.authentication.v1.TokenRequest" "token" "TokenRequest" "authentication.k8s.io" "v1");
-          default = {};
-        };
-        "tokenReviews" = mkOption {
-          description = "TokenReview attempts to authenticate a token to a known user. Note: TokenReview requests may be cached by the webhook token authenticator plugin in the kube-apiserver.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.authentication.v1.TokenReview" "tokenreviews" "TokenReview" "authentication.k8s.io" "v1");
-          default = {};
-        };
-        "validatingAdmissionPolicies" = mkOption {
-          description = "ValidatingAdmissionPolicy describes the definition of an admission validation policy that accepts or rejects an object without changing it.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1.ValidatingAdmissionPolicy" "validatingadmissionpolicies" "ValidatingAdmissionPolicy" "admissionregistration.k8s.io" "v1");
-          default = {};
-        };
-        "validatingAdmissionPolicyBindings" = mkOption {
-          description = "ValidatingAdmissionPolicyBinding binds the ValidatingAdmissionPolicy with paramerized resources. ValidatingAdmissionPolicyBinding and parameter CRDs together define how cluster administrators configure policies for clusters.\n\nFor a given admission request, each binding will cause its policy to be evaluated N times, where N is 1 for policies/bindings that don't use params, otherwise N is the number of parameters selected by the binding.\n\nThe CEL expressions of a policy must have a computed CEL cost below the maximum CEL budget. Each evaluation of the policy is given an independent CEL cost budget. Adding/removing policies, bindings, or params can not affect whether a given (policy, binding, param) combination is within its own CEL budget.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1.ValidatingAdmissionPolicyBinding" "validatingadmissionpolicybindings" "ValidatingAdmissionPolicyBinding" "admissionregistration.k8s.io" "v1");
-          default = {};
-        };
-        "validatingWebhookConfigurations" = mkOption {
-          description = "ValidatingWebhookConfiguration describes the configuration of and admission webhook that accept or reject and object without changing it.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1.ValidatingWebhookConfiguration" "validatingwebhookconfigurations" "ValidatingWebhookConfiguration" "admissionregistration.k8s.io" "v1");
-          default = {};
-        };
-        "volumeAttachments" = mkOption {
-          description = "VolumeAttachment captures the intent to attach or detach the specified volume to/from the specified node.\n\nVolumeAttachment objects are non-namespaced.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1.VolumeAttachment" "volumeattachments" "VolumeAttachment" "storage.k8s.io" "v1");
-          default = {};
-        };
-        "volumeAttributesClasses" = mkOption {
-          description = "VolumeAttributesClass represents a specification of mutable volume attributes defined by the CSI driver. The class can be specified during dynamic provisioning of PersistentVolumeClaims, and changed in the PersistentVolumeClaim spec after provisioning.";
-          type = types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1alpha1.VolumeAttributesClass" "volumeattributesclasses" "VolumeAttributesClass" "storage.k8s.io" "v1alpha1");
-          default = {};
-        };
+    resources = {
+      "admissionregistration.k8s.io"."v1"."MutatingWebhookConfiguration" = mkOption {
+        description = "MutatingWebhookConfiguration describes the configuration of and admission webhook that accept or reject and may change the object.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.admissionregistration.v1.MutatingWebhookConfiguration"
+            "mutatingwebhookconfigurations"
+            "MutatingWebhookConfiguration"
+            "admissionregistration.k8s.io"
+            "v1"
+        );
+        default = { };
       };
+      "admissionregistration.k8s.io"."v1"."ValidatingAdmissionPolicy" = mkOption {
+        description = "ValidatingAdmissionPolicy describes the definition of an admission validation policy that accepts or rejects an object without changing it.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.admissionregistration.v1.ValidatingAdmissionPolicy"
+            "validatingadmissionpolicies"
+            "ValidatingAdmissionPolicy"
+            "admissionregistration.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "admissionregistration.k8s.io"."v1"."ValidatingAdmissionPolicyBinding" = mkOption {
+        description = "ValidatingAdmissionPolicyBinding binds the ValidatingAdmissionPolicy with paramerized resources. ValidatingAdmissionPolicyBinding and parameter CRDs together define how cluster administrators configure policies for clusters.\n\nFor a given admission request, each binding will cause its policy to be evaluated N times, where N is 1 for policies/bindings that don't use params, otherwise N is the number of parameters selected by the binding.\n\nThe CEL expressions of a policy must have a computed CEL cost below the maximum CEL budget. Each evaluation of the policy is given an independent CEL cost budget. Adding/removing policies, bindings, or params can not affect whether a given (policy, binding, param) combination is within its own CEL budget.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.admissionregistration.v1.ValidatingAdmissionPolicyBinding"
+            "validatingadmissionpolicybindings"
+            "ValidatingAdmissionPolicyBinding"
+            "admissionregistration.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "admissionregistration.k8s.io"."v1"."ValidatingWebhookConfiguration" = mkOption {
+        description = "ValidatingWebhookConfiguration describes the configuration of and admission webhook that accept or reject and object without changing it.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.admissionregistration.v1.ValidatingWebhookConfiguration"
+            "validatingwebhookconfigurations"
+            "ValidatingWebhookConfiguration"
+            "admissionregistration.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "admissionregistration.k8s.io"."v1alpha1"."ValidatingAdmissionPolicy" = mkOption {
+        description = "ValidatingAdmissionPolicy describes the definition of an admission validation policy that accepts or rejects an object without changing it.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.admissionregistration.v1alpha1.ValidatingAdmissionPolicy"
+            "validatingadmissionpolicies"
+            "ValidatingAdmissionPolicy"
+            "admissionregistration.k8s.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+      "admissionregistration.k8s.io"."v1alpha1"."ValidatingAdmissionPolicyBinding" = mkOption {
+        description = "ValidatingAdmissionPolicyBinding binds the ValidatingAdmissionPolicy with paramerized resources. ValidatingAdmissionPolicyBinding and parameter CRDs together define how cluster administrators configure policies for clusters.\n\nFor a given admission request, each binding will cause its policy to be evaluated N times, where N is 1 for policies/bindings that don't use params, otherwise N is the number of parameters selected by the binding.\n\nThe CEL expressions of a policy must have a computed CEL cost below the maximum CEL budget. Each evaluation of the policy is given an independent CEL cost budget. Adding/removing policies, bindings, or params can not affect whether a given (policy, binding, param) combination is within its own CEL budget.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.admissionregistration.v1alpha1.ValidatingAdmissionPolicyBinding"
+            "validatingadmissionpolicybindings"
+            "ValidatingAdmissionPolicyBinding"
+            "admissionregistration.k8s.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+      "admissionregistration.k8s.io"."v1beta1"."ValidatingAdmissionPolicy" = mkOption {
+        description = "ValidatingAdmissionPolicy describes the definition of an admission validation policy that accepts or rejects an object without changing it.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.admissionregistration.v1beta1.ValidatingAdmissionPolicy"
+            "validatingadmissionpolicies"
+            "ValidatingAdmissionPolicy"
+            "admissionregistration.k8s.io"
+            "v1beta1"
+        );
+        default = { };
+      };
+      "admissionregistration.k8s.io"."v1beta1"."ValidatingAdmissionPolicyBinding" = mkOption {
+        description = "ValidatingAdmissionPolicyBinding binds the ValidatingAdmissionPolicy with paramerized resources. ValidatingAdmissionPolicyBinding and parameter CRDs together define how cluster administrators configure policies for clusters.\n\nFor a given admission request, each binding will cause its policy to be evaluated N times, where N is 1 for policies/bindings that don't use params, otherwise N is the number of parameters selected by the binding.\n\nThe CEL expressions of a policy must have a computed CEL cost below the maximum CEL budget. Each evaluation of the policy is given an independent CEL cost budget. Adding/removing policies, bindings, or params can not affect whether a given (policy, binding, param) combination is within its own CEL budget.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.admissionregistration.v1beta1.ValidatingAdmissionPolicyBinding"
+            "validatingadmissionpolicybindings"
+            "ValidatingAdmissionPolicyBinding"
+            "admissionregistration.k8s.io"
+            "v1beta1"
+        );
+        default = { };
+      };
+      "internal.apiserver.k8s.io"."v1alpha1"."StorageVersion" = mkOption {
+        description = "Storage version of a specific resource.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.apiserverinternal.v1alpha1.StorageVersion" "storageversions"
+            "StorageVersion"
+            "internal.apiserver.k8s.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+      "apps"."v1"."ControllerRevision" = mkOption {
+        description = "ControllerRevision implements an immutable snapshot of state data. Clients are responsible for serializing and deserializing the objects that contain their internal state. Once a ControllerRevision has been successfully created, it can not be updated. The API Server will fail validation of all requests that attempt to mutate the Data field. ControllerRevisions may, however, be deleted. Note that, due to its use by both the DaemonSet and StatefulSet controllers for update and rollback, this object is beta. However, it may be subject to name and representation changes in future releases, and clients should not depend on its stability. It is primarily for internal use by controllers.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.apps.v1.ControllerRevision" "controllerrevisions"
+            "ControllerRevision"
+            "apps"
+            "v1"
+        );
+        default = { };
+      };
+      "apps"."v1"."DaemonSet" = mkOption {
+        description = "DaemonSet represents the configuration of a daemon set.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.apps.v1.DaemonSet" "daemonsets" "DaemonSet" "apps" "v1"
+        );
+        default = { };
+      };
+      "apps"."v1"."Deployment" = mkOption {
+        description = "Deployment enables declarative updates for Pods and ReplicaSets.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.apps.v1.Deployment" "deployments" "Deployment" "apps" "v1"
+        );
+        default = { };
+      };
+      "apps"."v1"."ReplicaSet" = mkOption {
+        description = "ReplicaSet ensures that a specified number of pod replicas are running at any given time.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.apps.v1.ReplicaSet" "replicasets" "ReplicaSet" "apps" "v1"
+        );
+        default = { };
+      };
+      "apps"."v1"."StatefulSet" = mkOption {
+        description = "StatefulSet represents a set of pods with consistent identities. Identities are defined as:\n  - Network: A single stable DNS and hostname.\n  - Storage: As many VolumeClaims as requested.\n\nThe StatefulSet guarantees that a given network identity will always map to the same storage identity.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.apps.v1.StatefulSet" "statefulsets" "StatefulSet" "apps" "v1"
+        );
+        default = { };
+      };
+      "authentication.k8s.io"."v1"."SelfSubjectReview" = mkOption {
+        description = "SelfSubjectReview contains the user information that the kube-apiserver has about the user making this request. When using impersonation, users will receive the user info of the user being impersonated.  If impersonation or request header authentication is used, any extra keys will have their case ignored and returned as lowercase.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.authentication.v1.SelfSubjectReview" "selfsubjectreviews"
+            "SelfSubjectReview"
+            "authentication.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "authentication.k8s.io"."v1"."TokenRequest" = mkOption {
+        description = "TokenRequest requests a token for a given service account.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.authentication.v1.TokenRequest" "token" "TokenRequest"
+            "authentication.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "authentication.k8s.io"."v1"."TokenReview" = mkOption {
+        description = "TokenReview attempts to authenticate a token to a known user. Note: TokenReview requests may be cached by the webhook token authenticator plugin in the kube-apiserver.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.authentication.v1.TokenReview" "tokenreviews" "TokenReview"
+            "authentication.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "authentication.k8s.io"."v1alpha1"."SelfSubjectReview" = mkOption {
+        description = "SelfSubjectReview contains the user information that the kube-apiserver has about the user making this request. When using impersonation, users will receive the user info of the user being impersonated.  If impersonation or request header authentication is used, any extra keys will have their case ignored and returned as lowercase.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.authentication.v1alpha1.SelfSubjectReview" "selfsubjectreviews"
+            "SelfSubjectReview"
+            "authentication.k8s.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+      "authentication.k8s.io"."v1beta1"."SelfSubjectReview" = mkOption {
+        description = "SelfSubjectReview contains the user information that the kube-apiserver has about the user making this request. When using impersonation, users will receive the user info of the user being impersonated.  If impersonation or request header authentication is used, any extra keys will have their case ignored and returned as lowercase.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.authentication.v1beta1.SelfSubjectReview" "selfsubjectreviews"
+            "SelfSubjectReview"
+            "authentication.k8s.io"
+            "v1beta1"
+        );
+        default = { };
+      };
+      "authorization.k8s.io"."v1"."LocalSubjectAccessReview" = mkOption {
+        description = "LocalSubjectAccessReview checks whether or not a user or group can perform an action in a given namespace. Having a namespace scoped resource makes it much easier to grant namespace scoped policy that includes permissions checking.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.authorization.v1.LocalSubjectAccessReview"
+            "localsubjectaccessreviews"
+            "LocalSubjectAccessReview"
+            "authorization.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "authorization.k8s.io"."v1"."SelfSubjectAccessReview" = mkOption {
+        description = "SelfSubjectAccessReview checks whether or the current user can perform an action.  Not filling in a spec.namespace means \"in all namespaces\".  Self is a special case, because users should always be able to check whether they can perform an action";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.authorization.v1.SelfSubjectAccessReview"
+            "selfsubjectaccessreviews"
+            "SelfSubjectAccessReview"
+            "authorization.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "authorization.k8s.io"."v1"."SelfSubjectRulesReview" = mkOption {
+        description = "SelfSubjectRulesReview enumerates the set of actions the current user can perform within a namespace. The returned list of actions may be incomplete depending on the server's authorization mode, and any errors experienced during the evaluation. SelfSubjectRulesReview should be used by UIs to show/hide actions, or to quickly let an end user reason about their permissions. It should NOT Be used by external systems to drive authorization decisions as this raises confused deputy, cache lifetime/revocation, and correctness concerns. SubjectAccessReview, and LocalAccessReview are the correct way to defer authorization decisions to the API server.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.authorization.v1.SelfSubjectRulesReview"
+            "selfsubjectrulesreviews"
+            "SelfSubjectRulesReview"
+            "authorization.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "authorization.k8s.io"."v1"."SubjectAccessReview" = mkOption {
+        description = "SubjectAccessReview checks whether or not a user or group can perform an action.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.authorization.v1.SubjectAccessReview" "subjectaccessreviews"
+            "SubjectAccessReview"
+            "authorization.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "autoscaling"."v1"."HorizontalPodAutoscaler" = mkOption {
+        description = "configuration of a horizontal pod autoscaler.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.autoscaling.v1.HorizontalPodAutoscaler"
+            "horizontalpodautoscalers"
+            "HorizontalPodAutoscaler"
+            "autoscaling"
+            "v1"
+        );
+        default = { };
+      };
+      "autoscaling"."v2"."HorizontalPodAutoscaler" = mkOption {
+        description = "HorizontalPodAutoscaler is the configuration for a horizontal pod autoscaler, which automatically manages the replica count of any resource implementing the scale subresource based on the metrics specified.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.autoscaling.v2.HorizontalPodAutoscaler"
+            "horizontalpodautoscalers"
+            "HorizontalPodAutoscaler"
+            "autoscaling"
+            "v2"
+        );
+        default = { };
+      };
+      "batch"."v1"."CronJob" = mkOption {
+        description = "CronJob represents the configuration of a single cron job.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.batch.v1.CronJob" "cronjobs" "CronJob" "batch" "v1"
+        );
+        default = { };
+      };
+      "batch"."v1"."Job" = mkOption {
+        description = "Job represents the configuration of a single job.";
+        type = types.attrsOf (submoduleForDefinition "io.k8s.api.batch.v1.Job" "jobs" "Job" "batch" "v1");
+        default = { };
+      };
+      "certificates.k8s.io"."v1"."CertificateSigningRequest" = mkOption {
+        description = "CertificateSigningRequest objects provide a mechanism to obtain x509 certificates by submitting a certificate signing request, and having it asynchronously approved and issued.\n\nKubelets use this API to obtain:\n 1. client certificates to authenticate to kube-apiserver (with the \"kubernetes.io/kube-apiserver-client-kubelet\" signerName).\n 2. serving certificates for TLS endpoints kube-apiserver can connect to securely (with the \"kubernetes.io/kubelet-serving\" signerName).\n\nThis API can be used to request client certificates to authenticate to kube-apiserver (with the \"kubernetes.io/kube-apiserver-client\" signerName), or to obtain certificates from custom non-Kubernetes signers.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.certificates.v1.CertificateSigningRequest"
+            "certificatesigningrequests"
+            "CertificateSigningRequest"
+            "certificates.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "certificates.k8s.io"."v1alpha1"."ClusterTrustBundle" = mkOption {
+        description = "ClusterTrustBundle is a cluster-scoped container for X.509 trust anchors (root certificates).\n\nClusterTrustBundle objects are considered to be readable by any authenticated user in the cluster, because they can be mounted by pods using the `clusterTrustBundle` projection.  All service accounts have read access to ClusterTrustBundles by default.  Users who only have namespace-level access to a cluster can read ClusterTrustBundles by impersonating a serviceaccount that they have access to.\n\nIt can be optionally associated with a particular assigner, in which case it contains one valid set of trust anchors for that signer. Signers may have multiple associated ClusterTrustBundles; each is an independent set of trust anchors for that signer. Admission control is used to enforce that only users with permissions on the signer can create or modify the corresponding bundle.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.certificates.v1alpha1.ClusterTrustBundle" "clustertrustbundles"
+            "ClusterTrustBundle"
+            "certificates.k8s.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+      "coordination.k8s.io"."v1"."Lease" = mkOption {
+        description = "Lease defines a lease concept.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.coordination.v1.Lease" "leases" "Lease" "coordination.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "core"."v1"."Binding" = mkOption {
+        description = "Binding ties one object to another; for example, a pod is bound to a node by a scheduler. Deprecated in 1.7, please use the bindings subresource of pods instead.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.Binding" "bindings" "Binding" "core" "v1"
+        );
+        default = { };
+      };
+      "core"."v1"."ConfigMap" = mkOption {
+        description = "ConfigMap holds configuration data for pods to consume.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.ConfigMap" "configmaps" "ConfigMap" "core" "v1"
+        );
+        default = { };
+      };
+      "core"."v1"."Endpoints" = mkOption {
+        description = "Endpoints is a collection of endpoints that implement the actual service. Example:\n\n\t Name: \"mysvc\",\n\t Subsets: [\n\t   {\n\t     Addresses: [{\"ip\": \"10.10.1.1\"}, {\"ip\": \"10.10.2.2\"}],\n\t     Ports: [{\"name\": \"a\", \"port\": 8675}, {\"name\": \"b\", \"port\": 309}]\n\t   },\n\t   {\n\t     Addresses: [{\"ip\": \"10.10.3.3\"}],\n\t     Ports: [{\"name\": \"a\", \"port\": 93}, {\"name\": \"b\", \"port\": 76}]\n\t   },\n\t]";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.Endpoints" "endpoints" "Endpoints" "core" "v1"
+        );
+        default = { };
+      };
+      "core"."v1"."Event" = mkOption {
+        description = "Event is a report of an event somewhere in the cluster.  Events have a limited retention time and triggers and messages may evolve with time.  Event consumers should not rely on the timing of an event with a given Reason reflecting a consistent underlying trigger, or the continued existence of events with that Reason.  Events should be treated as informative, best-effort, supplemental data.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.Event" "events" "Event" "core" "v1"
+        );
+        default = { };
+      };
+      "core"."v1"."LimitRange" = mkOption {
+        description = "LimitRange sets resource usage limits for each kind of resource in a Namespace.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.LimitRange" "limitranges" "LimitRange" "core" "v1"
+        );
+        default = { };
+      };
+      "core"."v1"."Namespace" = mkOption {
+        description = "Namespace provides a scope for Names. Use of multiple namespaces is optional.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.Namespace" "namespaces" "Namespace" "core" "v1"
+        );
+        default = { };
+      };
+      "core"."v1"."Node" = mkOption {
+        description = "Node is a worker node in Kubernetes. Each node will have a unique identifier in the cache (i.e. in etcd).";
+        type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Node" "nodes" "Node" "core" "v1");
+        default = { };
+      };
+      "core"."v1"."PersistentVolume" = mkOption {
+        description = "PersistentVolume (PV) is a storage resource provisioned by an administrator. It is analogous to a node. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.PersistentVolume" "persistentvolumes" "PersistentVolume"
+            "core"
+            "v1"
+        );
+        default = { };
+      };
+      "core"."v1"."PersistentVolumeClaim" = mkOption {
+        description = "PersistentVolumeClaim is a user's request for and claim to a persistent volume";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.PersistentVolumeClaim" "persistentvolumeclaims"
+            "PersistentVolumeClaim"
+            "core"
+            "v1"
+        );
+        default = { };
+      };
+      "core"."v1"."Pod" = mkOption {
+        description = "Pod is a collection of containers that can run on a host. This resource is created by clients and scheduled onto hosts.";
+        type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Pod" "pods" "Pod" "core" "v1");
+        default = { };
+      };
+      "core"."v1"."PodTemplate" = mkOption {
+        description = "PodTemplate describes a template for creating copies of a predefined pod.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.PodTemplate" "podtemplates" "PodTemplate" "core" "v1"
+        );
+        default = { };
+      };
+      "core"."v1"."ReplicationController" = mkOption {
+        description = "ReplicationController represents the configuration of a replication controller.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.ReplicationController" "replicationcontrollers"
+            "ReplicationController"
+            "core"
+            "v1"
+        );
+        default = { };
+      };
+      "core"."v1"."ResourceQuota" = mkOption {
+        description = "ResourceQuota sets aggregate quota restrictions enforced per namespace";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.ResourceQuota" "resourcequotas" "ResourceQuota" "core"
+            "v1"
+        );
+        default = { };
+      };
+      "core"."v1"."Secret" = mkOption {
+        description = "Secret holds secret data of a certain type. The total bytes of the values in the Data field must be less than MaxSecretSize bytes.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.Secret" "secrets" "Secret" "core" "v1"
+        );
+        default = { };
+      };
+      "core"."v1"."Service" = mkOption {
+        description = "Service is a named abstraction of software service (for example, mysql) consisting of local port (for example 3306) that the proxy listens on, and the selector that determines which pods will answer requests sent through the proxy.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.Service" "services" "Service" "core" "v1"
+        );
+        default = { };
+      };
+      "core"."v1"."ServiceAccount" = mkOption {
+        description = "ServiceAccount binds together: * a name, understood by users, and perhaps by peripheral systems, for an identity * a principal that can be authenticated and authorized * a set of secrets";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.ServiceAccount" "serviceaccounts" "ServiceAccount" "core"
+            "v1"
+        );
+        default = { };
+      };
+      "discovery.k8s.io"."v1"."EndpointSlice" = mkOption {
+        description = "EndpointSlice represents a subset of the endpoints that implement a service. For a given service there may be multiple EndpointSlice objects, selected by labels, which must be joined to produce the full set of endpoints.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.discovery.v1.EndpointSlice" "endpointslices" "EndpointSlice"
+            "discovery.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "events.k8s.io"."v1"."Event" = mkOption {
+        description = "Event is a report of an event somewhere in the cluster. It generally denotes some state change in the system. Events have a limited retention time and triggers and messages may evolve with time.  Event consumers should not rely on the timing of an event with a given Reason reflecting a consistent underlying trigger, or the continued existence of events with that Reason.  Events should be treated as informative, best-effort, supplemental data.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.events.v1.Event" "events" "Event" "events.k8s.io" "v1"
+        );
+        default = { };
+      };
+      "flowcontrol.apiserver.k8s.io"."v1"."FlowSchema" = mkOption {
+        description = "FlowSchema defines the schema of a group of flows. Note that a flow is made up of a set of inbound API requests with similar attributes and is identified by a pair of strings: the name of the FlowSchema and a \"flow distinguisher\".";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.flowcontrol.v1.FlowSchema" "flowschemas" "FlowSchema"
+            "flowcontrol.apiserver.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "flowcontrol.apiserver.k8s.io"."v1"."PriorityLevelConfiguration" = mkOption {
+        description = "PriorityLevelConfiguration represents the configuration of a priority level.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.flowcontrol.v1.PriorityLevelConfiguration"
+            "prioritylevelconfigurations"
+            "PriorityLevelConfiguration"
+            "flowcontrol.apiserver.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "flowcontrol.apiserver.k8s.io"."v1beta3"."FlowSchema" = mkOption {
+        description = "FlowSchema defines the schema of a group of flows. Note that a flow is made up of a set of inbound API requests with similar attributes and is identified by a pair of strings: the name of the FlowSchema and a \"flow distinguisher\".";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.flowcontrol.v1beta3.FlowSchema" "flowschemas" "FlowSchema"
+            "flowcontrol.apiserver.k8s.io"
+            "v1beta3"
+        );
+        default = { };
+      };
+      "flowcontrol.apiserver.k8s.io"."v1beta3"."PriorityLevelConfiguration" = mkOption {
+        description = "PriorityLevelConfiguration represents the configuration of a priority level.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.flowcontrol.v1beta3.PriorityLevelConfiguration"
+            "prioritylevelconfigurations"
+            "PriorityLevelConfiguration"
+            "flowcontrol.apiserver.k8s.io"
+            "v1beta3"
+        );
+        default = { };
+      };
+      "networking.k8s.io"."v1"."Ingress" = mkOption {
+        description = "Ingress is a collection of rules that allow inbound connections to reach the endpoints defined by a backend. An Ingress can be configured to give services externally-reachable urls, load balance traffic, terminate SSL, offer name based virtual hosting etc.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.networking.v1.Ingress" "ingresses" "Ingress" "networking.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "networking.k8s.io"."v1"."IngressClass" = mkOption {
+        description = "IngressClass represents the class of the Ingress, referenced by the Ingress Spec. The `ingressclass.kubernetes.io/is-default-class` annotation can be used to indicate that an IngressClass should be considered default. When a single IngressClass resource has this annotation set to true, new Ingress resources without a class specified will be assigned this default class.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.networking.v1.IngressClass" "ingressclasses" "IngressClass"
+            "networking.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "networking.k8s.io"."v1"."NetworkPolicy" = mkOption {
+        description = "NetworkPolicy describes what network traffic is allowed for a set of Pods";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.networking.v1.NetworkPolicy" "networkpolicies" "NetworkPolicy"
+            "networking.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "networking.k8s.io"."v1alpha1"."IPAddress" = mkOption {
+        description = "IPAddress represents a single IP of a single IP Family. The object is designed to be used by APIs that operate on IP addresses. The object is used by the Service core API for allocation of IP addresses. An IP address can be represented in different formats, to guarantee the uniqueness of the IP, the name of the object is the IP address in canonical format, four decimal digits separated by dots suppressing leading zeros for IPv4 and the representation defined by RFC 5952 for IPv6. Valid: 192.168.1.5 or 2001:db8::1 or 2001:db8:aaaa:bbbb:cccc:dddd:eeee:1 Invalid: 10.01.2.3 or 2001:db8:0:0:0::1";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.networking.v1alpha1.IPAddress" "ipaddresses" "IPAddress"
+            "networking.k8s.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+      "networking.k8s.io"."v1alpha1"."ServiceCIDR" = mkOption {
+        description = "ServiceCIDR defines a range of IP addresses using CIDR format (e.g. 192.168.0.0/24 or 2001:db2::/64). This range is used to allocate ClusterIPs to Service objects.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.networking.v1alpha1.ServiceCIDR" "servicecidrs" "ServiceCIDR"
+            "networking.k8s.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+      "node.k8s.io"."v1"."RuntimeClass" = mkOption {
+        description = "RuntimeClass defines a class of container runtime supported in the cluster. The RuntimeClass is used to determine which container runtime is used to run all containers in a pod. RuntimeClasses are manually defined by a user or cluster provisioner, and referenced in the PodSpec. The Kubelet is responsible for resolving the RuntimeClassName reference before running the pod.  For more details, see https://kubernetes.io/docs/concepts/containers/runtime-class/";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.node.v1.RuntimeClass" "runtimeclasses" "RuntimeClass"
+            "node.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "policy"."v1"."Eviction" = mkOption {
+        description = "Eviction evicts a pod from its node subject to certain policies and safety constraints. This is a subresource of Pod.  A request to cause such an eviction is created by POSTing to .../pods/<pod name>/evictions.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.policy.v1.Eviction" "eviction" "Eviction" "policy" "v1"
+        );
+        default = { };
+      };
+      "policy"."v1"."PodDisruptionBudget" = mkOption {
+        description = "PodDisruptionBudget is an object to define the max disruption that can be caused to a collection of pods";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.policy.v1.PodDisruptionBudget" "poddisruptionbudgets"
+            "PodDisruptionBudget"
+            "policy"
+            "v1"
+        );
+        default = { };
+      };
+      "rbac.authorization.k8s.io"."v1"."ClusterRole" = mkOption {
+        description = "ClusterRole is a cluster level, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding or ClusterRoleBinding.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.rbac.v1.ClusterRole" "clusterroles" "ClusterRole"
+            "rbac.authorization.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "rbac.authorization.k8s.io"."v1"."ClusterRoleBinding" = mkOption {
+        description = "ClusterRoleBinding references a ClusterRole, but not contain it.  It can reference a ClusterRole in the global namespace, and adds who information via Subject.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.rbac.v1.ClusterRoleBinding" "clusterrolebindings"
+            "ClusterRoleBinding"
+            "rbac.authorization.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "rbac.authorization.k8s.io"."v1"."Role" = mkOption {
+        description = "Role is a namespaced, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.rbac.v1.Role" "roles" "Role" "rbac.authorization.k8s.io" "v1"
+        );
+        default = { };
+      };
+      "rbac.authorization.k8s.io"."v1"."RoleBinding" = mkOption {
+        description = "RoleBinding references a role, but does not contain it.  It can reference a Role in the same namespace or a ClusterRole in the global namespace. It adds who information via Subjects and namespace information by which namespace it exists in.  RoleBindings in a given namespace only have effect in that namespace.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.rbac.v1.RoleBinding" "rolebindings" "RoleBinding"
+            "rbac.authorization.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "resource.k8s.io"."v1alpha2"."PodSchedulingContext" = mkOption {
+        description = "PodSchedulingContext objects hold information that is needed to schedule a Pod with ResourceClaims that use \"WaitForFirstConsumer\" allocation mode.\n\nThis is an alpha type and requires enabling the DynamicResourceAllocation feature gate.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.resource.v1alpha2.PodSchedulingContext" "podschedulingcontexts"
+            "PodSchedulingContext"
+            "resource.k8s.io"
+            "v1alpha2"
+        );
+        default = { };
+      };
+      "resource.k8s.io"."v1alpha2"."ResourceClaim" = mkOption {
+        description = "ResourceClaim describes which resources are needed by a resource consumer. Its status tracks whether the resource has been allocated and what the resulting attributes are.\n\nThis is an alpha type and requires enabling the DynamicResourceAllocation feature gate.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClaim" "resourceclaims" "ResourceClaim"
+            "resource.k8s.io"
+            "v1alpha2"
+        );
+        default = { };
+      };
+      "resource.k8s.io"."v1alpha2"."ResourceClaimParameters" = mkOption {
+        description = "ResourceClaimParameters defines resource requests for a ResourceClaim in an in-tree format understood by Kubernetes.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClaimParameters"
+            "resourceclaimparameters"
+            "ResourceClaimParameters"
+            "resource.k8s.io"
+            "v1alpha2"
+        );
+        default = { };
+      };
+      "resource.k8s.io"."v1alpha2"."ResourceClaimTemplate" = mkOption {
+        description = "ResourceClaimTemplate is used to produce ResourceClaim objects.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClaimTemplate" "resourceclaimtemplates"
+            "ResourceClaimTemplate"
+            "resource.k8s.io"
+            "v1alpha2"
+        );
+        default = { };
+      };
+      "resource.k8s.io"."v1alpha2"."ResourceClass" = mkOption {
+        description = "ResourceClass is used by administrators to influence how resources are allocated.\n\nThis is an alpha type and requires enabling the DynamicResourceAllocation feature gate.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClass" "resourceclasses"
+            "ResourceClass"
+            "resource.k8s.io"
+            "v1alpha2"
+        );
+        default = { };
+      };
+      "resource.k8s.io"."v1alpha2"."ResourceClassParameters" = mkOption {
+        description = "ResourceClassParameters defines resource requests for a ResourceClass in an in-tree format understood by Kubernetes.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClassParameters"
+            "resourceclassparameters"
+            "ResourceClassParameters"
+            "resource.k8s.io"
+            "v1alpha2"
+        );
+        default = { };
+      };
+      "resource.k8s.io"."v1alpha2"."ResourceSlice" = mkOption {
+        description = "ResourceSlice provides information about available resources on individual nodes.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceSlice" "resourceslices" "ResourceSlice"
+            "resource.k8s.io"
+            "v1alpha2"
+        );
+        default = { };
+      };
+      "scheduling.k8s.io"."v1"."PriorityClass" = mkOption {
+        description = "PriorityClass defines mapping from a priority class name to the priority integer value. The value can be any valid integer.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.scheduling.v1.PriorityClass" "priorityclasses" "PriorityClass"
+            "scheduling.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "storage.k8s.io"."v1"."CSIDriver" = mkOption {
+        description = "CSIDriver captures information about a Container Storage Interface (CSI) volume driver deployed on the cluster. Kubernetes attach detach controller uses this object to determine whether attach is required. Kubelet uses this object to determine whether pod information needs to be passed on mount. CSIDriver objects are non-namespaced.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.storage.v1.CSIDriver" "csidrivers" "CSIDriver" "storage.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "storage.k8s.io"."v1"."CSINode" = mkOption {
+        description = "CSINode holds information about all CSI drivers installed on a node. CSI drivers do not need to create the CSINode object directly. As long as they use the node-driver-registrar sidecar container, the kubelet will automatically populate the CSINode object for the CSI driver as part of kubelet plugin registration. CSINode has the same name as a node. If the object is missing, it means either there are no CSI Drivers available on the node, or the Kubelet version is low enough that it doesn't create this object. CSINode has an OwnerReference that points to the corresponding node object.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.storage.v1.CSINode" "csinodes" "CSINode" "storage.k8s.io" "v1"
+        );
+        default = { };
+      };
+      "storage.k8s.io"."v1"."CSIStorageCapacity" = mkOption {
+        description = "CSIStorageCapacity stores the result of one CSI GetCapacity call. For a given StorageClass, this describes the available capacity in a particular topology segment.  This can be used when considering where to instantiate new PersistentVolumes.\n\nFor example this can express things like: - StorageClass \"standard\" has \"1234 GiB\" available in \"topology.kubernetes.io/zone=us-east1\" - StorageClass \"localssd\" has \"10 GiB\" available in \"kubernetes.io/hostname=knode-abc123\"\n\nThe following three cases all imply that no capacity is available for a certain combination: - no object exists with suitable topology and storage class name - such an object exists, but the capacity is unset - such an object exists, but the capacity is zero\n\nThe producer of these objects can decide which approach is more suitable.\n\nThey are consumed by the kube-scheduler when a CSI driver opts into capacity-aware scheduling with CSIDriverSpec.StorageCapacity. The scheduler compares the MaximumVolumeSize against the requested size of pending volumes to filter out unsuitable nodes. If MaximumVolumeSize is unset, it falls back to a comparison against the less precise Capacity. If that is also unset, the scheduler assumes that capacity is insufficient and tries some other node.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.storage.v1.CSIStorageCapacity" "csistoragecapacities"
+            "CSIStorageCapacity"
+            "storage.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "storage.k8s.io"."v1"."StorageClass" = mkOption {
+        description = "StorageClass describes the parameters for a class of storage for which PersistentVolumes can be dynamically provisioned.\n\nStorageClasses are non-namespaced; the name of the storage class according to etcd is in ObjectMeta.Name.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.storage.v1.StorageClass" "storageclasses" "StorageClass"
+            "storage.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "storage.k8s.io"."v1"."VolumeAttachment" = mkOption {
+        description = "VolumeAttachment captures the intent to attach or detach the specified volume to/from the specified node.\n\nVolumeAttachment objects are non-namespaced.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.storage.v1.VolumeAttachment" "volumeattachments"
+            "VolumeAttachment"
+            "storage.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "storage.k8s.io"."v1alpha1"."VolumeAttributesClass" = mkOption {
+        description = "VolumeAttributesClass represents a specification of mutable volume attributes defined by the CSI driver. The class can be specified during dynamic provisioning of PersistentVolumeClaims, and changed in the PersistentVolumeClaim spec after provisioning.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.storage.v1alpha1.VolumeAttributesClass" "volumeattributesclasses"
+            "VolumeAttributesClass"
+            "storage.k8s.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+      "storagemigration.k8s.io"."v1alpha1"."StorageVersionMigration" = mkOption {
+        description = "StorageVersionMigration represents a migration of stored data to the latest storage version.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.storagemigration.v1alpha1.StorageVersionMigration"
+            "storageversionmigrations"
+            "StorageVersionMigration"
+            "storagemigration.k8s.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+      "apiextensions.k8s.io"."v1"."CustomResourceDefinition" = mkOption {
+        description = "CustomResourceDefinition represents a resource that should be exposed on the API server.  Its name MUST be in the format <.spec.name>.<.spec.group>.";
+        type = types.attrsOf (
+          submoduleForDefinition
+            "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceDefinition"
+            "customresourcedefinitions"
+            "CustomResourceDefinition"
+            "apiextensions.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "apiregistration.k8s.io"."v1"."APIService" = mkOption {
+        description = "APIService represents a server for a particular GroupVersion. Name must be \"version.group\".";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1.APIService" "apiservices"
+            "APIService"
+            "apiregistration.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+    }
+    // {
+      "APIServices" = mkOption {
+        description = "APIService represents a server for a particular GroupVersion. Name must be \"version.group\".";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1.APIService" "apiservices"
+            "APIService"
+            "apiregistration.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "bindings" = mkOption {
+        description = "Binding ties one object to another; for example, a pod is bound to a node by a scheduler. Deprecated in 1.7, please use the bindings subresource of pods instead.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.Binding" "bindings" "Binding" "core" "v1"
+        );
+        default = { };
+      };
+      "cSIDrivers" = mkOption {
+        description = "CSIDriver captures information about a Container Storage Interface (CSI) volume driver deployed on the cluster. Kubernetes attach detach controller uses this object to determine whether attach is required. Kubelet uses this object to determine whether pod information needs to be passed on mount. CSIDriver objects are non-namespaced.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.storage.v1.CSIDriver" "csidrivers" "CSIDriver" "storage.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "cSINodes" = mkOption {
+        description = "CSINode holds information about all CSI drivers installed on a node. CSI drivers do not need to create the CSINode object directly. As long as they use the node-driver-registrar sidecar container, the kubelet will automatically populate the CSINode object for the CSI driver as part of kubelet plugin registration. CSINode has the same name as a node. If the object is missing, it means either there are no CSI Drivers available on the node, or the Kubelet version is low enough that it doesn't create this object. CSINode has an OwnerReference that points to the corresponding node object.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.storage.v1.CSINode" "csinodes" "CSINode" "storage.k8s.io" "v1"
+        );
+        default = { };
+      };
+      "cSIStorageCapacities" = mkOption {
+        description = "CSIStorageCapacity stores the result of one CSI GetCapacity call. For a given StorageClass, this describes the available capacity in a particular topology segment.  This can be used when considering where to instantiate new PersistentVolumes.\n\nFor example this can express things like: - StorageClass \"standard\" has \"1234 GiB\" available in \"topology.kubernetes.io/zone=us-east1\" - StorageClass \"localssd\" has \"10 GiB\" available in \"kubernetes.io/hostname=knode-abc123\"\n\nThe following three cases all imply that no capacity is available for a certain combination: - no object exists with suitable topology and storage class name - such an object exists, but the capacity is unset - such an object exists, but the capacity is zero\n\nThe producer of these objects can decide which approach is more suitable.\n\nThey are consumed by the kube-scheduler when a CSI driver opts into capacity-aware scheduling with CSIDriverSpec.StorageCapacity. The scheduler compares the MaximumVolumeSize against the requested size of pending volumes to filter out unsuitable nodes. If MaximumVolumeSize is unset, it falls back to a comparison against the less precise Capacity. If that is also unset, the scheduler assumes that capacity is insufficient and tries some other node.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.storage.v1.CSIStorageCapacity" "csistoragecapacities"
+            "CSIStorageCapacity"
+            "storage.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "certificateSigningRequests" = mkOption {
+        description = "CertificateSigningRequest objects provide a mechanism to obtain x509 certificates by submitting a certificate signing request, and having it asynchronously approved and issued.\n\nKubelets use this API to obtain:\n 1. client certificates to authenticate to kube-apiserver (with the \"kubernetes.io/kube-apiserver-client-kubelet\" signerName).\n 2. serving certificates for TLS endpoints kube-apiserver can connect to securely (with the \"kubernetes.io/kubelet-serving\" signerName).\n\nThis API can be used to request client certificates to authenticate to kube-apiserver (with the \"kubernetes.io/kube-apiserver-client\" signerName), or to obtain certificates from custom non-Kubernetes signers.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.certificates.v1.CertificateSigningRequest"
+            "certificatesigningrequests"
+            "CertificateSigningRequest"
+            "certificates.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "clusterRoles" = mkOption {
+        description = "ClusterRole is a cluster level, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding or ClusterRoleBinding.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.rbac.v1.ClusterRole" "clusterroles" "ClusterRole"
+            "rbac.authorization.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "clusterRoleBindings" = mkOption {
+        description = "ClusterRoleBinding references a ClusterRole, but not contain it.  It can reference a ClusterRole in the global namespace, and adds who information via Subject.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.rbac.v1.ClusterRoleBinding" "clusterrolebindings"
+            "ClusterRoleBinding"
+            "rbac.authorization.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "clusterTrustBundles" = mkOption {
+        description = "ClusterTrustBundle is a cluster-scoped container for X.509 trust anchors (root certificates).\n\nClusterTrustBundle objects are considered to be readable by any authenticated user in the cluster, because they can be mounted by pods using the `clusterTrustBundle` projection.  All service accounts have read access to ClusterTrustBundles by default.  Users who only have namespace-level access to a cluster can read ClusterTrustBundles by impersonating a serviceaccount that they have access to.\n\nIt can be optionally associated with a particular assigner, in which case it contains one valid set of trust anchors for that signer. Signers may have multiple associated ClusterTrustBundles; each is an independent set of trust anchors for that signer. Admission control is used to enforce that only users with permissions on the signer can create or modify the corresponding bundle.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.certificates.v1alpha1.ClusterTrustBundle" "clustertrustbundles"
+            "ClusterTrustBundle"
+            "certificates.k8s.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+      "configMaps" = mkOption {
+        description = "ConfigMap holds configuration data for pods to consume.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.ConfigMap" "configmaps" "ConfigMap" "core" "v1"
+        );
+        default = { };
+      };
+      "controllerRevisions" = mkOption {
+        description = "ControllerRevision implements an immutable snapshot of state data. Clients are responsible for serializing and deserializing the objects that contain their internal state. Once a ControllerRevision has been successfully created, it can not be updated. The API Server will fail validation of all requests that attempt to mutate the Data field. ControllerRevisions may, however, be deleted. Note that, due to its use by both the DaemonSet and StatefulSet controllers for update and rollback, this object is beta. However, it may be subject to name and representation changes in future releases, and clients should not depend on its stability. It is primarily for internal use by controllers.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.apps.v1.ControllerRevision" "controllerrevisions"
+            "ControllerRevision"
+            "apps"
+            "v1"
+        );
+        default = { };
+      };
+      "cronJobs" = mkOption {
+        description = "CronJob represents the configuration of a single cron job.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.batch.v1.CronJob" "cronjobs" "CronJob" "batch" "v1"
+        );
+        default = { };
+      };
+      "customResourceDefinitions" = mkOption {
+        description = "CustomResourceDefinition represents a resource that should be exposed on the API server.  Its name MUST be in the format <.spec.name>.<.spec.group>.";
+        type = types.attrsOf (
+          submoduleForDefinition
+            "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.CustomResourceDefinition"
+            "customresourcedefinitions"
+            "CustomResourceDefinition"
+            "apiextensions.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "daemonSets" = mkOption {
+        description = "DaemonSet represents the configuration of a daemon set.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.apps.v1.DaemonSet" "daemonsets" "DaemonSet" "apps" "v1"
+        );
+        default = { };
+      };
+      "deployments" = mkOption {
+        description = "Deployment enables declarative updates for Pods and ReplicaSets.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.apps.v1.Deployment" "deployments" "Deployment" "apps" "v1"
+        );
+        default = { };
+      };
+      "endpointSlices" = mkOption {
+        description = "EndpointSlice represents a subset of the endpoints that implement a service. For a given service there may be multiple EndpointSlice objects, selected by labels, which must be joined to produce the full set of endpoints.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.discovery.v1.EndpointSlice" "endpointslices" "EndpointSlice"
+            "discovery.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "endpoints" = mkOption {
+        description = "Endpoints is a collection of endpoints that implement the actual service. Example:\n\n\t Name: \"mysvc\",\n\t Subsets: [\n\t   {\n\t     Addresses: [{\"ip\": \"10.10.1.1\"}, {\"ip\": \"10.10.2.2\"}],\n\t     Ports: [{\"name\": \"a\", \"port\": 8675}, {\"name\": \"b\", \"port\": 309}]\n\t   },\n\t   {\n\t     Addresses: [{\"ip\": \"10.10.3.3\"}],\n\t     Ports: [{\"name\": \"a\", \"port\": 93}, {\"name\": \"b\", \"port\": 76}]\n\t   },\n\t]";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.Endpoints" "endpoints" "Endpoints" "core" "v1"
+        );
+        default = { };
+      };
+      "events" = mkOption {
+        description = "Event is a report of an event somewhere in the cluster.  Events have a limited retention time and triggers and messages may evolve with time.  Event consumers should not rely on the timing of an event with a given Reason reflecting a consistent underlying trigger, or the continued existence of events with that Reason.  Events should be treated as informative, best-effort, supplemental data.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.Event" "events" "Event" "core" "v1"
+        );
+        default = { };
+      };
+      "eviction" = mkOption {
+        description = "Eviction evicts a pod from its node subject to certain policies and safety constraints. This is a subresource of Pod.  A request to cause such an eviction is created by POSTing to .../pods/<pod name>/evictions.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.policy.v1.Eviction" "eviction" "Eviction" "policy" "v1"
+        );
+        default = { };
+      };
+      "flowSchemas" = mkOption {
+        description = "FlowSchema defines the schema of a group of flows. Note that a flow is made up of a set of inbound API requests with similar attributes and is identified by a pair of strings: the name of the FlowSchema and a \"flow distinguisher\".";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.flowcontrol.v1.FlowSchema" "flowschemas" "FlowSchema"
+            "flowcontrol.apiserver.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "horizontalPodAutoscalers" = mkOption {
+        description = "HorizontalPodAutoscaler is the configuration for a horizontal pod autoscaler, which automatically manages the replica count of any resource implementing the scale subresource based on the metrics specified.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.autoscaling.v2.HorizontalPodAutoscaler"
+            "horizontalpodautoscalers"
+            "HorizontalPodAutoscaler"
+            "autoscaling"
+            "v2"
+        );
+        default = { };
+      };
+      "iPAddresses" = mkOption {
+        description = "IPAddress represents a single IP of a single IP Family. The object is designed to be used by APIs that operate on IP addresses. The object is used by the Service core API for allocation of IP addresses. An IP address can be represented in different formats, to guarantee the uniqueness of the IP, the name of the object is the IP address in canonical format, four decimal digits separated by dots suppressing leading zeros for IPv4 and the representation defined by RFC 5952 for IPv6. Valid: 192.168.1.5 or 2001:db8::1 or 2001:db8:aaaa:bbbb:cccc:dddd:eeee:1 Invalid: 10.01.2.3 or 2001:db8:0:0:0::1";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.networking.v1alpha1.IPAddress" "ipaddresses" "IPAddress"
+            "networking.k8s.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+      "ingresses" = mkOption {
+        description = "Ingress is a collection of rules that allow inbound connections to reach the endpoints defined by a backend. An Ingress can be configured to give services externally-reachable urls, load balance traffic, terminate SSL, offer name based virtual hosting etc.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.networking.v1.Ingress" "ingresses" "Ingress" "networking.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "ingressClasses" = mkOption {
+        description = "IngressClass represents the class of the Ingress, referenced by the Ingress Spec. The `ingressclass.kubernetes.io/is-default-class` annotation can be used to indicate that an IngressClass should be considered default. When a single IngressClass resource has this annotation set to true, new Ingress resources without a class specified will be assigned this default class.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.networking.v1.IngressClass" "ingressclasses" "IngressClass"
+            "networking.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "jobs" = mkOption {
+        description = "Job represents the configuration of a single job.";
+        type = types.attrsOf (submoduleForDefinition "io.k8s.api.batch.v1.Job" "jobs" "Job" "batch" "v1");
+        default = { };
+      };
+      "leases" = mkOption {
+        description = "Lease defines a lease concept.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.coordination.v1.Lease" "leases" "Lease" "coordination.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "limitRanges" = mkOption {
+        description = "LimitRange sets resource usage limits for each kind of resource in a Namespace.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.LimitRange" "limitranges" "LimitRange" "core" "v1"
+        );
+        default = { };
+      };
+      "localSubjectAccessReviews" = mkOption {
+        description = "LocalSubjectAccessReview checks whether or not a user or group can perform an action in a given namespace. Having a namespace scoped resource makes it much easier to grant namespace scoped policy that includes permissions checking.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.authorization.v1.LocalSubjectAccessReview"
+            "localsubjectaccessreviews"
+            "LocalSubjectAccessReview"
+            "authorization.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "mutatingWebhookConfigurations" = mkOption {
+        description = "MutatingWebhookConfiguration describes the configuration of and admission webhook that accept or reject and may change the object.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.admissionregistration.v1.MutatingWebhookConfiguration"
+            "mutatingwebhookconfigurations"
+            "MutatingWebhookConfiguration"
+            "admissionregistration.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "namespaces" = mkOption {
+        description = "Namespace provides a scope for Names. Use of multiple namespaces is optional.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.Namespace" "namespaces" "Namespace" "core" "v1"
+        );
+        default = { };
+      };
+      "networkPolicies" = mkOption {
+        description = "NetworkPolicy describes what network traffic is allowed for a set of Pods";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.networking.v1.NetworkPolicy" "networkpolicies" "NetworkPolicy"
+            "networking.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "nodes" = mkOption {
+        description = "Node is a worker node in Kubernetes. Each node will have a unique identifier in the cache (i.e. in etcd).";
+        type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Node" "nodes" "Node" "core" "v1");
+        default = { };
+      };
+      "persistentVolumes" = mkOption {
+        description = "PersistentVolume (PV) is a storage resource provisioned by an administrator. It is analogous to a node. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.PersistentVolume" "persistentvolumes" "PersistentVolume"
+            "core"
+            "v1"
+        );
+        default = { };
+      };
+      "persistentVolumeClaims" = mkOption {
+        description = "PersistentVolumeClaim is a user's request for and claim to a persistent volume";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.PersistentVolumeClaim" "persistentvolumeclaims"
+            "PersistentVolumeClaim"
+            "core"
+            "v1"
+        );
+        default = { };
+      };
+      "pods" = mkOption {
+        description = "Pod is a collection of containers that can run on a host. This resource is created by clients and scheduled onto hosts.";
+        type = types.attrsOf (submoduleForDefinition "io.k8s.api.core.v1.Pod" "pods" "Pod" "core" "v1");
+        default = { };
+      };
+      "podDisruptionBudgets" = mkOption {
+        description = "PodDisruptionBudget is an object to define the max disruption that can be caused to a collection of pods";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.policy.v1.PodDisruptionBudget" "poddisruptionbudgets"
+            "PodDisruptionBudget"
+            "policy"
+            "v1"
+        );
+        default = { };
+      };
+      "podSchedulingContexts" = mkOption {
+        description = "PodSchedulingContext objects hold information that is needed to schedule a Pod with ResourceClaims that use \"WaitForFirstConsumer\" allocation mode.\n\nThis is an alpha type and requires enabling the DynamicResourceAllocation feature gate.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.resource.v1alpha2.PodSchedulingContext" "podschedulingcontexts"
+            "PodSchedulingContext"
+            "resource.k8s.io"
+            "v1alpha2"
+        );
+        default = { };
+      };
+      "podTemplates" = mkOption {
+        description = "PodTemplate describes a template for creating copies of a predefined pod.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.PodTemplate" "podtemplates" "PodTemplate" "core" "v1"
+        );
+        default = { };
+      };
+      "priorityClasses" = mkOption {
+        description = "PriorityClass defines mapping from a priority class name to the priority integer value. The value can be any valid integer.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.scheduling.v1.PriorityClass" "priorityclasses" "PriorityClass"
+            "scheduling.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "priorityLevelConfigurations" = mkOption {
+        description = "PriorityLevelConfiguration represents the configuration of a priority level.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.flowcontrol.v1.PriorityLevelConfiguration"
+            "prioritylevelconfigurations"
+            "PriorityLevelConfiguration"
+            "flowcontrol.apiserver.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "replicaSets" = mkOption {
+        description = "ReplicaSet ensures that a specified number of pod replicas are running at any given time.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.apps.v1.ReplicaSet" "replicasets" "ReplicaSet" "apps" "v1"
+        );
+        default = { };
+      };
+      "replicationControllers" = mkOption {
+        description = "ReplicationController represents the configuration of a replication controller.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.ReplicationController" "replicationcontrollers"
+            "ReplicationController"
+            "core"
+            "v1"
+        );
+        default = { };
+      };
+      "resourceClaims" = mkOption {
+        description = "ResourceClaim describes which resources are needed by a resource consumer. Its status tracks whether the resource has been allocated and what the resulting attributes are.\n\nThis is an alpha type and requires enabling the DynamicResourceAllocation feature gate.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClaim" "resourceclaims" "ResourceClaim"
+            "resource.k8s.io"
+            "v1alpha2"
+        );
+        default = { };
+      };
+      "resourceClaimParameters" = mkOption {
+        description = "ResourceClaimParameters defines resource requests for a ResourceClaim in an in-tree format understood by Kubernetes.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClaimParameters"
+            "resourceclaimparameters"
+            "ResourceClaimParameters"
+            "resource.k8s.io"
+            "v1alpha2"
+        );
+        default = { };
+      };
+      "resourceClaimTemplates" = mkOption {
+        description = "ResourceClaimTemplate is used to produce ResourceClaim objects.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClaimTemplate" "resourceclaimtemplates"
+            "ResourceClaimTemplate"
+            "resource.k8s.io"
+            "v1alpha2"
+        );
+        default = { };
+      };
+      "resourceClasses" = mkOption {
+        description = "ResourceClass is used by administrators to influence how resources are allocated.\n\nThis is an alpha type and requires enabling the DynamicResourceAllocation feature gate.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClass" "resourceclasses"
+            "ResourceClass"
+            "resource.k8s.io"
+            "v1alpha2"
+        );
+        default = { };
+      };
+      "resourceClassParameters" = mkOption {
+        description = "ResourceClassParameters defines resource requests for a ResourceClass in an in-tree format understood by Kubernetes.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceClassParameters"
+            "resourceclassparameters"
+            "ResourceClassParameters"
+            "resource.k8s.io"
+            "v1alpha2"
+        );
+        default = { };
+      };
+      "resourceQuotas" = mkOption {
+        description = "ResourceQuota sets aggregate quota restrictions enforced per namespace";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.ResourceQuota" "resourcequotas" "ResourceQuota" "core"
+            "v1"
+        );
+        default = { };
+      };
+      "resourceSlices" = mkOption {
+        description = "ResourceSlice provides information about available resources on individual nodes.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.resource.v1alpha2.ResourceSlice" "resourceslices" "ResourceSlice"
+            "resource.k8s.io"
+            "v1alpha2"
+        );
+        default = { };
+      };
+      "roles" = mkOption {
+        description = "Role is a namespaced, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.rbac.v1.Role" "roles" "Role" "rbac.authorization.k8s.io" "v1"
+        );
+        default = { };
+      };
+      "roleBindings" = mkOption {
+        description = "RoleBinding references a role, but does not contain it.  It can reference a Role in the same namespace or a ClusterRole in the global namespace. It adds who information via Subjects and namespace information by which namespace it exists in.  RoleBindings in a given namespace only have effect in that namespace.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.rbac.v1.RoleBinding" "rolebindings" "RoleBinding"
+            "rbac.authorization.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "runtimeClasses" = mkOption {
+        description = "RuntimeClass defines a class of container runtime supported in the cluster. The RuntimeClass is used to determine which container runtime is used to run all containers in a pod. RuntimeClasses are manually defined by a user or cluster provisioner, and referenced in the PodSpec. The Kubelet is responsible for resolving the RuntimeClassName reference before running the pod.  For more details, see https://kubernetes.io/docs/concepts/containers/runtime-class/";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.node.v1.RuntimeClass" "runtimeclasses" "RuntimeClass"
+            "node.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "secrets" = mkOption {
+        description = "Secret holds secret data of a certain type. The total bytes of the values in the Data field must be less than MaxSecretSize bytes.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.Secret" "secrets" "Secret" "core" "v1"
+        );
+        default = { };
+      };
+      "selfSubjectAccessReviews" = mkOption {
+        description = "SelfSubjectAccessReview checks whether or the current user can perform an action.  Not filling in a spec.namespace means \"in all namespaces\".  Self is a special case, because users should always be able to check whether they can perform an action";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.authorization.v1.SelfSubjectAccessReview"
+            "selfsubjectaccessreviews"
+            "SelfSubjectAccessReview"
+            "authorization.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "selfSubjectReviews" = mkOption {
+        description = "SelfSubjectReview contains the user information that the kube-apiserver has about the user making this request. When using impersonation, users will receive the user info of the user being impersonated.  If impersonation or request header authentication is used, any extra keys will have their case ignored and returned as lowercase.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.authentication.v1.SelfSubjectReview" "selfsubjectreviews"
+            "SelfSubjectReview"
+            "authentication.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "selfSubjectRulesReviews" = mkOption {
+        description = "SelfSubjectRulesReview enumerates the set of actions the current user can perform within a namespace. The returned list of actions may be incomplete depending on the server's authorization mode, and any errors experienced during the evaluation. SelfSubjectRulesReview should be used by UIs to show/hide actions, or to quickly let an end user reason about their permissions. It should NOT Be used by external systems to drive authorization decisions as this raises confused deputy, cache lifetime/revocation, and correctness concerns. SubjectAccessReview, and LocalAccessReview are the correct way to defer authorization decisions to the API server.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.authorization.v1.SelfSubjectRulesReview"
+            "selfsubjectrulesreviews"
+            "SelfSubjectRulesReview"
+            "authorization.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "services" = mkOption {
+        description = "Service is a named abstraction of software service (for example, mysql) consisting of local port (for example 3306) that the proxy listens on, and the selector that determines which pods will answer requests sent through the proxy.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.Service" "services" "Service" "core" "v1"
+        );
+        default = { };
+      };
+      "serviceAccounts" = mkOption {
+        description = "ServiceAccount binds together: * a name, understood by users, and perhaps by peripheral systems, for an identity * a principal that can be authenticated and authorized * a set of secrets";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.core.v1.ServiceAccount" "serviceaccounts" "ServiceAccount" "core"
+            "v1"
+        );
+        default = { };
+      };
+      "serviceCIDRs" = mkOption {
+        description = "ServiceCIDR defines a range of IP addresses using CIDR format (e.g. 192.168.0.0/24 or 2001:db2::/64). This range is used to allocate ClusterIPs to Service objects.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.networking.v1alpha1.ServiceCIDR" "servicecidrs" "ServiceCIDR"
+            "networking.k8s.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+      "statefulSets" = mkOption {
+        description = "StatefulSet represents a set of pods with consistent identities. Identities are defined as:\n  - Network: A single stable DNS and hostname.\n  - Storage: As many VolumeClaims as requested.\n\nThe StatefulSet guarantees that a given network identity will always map to the same storage identity.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.apps.v1.StatefulSet" "statefulsets" "StatefulSet" "apps" "v1"
+        );
+        default = { };
+      };
+      "storageClasses" = mkOption {
+        description = "StorageClass describes the parameters for a class of storage for which PersistentVolumes can be dynamically provisioned.\n\nStorageClasses are non-namespaced; the name of the storage class according to etcd is in ObjectMeta.Name.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.storage.v1.StorageClass" "storageclasses" "StorageClass"
+            "storage.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "storageVersions" = mkOption {
+        description = "Storage version of a specific resource.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.apiserverinternal.v1alpha1.StorageVersion" "storageversions"
+            "StorageVersion"
+            "internal.apiserver.k8s.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+      "storageVersionMigrations" = mkOption {
+        description = "StorageVersionMigration represents a migration of stored data to the latest storage version.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.storagemigration.v1alpha1.StorageVersionMigration"
+            "storageversionmigrations"
+            "StorageVersionMigration"
+            "storagemigration.k8s.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+      "subjectAccessReviews" = mkOption {
+        description = "SubjectAccessReview checks whether or not a user or group can perform an action.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.authorization.v1.SubjectAccessReview" "subjectaccessreviews"
+            "SubjectAccessReview"
+            "authorization.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "token" = mkOption {
+        description = "TokenRequest requests a token for a given service account.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.authentication.v1.TokenRequest" "token" "TokenRequest"
+            "authentication.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "tokenReviews" = mkOption {
+        description = "TokenReview attempts to authenticate a token to a known user. Note: TokenReview requests may be cached by the webhook token authenticator plugin in the kube-apiserver.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.authentication.v1.TokenReview" "tokenreviews" "TokenReview"
+            "authentication.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "validatingAdmissionPolicies" = mkOption {
+        description = "ValidatingAdmissionPolicy describes the definition of an admission validation policy that accepts or rejects an object without changing it.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.admissionregistration.v1.ValidatingAdmissionPolicy"
+            "validatingadmissionpolicies"
+            "ValidatingAdmissionPolicy"
+            "admissionregistration.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "validatingAdmissionPolicyBindings" = mkOption {
+        description = "ValidatingAdmissionPolicyBinding binds the ValidatingAdmissionPolicy with paramerized resources. ValidatingAdmissionPolicyBinding and parameter CRDs together define how cluster administrators configure policies for clusters.\n\nFor a given admission request, each binding will cause its policy to be evaluated N times, where N is 1 for policies/bindings that don't use params, otherwise N is the number of parameters selected by the binding.\n\nThe CEL expressions of a policy must have a computed CEL cost below the maximum CEL budget. Each evaluation of the policy is given an independent CEL cost budget. Adding/removing policies, bindings, or params can not affect whether a given (policy, binding, param) combination is within its own CEL budget.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.admissionregistration.v1.ValidatingAdmissionPolicyBinding"
+            "validatingadmissionpolicybindings"
+            "ValidatingAdmissionPolicyBinding"
+            "admissionregistration.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "validatingWebhookConfigurations" = mkOption {
+        description = "ValidatingWebhookConfiguration describes the configuration of and admission webhook that accept or reject and object without changing it.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.admissionregistration.v1.ValidatingWebhookConfiguration"
+            "validatingwebhookconfigurations"
+            "ValidatingWebhookConfiguration"
+            "admissionregistration.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "volumeAttachments" = mkOption {
+        description = "VolumeAttachment captures the intent to attach or detach the specified volume to/from the specified node.\n\nVolumeAttachment objects are non-namespaced.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.storage.v1.VolumeAttachment" "volumeattachments"
+            "VolumeAttachment"
+            "storage.k8s.io"
+            "v1"
+        );
+        default = { };
+      };
+      "volumeAttributesClasses" = mkOption {
+        description = "VolumeAttributesClass represents a specification of mutable volume attributes defined by the CSI driver. The class can be specified during dynamic provisioning of PersistentVolumeClaims, and changed in the PersistentVolumeClaim spec after provisioning.";
+        type = types.attrsOf (
+          submoduleForDefinition "io.k8s.api.storage.v1alpha1.VolumeAttributesClass" "volumeattributesclasses"
+            "VolumeAttributesClass"
+            "storage.k8s.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+    };
   };
 
   config = {
@@ -18048,148 +18987,135 @@ in {
     ];
 
     resources = {
-      "apiregistration.k8s.io"."v1"."APIService" =
-        mkAliasDefinitions options.resources."APIServices";
-      "core"."v1"."Binding" =
-        mkAliasDefinitions options.resources."bindings";
-      "storage.k8s.io"."v1"."CSIDriver" =
-        mkAliasDefinitions options.resources."cSIDrivers";
-      "storage.k8s.io"."v1"."CSINode" =
-        mkAliasDefinitions options.resources."cSINodes";
+      "apiregistration.k8s.io"."v1"."APIService" = mkAliasDefinitions options.resources."APIServices";
+      "core"."v1"."Binding" = mkAliasDefinitions options.resources."bindings";
+      "storage.k8s.io"."v1"."CSIDriver" = mkAliasDefinitions options.resources."cSIDrivers";
+      "storage.k8s.io"."v1"."CSINode" = mkAliasDefinitions options.resources."cSINodes";
       "storage.k8s.io"."v1"."CSIStorageCapacity" =
-        mkAliasDefinitions options.resources."cSIStorageCapacities";
+        mkAliasDefinitions
+          options.resources."cSIStorageCapacities";
       "certificates.k8s.io"."v1"."CertificateSigningRequest" =
-        mkAliasDefinitions options.resources."certificateSigningRequests";
+        mkAliasDefinitions
+          options.resources."certificateSigningRequests";
       "rbac.authorization.k8s.io"."v1"."ClusterRole" =
-        mkAliasDefinitions options.resources."clusterRoles";
+        mkAliasDefinitions
+          options.resources."clusterRoles";
       "rbac.authorization.k8s.io"."v1"."ClusterRoleBinding" =
-        mkAliasDefinitions options.resources."clusterRoleBindings";
+        mkAliasDefinitions
+          options.resources."clusterRoleBindings";
       "certificates.k8s.io"."v1alpha1"."ClusterTrustBundle" =
-        mkAliasDefinitions options.resources."clusterTrustBundles";
-      "core"."v1"."ConfigMap" =
-        mkAliasDefinitions options.resources."configMaps";
-      "apps"."v1"."ControllerRevision" =
-        mkAliasDefinitions options.resources."controllerRevisions";
-      "batch"."v1"."CronJob" =
-        mkAliasDefinitions options.resources."cronJobs";
+        mkAliasDefinitions
+          options.resources."clusterTrustBundles";
+      "core"."v1"."ConfigMap" = mkAliasDefinitions options.resources."configMaps";
+      "apps"."v1"."ControllerRevision" = mkAliasDefinitions options.resources."controllerRevisions";
+      "batch"."v1"."CronJob" = mkAliasDefinitions options.resources."cronJobs";
       "apiextensions.k8s.io"."v1"."CustomResourceDefinition" =
-        mkAliasDefinitions options.resources."customResourceDefinitions";
-      "apps"."v1"."DaemonSet" =
-        mkAliasDefinitions options.resources."daemonSets";
-      "apps"."v1"."Deployment" =
-        mkAliasDefinitions options.resources."deployments";
-      "discovery.k8s.io"."v1"."EndpointSlice" =
-        mkAliasDefinitions options.resources."endpointSlices";
-      "core"."v1"."Endpoints" =
-        mkAliasDefinitions options.resources."endpoints";
-      "core"."v1"."Event" =
-        mkAliasDefinitions options.resources."events";
-      "policy"."v1"."Eviction" =
-        mkAliasDefinitions options.resources."eviction";
+        mkAliasDefinitions
+          options.resources."customResourceDefinitions";
+      "apps"."v1"."DaemonSet" = mkAliasDefinitions options.resources."daemonSets";
+      "apps"."v1"."Deployment" = mkAliasDefinitions options.resources."deployments";
+      "discovery.k8s.io"."v1"."EndpointSlice" = mkAliasDefinitions options.resources."endpointSlices";
+      "core"."v1"."Endpoints" = mkAliasDefinitions options.resources."endpoints";
+      "core"."v1"."Event" = mkAliasDefinitions options.resources."events";
+      "policy"."v1"."Eviction" = mkAliasDefinitions options.resources."eviction";
       "flowcontrol.apiserver.k8s.io"."v1"."FlowSchema" =
-        mkAliasDefinitions options.resources."flowSchemas";
+        mkAliasDefinitions
+          options.resources."flowSchemas";
       "autoscaling"."v2"."HorizontalPodAutoscaler" =
-        mkAliasDefinitions options.resources."horizontalPodAutoscalers";
-      "networking.k8s.io"."v1alpha1"."IPAddress" =
-        mkAliasDefinitions options.resources."iPAddresses";
-      "networking.k8s.io"."v1"."Ingress" =
-        mkAliasDefinitions options.resources."ingresses";
-      "networking.k8s.io"."v1"."IngressClass" =
-        mkAliasDefinitions options.resources."ingressClasses";
-      "batch"."v1"."Job" =
-        mkAliasDefinitions options.resources."jobs";
-      "coordination.k8s.io"."v1"."Lease" =
-        mkAliasDefinitions options.resources."leases";
-      "core"."v1"."LimitRange" =
-        mkAliasDefinitions options.resources."limitRanges";
+        mkAliasDefinitions
+          options.resources."horizontalPodAutoscalers";
+      "networking.k8s.io"."v1alpha1"."IPAddress" = mkAliasDefinitions options.resources."iPAddresses";
+      "networking.k8s.io"."v1"."Ingress" = mkAliasDefinitions options.resources."ingresses";
+      "networking.k8s.io"."v1"."IngressClass" = mkAliasDefinitions options.resources."ingressClasses";
+      "batch"."v1"."Job" = mkAliasDefinitions options.resources."jobs";
+      "coordination.k8s.io"."v1"."Lease" = mkAliasDefinitions options.resources."leases";
+      "core"."v1"."LimitRange" = mkAliasDefinitions options.resources."limitRanges";
       "authorization.k8s.io"."v1"."LocalSubjectAccessReview" =
-        mkAliasDefinitions options.resources."localSubjectAccessReviews";
+        mkAliasDefinitions
+          options.resources."localSubjectAccessReviews";
       "admissionregistration.k8s.io"."v1"."MutatingWebhookConfiguration" =
-        mkAliasDefinitions options.resources."mutatingWebhookConfigurations";
-      "core"."v1"."Namespace" =
-        mkAliasDefinitions options.resources."namespaces";
-      "networking.k8s.io"."v1"."NetworkPolicy" =
-        mkAliasDefinitions options.resources."networkPolicies";
-      "core"."v1"."Node" =
-        mkAliasDefinitions options.resources."nodes";
-      "core"."v1"."PersistentVolume" =
-        mkAliasDefinitions options.resources."persistentVolumes";
-      "core"."v1"."PersistentVolumeClaim" =
-        mkAliasDefinitions options.resources."persistentVolumeClaims";
-      "core"."v1"."Pod" =
-        mkAliasDefinitions options.resources."pods";
-      "policy"."v1"."PodDisruptionBudget" =
-        mkAliasDefinitions options.resources."podDisruptionBudgets";
+        mkAliasDefinitions
+          options.resources."mutatingWebhookConfigurations";
+      "core"."v1"."Namespace" = mkAliasDefinitions options.resources."namespaces";
+      "networking.k8s.io"."v1"."NetworkPolicy" = mkAliasDefinitions options.resources."networkPolicies";
+      "core"."v1"."Node" = mkAliasDefinitions options.resources."nodes";
+      "core"."v1"."PersistentVolume" = mkAliasDefinitions options.resources."persistentVolumes";
+      "core"."v1"."PersistentVolumeClaim" = mkAliasDefinitions options.resources."persistentVolumeClaims";
+      "core"."v1"."Pod" = mkAliasDefinitions options.resources."pods";
+      "policy"."v1"."PodDisruptionBudget" = mkAliasDefinitions options.resources."podDisruptionBudgets";
       "resource.k8s.io"."v1alpha2"."PodSchedulingContext" =
-        mkAliasDefinitions options.resources."podSchedulingContexts";
-      "core"."v1"."PodTemplate" =
-        mkAliasDefinitions options.resources."podTemplates";
-      "scheduling.k8s.io"."v1"."PriorityClass" =
-        mkAliasDefinitions options.resources."priorityClasses";
+        mkAliasDefinitions
+          options.resources."podSchedulingContexts";
+      "core"."v1"."PodTemplate" = mkAliasDefinitions options.resources."podTemplates";
+      "scheduling.k8s.io"."v1"."PriorityClass" = mkAliasDefinitions options.resources."priorityClasses";
       "flowcontrol.apiserver.k8s.io"."v1"."PriorityLevelConfiguration" =
-        mkAliasDefinitions options.resources."priorityLevelConfigurations";
-      "apps"."v1"."ReplicaSet" =
-        mkAliasDefinitions options.resources."replicaSets";
-      "core"."v1"."ReplicationController" =
-        mkAliasDefinitions options.resources."replicationControllers";
+        mkAliasDefinitions
+          options.resources."priorityLevelConfigurations";
+      "apps"."v1"."ReplicaSet" = mkAliasDefinitions options.resources."replicaSets";
+      "core"."v1"."ReplicationController" = mkAliasDefinitions options.resources."replicationControllers";
       "resource.k8s.io"."v1alpha2"."ResourceClaim" =
-        mkAliasDefinitions options.resources."resourceClaims";
+        mkAliasDefinitions
+          options.resources."resourceClaims";
       "resource.k8s.io"."v1alpha2"."ResourceClaimParameters" =
-        mkAliasDefinitions options.resources."resourceClaimParameters";
+        mkAliasDefinitions
+          options.resources."resourceClaimParameters";
       "resource.k8s.io"."v1alpha2"."ResourceClaimTemplate" =
-        mkAliasDefinitions options.resources."resourceClaimTemplates";
+        mkAliasDefinitions
+          options.resources."resourceClaimTemplates";
       "resource.k8s.io"."v1alpha2"."ResourceClass" =
-        mkAliasDefinitions options.resources."resourceClasses";
+        mkAliasDefinitions
+          options.resources."resourceClasses";
       "resource.k8s.io"."v1alpha2"."ResourceClassParameters" =
-        mkAliasDefinitions options.resources."resourceClassParameters";
-      "core"."v1"."ResourceQuota" =
-        mkAliasDefinitions options.resources."resourceQuotas";
+        mkAliasDefinitions
+          options.resources."resourceClassParameters";
+      "core"."v1"."ResourceQuota" = mkAliasDefinitions options.resources."resourceQuotas";
       "resource.k8s.io"."v1alpha2"."ResourceSlice" =
-        mkAliasDefinitions options.resources."resourceSlices";
-      "rbac.authorization.k8s.io"."v1"."Role" =
-        mkAliasDefinitions options.resources."roles";
+        mkAliasDefinitions
+          options.resources."resourceSlices";
+      "rbac.authorization.k8s.io"."v1"."Role" = mkAliasDefinitions options.resources."roles";
       "rbac.authorization.k8s.io"."v1"."RoleBinding" =
-        mkAliasDefinitions options.resources."roleBindings";
-      "node.k8s.io"."v1"."RuntimeClass" =
-        mkAliasDefinitions options.resources."runtimeClasses";
-      "core"."v1"."Secret" =
-        mkAliasDefinitions options.resources."secrets";
+        mkAliasDefinitions
+          options.resources."roleBindings";
+      "node.k8s.io"."v1"."RuntimeClass" = mkAliasDefinitions options.resources."runtimeClasses";
+      "core"."v1"."Secret" = mkAliasDefinitions options.resources."secrets";
       "authorization.k8s.io"."v1"."SelfSubjectAccessReview" =
-        mkAliasDefinitions options.resources."selfSubjectAccessReviews";
+        mkAliasDefinitions
+          options.resources."selfSubjectAccessReviews";
       "authentication.k8s.io"."v1"."SelfSubjectReview" =
-        mkAliasDefinitions options.resources."selfSubjectReviews";
+        mkAliasDefinitions
+          options.resources."selfSubjectReviews";
       "authorization.k8s.io"."v1"."SelfSubjectRulesReview" =
-        mkAliasDefinitions options.resources."selfSubjectRulesReviews";
-      "core"."v1"."Service" =
-        mkAliasDefinitions options.resources."services";
-      "core"."v1"."ServiceAccount" =
-        mkAliasDefinitions options.resources."serviceAccounts";
-      "networking.k8s.io"."v1alpha1"."ServiceCIDR" =
-        mkAliasDefinitions options.resources."serviceCIDRs";
-      "apps"."v1"."StatefulSet" =
-        mkAliasDefinitions options.resources."statefulSets";
-      "storage.k8s.io"."v1"."StorageClass" =
-        mkAliasDefinitions options.resources."storageClasses";
+        mkAliasDefinitions
+          options.resources."selfSubjectRulesReviews";
+      "core"."v1"."Service" = mkAliasDefinitions options.resources."services";
+      "core"."v1"."ServiceAccount" = mkAliasDefinitions options.resources."serviceAccounts";
+      "networking.k8s.io"."v1alpha1"."ServiceCIDR" = mkAliasDefinitions options.resources."serviceCIDRs";
+      "apps"."v1"."StatefulSet" = mkAliasDefinitions options.resources."statefulSets";
+      "storage.k8s.io"."v1"."StorageClass" = mkAliasDefinitions options.resources."storageClasses";
       "internal.apiserver.k8s.io"."v1alpha1"."StorageVersion" =
-        mkAliasDefinitions options.resources."storageVersions";
+        mkAliasDefinitions
+          options.resources."storageVersions";
       "storagemigration.k8s.io"."v1alpha1"."StorageVersionMigration" =
-        mkAliasDefinitions options.resources."storageVersionMigrations";
+        mkAliasDefinitions
+          options.resources."storageVersionMigrations";
       "authorization.k8s.io"."v1"."SubjectAccessReview" =
-        mkAliasDefinitions options.resources."subjectAccessReviews";
-      "authentication.k8s.io"."v1"."TokenRequest" =
-        mkAliasDefinitions options.resources."token";
-      "authentication.k8s.io"."v1"."TokenReview" =
-        mkAliasDefinitions options.resources."tokenReviews";
+        mkAliasDefinitions
+          options.resources."subjectAccessReviews";
+      "authentication.k8s.io"."v1"."TokenRequest" = mkAliasDefinitions options.resources."token";
+      "authentication.k8s.io"."v1"."TokenReview" = mkAliasDefinitions options.resources."tokenReviews";
       "admissionregistration.k8s.io"."v1"."ValidatingAdmissionPolicy" =
-        mkAliasDefinitions options.resources."validatingAdmissionPolicies";
+        mkAliasDefinitions
+          options.resources."validatingAdmissionPolicies";
       "admissionregistration.k8s.io"."v1"."ValidatingAdmissionPolicyBinding" =
-        mkAliasDefinitions options.resources."validatingAdmissionPolicyBindings";
+        mkAliasDefinitions
+          options.resources."validatingAdmissionPolicyBindings";
       "admissionregistration.k8s.io"."v1"."ValidatingWebhookConfiguration" =
-        mkAliasDefinitions options.resources."validatingWebhookConfigurations";
-      "storage.k8s.io"."v1"."VolumeAttachment" =
-        mkAliasDefinitions options.resources."volumeAttachments";
+        mkAliasDefinitions
+          options.resources."validatingWebhookConfigurations";
+      "storage.k8s.io"."v1"."VolumeAttachment" = mkAliasDefinitions options.resources."volumeAttachments";
       "storage.k8s.io"."v1alpha1"."VolumeAttributesClass" =
-        mkAliasDefinitions options.resources."volumeAttributesClasses";
+        mkAliasDefinitions
+          options.resources."volumeAttributesClasses";
     };
 
     # make all namespaced resources default to the

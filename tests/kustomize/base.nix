@@ -2,9 +2,11 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   apps = config.applications;
-in {
+in
+{
   # Create an application with a kustomization
   applications.test1.kustomize.applications.test1 = {
     kustomization = {
@@ -20,11 +22,9 @@ in {
       {
         description = "Deployment should be rendered correctly.";
 
-        expression =
-          findFirst
-          (x: x.kind == "Deployment" && x.metadata.name == "deployment")
-          null
-          apps.test1.objects;
+        expression = findFirst (
+          x: x.kind == "Deployment" && x.metadata.name == "deployment"
+        ) null apps.test1.objects;
 
         expected = {
           apiVersion = "apps/v1";
@@ -60,11 +60,9 @@ in {
       {
         description = "Service should be rendered correctly.";
 
-        expression =
-          findFirst
-          (x: x.kind == "Service" && x.metadata.name == "service")
-          null
-          apps.test1.objects;
+        expression = findFirst (
+          x: x.kind == "Service" && x.metadata.name == "service"
+        ) null apps.test1.objects;
 
         expected = {
           apiVersion = "v1";

@@ -2,9 +2,11 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   apps = config.applications;
-in {
+in
+{
   # Create an application with a helm chart
   # without setting any values but overriding
   # image with nixidy
@@ -13,7 +15,8 @@ in {
       chart = ./chart;
     };
 
-    resources.deployments.test1-chart.spec.template.spec.containers.chart.image = lib.mkForce "nginx:2.0.0";
+    resources.deployments.test1-chart.spec.template.spec.containers.chart.image =
+      lib.mkForce "nginx:2.0.0";
   };
 
   test = with lib; {
@@ -23,11 +26,9 @@ in {
       {
         description = "Deployment should be rendered correctly.";
 
-        expression =
-          findFirst
-          (x: x.kind == "Deployment" && x.metadata.name == "test1-chart")
-          null
-          apps.test1.objects;
+        expression = findFirst (
+          x: x.kind == "Deployment" && x.metadata.name == "test1-chart"
+        ) null apps.test1.objects;
 
         expected = {
           apiVersion = "apps/v1";
@@ -78,11 +79,9 @@ in {
       {
         description = "Service should be rendered correctly.";
 
-        expression =
-          findFirst
-          (x: x.kind == "Service" && x.metadata.name == "test1-chart")
-          null
-          apps.test1.objects;
+        expression = findFirst (
+          x: x.kind == "Service" && x.metadata.name == "test1-chart"
+        ) null apps.test1.objects;
 
         expected = {
           apiVersion = "v1";

@@ -2,9 +2,11 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   apps = config.applications.${config.nixidy.appOfApps.name};
-in {
+in
+{
   # `__` prefix makes an application an
   # internal application
   applications.__test = {
@@ -29,11 +31,7 @@ in {
       {
         description = "App of apps should not have an Application resource for an internal application.";
 
-        expression =
-          findFirst
-          (x: x.kind == "Application" && x.metadata.name == "test")
-          null
-          apps.objects;
+        expression = findFirst (x: x.kind == "Application" && x.metadata.name == "test") null apps.objects;
 
         expected = null;
       }

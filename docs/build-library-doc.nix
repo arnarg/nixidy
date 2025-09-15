@@ -1,7 +1,8 @@
 {
   pkgs,
   lib,
-}: let
+}:
+let
   includedLib = [
     {
       name = "helm";
@@ -22,7 +23,10 @@
 
     src = ../lib;
 
-    buildInputs = with pkgs; [nixdoc gnused];
+    buildInputs = with pkgs; [
+      nixdoc
+      gnused
+    ];
 
     installPhase = ''
       mkdir -p $out
@@ -33,18 +37,20 @@
 
       EOF
 
-      ${lib.concatMapStrings ({
+      ${lib.concatMapStrings (
+        {
           name,
           description,
-        }: ''
+        }:
+        ''
           nixdoc -c ${name} -f "${name}.nix" -d "${description}" | \
             sed -E ''\'s|^# `.+` usage example|**Example:**|g''\' | \
             sed -E ''\'s|^## `([^`]+)`.*$|## \1|g''\' | \
             sed -E ''\'s|^# .*$||g''\' | \
             sed -E ''\'s|^:::.*$||g''\' >> $out/lib.md
-        '')
-        includedLib}
+        ''
+      ) includedLib}
     '';
   };
 in
-  libMd
+libMd

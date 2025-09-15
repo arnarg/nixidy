@@ -2,9 +2,11 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   apps = config.applications;
-in {
+in
+{
   applications = {
     # Create an application with `createNamespace = true`
     test1.createNamespace = true;
@@ -20,11 +22,9 @@ in {
       {
         description = "A namespace resource should be created when `createNamespace = true`.";
 
-        expression =
-          findFirst
-          (x: x.kind == "Namespace" && x.metadata.name == "test1")
-          null
-          apps.test1.objects;
+        expression = findFirst (
+          x: x.kind == "Namespace" && x.metadata.name == "test1"
+        ) null apps.test1.objects;
 
         expected = {
           apiVersion = "v1";
@@ -36,11 +36,7 @@ in {
       {
         description = "A namespace resource should not be created when `createNamespace = false`.";
 
-        expression =
-          findFirst
-          (x: x.kind == "Namespace")
-          null
-          apps.test2.objects;
+        expression = findFirst (x: x.kind == "Namespace") null apps.test2.objects;
 
         assertion = isNull;
       }

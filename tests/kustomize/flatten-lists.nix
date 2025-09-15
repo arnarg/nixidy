@@ -2,9 +2,11 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   apps = config.applications;
-in {
+in
+{
   applications.test1.kustomize.applications.test1 = {
     kustomization = {
       src = ./manifests;
@@ -50,7 +52,7 @@ in {
 
         expression = filter (x: x.kind == "ConfigMapList") apps.test1.objects;
 
-        expected = [];
+        expected = [ ];
       }
       {
         description = "CustomList should be rendered intact.";
@@ -63,7 +65,7 @@ in {
             kind = "CustomList";
             metadata.name = "custom-list";
             metadata.namespace = "test1";
-            spec.items = [1];
+            spec.items = [ 1 ];
           }
         ];
       }

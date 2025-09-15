@@ -1,6 +1,8 @@
-{config, ...}: let
+{ config, ... }:
+let
   apps = config.applications;
-in {
+in
+{
   applications.test1 = {
     name = "test1override";
   };

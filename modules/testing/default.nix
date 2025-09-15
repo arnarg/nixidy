@@ -3,13 +3,15 @@
   config,
   pkgs,
   ...
-}: let
+}:
+let
   testModule = {
-    imports = [./eval.nix];
+    imports = [ ./eval.nix ];
 
     _module.args.applicationImports = config.nixidy.applicationImports;
   };
-in {
+in
+{
   options.testing = with lib; {
     name = mkOption {
       type = types.str;
@@ -18,15 +20,14 @@ in {
     };
 
     tests = mkOption {
-      type = with types;
+      type =
+        with types;
         listOf (
-          coercedTo path
-          (module: {
+          coercedTo path (module: {
             inherit module;
-          })
-          (submodule testModule)
+          }) (submodule testModule)
         );
-      default = [];
+      default = [ ];
       description = "List of test cases.";
     };
 
@@ -60,28 +61,20 @@ in {
     testing = {
       success = lib.all (test: test.success) config.testing.tests;
 
-      report = let
-        total = lib.length config.testing.tests;
-        passing = lib.count (test: test.success) config.testing.tests;
-      in
+      report =
+        let
+          total = lib.length config.testing.tests;
+          passing = lib.count (test: test.success) config.testing.tests;
+        in
         (lib.concatMapStringsSep "\n" (
-            test: let
-              result =
-                if test.success
-                then "✅"
-                else "❌";
-            in
-              "${result} ${test.name}"
-              + (
-                lib.optionalString (!test.success)
-                "\n${test.report}"
-              )
-          )
-          config.testing.tests)
+          test:
+          let
+            result = if test.success then "✅" else "❌";
+          in
+          "${result} ${test.name}" + (lib.optionalString (!test.success) "\n${test.report}")
+        ) config.testing.tests)
         + "\n\n${
-          if config.testing.success
-          then "🎉"
-          else "💥"
+          if config.testing.success then "🎉" else "💥"
         } ${toString passing}/${toString total} successful";
 
       reportScript = pkgs.writeShellScript "testing-${config.testing.name}-report-script" ''
@@ -89,11 +82,7 @@ in {
 
         printf '${config.testing.report}\n'
 
-        exit ${
-          if config.testing.success
-          then "0"
-          else "1"
-        }
+        exit ${if config.testing.success then "0" else "1"}
       '';
     };
   };
