@@ -2,27 +2,35 @@
   pkgs,
   lib ? pkgs.lib,
   mkSearch,
-}: let
-  optionsMd = import ./build-options-doc.nix {inherit pkgs lib;};
+}:
+let
+  optionsMd = import ./build-options-doc.nix { inherit pkgs lib; };
 
   buildSearch = import ./build-options-search.nix {
     inherit pkgs lib mkSearch;
   };
 
-  libraryMd = import ./build-library-doc.nix {inherit pkgs lib;};
+  libraryMd = import ./build-library-doc.nix { inherit pkgs lib; };
 
   docsHtml = pkgs.stdenv.mkDerivation {
     inherit optionsMd;
 
-    passAsFile = ["optionsMd"];
+    passAsFile = [ "optionsMd" ];
 
     name = "nixidy-html-docs";
 
     src = lib.cleanSource ./..;
 
-    buildInputs = with pkgs.python3.pkgs; [mkdocs-material mkdocs-material-extensions];
+    buildInputs = with pkgs.python3.pkgs; [
+      mkdocs-material
+      mkdocs-material-extensions
+    ];
 
-    phases = ["unpackPhase" "patchPhase" "buildPhase"];
+    phases = [
+      "unpackPhase"
+      "patchPhase"
+      "buildPhase"
+    ];
 
     patchPhase = ''
       cat $optionsMdPath > docs/options.md
@@ -119,7 +127,8 @@
       cp -r ${buildSearch "/nixidy/options/search/"} $out/options/search
     '';
   };
-in {
+in
+{
   html = docsHtml;
   search = buildSearch "/";
 }

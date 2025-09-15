@@ -2,11 +2,16 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   cfg = config.nixidy;
-in {
+in
+{
   imports = [
-    (lib.mkRenamedOptionModule ["nixidy" "defaults" "syncPolicy" "autoSync" "enabled"] ["nixidy" "defaults" "syncPolicy" "autoSync" "enable"])
+    (lib.mkRenamedOptionModule
+      [ "nixidy" "defaults" "syncPolicy" "autoSync" "enabled" ]
+      [ "nixidy" "defaults" "syncPolicy" "autoSync" "enable" ]
+    )
   ];
 
   options.nixidy = with lib; {
@@ -138,7 +143,7 @@ in {
 
     charts = mkOption {
       type = with types; attrsOf anything;
-      default = {};
+      default = { };
       description = "Attrset of derivations containing helm charts. This will be passed as `charts` to every module.";
     };
     chartsDir = mkOption {
@@ -149,7 +154,7 @@ in {
 
     publicApps = mkOption {
       type = with types; listOf str;
-      default = [];
+      default = [ ];
       internal = true;
       description = ''
         List of the names of all applications that do not contain the internal `__` prefix.
@@ -161,23 +166,23 @@ in {
     applications.${cfg.appOfApps.name} = {
       inherit (cfg.appOfApps) namespace;
 
-      resources.applications = let
-        appsWithoutAppsOfApps = lib.filter (n: n != cfg.appOfApps.name) cfg.publicApps;
-      in
-        builtins.listToAttrs
-        (map (
-            name: let
+      resources.applications =
+        let
+          appsWithoutAppsOfApps = lib.filter (n: n != cfg.appOfApps.name) cfg.publicApps;
+        in
+        builtins.listToAttrs (
+          map (
+            name:
+            let
               app = config.applications.${name};
-            in {
+            in
+            {
               inherit name;
 
               value = {
                 metadata = {
                   inherit (app) name;
-                  annotations =
-                    if app.annotations != {}
-                    then app.annotations
-                    else null;
+                  annotations = if app.annotations != { } then app.annotations else null;
                 };
                 spec = {
                   inherit (app) project ignoreDifferences;
@@ -206,44 +211,46 @@ in {
                 };
               };
             }
-          )
-          appsWithoutAppsOfApps);
+          ) appsWithoutAppsOfApps
+        );
     };
 
     # This application's resources are printed on
     # stdout when `nixidy bootstrap .#<env>` is run
-    applications.__bootstrap = let
-      app = config.applications.${cfg.appOfApps.name};
-    in {
-      inherit (cfg.appOfApps) namespace;
+    applications.__bootstrap =
+      let
+        app = config.applications.${cfg.appOfApps.name};
+      in
+      {
+        inherit (cfg.appOfApps) namespace;
 
-      resources.applications.${cfg.appOfApps.name} = {
-        metadata.namespace = cfg.appOfApps.namespace;
-        spec = {
-          inherit (cfg.appOfApps) project;
+        resources.applications.${cfg.appOfApps.name} = {
+          metadata.namespace = cfg.appOfApps.namespace;
+          spec = {
+            inherit (cfg.appOfApps) project;
 
-          source = {
-            repoURL = cfg.target.repository;
-            targetRevision = cfg.target.branch;
-            path = lib.path.subpath.join [
-              cfg.target.rootPath
-              app.output.path
-            ];
-          };
-          destination = {
-            inherit (app) namespace;
-            inherit (app.destination) server;
-          };
-          # Maybe this should be configurable but
-          # generally I think autoSync would be
-          # desirable on the initial appOfApps.
-          syncPolicy.automated = {
-            prune = true;
-            selfHeal = true;
+            source = {
+              repoURL = cfg.target.repository;
+              targetRevision = cfg.target.branch;
+              path = lib.path.subpath.join [
+                cfg.target.rootPath
+                app.output.path
+              ];
+            };
+            destination = {
+              inherit (app) namespace;
+              inherit (app.destination) server;
+            };
+            # Maybe this should be configurable but
+            # generally I think autoSync would be
+            # desirable on the initial appOfApps.
+            syncPolicy.automated = {
+              prune = true;
+              selfHeal = true;
+            };
           };
         };
       };
-    };
 
     _module.args.charts = config.nixidy.charts;
     nixidy = {
@@ -253,9 +260,7 @@ in {
         ".revision".text = cfg.build.revision;
       };
 
-      publicApps =
-        builtins.filter (n: !(lib.hasPrefix "__" n))
-        (builtins.attrNames config.applications);
+      publicApps = builtins.filter (n: !(lib.hasPrefix "__" n)) (builtins.attrNames config.applications);
     };
   };
 }

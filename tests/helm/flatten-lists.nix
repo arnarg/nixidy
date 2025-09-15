@@ -2,11 +2,13 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   apps = config.applications;
-in {
+in
+{
   applications.test1.helm.releases.test1 = {
-    chart = ./chart; 
+    chart = ./chart;
   };
 
   test = with lib; {
@@ -47,7 +49,7 @@ in {
 
         expression = filter (x: x.kind == "ConfigMapList") apps.test1.objects;
 
-        expected = [];
+        expected = [ ];
       }
       {
         description = "CustomList should be rendered intact.";
@@ -59,7 +61,7 @@ in {
             apiVersion = "custom/v1";
             kind = "CustomList";
             metadata.name = "custom-list";
-            spec.items = [1];
+            spec.items = [ 1 ];
           }
         ];
       }

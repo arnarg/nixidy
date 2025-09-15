@@ -2,9 +2,11 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   apps = config.applications;
-in {
+in
+{
   # Create an application with the overlay kustomization
   # which overrides a value and adds an unknown resource
   # type
@@ -22,11 +24,9 @@ in {
       {
         description = "Deployment should be rendered correctly.";
 
-        expression =
-          findFirst
-          (x: x.kind == "Deployment" && x.metadata.name == "deployment")
-          null
-          apps.test1.objects;
+        expression = findFirst (
+          x: x.kind == "Deployment" && x.metadata.name == "deployment"
+        ) null apps.test1.objects;
 
         expected = {
           apiVersion = "apps/v1";
@@ -62,11 +62,9 @@ in {
       {
         description = "Service should be rendered correctly.";
 
-        expression =
-          findFirst
-          (x: x.kind == "Service" && x.metadata.name == "service")
-          null
-          apps.test1.objects;
+        expression = findFirst (
+          x: x.kind == "Service" && x.metadata.name == "service"
+        ) null apps.test1.objects;
 
         expected = {
           apiVersion = "v1";
@@ -94,11 +92,9 @@ in {
       {
         description = "Issuer should be rendered correctly.";
 
-        expression =
-          findFirst
-          (x: x.kind == "Issuer" && x.metadata.name == "ca-issuer")
-          null
-          apps.test1.objects;
+        expression = findFirst (
+          x: x.kind == "Issuer" && x.metadata.name == "ca-issuer"
+        ) null apps.test1.objects;
 
         expected = {
           apiVersion = "cert-manager.io/v1";

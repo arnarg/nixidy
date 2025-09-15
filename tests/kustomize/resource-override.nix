@@ -2,9 +2,11 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   apps = config.applications;
-in {
+in
+{
   # Create an application with a kustomization
   # and a nixidy resource override
   applications.test1 = {
@@ -13,7 +15,8 @@ in {
       path = "base";
     };
 
-    resources.deployments.deployment.spec.template.spec.containers.nginx.image = lib.mkForce "nginx:2.0.0";
+    resources.deployments.deployment.spec.template.spec.containers.nginx.image =
+      lib.mkForce "nginx:2.0.0";
   };
 
   test = with lib; {
@@ -23,11 +26,9 @@ in {
       {
         description = "Deployment should be rendered correctly.";
 
-        expression =
-          findFirst
-          (x: x.kind == "Deployment" && x.metadata.name == "deployment")
-          null
-          apps.test1.objects;
+        expression = findFirst (
+          x: x.kind == "Deployment" && x.metadata.name == "deployment"
+        ) null apps.test1.objects;
 
         expected = {
           apiVersion = "apps/v1";
@@ -63,11 +64,9 @@ in {
       {
         description = "Service should be rendered correctly.";
 
-        expression =
-          findFirst
-          (x: x.kind == "Service" && x.metadata.name == "service")
-          null
-          apps.test1.objects;
+        expression = findFirst (
+          x: x.kind == "Service" && x.metadata.name == "service"
+        ) null apps.test1.objects;
 
         expected = {
           apiVersion = "v1";

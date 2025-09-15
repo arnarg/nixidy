@@ -1,21 +1,32 @@
 {
   pkgs,
   lib ? pkgs.lib,
-}: let
-  fromCRD = {
-    name,
-    src,
-    crds,
-    namePrefix ? "",
-    attrNameOverrides ? {},
-  }:
+}:
+let
+  fromCRD =
+    {
+      name,
+      src,
+      crds,
+      namePrefix ? "",
+      attrNameOverrides ? { },
+    }:
     import ./crd/default.nix {
-      inherit pkgs lib name src crds namePrefix attrNameOverrides;
+      inherit
+        pkgs
+        lib
+        name
+        src
+        crds
+        namePrefix
+        attrNameOverrides
+        ;
     };
-in {
+in
+{
   inherit fromCRD;
 
-  k8s = import ./k8s {inherit pkgs lib;};
+  k8s = import ./k8s { inherit pkgs lib; };
 
   argocd = fromCRD {
     name = "argocd";

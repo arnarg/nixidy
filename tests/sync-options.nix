@@ -2,9 +2,11 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   apps = config.applications.apps.resources.applications;
-in {
+in
+{
   applications = {
     # Create an application with all sync options set
     test1.syncPolicy.syncOptions = {
@@ -23,7 +25,7 @@ in {
     };
 
     # Create an application with no sync options set
-    test3 = {};
+    test3 = { };
   };
 
   test = with lib; {
@@ -33,26 +35,26 @@ in {
       {
         description = "Application with all sync options should set them correctly.";
         expression = apps.test1.spec.syncPolicy.syncOptions;
-        assertion = opts:
+        assertion =
+          opts:
           (compareLists compare opts [
             "ApplyOutOfSyncOnly=true"
             "FailOnSharedResource=true"
             "PruneLast=true"
             "Replace=true"
             "ServerSideApply=true"
-          ])
-          == 0;
+          ]) == 0;
       }
       {
         description = "Application with some sync options should set them correctly.";
         expression = apps.test2.spec.syncPolicy.syncOptions;
-        assertion = opts:
+        assertion =
+          opts:
           (compareLists compare opts [
             "ApplyOutOfSyncOnly=true"
             "PruneLast=true"
             "ServerSideApply=true"
-          ])
-          == 0;
+          ]) == 0;
       }
       {
         description = "Application with no sync options should set them correctly.";

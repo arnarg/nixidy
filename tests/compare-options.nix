@@ -2,10 +2,14 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   apps = config.applications.apps.resources.applications;
-  hasAnnotation = name: value: annotations: (lib.hasAttr name annotations) && annotations.${name} == value;
-in {
+  hasAnnotation =
+    name: value: annotations:
+    (lib.hasAttr name annotations) && annotations.${name} == value;
+in
+{
   applications = {
     # Create an application with all compare options set
     test1.compareOptions = {
@@ -20,7 +24,7 @@ in {
     };
 
     # Create an application with no compare option set
-    test3 = {};
+    test3 = { };
   };
 
   test = {

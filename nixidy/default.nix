@@ -1,3 +1,3 @@
 pkgs: {
-  nixidy = pkgs.callPackage ./nixidy.nix {};
+  nixidy = pkgs.callPackage ./nixidy.nix { };
 }
