@@ -169,5 +169,6 @@
             .outPath;
         };
       };
+      formatter = pkgs.nixfmt-tree;
     }));
 }
