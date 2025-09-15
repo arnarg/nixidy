@@ -22,3 +22,11 @@ jobs:
     - name: Run statix
       run: |
         nix run .#staticCheck
+
+    - name: Check formatting
+      run: |
+        nix fmt
+        if ! git diff --exit-code; then
+          echo "Code is not formatted properly. Please run 'nix fmt' and commit the changes."
+          exit 1
+        fi
