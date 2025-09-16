@@ -48,42 +48,43 @@ def generate_jsonschema(prefix, files, attr_name_overrides):
 
     for file in files:
         with open(file, "r") as f:
-            data = yaml.safe_load(f)
+            docs = yaml.safe_load_all(f)
 
-            if "spec" in data:
-                group = data["spec"]["group"]
-                kind = data["spec"]["names"]["kind"]
-                plural = data["spec"]["names"]["plural"]
-                namespaced = (
-                    "scope" in data["spec"] and data["spec"]["scope"] == "Namespaced"
-                )
-
-                for ver in data["spec"]["versions"]:
-                    if "deprecated" in ver and ver["deprecated"] is True:
-                        continue
-
-                    version = ver["name"]
-                    definitionKey = f"{group}.{version}.{kind}"
-                    schema["definitions"][definitionKey] = ver["schema"][
-                        "openAPIV3Schema"
-                    ]
-                    schema["roots"].append(
-                        {
-                            "ref": definitionKey,
-                            "group": group,
-                            "version": version,
-                            "kind": kind,
-                            "name": plural,
-                            "attrName": attr_name_overrides.get(
-                                data["metadata"]["name"],
-                                gen_attr_name(kind, plural, prefix),
-                            ),
-                            "description": ver["schema"]["openAPIV3Schema"].get(
-                                "description", ""
-                            ),
-                            "namespaced": namespaced,
-                        }
+            for data in docs:
+                if "spec" in data and "kind" in data and data["kind"] == "CustomResourceDefinition":
+                    group = data["spec"]["group"]
+                    kind = data["spec"]["names"]["kind"]
+                    plural = data["spec"]["names"]["plural"]
+                    namespaced = (
+                        "scope" in data["spec"] and data["spec"]["scope"] == "Namespaced"
                     )
+
+                    for ver in data["spec"]["versions"]:
+                        if "deprecated" in ver and ver["deprecated"] is True:
+                            continue
+
+                        version = ver["name"]
+                        definitionKey = f"{group}.{version}.{kind}"
+                        schema["definitions"][definitionKey] = ver["schema"][
+                            "openAPIV3Schema"
+                        ]
+                        schema["roots"].append(
+                            {
+                                "ref": definitionKey,
+                                "group": group,
+                                "version": version,
+                                "kind": kind,
+                                "name": plural,
+                                "attrName": attr_name_overrides.get(
+                                    data["metadata"]["name"],
+                                    gen_attr_name(kind, plural, prefix),
+                                ),
+                                "description": ver["schema"]["openAPIV3Schema"].get(
+                                    "description", ""
+                                ),
+                                "namespaced": namespaced,
+                            }
+                        )
 
     def flatten_ref(definition, key, root=True):
         if not root:
