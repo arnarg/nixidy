@@ -1,5 +1,8 @@
 disabled = [
   # I think enforcing this can often produce
   # code that is harder to read.
-  "manual_inherit_from"
+  "manual_inherit_from",
+  # The code generator outputs a number of these
+  # that are difficult to get rid of.
+  "useless_parens"
 ]
