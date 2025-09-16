@@ -124,7 +124,7 @@ let
       mkdir -p $out
       python -m mkdocs build
 
-      cp -r ${buildSearch "/nixidy/options/search/"} $out/options/search
+      cp -r ${buildSearch "/options/search/"} $out/options/search
     '';
   };
 in
