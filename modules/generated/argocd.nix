@@ -44,6 +44,35 @@ let
       merge = mergeEqualOption;
     };
 
+    minimumNum =
+      min: base:
+      lib.types.addCheck base (x: x >= min)
+      // {
+        name = "minimumNum";
+        description = "${base.description}, higher than ${toString min}";
+        descriptionClass = "noun";
+      };
+
+    maximumNum =
+      max: base:
+      lib.types.addCheck base (x: x <= max)
+      // {
+        name = "maximumNum";
+        description = "${base.description}, lower than ${toString max}";
+        descriptionClass = "noun";
+      };
+
+    multipleOfNum =
+      mult: base:
+      lib.types.addCheck base (x: lib.mod x mult == 0)
+      // {
+        name = "multipleOfNum";
+        description = "${base.description}, multiple of ${toString mult}";
+        descriptionClass = "noun";
+      };
+
+    mergeValidators = base: vals: lib.foldl (a: b: b a) base vals;
+
     # Either value of type `finalType` or `coercedType`, the latter is
     # converted to `finalType` using `coerceFunc`.
     coercedTo =

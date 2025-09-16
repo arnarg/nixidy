@@ -49,6 +49,7 @@ let
       unspecified = "types.unspecified";
       str = "types.str";
       int = "types.int";
+      float = "types.float";
       bool = "types.bool";
       attrs = "types.attrs";
       nullOr = val: "(types.nullOr ${val})";
@@ -59,6 +60,73 @@ let
         "(types.coercedTo ${coercedType} ${coerceFunc} ${finalType})";
       either = val1: val2: "(types.either ${val1} ${val2})";
       loaOf = type: "(types.loaOf ${type})";
+
+      mapNumType =
+        base: def:
+        let
+          # Handle minimum value constraints from JSON Schema
+          # JSON Schema supports both regular minimum and exclusiveMinimum:
+          # - exclusiveMinimum: true means value must be > minimum (not >=)
+          # - exclusiveMinimum: <integer> means value must be >= that integer (exclusive constraint)
+          min =
+            # If exclusiveMinimum is defined
+            if def ? exclusiveMinimum then
+              # If it's a boolean true, we make the minimum exclusive by incrementing it
+              if lib.isBool def.exclusiveMinimum then
+                # If minimum is also defined, increment it to make it exclusive
+                if def ? minimum then def.minimum + 1 else null
+              # If it's an integer, use that as the exclusive minimum directly
+              else if lib.isInt def.exclusiveMinimum then
+                def.exclusiveMinimum
+              # Otherwise, no minimum constraint
+              else
+                null
+            # If no exclusiveMinimum but regular minimum is defined, use it as-is
+            else if def ? minimum then
+              def.minimum
+            # No minimum constraint
+            else
+              null;
+
+          # Handle maximum value constraints from JSON Schema
+          # Similar logic to minimum but for maximum values:
+          # - exclusiveMaximum: true means value must be < maximum (not <=)
+          # - exclusiveMaximum: <integer> means value must be <= that integer (exclusive constraint)
+          max =
+            # If exclusiveMaximum is defined
+            if def ? exclusiveMaximum then
+              # If it's a boolean true, we make the maximum exclusive by decrementing it
+              if lib.isBool def.exclusiveMaximum then
+                # If maximum is also defined, decrement it to make it exclusive
+                if def ? maximum then def.maximum - 1 else null
+              # If it's an integer, use that as the exclusive maximum directly
+              else if lib.isInt def.exclusiveMaximum then
+                def.exclusiveMaximum
+              # Otherwise, no maximum constraint
+              else
+                null
+            # If no exclusiveMaximum but regular maximum is defined, use it as-is
+            else if def ? maximum then
+              def.maximum
+            # No maximum constraint
+            else
+              null;
+
+          # Collect validators that should be added
+          validators =
+            if def != null then
+              lib.remove null [
+                (if min != null then "(types.minimumNum ${toString min})" else null)
+                (if max != null then "(types.maximumNum ${toString max})" else null)
+                (if def ? "multipleOf" then "(types.multipleOfNum ${toString def.multipleOf})" else null)
+              ]
+            else
+              [ ];
+        in
+        if lib.length validators > 0 then
+          "(types.mergeValidators ${base} [${lib.concatStringsSep " " validators}])"
+        else
+          base;
     };
 
     hasTypeMapping =
@@ -80,9 +148,9 @@ let
         else
           types.str
       else if def.type == "integer" then
-        types.int
+        types.mapNumType types.int def
       else if def.type == "number" then
-        types.int
+        types.either (types.mapNumType types.int def) (types.mapNumType types.float def)
       else if def.type == "boolean" then
         types.bool
       else if def.type == "object" then
@@ -364,6 +432,26 @@ let
           check = isString;
           merge = mergeEqualOption;
         };
+
+        minimumNum = min: base: lib.types.addCheck base (x: x >= min) // {
+          name = "minimumNum";
+          description = "''${base.description}, higher than ''${toString min}";
+          descriptionClass = "noun";
+        };
+
+        maximumNum = max: base: lib.types.addCheck base (x: x <= max) // {
+          name = "maximumNum";
+          description = "''${base.description}, lower than ''${toString max}";
+          descriptionClass = "noun";
+        };
+
+        multipleOfNum = mult: base: lib.types.addCheck base (x: lib.mod x mult == 0) // {
+          name = "multipleOfNum";
+          description = "''${base.description}, multiple of ''${toString mult}";
+          descriptionClass = "noun";
+        };
+
+        mergeValidators = base: vals: lib.foldl (a: b: b a) base vals;
 
         # Either value of type `finalType` or `coercedType`, the latter is
         # converted to `finalType` using `coerceFunc`.
