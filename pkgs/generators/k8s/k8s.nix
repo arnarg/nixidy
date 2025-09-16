@@ -606,13 +606,13 @@ let
 in
 pkgs.runCommand "k8s-${name}-gen.nix"
   {
-    buildInputs = [ pkgs.alejandra ];
+    buildInputs = [ pkgs.nixfmt-rfc-style ];
   }
   ''
     cat << 'GENERATED' > ./raw.nix
     ${generated}
     GENERATED
 
-    alejandra ./raw.nix
+    nixfmt ./raw.nix
     cp ./raw.nix $out
   ''
