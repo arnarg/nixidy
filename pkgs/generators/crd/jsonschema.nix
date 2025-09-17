@@ -127,6 +127,25 @@ let
           "(types.mergeValidators ${base} [${lib.concatStringsSep " " validators}])"
         else
           base;
+
+      mapStrType =
+        def:
+        let
+          # Collect validators that should be added
+          validators =
+            if def != null then
+              lib.remove null [
+                (if def ? "minLength" then "(types.minLengthStr ${toString def.minLength})" else null)
+                (if def ? "maxLength" then "(types.maxLengthStr ${toString def.maxLength})" else null)
+                (if def ? "pattern" then ''(types.patternStr "${def.pattern}")'' else null)
+              ]
+            else
+              [ ];
+        in
+        if lib.length validators > 0 then
+          "(types.mergeValidators ${types.str} [${lib.concatStringsSep " " validators}])"
+        else
+          types.str;
     };
 
     hasTypeMapping =
@@ -146,7 +165,7 @@ let
         if hasAttr "format" def && def.format == "int-or-string" then
           types.either types.int types.str
         else
-          types.str
+          types.mapStrType def
       else if def.type == "integer" then
         types.mapNumType types.int def
       else if def.type == "number" then
@@ -452,6 +471,24 @@ let
         };
 
         mergeValidators = base: vals: lib.foldl (a: b: b a) base vals;
+
+        minLengthStr = min: base: lib.types.addCheck base (x: stringLength x >= min) // {
+          name = "minLengthStr";
+          description = "''${base.description}, with minimum length of ''${toString min}";
+          descriptionClass = "noun";
+        };
+
+        maxLengthStr = max: base: lib.types.addCheck base (x: stringLength x <= max) // {
+          name = "maxLengthStr";
+          description = "''${base.description}, with maximum length of ''${toString max}";
+          descriptionClass = "noun";
+        };
+
+        patternStr = pattern: base: lib.types.addCheck base (x: match pattern x != null) // {
+          name = "patternStr";
+          description = "''${base.description}, matching pattern \"''${pattern}\"";
+          descriptionClass = "noun";
+        };
 
         # Either value of type `finalType` or `coercedType`, the latter is
         # converted to `finalType` using `coerceFunc`.
