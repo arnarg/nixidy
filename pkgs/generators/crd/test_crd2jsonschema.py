@@ -818,6 +818,183 @@ spec:
 
         self.assertEqual(schema, expected_schema)
 
+    def test_one_manifest_multiple_crds(self):
+        # The namespace at the end of the manifest file is ignored
+        mock_crd_content = """
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: foobars.stable.example.com
+spec:
+  group: stable.example.com
+  names:
+    kind: FooBar
+    plural: foobars
+    singular: foobar
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                image:
+                  type: string
+                replicas:
+                  type: integer
+            status:
+              type: object
+              properties:
+                availableReplicas:
+                  type: integer
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: second.stable.example.com
+spec:
+  group: stable.example.com
+  names:
+    kind: Second
+    plural: seconds
+    singular: second
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                image:
+                  type: string
+                replicas:
+                  type: integer
+            status:
+              type: object
+              properties:
+                availableReplicas:
+                  type: integer
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: some-namespace
+"""
+        prefix = ""
+        attr_name_overrides = {}
+
+        schema = mock_generate_jsonschema(mock_crd_content, prefix, attr_name_overrides)
+
+        expected_schema = {
+            "definitions": {
+                "stable.example.com.v1.FooBar": {
+                    "type": "object",
+                    "properties": {
+                        "apiVersion": {
+                            "description": "\nAPIVersion defines the versioned schema of this representation of an object.\nServers should convert recognized schemas to the latest internal value, and\nmay reject unrecognized values.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources\n",
+                            "type": "string",
+                        },
+                        "kind": {
+                            "description": "\nKind is a string value representing the REST resource this object represents.\nServers may infer this from the endpoint the client submits requests to.\nCannot be updated.\nIn CamelCase.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds\n",
+                            "type": "string",
+                        },
+                        "metadata": {
+                            "description": "Standard object's metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata",
+                            "$ref": "#/global/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta",
+                        },
+                        "spec": {
+                            "description": "",
+                            "$ref": "#/definitions/stable.example.com.v1.FooBarSpec",
+                        },
+                        "status": {
+                            "description": "",
+                            "$ref": "#/definitions/stable.example.com.v1.FooBarStatus",
+                        },
+                    },
+                },
+                "stable.example.com.v1.FooBarSpec": {
+                    "type": "object",
+                    "properties": {
+                        "image": {"type": "string"},
+                        "replicas": {"type": "integer"},
+                    },
+                },
+                "stable.example.com.v1.FooBarStatus": {
+                    "type": "object",
+                    "properties": {"availableReplicas": {"type": "integer"}},
+                },
+                "stable.example.com.v1.Second": {
+                    "type": "object",
+                    "properties": {
+                        "apiVersion": {
+                            "description": "\nAPIVersion defines the versioned schema of this representation of an object.\nServers should convert recognized schemas to the latest internal value, and\nmay reject unrecognized values.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources\n",
+                            "type": "string",
+                        },
+                        "kind": {
+                            "description": "\nKind is a string value representing the REST resource this object represents.\nServers may infer this from the endpoint the client submits requests to.\nCannot be updated.\nIn CamelCase.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds\n",
+                            "type": "string",
+                        },
+                        "metadata": {
+                            "description": "Standard object's metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata",
+                            "$ref": "#/global/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta",
+                        },
+                        "spec": {
+                            "description": "",
+                            "$ref": "#/definitions/stable.example.com.v1.SecondSpec",
+                        },
+                        "status": {
+                            "description": "",
+                            "$ref": "#/definitions/stable.example.com.v1.SecondStatus",
+                        },
+                    },
+                },
+                "stable.example.com.v1.SecondSpec": {
+                    "type": "object",
+                    "properties": {
+                        "image": {"type": "string"},
+                        "replicas": {"type": "integer"},
+                    },
+                },
+                "stable.example.com.v1.SecondStatus": {
+                    "type": "object",
+                    "properties": {"availableReplicas": {"type": "integer"}},
+                },
+            },
+            "roots": [
+                {
+                    "ref": "stable.example.com.v1.FooBar",
+                    "group": "stable.example.com",
+                    "version": "v1",
+                    "kind": "FooBar",
+                    "name": "foobars",
+                    "attrName": "fooBars",
+                    "description": "",
+                    "namespaced": True,
+                },
+                {
+                    "ref": "stable.example.com.v1.Second",
+                    "group": "stable.example.com",
+                    "version": "v1",
+                    "kind": "Second",
+                    "name": "seconds",
+                    "attrName": "seconds",
+                    "description": "",
+                    "namespaced": True,
+                }
+            ],
+        }
+
+        self.assertEqual(schema, expected_schema)
 
 if __name__ == "__main__":
     unittest.main()
