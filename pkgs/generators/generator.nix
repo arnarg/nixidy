@@ -4,7 +4,7 @@
   name,
   pkgs,
   lib,
-  spec,
+  schema,
 }:
 with lib;
 let
@@ -129,10 +129,6 @@ let
     in
     builtins.compareVersions v1 v2;
 
-  fixJSON = replaceStrings [ "\\u" ] [ "u" ];
-
-  fetchSpecs = path: builtins.fromJSON (fixJSON (builtins.readFile path));
-
   genDefinitions =
     schema:
     with gen;
@@ -182,9 +178,7 @@ let
                     # if it is a reference to simple type
                     if hasTypeMapping schema.definitions.${refDefinition property.items} then
                       {
-                        type = requiredOrNot (
-                          types.listOf (mapType schema.definitions.${refDefinition property.items}.type)
-                        );
+                        type = requiredOrNot (types.listOf (mapType schema.definitions.${refDefinition property.items}));
                       }
                     # if a reference is to complex type
                     else
@@ -220,7 +214,23 @@ let
                       {
                         type = requiredOrNot (
                           coerceAttrsOfSubmodulesToListByKey (refDefinition property.items) mergeKey (
-                            if hasAttr "x-kubernetes-list-map-keys" property then property."x-kubernetes-list-map-keys" else [ ]
+                            if hasAttr "x-kubernetes-list-map-keys" property then
+                              # The ports list in Container and EphemeralContainer
+                              # should not enforce "protocol".
+                              # See: https://github.com/arnarg/nixidy/issues/34
+                              if
+                                builtins.any (n: _name == n) [
+                                  "io.k8s.api.core.v1.Container"
+                                  "io.k8s.api.core.v1.EphemeralContainer"
+                                  "io.k8s.api.core.v1.ServiceSpec"
+                                ]
+                                && propName == "ports"
+                              then
+                                builtins.filter (x: x != "protocol") property."x-kubernetes-list-map-keys"
+                              else
+                                property."x-kubernetes-list-map-keys"
+                            else
+                              [ ]
                           )
                         );
                         apply = attrsToList;
@@ -287,17 +297,8 @@ let
         }
     ) schema.definitions;
 
-  genResourceTypes =
-    schema:
-    lib.attrsets.mergeAttrsList (
-      map (root: {
-        "${root.ref}" = root;
-      }) schema.roots
-    );
-
-  schema = fetchSpecs spec;
   definitions = genDefinitions schema;
-  resourceTypes = genResourceTypes schema;
+  resourceTypes = schema.roots;
 
   resourceTypesByKind = zipAttrs (
     mapAttrsToList (_name: resourceType: {
@@ -330,7 +331,7 @@ let
     };
 
   generated = ''
-    # This file was generated with nixidy CRD generator, do not edit.
+    # This file was generated with nixidy resource generator, do not edit.
     { lib, options, config, ... }:
 
     with lib;

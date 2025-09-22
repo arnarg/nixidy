@@ -5,12 +5,12 @@ on:
     branches:
       - main
     paths:
-      - pkgs/generators/crd/crd2jsonschema.py
+      - pkgs/generators/crd2jsonschema.py
   pull_request:
     branches:
       - main
     paths:
-      - pkgs/generators/crd/crd2jsonschema.py
+      - pkgs/generators/crd2jsonschema.py
 
 jobs:
   crd2jsonschema-test:

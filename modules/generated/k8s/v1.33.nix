@@ -1,4 +1,4 @@
-# This file was generated with kubenix k8s generator, do not edit
+# This file was generated with nixidy resource generator, do not edit.
 {
   lib,
   options,
@@ -49,6 +49,8 @@ let
     coercedTo =
       coercedType: coerceFunc: finalType:
       mkOptionType rec {
+        inherit (finalType) getSubOptions getSubModules;
+
         name = "coercedTo";
         description = "${finalType.description} or ${coercedType.description}";
         check = x: finalType.check x || coercedType.check x;
@@ -68,8 +70,6 @@ let
 
           in
           finalType.merge loc (map (def: def // { value = coerceVal def.value; }) defs);
-        getSubOptions = finalType.getSubOptions;
-        getSubModules = finalType.getSubModules;
         substSubModules = m: coercedTo coercedType coerceFunc (finalType.substSubModules m);
         typeMerge = t1: t2: null;
         functor = (defaultFunctor name) // {
@@ -113,6 +113,16 @@ let
       }
     );
 
+  globalSubmoduleOf =
+    ref:
+    types.submodule (
+      { name, ... }:
+      {
+        options = config.definitions."${ref}".options or { };
+        config = config.definitions."${ref}".config or { };
+      }
+    );
+
   submoduleWithMergeOf =
     ref: mergeKey:
     types.submodule (
@@ -146,8 +156,9 @@ let
     types.submodule (
       { name, ... }:
       {
+        inherit (definitions."${ref}") options;
+
         imports = getDefaults resource group version kind;
-        options = definitions."${ref}".options;
         config = mkMerge [
           definitions."${ref}".config
           {

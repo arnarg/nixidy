@@ -1,4 +1,4 @@
-# This file was generated with nixidy CRD generator, do not edit.
+# This file was generated with nixidy resource generator, do not edit.
 {
   lib,
   options,

@@ -139,8 +139,8 @@ spec:
                     "properties": {"availableReplicas": {"type": "integer"}},
                 },
             },
-            "roots": [
-                {
+            "roots": {
+                "stable.example.com.v1.FooBar": {
                     "ref": "stable.example.com.v1.FooBar",
                     "group": "stable.example.com",
                     "version": "v1",
@@ -149,15 +149,15 @@ spec:
                     "attrName": "fooBars",
                     "description": "",
                     "namespaced": True,
-                }
-            ],
+                },
+            },
         }
 
         self.assertEqual(schema, expected_schema)
 
     def test_empty_files_list(self):
         schema = generate_jsonschema("", [], {})
-        expected_schema = {"definitions": {}, "roots": []}
+        expected_schema = {"definitions": {}, "roots": {}}
         self.assertEqual(schema, expected_schema)
 
     def test_deprecated_version_skipped(self):
@@ -229,8 +229,8 @@ spec:
                     },
                 }
             },
-            "roots": [
-                {
+            "roots": {
+                "stable.example.com.v1.FooBar": {
                     "ref": "stable.example.com.v1.FooBar",
                     "group": "stable.example.com",
                     "version": "v1",
@@ -240,7 +240,7 @@ spec:
                     "description": "",
                     "namespaced": True,
                 }
-            ],
+            },
         }
 
         self.assertEqual(schema, expected_schema)
@@ -309,8 +309,8 @@ spec:
                     },
                 }
             },
-            "roots": [
-                {
+            "roots": {
+                "stable.example.com.v1.FooBar": {
                     "ref": "stable.example.com.v1.FooBar",
                     "group": "stable.example.com",
                     "version": "v1",
@@ -320,7 +320,7 @@ spec:
                     "description": "",
                     "namespaced": True,
                 }
-            ],
+            },
         }
 
         self.assertEqual(schema, expected_schema)
@@ -387,8 +387,8 @@ spec:
                     },
                 }
             },
-            "roots": [
-                {
+            "roots": {
+                "stable.example.com.v1.FooBar": {
                     "ref": "stable.example.com.v1.FooBar",
                     "group": "stable.example.com",
                     "version": "v1",
@@ -398,7 +398,7 @@ spec:
                     "description": "",
                     "namespaced": True,
                 }
-            ],
+            },
         }
 
         self.assertEqual(schema, expected_schema)
@@ -464,8 +464,8 @@ spec:
                     },
                 }
             },
-            "roots": [
-                {
+            "roots": {
+                "stable.example.com.v1.FooBar": {
                     "ref": "stable.example.com.v1.FooBar",
                     "group": "stable.example.com",
                     "version": "v1",
@@ -475,7 +475,7 @@ spec:
                     "description": "",
                     "namespaced": False,
                 }
-            ],
+            },
         }
 
         self.assertEqual(schema, expected_schema)
@@ -582,8 +582,8 @@ spec:
                     },
                 },
             },
-            "roots": [
-                {
+            "roots": {
+                "stable.example.com.v1.ArrayTest": {
                     "ref": "stable.example.com.v1.ArrayTest",
                     "group": "stable.example.com",
                     "version": "v1",
@@ -593,7 +593,7 @@ spec:
                     "description": "",
                     "namespaced": True,
                 }
-            ],
+            },
         }
         self.assertEqual(schema, expected_schema)
 
@@ -709,8 +709,8 @@ spec:
                     },
                 },
             },
-            "roots": [
-                {
+            "roots": {
+                "stable.example.com.v1.FooBar": {
                     "ref": "stable.example.com.v1.FooBar",
                     "group": "stable.example.com",
                     "version": "v1",
@@ -720,7 +720,7 @@ spec:
                     "description": "",
                     "namespaced": True,
                 }
-            ],
+            },
         }
         self.assertEqual(schema, expected_schema)
 
@@ -802,8 +802,8 @@ spec:
                     "properties": {"availableReplicas": {"type": "integer"}},
                 },
             },
-            "roots": [
-                {
+            "roots": {
+                "stable.example.com.v1.FooBar": {
                     "ref": "stable.example.com.v1.FooBar",
                     "group": "stable.example.com",
                     "version": "v1",
@@ -813,7 +813,7 @@ spec:
                     "description": "",
                     "namespaced": True,
                 }
-            ],
+            },
         }
 
         self.assertEqual(schema, expected_schema)
@@ -970,8 +970,8 @@ metadata:
                     "properties": {"availableReplicas": {"type": "integer"}},
                 },
             },
-            "roots": [
-                {
+            "roots": {
+                "stable.example.com.v1.FooBar": {
                     "ref": "stable.example.com.v1.FooBar",
                     "group": "stable.example.com",
                     "version": "v1",
@@ -981,7 +981,7 @@ metadata:
                     "description": "",
                     "namespaced": True,
                 },
-                {
+                "stable.example.com.v1.Second": {
                     "ref": "stable.example.com.v1.Second",
                     "group": "stable.example.com",
                     "version": "v1",
@@ -990,11 +990,12 @@ metadata:
                     "attrName": "seconds",
                     "description": "",
                     "namespaced": True,
-                }
-            ],
+                },
+            },
         }
 
         self.assertEqual(schema, expected_schema)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -44,19 +44,24 @@ def uppercase_first(name):
 
 
 def generate_jsonschema(prefix, files, attr_name_overrides):
-    schema = {"definitions": {}, "roots": []}
+    schema = {"definitions": {}, "roots": {}}
 
     for file in files:
         with open(file, "r") as f:
             docs = yaml.safe_load_all(f)
 
             for data in docs:
-                if "spec" in data and "kind" in data and data["kind"] == "CustomResourceDefinition":
+                if (
+                    "spec" in data
+                    and "kind" in data
+                    and data["kind"] == "CustomResourceDefinition"
+                ):
                     group = data["spec"]["group"]
                     kind = data["spec"]["names"]["kind"]
                     plural = data["spec"]["names"]["plural"]
                     namespaced = (
-                        "scope" in data["spec"] and data["spec"]["scope"] == "Namespaced"
+                        "scope" in data["spec"]
+                        and data["spec"]["scope"] == "Namespaced"
                     )
 
                     for ver in data["spec"]["versions"]:
@@ -68,23 +73,21 @@ def generate_jsonschema(prefix, files, attr_name_overrides):
                         schema["definitions"][definitionKey] = ver["schema"][
                             "openAPIV3Schema"
                         ]
-                        schema["roots"].append(
-                            {
-                                "ref": definitionKey,
-                                "group": group,
-                                "version": version,
-                                "kind": kind,
-                                "name": plural,
-                                "attrName": attr_name_overrides.get(
-                                    data["metadata"]["name"],
-                                    gen_attr_name(kind, plural, prefix),
-                                ),
-                                "description": ver["schema"]["openAPIV3Schema"].get(
-                                    "description", ""
-                                ),
-                                "namespaced": namespaced,
-                            }
-                        )
+                        schema["roots"][definitionKey] = {
+                            "ref": definitionKey,
+                            "group": group,
+                            "version": version,
+                            "kind": kind,
+                            "name": plural,
+                            "attrName": attr_name_overrides.get(
+                                data["metadata"]["name"],
+                                gen_attr_name(kind, plural, prefix),
+                            ),
+                            "description": ver["schema"]["openAPIV3Schema"].get(
+                                "description", ""
+                            ),
+                            "namespaced": namespaced,
+                        }
 
     def flatten_ref(definition, key, root=True):
         if not root:
@@ -167,7 +170,7 @@ def generate_jsonschema(prefix, files, attr_name_overrides):
 
         return definition
 
-    for root in schema["roots"]:
+    for _, root in schema["roots"].items():
         key = root["ref"]
         schema["definitions"][key] = flatten_ref(
             set_builtin_fields(schema["definitions"][key]), key

@@ -6,7 +6,7 @@
 let
   versions = lib.mapAttrsToList (
     version: _: builtins.concatStringsSep "." (lib.lists.sublist 0 2 (builtins.splitVersion version))
-  ) (import ../pkgs/generators/k8s/versions.nix);
+  ) (import ../pkgs/generators/versions.nix);
 in
 {
   imports = [
