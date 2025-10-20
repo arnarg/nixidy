@@ -15,6 +15,15 @@ let
         name
         schema
         ;
+
+      # The ports list in Container, EphemeralContainer
+      # and ServiceSpec should not enforce "protocol".
+      # See: https://github.com/arnarg/nixidy/issues/34
+      specialMapKeys = {
+        "io.k8s.api.core.v1.Container".ports = [ "containerPort" ];
+        "io.k8s.api.core.v1.EphemeralContainer".ports = [ "containerPort" ];
+        "io.k8s.api.core.v1.ServiceSpec".ports = [ "port" ];
+      };
     };
 
   genNamespaced =

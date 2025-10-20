@@ -5,6 +5,7 @@
   pkgs,
   lib,
   schema,
+  specialMapKeys ? { },
 }:
 with lib;
 let
@@ -214,21 +215,10 @@ let
                       {
                         type = requiredOrNot (
                           coerceAttrsOfSubmodulesToListByKey (refDefinition property.items) mergeKey (
-                            if hasAttr "x-kubernetes-list-map-keys" property then
-                              # The ports list in Container and EphemeralContainer
-                              # should not enforce "protocol".
-                              # See: https://github.com/arnarg/nixidy/issues/34
-                              if
-                                builtins.any (n: _name == n) [
-                                  "io.k8s.api.core.v1.Container"
-                                  "io.k8s.api.core.v1.EphemeralContainer"
-                                  "io.k8s.api.core.v1.ServiceSpec"
-                                ]
-                                && propName == "ports"
-                              then
-                                builtins.filter (x: x != "protocol") property."x-kubernetes-list-map-keys"
-                              else
-                                property."x-kubernetes-list-map-keys"
+                            if hasAttr _name specialMapKeys && hasAttr propName specialMapKeys.${_name} then
+                              specialMapKeys.${_name}.${propName}
+                            else if hasAttr "x-kubernetes-list-map-keys" property then
+                              property."x-kubernetes-list-map-keys"
                             else
                               [ ]
                           )
