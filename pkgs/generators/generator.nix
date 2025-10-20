@@ -6,6 +6,7 @@
   lib,
   schema,
   specialMapKeys ? { },
+  skipCoerceToList ? { },
 }:
 with lib;
 let
@@ -208,6 +209,7 @@ let
                     if
                       hasAttr "properties" schema.definitions.${refDefinition property.items}
                       && hasAttr "name" schema.definitions.${refDefinition property.items}.properties
+                      && !(hasAttr _name skipCoerceToList && any (x: x == propName) skipCoerceToList.${_name})
                     then
                       let
                         mergeKey = "name";

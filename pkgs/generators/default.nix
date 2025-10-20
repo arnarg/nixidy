@@ -170,6 +170,7 @@ let
       crds,
       namePrefix ? "",
       attrNameOverrides ? { },
+      skipCoerceToList ? { },
     }:
     let
       options = pkgs.writeText "${name}-crd2jsonschema-options.json" (
@@ -208,6 +209,7 @@ let
         pkgs
         lib
         name
+        skipCoerceToList
         ;
 
       schema = builtins.fromJSON (builtins.readFile schema);
@@ -229,5 +231,11 @@ in
       "manifests/crds/applicationset-crd.yaml"
       "manifests/crds/appproject-crd.yaml"
     ];
+    skipCoerceToList = {
+      # Coercing AppProject.spec.destinations from attrset
+      # to list based on `name` doesn't make sense.
+      # See: https://github.com/arnarg/nixidy/issues/60
+      "argoproj.io.v1alpha1.AppProjectSpec" = [ "destinations" ];
+    };
   };
 }
