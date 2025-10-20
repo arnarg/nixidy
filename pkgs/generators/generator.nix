@@ -422,7 +422,7 @@ let
       in {
         options = definitions."''${ref}".options // {
           # position in original array
-          _priority = mkOption { type = types.nullOr types.int; default = null; };
+          _priority = mkOption { type = types.nullOr types.int; default = null; internal = true; };
         };
         config = definitions."''${ref}".config // {
           ''${mergeKey} = mkOverride 1002 (
