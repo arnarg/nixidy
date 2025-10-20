@@ -89,6 +89,8 @@ let
         types.bool
       else if def.type == "object" then
         types.attrs
+      else if def.type == "array" then
+        types.listOf (mapType def.items)
       else
         throw "type ${def.type} not supported";
 
