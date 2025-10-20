@@ -137,6 +137,7 @@ let
           _priority = mkOption {
             type = types.nullOr types.int;
             default = null;
+            internal = true;
           };
         };
         config = definitions."${ref}".config // {
@@ -245,11 +246,8 @@ let
         "destinations" = mkOption {
           description = "Destinations contains list of destinations available for deployment";
           type = (
-            types.nullOr (
-              coerceAttrsOfSubmodulesToListByKey "argoproj.io.v1alpha1.AppProjectSpecDestinations" "name" [ ]
-            )
+            types.nullOr (types.listOf (submoduleOf "argoproj.io.v1alpha1.AppProjectSpecDestinations"))
           );
-          apply = attrsToList;
         };
         "namespaceResourceBlacklist" = mkOption {
           description = "NamespaceResourceBlacklist contains list of blacklisted namespace level resources";

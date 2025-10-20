@@ -137,6 +137,7 @@ let
           _priority = mkOption {
             type = types.nullOr types.int;
             default = null;
+            internal = true;
           };
         };
         config = definitions."${ref}".config // {
