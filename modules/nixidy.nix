@@ -21,6 +21,12 @@ in
       description = "The environment name for this configuration.";
     };
 
+    appendNameWithEnv = mkOption {
+      type = types.bool;
+      default = false;
+      description = "When this is set to true, all applications names will be suffixed by the environment.";
+    };
+
     target = {
       repository = mkOption {
         type = types.str;
@@ -190,7 +196,7 @@ in
 
               value = {
                 metadata = {
-                  inherit (app) name;
+                  name = if cfg.appendNameWithEnv then "${app.name}-${cfg.env}" else app.name;
                   annotations = if app.annotations != { } then app.annotations else null;
                 };
                 spec = {
