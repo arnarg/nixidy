@@ -167,6 +167,7 @@ let
     {
       name,
       src,
+      patches ? [ ],
       crds,
       namePrefix ? "",
       attrNameOverrides ? { },
@@ -190,12 +191,13 @@ let
           pythonWithYaml = pkgs.python3.withPackages (ps: [ ps.pyyaml ]);
         in
         pkgs.stdenv.mkDerivation {
-          inherit src;
+          inherit src patches;
 
           name = "${name}-jsonschema.json";
 
           phases = [
             "unpackPhase"
+            "patchPhase"
             "installPhase"
           ];
 
