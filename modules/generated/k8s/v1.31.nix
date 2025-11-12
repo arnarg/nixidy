@@ -4521,7 +4521,14 @@ let
         };
         "averageValue" = mkOption {
           description = "averageValue is the target value of the average of the metric across all relevant pods (as a quantity)";
-          type = (types.nullOr types.str);
+          type = (
+            types.nullOr (
+              types.oneOf [
+                types.str
+                (types.either types.int types.float)
+              ]
+            )
+          );
         };
         "type" = mkOption {
           description = "type represents whether the metric type is Utilization, Value, or AverageValue";
@@ -4529,7 +4536,14 @@ let
         };
         "value" = mkOption {
           description = "value is the target value of the metric (as a quantity).";
-          type = (types.nullOr types.str);
+          type = (
+            types.nullOr (
+              types.oneOf [
+                types.str
+                (types.either types.int types.float)
+              ]
+            )
+          );
         };
       };
 
@@ -4549,11 +4563,25 @@ let
         };
         "averageValue" = mkOption {
           description = "averageValue is the current value of the average of the metric across all relevant pods (as a quantity)";
-          type = (types.nullOr types.str);
+          type = (
+            types.nullOr (
+              types.oneOf [
+                types.str
+                (types.either types.int types.float)
+              ]
+            )
+          );
         };
         "value" = mkOption {
           description = "value is the current value of the metric (as a quantity).";
-          type = (types.nullOr types.str);
+          type = (
+            types.nullOr (
+              types.oneOf [
+                types.str
+                (types.either types.int types.float)
+              ]
+            )
+          );
         };
       };
 
@@ -6722,7 +6750,16 @@ let
       options = {
         "allocatedResources" = mkOption {
           description = "AllocatedResources represents the compute resources allocated for this container by the node. Kubelet sets this value to Container.Resources.Requests upon successful pod admission and after successfully admitting desired pod resize.";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
         "allocatedResourcesStatus" = mkOption {
           description = "AllocatedResourcesStatus represents the status of various resources allocated for this Pod.";
@@ -6895,7 +6932,14 @@ let
         };
         "sizeLimit" = mkOption {
           description = "sizeLimit is the total amount of local storage required for this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir";
-          type = (types.nullOr types.str);
+          type = (
+            types.nullOr (
+              types.oneOf [
+                types.str
+                (types.either types.int types.float)
+              ]
+            )
+          );
         };
       };
 
@@ -8034,23 +8078,68 @@ let
       options = {
         "default" = mkOption {
           description = "Default resource requirement limit value by resource name if resource limit is omitted.";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
         "defaultRequest" = mkOption {
           description = "DefaultRequest is the default resource requirement request value by resource name if resource request is omitted.";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
         "max" = mkOption {
           description = "Max usage constraints on this kind by resource name.";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
         "maxLimitRequestRatio" = mkOption {
           description = "MaxLimitRequestRatio if specified, the named resource must have a request and limit that are both non-zero where limit divided by request is less than or equal to the enumerated value; this represents the max burst for the named resource.";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
         "min" = mkOption {
           description = "Min usage constraints on this kind by resource name.";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
         "type" = mkOption {
           description = "Type of resource that this limit applies to.";
@@ -8726,11 +8815,29 @@ let
         };
         "allocatable" = mkOption {
           description = "Allocatable represents the resources of a node that are available for scheduling. Defaults to Capacity.";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
         "capacity" = mkOption {
           description = "Capacity represents the total resources of a node. More info: https://kubernetes.io/docs/reference/node/node-status/#capacity";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
         "conditions" = mkOption {
           description = "Conditions is an array of current observed node conditions. More info: https://kubernetes.io/docs/concepts/nodes/node/#condition";
@@ -9110,11 +9217,29 @@ let
         };
         "allocatedResources" = mkOption {
           description = "allocatedResources tracks the resources allocated to a PVC including its capacity. Key names follow standard Kubernetes label syntax. Valid values are either:\n\t* Un-prefixed keys:\n\t\t- storage - the capacity of the volume.\n\t* Custom resources must use implementation-defined prefixed names such as \"example.com/my-custom-resource\"\nApart from above values - keys that are unprefixed or have kubernetes.io prefix are considered reserved and hence may not be used.\n\nCapacity reported here may be larger than the actual capacity when a volume expansion operation is requested. For storage quota, the larger value from allocatedResources and PVC.spec.resources is used. If allocatedResources is not set, PVC.spec.resources alone is used for quota calculation. If a volume expansion capacity request is lowered, allocatedResources is only lowered if there are no expansion operations in progress and if the actual volume capacity is equal or lower than the requested capacity.\n\nA controller that receives PVC update with previously unknown resourceName should ignore the update for the purpose it was designed. For example - a controller that only is responsible for resizing capacity of the volume, should ignore PVC updates that change other valid resources associated with PVC.\n\nThis is an alpha field and requires enabling RecoverVolumeExpansionFailure feature.";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
         "capacity" = mkOption {
           description = "capacity represents the actual resources of the underlying volume.";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
         "conditions" = mkOption {
           description = "conditions is the current Condition of persistent volume claim. If underlying persistent volume is being resized then the Condition will be set to 'Resizing'.";
@@ -9236,7 +9361,16 @@ let
         };
         "capacity" = mkOption {
           description = "capacity is the description of the persistent volume's resources and capacity. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
         "cephfs" = mkOption {
           description = "cephFS represents a Ceph FS mount on the host that shares a pod's lifetime";
@@ -9900,7 +10034,16 @@ let
         };
         "overhead" = mkOption {
           description = "Overhead represents the resource overhead associated with running a pod for a given RuntimeClass. This field will be autopopulated at admission time by the RuntimeClass admission controller. If the RuntimeClass admission controller is enabled, overhead must not be set in Pod create requests. The RuntimeClass admission controller will reject Pod create requests which have the overhead already set. If RuntimeClass is configured and selected in the PodSpec, Overhead will be set to the value defined in the corresponding RuntimeClass, otherwise it will remain unset and treated as zero. More info: https://git.k8s.io/enhancements/keps/sig-node/688-pod-overhead/README.md";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
         "preemptionPolicy" = mkOption {
           description = "PreemptionPolicy is the Policy for preempting pods with lower priority. One of Never, PreemptLowerPriority. Defaults to PreemptLowerPriority if unset.";
@@ -10676,7 +10819,14 @@ let
         };
         "divisor" = mkOption {
           description = "Specifies the output format of the exposed resources, defaults to \"1\"";
-          type = (types.nullOr types.str);
+          type = (
+            types.nullOr (
+              types.oneOf [
+                types.str
+                (types.either types.int types.float)
+              ]
+            )
+          );
         };
         "resource" = mkOption {
           description = "Required: resource to select";
@@ -10775,7 +10925,16 @@ let
       options = {
         "hard" = mkOption {
           description = "hard is the set of desired hard limits for each named resource. More info: https://kubernetes.io/docs/concepts/policy/resource-quotas/";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
         "scopeSelector" = mkOption {
           description = "scopeSelector is also a collection of filters like scopes that must match each object tracked by a quota but expressed using ScopeSelectorOperator in combination with possible values. For a resource to match, both scopes AND scopeSelector (if specified in spec), must be matched.";
@@ -10799,11 +10958,29 @@ let
       options = {
         "hard" = mkOption {
           description = "Hard is the set of enforced hard limits for each named resource. More info: https://kubernetes.io/docs/concepts/policy/resource-quotas/";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
         "used" = mkOption {
           description = "Used is the current observed total usage of the resource in the namespace.";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
       };
 
@@ -10827,11 +11004,29 @@ let
         };
         "limits" = mkOption {
           description = "Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
         "requests" = mkOption {
           description = "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
       };
 
@@ -12263,11 +12458,29 @@ let
       options = {
         "limits" = mkOption {
           description = "Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
         "requests" = mkOption {
           description = "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
       };
 
@@ -14564,7 +14777,16 @@ let
       options = {
         "podFixed" = mkOption {
           description = "podFixed represents the fixed resource overhead associated with running a pod.";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
       };
 
@@ -15195,7 +15417,16 @@ let
         };
         "capacity" = mkOption {
           description = "Capacity defines the set of capacities for this device. The name of each capacity must be unique in that set.\n\nThe maximum number of attributes and capacities combined is 32.";
-          type = (types.nullOr (types.attrsOf types.str));
+          type = (
+            types.nullOr (
+              types.attrsOf (
+                types.oneOf [
+                  types.str
+                  (types.either types.int types.float)
+                ]
+              )
+            )
+          );
         };
       };
 
@@ -16297,7 +16528,14 @@ let
         };
         "capacity" = mkOption {
           description = "capacity is the value reported by the CSI driver in its GetCapacityResponse for a GetCapacityRequest with topology and parameters that match the previous fields.\n\nThe semantic is currently (CSI spec 1.2) defined as: The available capacity, in bytes, of the storage that can be used to provision volumes. If not set, that information is currently unavailable.";
-          type = (types.nullOr types.str);
+          type = (
+            types.nullOr (
+              types.oneOf [
+                types.str
+                (types.either types.int types.float)
+              ]
+            )
+          );
         };
         "kind" = mkOption {
           description = "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds";
@@ -16305,7 +16543,14 @@ let
         };
         "maximumVolumeSize" = mkOption {
           description = "maximumVolumeSize is the value reported by the CSI driver in its GetCapacityResponse for a GetCapacityRequest with topology and parameters that match the previous fields.\n\nThis is defined since CSI spec 1.4.0 as the largest size that may be used in a CreateVolumeRequest.capacity_range.required_bytes field to create a volume with the same parameters as those in GetCapacityRequest. The corresponding value in the Kubernetes API is ResourceRequirements.Requests in a volume claim.";
-          type = (types.nullOr types.str);
+          type = (
+            types.nullOr (
+              types.oneOf [
+                types.str
+                (types.either types.int types.float)
+              ]
+            )
+          );
         };
         "metadata" = mkOption {
           description = "Standard object's metadata. The name has no particular meaning. It must be a DNS subdomain (dots allowed, 253 characters). To ensure that there are no conflicts with other CSI drivers on the cluster, the recommendation is to use csisc-<uuid>, a generated name, or a reverse-domain name which ends with the unique CSI driver name.\n\nObjects are namespaced.\n\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata";
@@ -17469,7 +17714,7 @@ let
         };
         "maximum" = mkOption {
           description = "";
-          type = (types.nullOr types.int);
+          type = (types.nullOr (types.either types.int types.float));
         };
         "minItems" = mkOption {
           description = "";
@@ -17485,11 +17730,11 @@ let
         };
         "minimum" = mkOption {
           description = "";
-          type = (types.nullOr types.int);
+          type = (types.nullOr (types.either types.int types.float));
         };
         "multipleOf" = mkOption {
           description = "";
-          type = (types.nullOr types.int);
+          type = (types.nullOr (types.either types.int types.float));
         };
         "not" = mkOption {
           description = "";
