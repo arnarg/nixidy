@@ -234,8 +234,16 @@ in
       };
     };
     destination = {
+      name = mkOption {
+        type = types.nullOr types.str;
+        default = nixidyDefaults.destination.name;
+        defaultText = literalExpression "config.nixidy.defaults.destination.name";
+        description = ''
+          The name of the cluster that ArgoCD should deploy all applications to.
+        '';
+      };
       server = mkOption {
-        type = types.str;
+        type = types.nullOr types.str;
         default = nixidyDefaults.destination.server;
         defaultText = literalExpression "config.nixidy.defaults.destination.server";
         description = ''

@@ -4,6 +4,7 @@
 
     tests = [
       ./defaults.nix
+      ./destination.nix
       ./sync-options.nix
       ./compare-options.nix
       ./configmap.nix
