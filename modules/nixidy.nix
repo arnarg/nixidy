@@ -111,8 +111,17 @@ in
       };
 
       destination = {
+        name = mkOption {
+          type = types.nullOr types.str;
+          default = null;
+          description = ''
+            The name of the cluster that ArgoCD should deploy all applications to.
+
+            This is the default value for all applications if not explicitly set for the application.
+          '';
+        };
         server = mkOption {
-          type = types.str;
+          type = types.nullOr types.str;
           default = "https://kubernetes.default.svc";
           description = ''
             The Kubernetes server that ArgoCD should deploy all applications to.
@@ -195,10 +204,15 @@ in
                       app.output.path
                     ];
                   };
-                  destination = {
-                    inherit (app) namespace;
-                    inherit (app.destination) server;
-                  };
+                  destination = lib.mkMerge [
+                    { inherit (app) namespace; }
+                    (lib.mkIf (app.destination.name != null) {
+                      inherit (app.destination) name;
+                    })
+                    (lib.mkIf (app.destination.name == null) {
+                      inherit (app.destination) server;
+                    })
+                  ];
                   syncPolicy =
                     (lib.optionalAttrs app.syncPolicy.autoSync.enable {
                       automated = {
@@ -237,10 +251,15 @@ in
                 app.output.path
               ];
             };
-            destination = {
-              inherit (app) namespace;
-              inherit (app.destination) server;
-            };
+            destination = lib.mkMerge [
+              { inherit (app) namespace; }
+              (lib.mkIf (app.destination.name != null) {
+                inherit (app.destination) name;
+              })
+              (lib.mkIf (app.destination.name == null) {
+                inherit (app.destination) server;
+              })
+            ];
             # Maybe this should be configurable but
             # generally I think autoSync would be
             # desirable on the initial appOfApps.
