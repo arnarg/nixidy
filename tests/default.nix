@@ -12,6 +12,8 @@
       ./override-name.nix
       ./internal-apps.nix
       ./no-port-protocol.nix
+      ./no-suffix-env-to-app-name.nix
+      ./suffix-env-to-app-name.nix
       ./templates.nix
       ./helm/no-values.nix
       ./helm/with-values.nix
