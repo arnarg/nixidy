@@ -24,6 +24,16 @@ let
         "io.k8s.api.core.v1.EphemeralContainer".ports = [ "containerPort" ];
         "io.k8s.api.core.v1.ServiceSpec".ports = [ "port" ];
       };
+
+      definitionsOverlay = final: prev: {
+        "io.k8s.apimachinery.pkg.api.resource.Quantity" = {
+          inherit (prev."io.k8s.apimachinery.pkg.api.resource.Quantity") description;
+          oneOf = [
+            { type = "string"; }
+            { type = "number"; }
+          ];
+        };
+      };
     };
 
   genNamespaced =

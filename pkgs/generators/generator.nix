@@ -7,9 +7,17 @@
   schema,
   specialMapKeys ? { },
   skipCoerceToList ? { },
+  definitionsOverlay ? f: p: p,
 }:
 with lib;
 let
+  applyOverlay =
+    overlay: attr:
+    let
+      f = final: attr;
+    in
+    lib.fix (lib.extends overlay f);
+
   gen = rec {
     mkMerge = values: ''mkMerge [${concatMapStrings (value: "
       ${value}
@@ -51,6 +59,7 @@ let
       unspecified = "types.unspecified";
       str = "types.str";
       int = "types.int";
+      float = "types.float";
       bool = "types.bool";
       attrs = "types.attrs";
       nullOr = val: "(types.nullOr ${val})";
@@ -61,38 +70,47 @@ let
         "(types.coercedTo ${coercedType} ${coerceFunc} ${finalType})";
       either = val1: val2: "(types.either ${val1} ${val2})";
       loaOf = type: "(types.loaOf ${type})";
+      oneOf = of: "(types.oneOf [${lib.concatStringsSep " " (map mapType of)}])";
     };
 
     hasTypeMapping =
       def:
-      hasAttr "type" def
-      && elem def.type [
-        "string"
-        "integer"
-        "boolean"
-      ];
+      def ? oneOf
+      || (
+        def ? type
+        && elem def.type [
+          "string"
+          "integer"
+          "boolean"
+        ]
+      );
 
     mergeValuesByKey = mergeKey: ''(mergeValuesByKey "${mergeKey}")'';
 
     mapType =
       def:
-      if def.type == "string" then
-        if hasAttr "format" def && def.format == "int-or-string" then
-          types.either types.int types.str
+      if def ? oneOf then
+        types.oneOf def.oneOf
+      else if def ? type then
+        if def.type == "string" then
+          if hasAttr "format" def && def.format == "int-or-string" then
+            types.either types.int types.str
+          else
+            types.str
+        else if def.type == "integer" then
+          types.int
+        else if def.type == "number" then
+          types.either types.int types.float
+        else if def.type == "boolean" then
+          types.bool
+        else if def.type == "object" then
+          types.attrs
+        else if def.type == "array" then
+          types.listOf (mapType def.items)
         else
-          types.str
-      else if def.type == "integer" then
-        types.int
-      else if def.type == "number" then
-        types.int
-      else if def.type == "boolean" then
-        types.bool
-      else if def.type == "object" then
-        types.attrs
-      else if def.type == "array" then
-        types.listOf (mapType def.items)
+          throw "type ${def.type} not supported"
       else
-        throw "type ${def.type} not supported";
+        throw "unknown definition";
 
     submoduleOf = _definitions: ref: ''(submoduleOf "${ref}")'';
 
@@ -134,7 +152,7 @@ let
     builtins.compareVersions v1 v2;
 
   genDefinitions =
-    schema:
+    definitions:
     with gen;
     mapAttrs (
       _name: definition:
@@ -162,9 +180,9 @@ let
                     {
                       type = requiredOrNot (globalSubmoduleOf definitions (refDefinition property));
                     }
-                  else if hasTypeMapping schema.definitions.${refDefinition property} then
+                  else if hasTypeMapping definitions.${refDefinition property} then
                     {
-                      type = requiredOrNot (mapType schema.definitions.${refDefinition property});
+                      type = requiredOrNot (mapType definitions.${refDefinition property});
                     }
                   else
                     {
@@ -180,9 +198,9 @@ let
                   # definition
                   if hasAttr "$ref" property.items then
                     # if it is a reference to simple type
-                    if hasTypeMapping schema.definitions.${refDefinition property.items} then
+                    if hasTypeMapping definitions.${refDefinition property.items} then
                       {
-                        type = requiredOrNot (types.listOf (mapType schema.definitions.${refDefinition property.items}));
+                        type = requiredOrNot (types.listOf (mapType definitions.${refDefinition property.items}));
                       }
                     # if a reference is to complex type
                     else
@@ -209,8 +227,8 @@ let
                     # make it an attribute set of submodules if only x-kubernetes-patch-merge-key is present, or
                     # x-kubernetes-patch-merge-key == x-kubernetes-list-map-keys.
                     if
-                      hasAttr "properties" schema.definitions.${refDefinition property.items}
-                      && hasAttr "name" schema.definitions.${refDefinition property.items}.properties
+                      hasAttr "properties" definitions.${refDefinition property.items}
+                      && hasAttr "name" definitions.${refDefinition property.items}.properties
                       && !(hasAttr _name skipCoerceToList && any (x: x == propName) skipCoerceToList.${_name})
                     then
                       let
@@ -247,12 +265,12 @@ let
                   if
                     (
                       hasAttr "$ref" property.additionalProperties
-                      && hasTypeMapping schema.definitions.${refDefinition property.additionalProperties}
+                      && hasTypeMapping definitions.${refDefinition property.additionalProperties}
                     )
                   then
                     {
                       type = requiredOrNot (
-                        types.attrsOf (mapType schema.definitions.${refDefinition property.additionalProperties})
+                        types.attrsOf (mapType definitions.${refDefinition property.additionalProperties})
                       );
                     }
                   else if hasAttr "$ref" property.additionalProperties then
@@ -289,9 +307,9 @@ let
             in
             mapAttrs (_name: _property: mkOverride 1002 null) optionalProps;
         }
-    ) schema.definitions;
+    ) definitions;
 
-  definitions = genDefinitions schema;
+  definitions = genDefinitions (applyOverlay definitionsOverlay schema.definitions);
   resourceTypes = schema.roots;
 
   resourceTypesByKind = zipAttrs (

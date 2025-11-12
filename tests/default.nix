@@ -8,6 +8,7 @@
       ./compare-options.nix
       ./configmap.nix
       ./create-namespace.nix
+      ./limits.nix
       ./yamls.nix
       ./override-name.nix
       ./internal-apps.nix
