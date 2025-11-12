@@ -154,6 +154,24 @@ in
         default = "default";
         description = "The project of the generated bootstrap app for appOfApps";
       };
+      destination = {
+        name = mkOption {
+          type = types.nullOr types.str;
+          default = cfg.defaults.destination.name;
+          defaultText = literalExpression "config.nixidy.defaults.destination.name";
+          description = ''
+            The name of the cluster that ArgoCD should deploy the app of apps to.
+          '';
+        };
+        server = mkOption {
+          type = types.nullOr types.str;
+          default = cfg.defaults.destination.server;
+          defaultText = literalExpression "config.nixidy.defaults.destination.server";
+          description = ''
+            The Kubernetes server that ArgoCD should deploy the app of apps to.
+          '';
+        };
+      };
     };
 
     charts = mkOption {
@@ -259,11 +277,11 @@ in
             };
             destination = lib.mkMerge [
               { inherit (app) namespace; }
-              (lib.mkIf (app.destination.name != null) {
-                inherit (app.destination) name;
+              (lib.mkIf (cfg.appOfApps.destination.name != null) {
+                inherit (cfg.appOfApps.destination) name;
               })
-              (lib.mkIf (app.destination.name == null) {
-                inherit (app.destination) server;
+              (lib.mkIf (cfg.appOfApps.destination.name == null) {
+                inherit (cfg.appOfApps.destination) server;
               })
             ];
             # Maybe this should be configurable but
