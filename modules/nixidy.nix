@@ -259,6 +259,9 @@ in
                     })
                     // (lib.optionalAttrs (app.syncPolicy.managedNamespaceMetadata != null) {
                       inherit (app.syncPolicy) managedNamespaceMetadata;
+                    })
+                    // (lib.optionalAttrs (app.syncPolicy.retry != null) {
+                      inherit (app.syncPolicy) retry;
                     });
                 };
               };
