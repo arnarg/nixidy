@@ -190,6 +190,50 @@ in
           ArgoCD Managed namespace metadata.
         '';
       };
+      retry = mkOption {
+        type = types.nullOr (
+          types.submodule {
+            options = {
+              backoff = mkOption {
+                type = types.nullOr (
+                  types.submodule {
+                    options = {
+                      duration = mkOption {
+                        type = types.nullOr types.str;
+                        default = null;
+                      };
+                      factor = mkOption {
+                        type = types.nullOr types.int;
+                        default = null;
+                      };
+                      maxDuration = mkOption {
+                        type = types.nullOr types.str;
+                        default = null;
+                      };
+                    };
+
+                    config = { };
+                  }
+                );
+
+                default = null;
+              };
+
+              limit = mkOption {
+                type = (types.nullOr types.int);
+                default = null;
+              };
+            };
+
+            config = { };
+          }
+        );
+
+        default = null;
+        description = ''
+          ArgoCD retry syncPolicy.
+        '';
+      };
       syncOptions = {
         applyOutOfSyncOnly = mkOption {
           type = types.bool;
