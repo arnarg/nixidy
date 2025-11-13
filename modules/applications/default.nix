@@ -179,6 +179,15 @@ in
             Turning on selective sync option which will sync only out-of-sync resources.
           '';
         };
+        createNamespace = mkOption {
+          type = types.bool;
+          default = false;
+          apply = val: if val then "CreateNamespace=true" else null;
+          description = ''
+            Namespace Auto-Creation ensures that namespace specified as the
+            application destination exists in the destination cluster.
+          '';
+        };
         pruneLast = mkOption {
           type = types.bool;
           default = false;

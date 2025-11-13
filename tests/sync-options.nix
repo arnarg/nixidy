@@ -10,6 +10,7 @@ in
   applications = {
     # Create an application with all sync options set
     test1.syncPolicy.syncOptions = {
+      createNamespace = true;
       serverSideApply = true;
       replace = true;
       pruneLast = true;
@@ -39,6 +40,7 @@ in
           opts:
           (compareLists compare opts [
             "ApplyOutOfSyncOnly=true"
+            "CreateNamespace=true"
             "FailOnSharedResource=true"
             "PruneLast=true"
             "Replace=true"
