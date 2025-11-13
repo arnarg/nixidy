@@ -75,13 +75,14 @@ let
 
     hasTypeMapping =
       def:
-      def ? oneOf
+      (def ? oneOf && lib.any hasTypeMapping def.oneOf)
       || (
         def ? type
         && elem def.type [
           "string"
           "integer"
           "boolean"
+          "number"
         ]
       );
 
@@ -90,7 +91,7 @@ let
     mapType =
       def:
       if def ? oneOf then
-        types.oneOf def.oneOf
+        types.oneOf (lib.filter hasTypeMapping def.oneOf)
       else if def ? type then
         if def.type == "string" then
           if hasAttr "format" def && def.format == "int-or-string" then
