@@ -168,6 +168,28 @@ in
           '';
         };
       };
+      managedNamespaceMetadata = mkOption {
+        type = types.nullOr (
+          types.submodule {
+            options = {
+              annotations = mkOption {
+                type = types.nullOr (types.attrsOf types.str);
+                default = null;
+              };
+              labels = mkOption {
+                type = types.nullOr (types.attrsOf types.str);
+                default = null;
+              };
+            };
+
+            config = { };
+          }
+        );
+        default = null;
+        description = ''
+          ArgoCD Managed namespace metadata.
+        '';
+      };
       syncOptions = {
         applyOutOfSyncOnly = mkOption {
           type = types.bool;
@@ -424,26 +446,32 @@ in
     };
   };
 
-  config = {
-    # If createNamespace is set to `true` we should
-    # create one.
-    resources = lib.mkIf config.createNamespace {
-      namespaces.${config.namespace} = { };
-    };
+  config = lib.mkMerge [
+    (lib.mkIf (config.syncPolicy.managedNamespaceMetadata != null) {
+      syncPolicy.syncOptions.createNamespace = lib.mkDefault true;
+    })
 
-    # Turn all typed resources into standard kubernetes
-    # objects that will be written to YAML files.
-    objects =
-      with lib;
-      flatten (
-        mapAttrsToList (
-          _: type:
-          mapAttrsToList (_: moduleToAttrs) config.resources.${type.group}.${type.version}.${type.kind}
-        ) config.types
-      );
+    {
+      # If createNamespace is set to `true` we should
+      # create one.
+      resources = lib.mkIf config.createNamespace {
+        namespaces.${config.namespace} = { };
+      };
 
-    annotations = convertCmpOptionsAnnotation config.compareOptions;
+      # Turn all typed resources into standard kubernetes
+      # objects that will be written to YAML files.
+      objects =
+        with lib;
+        flatten (
+          mapAttrsToList (
+            _: type:
+            mapAttrsToList (_: moduleToAttrs) config.resources.${type.group}.${type.version}.${type.kind}
+          ) config.types
+        );
 
-    syncPolicy.finalSyncOpts = convertSyncOptionsList config.syncPolicy.syncOptions;
-  };
+      annotations = convertCmpOptionsAnnotation config.compareOptions;
+
+      syncPolicy.finalSyncOpts = convertSyncOptionsList config.syncPolicy.syncOptions;
+    }
+  ];
 }

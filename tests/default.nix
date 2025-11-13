@@ -13,6 +13,7 @@
       ./configmap.nix
       ./create-namespace.nix
       ./limits.nix
+      ./argo-syncpolicy-managed-namespace-metadata.nix
       ./yamls.nix
       ./override-name.nix
       ./internal-apps.nix
