@@ -697,6 +697,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#applicationsnamedestinationname" class="md-nav__link">
+    <span class="md-ellipsis">
+      applications.&lt;name&gt;.destination.name
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#applicationsnamedestinationserver" class="md-nav__link">
     <span class="md-ellipsis">
       applications.&lt;name&gt;.destination.server
@@ -1096,6 +1105,15 @@
   <a href="#nixidychartsdir" class="md-nav__link">
     <span class="md-ellipsis">
       nixidy.chartsDir
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidydefaultsdestinationname" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.defaults.destination.name
     </span>
   </a>
   
@@ -1383,6 +1401,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#applicationsnamedestinationname" class="md-nav__link">
+    <span class="md-ellipsis">
+      applications.&lt;name&gt;.destination.name
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#applicationsnamedestinationserver" class="md-nav__link">
     <span class="md-ellipsis">
       applications.&lt;name&gt;.destination.server
@@ -1782,6 +1809,15 @@
   <a href="#nixidychartsdir" class="md-nav__link">
     <span class="md-ellipsis">
       nixidy.chartsDir
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidydefaultsdestinationname" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.defaults.destination.name
     </span>
   </a>
   
@@ -2084,10 +2120,20 @@ boolean</p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/applications">&lt;nixidy/modules/applications&gt;</a></li>
 </ul>
+<h2 id="applicationsnamedestinationname">applications.&lt;name&gt;.destination.name<a class="headerlink" href="#applicationsnamedestinationname" title="Permanent link">#</a></h2>
+<p>The name of the cluster that ArgoCD should deploy all applications to.</p>
+<p><strong><em>Type:</em></strong>
+null or string</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight">config<span class="o">.</span>nixidy<span class="o">.</span>defaults<span class="o">.</span>destination<span class="o">.</span>name</code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/applications">&lt;nixidy/modules/applications&gt;</a></li>
+</ul>
 <h2 id="applicationsnamedestinationserver">applications.&lt;name&gt;.destination.server<a class="headerlink" href="#applicationsnamedestinationserver" title="Permanent link">#</a></h2>
 <p>The Kubernetes server that ArgoCD should deploy the application to.</p>
 <p><strong><em>Type:</em></strong>
-string</p>
+null or string</p>
 <p><strong><em>Default:</em></strong>
 <code class="highlight">config<span class="o">.</span>nixidy<span class="o">.</span>defaults<span class="o">.</span>destination<span class="o">.</span>server</code></p>
 <p><strong><em>Declared by:</em></strong></p>
@@ -2627,11 +2673,22 @@ null or absolute path</p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
 </ul>
+<h2 id="nixidydefaultsdestinationname">nixidy.defaults.destination.name<a class="headerlink" href="#nixidydefaultsdestinationname" title="Permanent link">#</a></h2>
+<p>The name of the cluster that ArgoCD should deploy all applications to.</p>
+<p>This is the default value for all applications if not explicitly set for the application.</p>
+<p><strong><em>Type:</em></strong>
+null or string</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="no">null</span></code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
+</ul>
 <h2 id="nixidydefaultsdestinationserver">nixidy.defaults.destination.server<a class="headerlink" href="#nixidydefaultsdestinationserver" title="Permanent link">#</a></h2>
 <p>The Kubernetes server that ArgoCD should deploy all applications to.</p>
 <p>This is the default value for all applications if not explicitly set for the application.</p>
 <p><strong><em>Type:</em></strong>
-string</p>
+null or string</p>
 <p><strong><em>Default:</em></strong>
 <code class="highlight"><span class="s2">&quot;https://kubernetes.default.svc&quot;</span></code></p>
 <p><strong><em>Declared by:</em></strong></p>
