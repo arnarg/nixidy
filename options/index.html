@@ -1039,6 +1039,24 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#nixidyappofappsdestinationname" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.appOfApps.destination.name
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidyappofappsdestinationserver" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.appOfApps.destination.server
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#nixidyappofappsname" class="md-nav__link">
     <span class="md-ellipsis">
       nixidy.appOfApps.name
@@ -1746,6 +1764,24 @@
   <a href="#applicationsnameyamls" class="md-nav__link">
     <span class="md-ellipsis">
       applications.&lt;name&gt;.yamls
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidyappofappsdestinationname" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.appOfApps.destination.name
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidyappofappsdestinationserver" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.appOfApps.destination.server
     </span>
   </a>
   
@@ -2608,6 +2644,26 @@ list of string</p>
 <p><strong><em>Declared by:</em></strong></p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/applications/yamls.nix">&lt;nixidy/modules/applications/yamls.nix&gt;</a></li>
+</ul>
+<h2 id="nixidyappofappsdestinationname">nixidy.appOfApps.destination.name<a class="headerlink" href="#nixidyappofappsdestinationname" title="Permanent link">#</a></h2>
+<p>The name of the cluster that ArgoCD should deploy the app of apps to.</p>
+<p><strong><em>Type:</em></strong>
+null or string</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight">config<span class="o">.</span>nixidy<span class="o">.</span>defaults<span class="o">.</span>destination<span class="o">.</span>name</code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
+</ul>
+<h2 id="nixidyappofappsdestinationserver">nixidy.appOfApps.destination.server<a class="headerlink" href="#nixidyappofappsdestinationserver" title="Permanent link">#</a></h2>
+<p>The Kubernetes server that ArgoCD should deploy the app of apps to.</p>
+<p><strong><em>Type:</em></strong>
+null or string</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight">config<span class="o">.</span>nixidy<span class="o">.</span>defaults<span class="o">.</span>destination<span class="o">.</span>server</code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
 </ul>
 <h2 id="nixidyappofappsname">nixidy.appOfApps.name<a class="headerlink" href="#nixidyappofappsname" title="Permanent link">#</a></h2>
 <p>Name of the application for bootstrapping all other applications (app of apps pattern).</p>
