@@ -134,9 +134,17 @@
           update = updateFunc;
         }
       )
-      # Handle Deployment selector matchLabels
+      # Handle DaemonSet/Deployment/ReplicaSet/StatefulSet selector matchLabels
       ++ (lib.optional
-        ((manifest.kind == "Deployment") && (hasLabelPath [ "spec" "selector" "matchLabels" ] manifest))
+        (
+          (
+            manifest.kind == "DaemonSet"
+            || manifest.kind == "Deployment"
+            || manifest.kind == "ReplicaSet"
+            || manifest.kind == "StatefulSet"
+          )
+          && (hasLabelPath [ "spec" "selector" "matchLabels" ] manifest)
+        )
         {
           path = [
             "spec"
