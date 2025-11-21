@@ -119,6 +119,16 @@ in
 
         expected = null;
       }
+
+      {
+        description = "ServiceMonitor should not be rendered at all.";
+
+        expression = findFirst (
+          x: x.kind == "ServiceMonitor" && x.metadata.name == "test1-chart"
+        ) null apps.test1.objects;
+
+        expected = null;
+      }
     ];
   };
 }

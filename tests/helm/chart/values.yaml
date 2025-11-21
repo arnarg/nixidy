@@ -10,3 +10,5 @@ service:
 
 issuer:
   create: false
+
+serviceMonitor: {}

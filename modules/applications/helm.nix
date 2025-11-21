@@ -56,7 +56,8 @@ in
                 };
                 extraOpts = mkOption {
                   type = with types; listOf str;
-                  default = [ ];
+                  default = nixidyDefaults.helm.extraOpts;
+                  defaultText = literalExpression "config.nixidy.defaults.helm.extraOpts";
                   example = [ "--no-hooks" ];
                   description = ''
                     Extra options to pass to `helm template` that is run when rendering the helm chart.
