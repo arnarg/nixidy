@@ -30,6 +30,7 @@ in
           apiVersion = "v1";
           kind = "Namespace";
           metadata.name = "test1";
+          metadata.annotations."argocd.argoproj.io/sync-options" = "Prune=false";
         };
       }
 
