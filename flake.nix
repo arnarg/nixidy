@@ -31,7 +31,10 @@
         packages = {
           default = packages.nixidy;
           cli = pkgs.callPackage ./cli { };
-          generators = import ./pkgs/generators { inherit pkgs; };
+          generators = import ./pkgs/generators {
+            inherit pkgs;
+            kubelib = nix-kube-generators;
+          };
         };
 
         libTests = import ./lib/tests.nix {

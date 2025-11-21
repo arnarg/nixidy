@@ -62,6 +62,9 @@ let
 
   # Import the lib functions present in the flake.
   lib = import ./make-env.nix { inherit kubelib; };
+
+  # Import the generator functions present in the flake.
+  generators = import ./pkgs/generators { inherit pkgs kubelib; };
 in
 {
   # Wrap the lib functions to use the pkgs imported above
@@ -74,6 +77,6 @@ in
   # Have the nixidy cli available.
   nixidy = pkgs.callPackage ./nixidy/nixidy.nix { };
 
-  # Have fromCRD generator available.
-  generators.fromCRD = (import ./pkgs/generators { inherit pkgs; }).fromCRD;
+  # Have generators available.
+  generators = { inherit (generators) fromCRD fromChartCRD; };
 }

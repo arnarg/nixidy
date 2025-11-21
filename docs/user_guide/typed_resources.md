@@ -107,6 +107,109 @@ Thankfully a code generator for generating resource options from CRDs is provide
 }
 ```
 
+### Generating resource options from Helm Chart CRDs
+
+In some cases, CRDs are only available through Helm charts or it's beneficial to keep them in sync with the chart version you're deploying. The `fromChartCRD` function provides a solution by templating the Helm chart and extracting CRDs from the output, generating nixidy resource options from them.
+
+This approach also handles CRDs that include Helm templating within their definitions, which would not be properly processed by the regular `fromCRD` function.
+
+=== "flakes"
+    As an example, to generate resource options for cert-manager's `Certificate` CRD directly from the Helm chart:
+
+    ```nix title="flake.nix"
+    {
+      description = "My ArgoCD configuration with nixidy.";
+
+      inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+      inputs.flake-utils.url = "github:numtide/flake-utils";
+
+      inputs.nixidy = {
+        url = "github:arnarg/nixidy";
+        inputs.nixpkgs.follows = "nixpkgs";
+      };
+
+      inputs.nixhelm = {
+        url = "github:farcaller/nixhelm";
+        inputs.nixpkgs.follows = "nixpkgs";
+      };
+
+      outputs = {
+        self,
+        nixpkgs,
+        flake-utils,
+        nixidy,
+        nixhelm,
+      }: (flake-utils.lib.eachDefaultSystem (system: let
+        pkgs = import nixpkgs {
+          inherit system;
+        };
+      in {
+        packages = {
+          generators.certManager = nixidy.packages.${system}.generators.fromChartCRD {
+            name = "cert-manager";
+
+            chartAttrs = {
+              repo = "https://charts.jetstack.io";
+              chart = "cert-manager";
+              version = "v1.19.1";
+              chartHash = "sha256-fs14wuKK+blC0l+pRfa//oBV2X+Dr3nNX+Z94nrQVrA=";
+            };
+            # Or from nixhelm
+            # chart = nixhelm.chartsDerivations.${system}.jetstack.cert-manager;
+
+            crds = [ "Certificate" ];  # Optional: filter by specific CRD kinds
+          };
+        };
+      }));
+    }
+    ```
+
+    Then running `nix build .#generators.certManager` will produce a nix file that can be copied into place in your repository.
+
+=== "flake-less"
+    As an example, to generate resource options for cert-manager's `Certificate` CRD directly from the Helm chart:
+
+    ```nix title="generate.nix"
+    let
+      # With npins
+      sources = import ./npins;
+      # With niv
+      # sources = import ./nix/sources.nix;
+
+      # nixpkgs added with:
+      #   npins: `npins add --name nixpkgs channel nixos-unstable`
+      #   niv: `niv add github nixos/nixpkgs -b nixos-unstable`
+      nixpkgs = sources.nixpkgs;
+      pkgs = import nixpkgs {};
+
+      # Import nixidy
+      nixidy = import sources.nixidy {inherit nixpkgs;};
+    in
+      {
+        certManager = nixidy.generators.fromChartCRD {
+          name = "cert-manager";
+          chartAttrs = {
+            repo = "https://charts.jetstack.io";
+            chart = "cert-manager";
+            version = "v1.19.1";
+            chartHash = "sha256-fs14wuKK+blC0l+pRfa//oBV2X+Dr3nNX+Z94nrQVrA=";
+          };
+          crds = [ "Certificate" ];  # Optional: filter by specific CRD kinds
+        };
+      }
+    ```
+
+    Then running `nix-build generate.nix -A certManager` will produce a nix file that can be copied into place in your repository.
+
+The `fromChartCRD` function accepts the same optional arguments as `fromCRD` (`namePrefix`, `attrNameOverrides`, and `skipCoerceToList`) for customization of the generated options. Additionally, it accepts:
+
+- `chartAttrs`: Chart repository, name, version and chartHash configuration
+- `chart`: Alternative to `chartAttrs`, can use a pre-downloaded chart
+- `values`: Values to pass to the Helm chart templating
+- `crds`: List of CRD kinds to extract (empty list extracts all CRDs)
+
+This approach ensures your CRD definitions stay synchronized with the Helm chart version you're actually deploying in your applications.
+
 ### Resolving Naming Conflicts
 
 Sometimes, multiple Custom Resource Definitions from different sources might define the same resource `kind`. This can lead to conflicts in the generated attribute names. For instance, if two different operators both define a CRD with the kind `Database`, they would both try to generate options for `resources.databases`.

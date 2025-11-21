@@ -1,8 +1,11 @@
 {
   pkgs,
+  kubelib,
   lib ? pkgs.lib,
 }:
 let
+  klib = kubelib.lib { inherit pkgs; };
+
   #########
   ## K8s ##
   #########
@@ -224,9 +227,62 @@ let
 
       schema = builtins.fromJSON (builtins.readFile schema);
     };
+
+  fromChartCRD =
+    {
+      name,
+      chartAttrs ? { },
+      chart ? null,
+      values ? { },
+      crds ? [ ],
+      namePrefix ? "",
+      attrNameOverrides ? { },
+      skipCoerceToList ? { },
+    }:
+    let
+      _chart = if chart != null then chart else klib.downloadHelmChart chartAttrs;
+
+      objects = klib.fromHelm {
+        inherit name values;
+        includeCRDs = true;
+        chart = _chart;
+      };
+
+      isWanted =
+        obj:
+        obj ? kind
+        && obj.kind == "CustomResourceDefinition"
+        && (crds == [ ] || (lib.any (x: obj.spec.names.kind == x) crds));
+
+      filtered = lib.filter isWanted objects;
+
+      src = pkgs.stdenv.mkDerivation {
+        yamlText = pkgs.lib.strings.concatStringsSep "\n---\n" (map builtins.toJSON filtered);
+        passAsFile = "yamlText";
+        name = "toYAMLFile";
+        phases = [ "buildPhase" ];
+        buildPhase = ''
+          mkdir $out
+          ${pkgs.yq-go}/bin/yq -P -M $yamlTextPath > $out/crds.yaml
+        '';
+      };
+    in
+    fromCRD {
+      inherit
+        name
+        src
+        namePrefix
+        attrNameOverrides
+        skipCoerceToList
+        ;
+
+      crds = [
+        "crds.yaml"
+      ];
+    };
 in
 {
-  inherit fromCRD k8s;
+  inherit fromCRD fromChartCRD k8s;
 
   argocd = fromCRD {
     name = "argocd";
