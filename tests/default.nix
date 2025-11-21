@@ -25,6 +25,7 @@
       ./helm/transformer.nix
       ./helm/resource-override.nix
       ./helm/extra-opts.nix
+      ./helm/extra-opts-defaults.nix
       ./helm/flatten-lists.nix
       ./kustomize/base.nix
       ./kustomize/overlay.nix
