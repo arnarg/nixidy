@@ -1156,6 +1156,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#nixidydefaultshelmextraopts" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.defaults.helm.extraOpts
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#nixidydefaultshelmtransformer" class="md-nav__link">
     <span class="md-ellipsis">
       nixidy.defaults.helm.transformer
@@ -1887,6 +1896,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#nixidydefaultshelmextraopts" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.defaults.helm.extraOpts
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#nixidydefaultshelmtransformer" class="md-nav__link">
     <span class="md-ellipsis">
       nixidy.defaults.helm.transformer
@@ -2217,7 +2235,7 @@ package or absolute path</p>
 <p><strong><em>Type:</em></strong>
 list of string</p>
 <p><strong><em>Default:</em></strong>
-<code class="highlight"><span class="p">[</span> <span class="p">]</span></code></p>
+<code class="highlight">config<span class="o">.</span>nixidy<span class="o">.</span>defaults<span class="o">.</span>helm<span class="o">.</span>extraOpts</code></p>
 <p><strong><em>Example:</em></strong></p>
 <div class="highlight"><pre><span></span><code><span class="p">[</span>
   <span class="s2">&quot;--no-hooks&quot;</span>
@@ -2775,6 +2793,22 @@ null or string</p>
 null or string</p>
 <p><strong><em>Default:</em></strong>
 <code class="highlight"><span class="s2">&quot;https://kubernetes.default.svc&quot;</span></code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
+</ul>
+<h2 id="nixidydefaultshelmextraopts">nixidy.defaults.helm.extraOpts<a class="headerlink" href="#nixidydefaultshelmextraopts" title="Permanent link">#</a></h2>
+<p>The default extra options to pass to <code>helm template</code> that is run
+when rendering the helm chart, applies to all applications.</p>
+<p><strong><em>Type:</em></strong>
+list of string</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="p">[</span> <span class="p">]</span></code></p>
+<p><strong><em>Example:</em></strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">[</span>
+  <span class="s2">&quot;--no-hooks&quot;</span>
+<span class="p">]</span>
+</code></pre></div>
 <p><strong><em>Declared by:</em></strong></p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
