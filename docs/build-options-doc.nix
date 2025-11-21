@@ -221,7 +221,7 @@ let
         ''
           ## ${replaceStrings [ "\<" ">" ] [ "&lt;" "&gt;" ] n}
 
-          ${opt.description}
+          ${if opt.description != null then opt.description else ""}
 
           ***Type:***
           ${opt.type}

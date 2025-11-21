@@ -174,10 +174,16 @@ in
             options = {
               annotations = mkOption {
                 type = types.nullOr (types.attrsOf types.str);
+                description = ''
+                  Annotations to add to the ArgoCD managed namespace.
+                '';
                 default = null;
               };
               labels = mkOption {
                 type = types.nullOr (types.attrsOf types.str);
+                description = ''
+                  Label to add to the ArgoCD managed namespace.
+                '';
                 default = null;
               };
             };
