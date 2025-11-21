@@ -505,7 +505,9 @@ in
       # If createNamespace is set to `true` we should
       # create one.
       resources = lib.mkIf config.createNamespace {
-        namespaces.${config.namespace} = { };
+        namespaces.${config.namespace} = {
+          metadata.annotations."argocd.argoproj.io/sync-options" = "Prune=false";
+        };
       };
 
       # Turn all typed resources into standard kubernetes
