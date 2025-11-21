@@ -424,6 +424,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#generating-resource-options-from-helm-chart-crds" class="md-nav__link">
+    <span class="md-ellipsis">
+      Generating resource options from Helm Chart CRDs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#resolving-naming-conflicts" class="md-nav__link">
     <span class="md-ellipsis">
       Resolving Naming Conflicts
@@ -742,6 +751,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#generating-resource-options-from-helm-chart-crds" class="md-nav__link">
+    <span class="md-ellipsis">
+      Generating resource options from Helm Chart CRDs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#resolving-naming-conflicts" class="md-nav__link">
     <span class="md-ellipsis">
       Resolving Naming Conflicts
@@ -873,6 +891,103 @@
   <span class="p">];</span>
 <span class="p">}</span>
 </code></pre></div>
+<h3 id="generating-resource-options-from-helm-chart-crds">Generating resource options from Helm Chart CRDs<a class="headerlink" href="#generating-resource-options-from-helm-chart-crds" title="Permanent link">#</a></h3>
+<p>In some cases, CRDs are only available through Helm charts or it's beneficial to keep them in sync with the chart version you're deploying. The <code>fromChartCRD</code> function provides a solution by templating the Helm chart and extracting CRDs from the output, generating nixidy resource options from them.</p>
+<p>This approach also handles CRDs that include Helm templating within their definitions, which would not be properly processed by the regular <code>fromCRD</code> function.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">flakes</label><label for="__tabbed_2_2">flake-less</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>As an example, to generate resource options for cert-manager's <code>Certificate</code> CRD directly from the Helm chart:</p>
+<div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
+  <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;My ArgoCD configuration with nixidy.&quot;</span><span class="p">;</span>
+
+  inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:nixos/nixpkgs/nixos-unstable&quot;</span><span class="p">;</span>
+  inputs<span class="o">.</span>flake-utils<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:numtide/flake-utils&quot;</span><span class="p">;</span>
+
+  inputs<span class="o">.</span><span class="ss">nixidy</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:arnarg/nixidy&quot;</span><span class="p">;</span>
+    inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">follows</span> <span class="o">=</span> <span class="s2">&quot;nixpkgs&quot;</span><span class="p">;</span>
+  <span class="p">};</span>
+
+  inputs<span class="o">.</span><span class="ss">nixhelm</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:farcaller/nixhelm&quot;</span><span class="p">;</span>
+    inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">follows</span> <span class="o">=</span> <span class="s2">&quot;nixpkgs&quot;</span><span class="p">;</span>
+  <span class="p">};</span>
+
+  <span class="ss">outputs</span> <span class="o">=</span> <span class="p">{</span>
+    self<span class="p">,</span>
+    nixpkgs<span class="p">,</span>
+    flake-utils<span class="p">,</span>
+    nixidy<span class="p">,</span>
+    nixhelm<span class="p">,</span>
+  <span class="p">}:</span> <span class="p">(</span>flake-utils<span class="o">.</span>lib<span class="o">.</span>eachDefaultSystem <span class="p">(</span>system<span class="p">:</span> <span class="k">let</span>
+    <span class="ss">pkgs</span> <span class="o">=</span> <span class="nb">import</span> nixpkgs <span class="p">{</span>
+      <span class="k">inherit</span> system<span class="p">;</span>
+    <span class="p">};</span>
+  <span class="k">in</span> <span class="p">{</span>
+    <span class="ss">packages</span> <span class="o">=</span> <span class="p">{</span>
+      generators<span class="o">.</span><span class="ss">certManager</span> <span class="o">=</span> nixidy<span class="o">.</span>packages<span class="o">.</span><span class="si">${</span>system<span class="si">}</span><span class="o">.</span>generators<span class="o">.</span>fromChartCRD <span class="p">{</span>
+        <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;cert-manager&quot;</span><span class="p">;</span>
+
+        <span class="ss">chartAttrs</span> <span class="o">=</span> <span class="p">{</span>
+          <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;https://charts.jetstack.io&quot;</span><span class="p">;</span>
+          <span class="ss">chart</span> <span class="o">=</span> <span class="s2">&quot;cert-manager&quot;</span><span class="p">;</span>
+          <span class="ss">version</span> <span class="o">=</span> <span class="s2">&quot;v1.19.1&quot;</span><span class="p">;</span>
+          <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">&quot;sha256-fs14wuKK+blC0l+pRfa//oBV2X+Dr3nNX+Z94nrQVrA=&quot;</span><span class="p">;</span>
+        <span class="p">};</span>
+        <span class="c1"># Or from nixhelm</span>
+        <span class="c1"># chart = nixhelm.chartsDerivations.${system}.jetstack.cert-manager;</span>
+
+        <span class="ss">crds</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;Certificate&quot;</span> <span class="p">];</span>  <span class="c1"># Optional: filter by specific CRD kinds</span>
+      <span class="p">};</span>
+    <span class="p">};</span>
+  <span class="p">}));</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Then running <code>nix build .#generators.certManager</code> will produce a nix file that can be copied into place in your repository.</p>
+</div>
+<div class="tabbed-block">
+<p>As an example, to generate resource options for cert-manager's <code>Certificate</code> CRD directly from the Helm chart:</p>
+<div class="highlight"><span class="filename">generate.nix</span><pre><span></span><code><span class="k">let</span>
+  <span class="c1"># With npins</span>
+  <span class="ss">sources</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./npins</span><span class="p">;</span>
+  <span class="c1"># With niv</span>
+  <span class="c1"># sources = import ./nix/sources.nix;</span>
+
+  <span class="c1"># nixpkgs added with:</span>
+  <span class="c1">#   npins: `npins add --name nixpkgs channel nixos-unstable`</span>
+  <span class="c1">#   niv: `niv add github nixos/nixpkgs -b nixos-unstable`</span>
+  <span class="ss">nixpkgs</span> <span class="o">=</span> sources<span class="o">.</span>nixpkgs<span class="p">;</span>
+  <span class="ss">pkgs</span> <span class="o">=</span> <span class="nb">import</span> nixpkgs <span class="p">{};</span>
+
+  <span class="c1"># Import nixidy</span>
+  <span class="ss">nixidy</span> <span class="o">=</span> <span class="nb">import</span> sources<span class="o">.</span>nixidy <span class="p">{</span><span class="k">inherit</span> nixpkgs<span class="p">;};</span>
+<span class="k">in</span>
+  <span class="p">{</span>
+    <span class="ss">certManager</span> <span class="o">=</span> nixidy<span class="o">.</span>generators<span class="o">.</span>fromChartCRD <span class="p">{</span>
+      <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;cert-manager&quot;</span><span class="p">;</span>
+      <span class="ss">chartAttrs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;https://charts.jetstack.io&quot;</span><span class="p">;</span>
+        <span class="ss">chart</span> <span class="o">=</span> <span class="s2">&quot;cert-manager&quot;</span><span class="p">;</span>
+        <span class="ss">version</span> <span class="o">=</span> <span class="s2">&quot;v1.19.1&quot;</span><span class="p">;</span>
+        <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">&quot;sha256-fs14wuKK+blC0l+pRfa//oBV2X+Dr3nNX+Z94nrQVrA=&quot;</span><span class="p">;</span>
+      <span class="p">};</span>
+      <span class="ss">crds</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;Certificate&quot;</span> <span class="p">];</span>  <span class="c1"># Optional: filter by specific CRD kinds</span>
+    <span class="p">};</span>
+  <span class="p">}</span>
+</code></pre></div>
+<p>Then running <code>nix-build generate.nix -A certManager</code> will produce a nix file that can be copied into place in your repository.</p>
+</div>
+</div>
+</div>
+<p>The <code>fromChartCRD</code> function accepts the same optional arguments as <code>fromCRD</code> (<code>namePrefix</code>, <code>attrNameOverrides</code>, and <code>skipCoerceToList</code>) for customization of the generated options. Additionally, it accepts:</p>
+<ul>
+<li><code>chartAttrs</code>: Chart repository, name, version and chartHash configuration</li>
+<li><code>chart</code>: Alternative to <code>chartAttrs</code>, can use a pre-downloaded chart</li>
+<li><code>values</code>: Values to pass to the Helm chart templating</li>
+<li><code>crds</code>: List of CRD kinds to extract (empty list extracts all CRDs)</li>
+</ul>
+<p>This approach ensures your CRD definitions stay synchronized with the Helm chart version you're actually deploying in your applications.</p>
 <h3 id="resolving-naming-conflicts">Resolving Naming Conflicts<a class="headerlink" href="#resolving-naming-conflicts" title="Permanent link">#</a></h3>
 <p>Sometimes, multiple Custom Resource Definitions from different sources might define the same resource <code>kind</code>. This can lead to conflicts in the generated attribute names. For instance, if two different operators both define a CRD with the kind <code>Database</code>, they would both try to generate options for <code>resources.databases</code>.</p>
 <p>To resolve this, the <code>fromCRD</code> function accepts a <code>namePrefix</code> argument. This prefix will be added to the generated attribute name, making it unique.</p>
