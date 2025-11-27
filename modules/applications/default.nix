@@ -140,6 +140,18 @@ in
         description = "Sets IgnoreExtraneous compare option for the application. Only setting it as `true` has any effect.";
       };
     };
+    finalizer = mkOption {
+      type = types.enum [
+        "background"
+        "foreground"
+        "non-cascading"
+      ];
+      default = nixidyDefaults.finalizer;
+      defaultText = literalExpression "config.nixidy.defaults.finalizer";
+      description = ''
+        Specify the finalizer to apply to the ArgoCD application.
+      '';
+    };
     syncPolicy = {
       autoSync = {
         enable = mkOption {

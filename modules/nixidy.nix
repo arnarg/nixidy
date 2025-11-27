@@ -10,6 +10,12 @@ let
     metadata = {
       name = if cfg.appendNameWithEnv then "${app.name}-${cfg.env}" else app.name;
       annotations = if app.annotations != { } then app.annotations else null;
+      finalizers = lib.mkMerge [
+        (lib.mkIf (app.finalizer == "background") (
+          lib.singleton "resources-finalizer.argocd.argoproj.io/background"
+        ))
+        (lib.mkIf (app.finalizer == "foreground") (lib.singleton "resources-finalizer.argocd.argoproj.io"))
+      ];
     };
     spec = {
       inherit (app) project ignoreDifferences;
@@ -121,6 +127,18 @@ in
             there.
           '';
         };
+      };
+
+      finalizer = mkOption {
+        type = types.enum [
+          "background"
+          "foreground"
+          "non-cascading"
+        ];
+        default = "non-cascading";
+        description = ''
+          Specify the default finalizer to apply to all ArgoCD application, by default.
+        '';
       };
 
       kustomize.transformer = mkOption {
