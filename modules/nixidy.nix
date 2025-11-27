@@ -5,6 +5,8 @@
 }:
 let
   cfg = config.nixidy;
+
+  nixidyDefaults = config.nixidy.defaults;
 in
 {
   imports = [
@@ -91,6 +93,18 @@ in
           Function that will be applied to the list of rendered manifests after kustomize rendering.
           This option applies to all kustomize applications in all nixidy applications unless
           explicitly specified there.
+        '';
+      };
+
+      finalizer = mkOption {
+        type = types.enum [
+          "background"
+          "foreground"
+          "non-cascading"
+        ];
+        default = "non-cascading";
+        description = ''
+          Specify the default finalizer to apply to all ArgoCD application, by default.
         '';
       };
 
@@ -183,6 +197,18 @@ in
           '';
         };
       };
+      finalizer = mkOption {
+        type = types.enum [
+          "background"
+          "foreground"
+          "non-cascading"
+        ];
+        default = nixidyDefaults.finalizer;
+        defaultText = literalExpression "config.nixidy.defaults.finalizer";
+        description = ''
+          Specify the finalizer to apply to the ArgoCD application.
+        '';
+      };
     };
 
     charts = mkOption {
@@ -227,6 +253,12 @@ in
                 metadata = {
                   name = if cfg.appendNameWithEnv then "${app.name}-${cfg.env}" else app.name;
                   annotations = if app.annotations != { } then app.annotations else null;
+                  finalizers = lib.mkMerge [
+                    (lib.mkIf (app.finalizer == "background") (
+                      lib.singleton "resources-finalizer.argocd.argoproj.io/background"
+                    ))
+                    (lib.mkIf (app.finalizer == "foreground") (lib.singleton "resources-finalizer.argocd.argoproj.io"))
+                  ];
                 };
                 spec = {
                   inherit (app) project ignoreDifferences;
@@ -280,7 +312,17 @@ in
         inherit (cfg.appOfApps) namespace;
 
         resources.applications.${cfg.appOfApps.name} = {
-          metadata.namespace = cfg.appOfApps.namespace;
+          metadata = {
+            finalizers = lib.mkMerge [
+              (lib.mkIf (cfg.appOfApps.finalizer == "background") (
+                lib.singleton "resources-finalizer.argocd.argoproj.io/background"
+              ))
+              (lib.mkIf (cfg.appOfApps.finalizer == "foreground") (
+                lib.singleton "resources-finalizer.argocd.argoproj.io"
+              ))
+            ];
+            namespace = cfg.appOfApps.namespace;
+          };
           spec = {
             inherit (cfg.appOfApps) project;
 

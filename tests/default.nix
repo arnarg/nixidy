@@ -6,6 +6,10 @@
       ./appOfApps-default-destination.nix
       ./appOfApps-custom-default-destination.nix
       ./appOfApps-custom-appOfApps-destination.nix
+      ./appOfApps-default-finalizer-background.nix
+      ./appOfApps-finalizer-background.nix
+      ./appOfApps-finalizer-foreground.nix
+      ./appOfApps-finalizer-non-cascading.nix
       ./defaults.nix
       ./destination.nix
       ./sync-options.nix
@@ -13,6 +17,10 @@
       ./configmap.nix
       ./create-namespace.nix
       ./limits.nix
+      ./argo-default-finalizer-background.nix
+      ./argo-finalizer-background.nix
+      ./argo-finalizer-foreground.nix
+      ./argo-finalizer-non-cascading.nix
       ./argo-syncpolicy-managed-namespace-metadata.nix
       ./argo-syncpolicy-retry.nix
       ./yamls.nix
