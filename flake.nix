@@ -14,10 +14,11 @@
       flake-utils,
       nix-kube-generators,
     }:
+    let
+      kubelib = nix-kube-generators;
+    in
     {
-      lib = import ./make-env.nix {
-        kubelib = nix-kube-generators;
-      };
+      lib = import ./make-env.nix { inherit kubelib; };
     }
     // (flake-utils.lib.eachDefaultSystem (
       system:
@@ -28,6 +29,8 @@
         packages = import ./nixidy pkgs;
       in
       {
+        mlib = import ./lib { inherit pkgs kubelib; };
+
         packages = {
           default = packages.nixidy;
           cli = pkgs.callPackage ./cli { };
