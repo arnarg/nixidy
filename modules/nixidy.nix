@@ -5,6 +5,18 @@
 }:
 let
   cfg = config.nixidy;
+
+  nixidyDefaults = config.nixidy.defaults;
+
+  # TODO: Consolidate with function in modules/applications/default.nix?
+  convertSyncOptionsList =
+    opts:
+    let
+      filtered = lib.filter (val: val != null) (lib.mapAttrsToList (_: val: val) opts);
+    in
+    filtered;
+
+  syncPolicy = import ./applications/syncPolicy.nix { inherit lib nixidyDefaults; };
 in
 {
   imports = [
@@ -150,6 +162,7 @@ in
     };
 
     appOfApps = {
+      inherit syncPolicy;
       name = mkOption {
         type = types.str;
         default = "apps";
@@ -207,6 +220,16 @@ in
   };
 
   config = {
+    nixidy.appOfApps = {
+      # XXX: Restore the previous behavior where autoSync/selfHeal is enabled.
+      syncPolicy.autoSync = {
+        enable = lib.mkDefault true;
+        selfHeal = lib.mkDefault true;
+      };
+
+      syncPolicy.finalSyncOpts = convertSyncOptionsList cfg.appOfApps.syncPolicy.syncOptions;
+    };
+
     applications.${cfg.appOfApps.name} = {
       inherit (cfg.appOfApps) namespace;
 
@@ -301,13 +324,21 @@ in
                 inherit (cfg.appOfApps.destination) server;
               })
             ];
-            # Maybe this should be configurable but
-            # generally I think autoSync would be
-            # desirable on the initial appOfApps.
-            syncPolicy.automated = {
-              prune = true;
-              selfHeal = true;
-            };
+            syncPolicy =
+              (lib.optionalAttrs cfg.appOfApps.syncPolicy.autoSync.enable {
+                automated = {
+                  inherit (cfg.appOfApps.syncPolicy.autoSync) prune selfHeal;
+                };
+              })
+              // (lib.optionalAttrs (lib.length cfg.appOfApps.syncPolicy.finalSyncOpts > 0) {
+                syncOptions = cfg.appOfApps.syncPolicy.finalSyncOpts;
+              })
+              // (lib.optionalAttrs (cfg.appOfApps.syncPolicy.managedNamespaceMetadata != null) {
+                inherit (cfg.appOfApps.syncPolicy) managedNamespaceMetadata;
+              })
+              // (lib.optionalAttrs (cfg.appOfApps.syncPolicy.retry != null) {
+                inherit (cfg.appOfApps.syncPolicy) retry;
+              });
           };
         };
       };
