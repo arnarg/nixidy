@@ -6,6 +6,7 @@
       ./appOfApps-default-destination.nix
       ./appOfApps-custom-default-destination.nix
       ./appOfApps-custom-appOfApps-destination.nix
+      ./appOfApps-syncPolicy.nix
       ./defaults.nix
       ./destination.nix
       ./sync-options.nix
