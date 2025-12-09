@@ -197,10 +197,10 @@ let
       # flattened with `$ref`s we first pre-process the CRD with
       # a crude python script to flatten it before running the
       # generator.
-      # See: crd2jsonschema.py
+      # See: crd2jsonschema/main.go
       schema =
         let
-          pythonWithYaml = pkgs.python3.withPackages (ps: [ ps.pyyaml ]);
+          crd2jsonschema = pkgs.callPackage ./crd2jsonschema { };
         in
         pkgs.stdenv.mkDerivation {
           inherit src;
@@ -213,7 +213,7 @@ let
           ];
 
           installPhase = ''
-            ${pythonWithYaml}/bin/python ${./crd2jsonschema.py} "${options}" > $out
+            ${crd2jsonschema}/bin/crd2jsonschema "${options}" > $out
           '';
         };
     in
