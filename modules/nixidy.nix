@@ -210,6 +210,20 @@ in
     applications.${cfg.appOfApps.name} = {
       inherit (cfg.appOfApps) namespace;
 
+      # App of apps autoSync should (probably) automatically
+      # be enabled
+      syncPolicy.autoSync =
+        let
+          # Lower priority than `mkDefault`,
+          # higher priority than `mkOptionDefault`.
+          mkLowerDefault = lib.mkOverride 1100;
+        in
+        {
+          enable = mkLowerDefault true;
+          prune = mkLowerDefault true;
+          selfHeal = mkLowerDefault true;
+        };
+
       resources.applications =
         let
           appsWithoutAppsOfApps = lib.filter (n: n != cfg.appOfApps.name) cfg.publicApps;
@@ -301,13 +315,21 @@ in
                 inherit (cfg.appOfApps.destination) server;
               })
             ];
-            # Maybe this should be configurable but
-            # generally I think autoSync would be
-            # desirable on the initial appOfApps.
-            syncPolicy.automated = {
-              prune = true;
-              selfHeal = true;
-            };
+            syncPolicy =
+              (lib.optionalAttrs app.syncPolicy.autoSync.enable {
+                automated = {
+                  inherit (app.syncPolicy.autoSync) prune selfHeal;
+                };
+              })
+              // (lib.optionalAttrs (lib.length app.syncPolicy.finalSyncOpts > 0) {
+                syncOptions = app.syncPolicy.finalSyncOpts;
+              })
+              // (lib.optionalAttrs (app.syncPolicy.managedNamespaceMetadata != null) {
+                inherit (app.syncPolicy) managedNamespaceMetadata;
+              })
+              // (lib.optionalAttrs (app.syncPolicy.retry != null) {
+                inherit (app.syncPolicy) retry;
+              });
           };
         };
       };
