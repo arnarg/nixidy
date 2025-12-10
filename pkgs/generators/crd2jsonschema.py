@@ -46,6 +46,11 @@ def uppercase_first(name):
 def generate_jsonschema(prefix, files, attr_name_overrides):
     schema = {"definitions": {}, "roots": {}}
 
+    # This lovely hack is here to circumvent an issue with
+    # pyyaml: https://github.com/yaml/pyyaml/issues/683#issuecomment-1371681056
+    # Relevant issue: https://github.com/arnarg/nixidy/issues/76
+    del yaml.resolver.Resolver.yaml_implicit_resolvers["="]
+
     for file in files:
         with open(file, "r") as f:
             docs = yaml.safe_load_all(f)
