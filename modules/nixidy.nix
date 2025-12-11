@@ -5,6 +5,49 @@
 }:
 let
   cfg = config.nixidy;
+
+  mkApplication = app: {
+    metadata = {
+      name = if cfg.appendNameWithEnv then "${app.name}-${cfg.env}" else app.name;
+      annotations = if app.annotations != { } then app.annotations else null;
+    };
+    spec = {
+      inherit (app) project ignoreDifferences;
+
+      source = {
+        repoURL = cfg.target.repository;
+        targetRevision = cfg.target.branch;
+        path = lib.path.subpath.join [
+          cfg.target.rootPath
+          app.output.path
+        ];
+      };
+      destination = lib.mkMerge [
+        { inherit (app) namespace; }
+        (lib.mkIf (app.destination.name != null) {
+          inherit (app.destination) name;
+        })
+        (lib.mkIf (app.destination.name == null) {
+          inherit (app.destination) server;
+        })
+      ];
+      syncPolicy =
+        (lib.optionalAttrs app.syncPolicy.autoSync.enable {
+          automated = {
+            inherit (app.syncPolicy.autoSync) prune selfHeal;
+          };
+        })
+        // (lib.optionalAttrs (lib.length app.syncPolicy.finalSyncOpts > 0) {
+          syncOptions = app.syncPolicy.finalSyncOpts;
+        })
+        // (lib.optionalAttrs (app.syncPolicy.managedNamespaceMetadata != null) {
+          inherit (app.syncPolicy) managedNamespaceMetadata;
+        })
+        // (lib.optionalAttrs (app.syncPolicy.retry != null) {
+          inherit (app.syncPolicy) retry;
+        });
+    };
+  };
 in
 {
   imports = [
@@ -208,7 +251,7 @@ in
 
   config = {
     applications.${cfg.appOfApps.name} = {
-      inherit (cfg.appOfApps) namespace;
+      inherit (cfg.appOfApps) namespace destination;
 
       # App of apps autoSync should (probably) automatically
       # be enabled
@@ -229,110 +272,23 @@ in
           appsWithoutAppsOfApps = lib.filter (n: n != cfg.appOfApps.name) cfg.publicApps;
         in
         builtins.listToAttrs (
-          map (
-            name:
-            let
-              app = config.applications.${name};
-            in
-            {
-              inherit name;
+          map (name: {
+            inherit name;
 
-              value = {
-                metadata = {
-                  name = if cfg.appendNameWithEnv then "${app.name}-${cfg.env}" else app.name;
-                  annotations = if app.annotations != { } then app.annotations else null;
-                };
-                spec = {
-                  inherit (app) project ignoreDifferences;
-
-                  source = {
-                    repoURL = cfg.target.repository;
-                    targetRevision = cfg.target.branch;
-                    path = lib.path.subpath.join [
-                      cfg.target.rootPath
-                      app.output.path
-                    ];
-                  };
-                  destination = lib.mkMerge [
-                    { inherit (app) namespace; }
-                    (lib.mkIf (app.destination.name != null) {
-                      inherit (app.destination) name;
-                    })
-                    (lib.mkIf (app.destination.name == null) {
-                      inherit (app.destination) server;
-                    })
-                  ];
-                  syncPolicy =
-                    (lib.optionalAttrs app.syncPolicy.autoSync.enable {
-                      automated = {
-                        inherit (app.syncPolicy.autoSync) prune selfHeal;
-                      };
-                    })
-                    // (lib.optionalAttrs (lib.length app.syncPolicy.finalSyncOpts > 0) {
-                      syncOptions = app.syncPolicy.finalSyncOpts;
-                    })
-                    // (lib.optionalAttrs (app.syncPolicy.managedNamespaceMetadata != null) {
-                      inherit (app.syncPolicy) managedNamespaceMetadata;
-                    })
-                    // (lib.optionalAttrs (app.syncPolicy.retry != null) {
-                      inherit (app.syncPolicy) retry;
-                    });
-                };
-              };
-            }
-          ) appsWithoutAppsOfApps
+            value = mkApplication config.applications.${name};
+          }) appsWithoutAppsOfApps
         );
     };
 
     # This application's resources are printed on
     # stdout when `nixidy bootstrap .#<env>` is run
-    applications.__bootstrap =
-      let
-        app = config.applications.${cfg.appOfApps.name};
-      in
-      {
-        inherit (cfg.appOfApps) namespace;
+    applications.__bootstrap = {
+      inherit (cfg.appOfApps) namespace;
 
-        resources.applications.${cfg.appOfApps.name} = {
-          metadata.namespace = cfg.appOfApps.namespace;
-          spec = {
-            inherit (cfg.appOfApps) project;
-
-            source = {
-              repoURL = cfg.target.repository;
-              targetRevision = cfg.target.branch;
-              path = lib.path.subpath.join [
-                cfg.target.rootPath
-                app.output.path
-              ];
-            };
-            destination = lib.mkMerge [
-              { inherit (app) namespace; }
-              (lib.mkIf (cfg.appOfApps.destination.name != null) {
-                inherit (cfg.appOfApps.destination) name;
-              })
-              (lib.mkIf (cfg.appOfApps.destination.name == null) {
-                inherit (cfg.appOfApps.destination) server;
-              })
-            ];
-            syncPolicy =
-              (lib.optionalAttrs app.syncPolicy.autoSync.enable {
-                automated = {
-                  inherit (app.syncPolicy.autoSync) prune selfHeal;
-                };
-              })
-              // (lib.optionalAttrs (lib.length app.syncPolicy.finalSyncOpts > 0) {
-                syncOptions = app.syncPolicy.finalSyncOpts;
-              })
-              // (lib.optionalAttrs (app.syncPolicy.managedNamespaceMetadata != null) {
-                inherit (app.syncPolicy) managedNamespaceMetadata;
-              })
-              // (lib.optionalAttrs (app.syncPolicy.retry != null) {
-                inherit (app.syncPolicy) retry;
-              });
-          };
-        };
-      };
+      resources.applications.${cfg.appOfApps.name} =
+        mkApplication
+          config.applications.${cfg.appOfApps.name};
+    };
 
     _module.args.charts = config.nixidy.charts;
     nixidy = {
