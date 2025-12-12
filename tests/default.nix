@@ -5,6 +5,7 @@
     tests = [
       ./appOfApps-default-destination.nix
       ./appOfApps-custom-default-destination.nix
+      ./appOfApps-custom-project.nix
       ./appOfApps-custom-appOfApps-destination.nix
       ./defaults.nix
       ./destination.nix
