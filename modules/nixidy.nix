@@ -251,7 +251,7 @@ in
 
   config = {
     applications.${cfg.appOfApps.name} = {
-      inherit (cfg.appOfApps) namespace destination;
+      inherit (cfg.appOfApps) namespace project destination;
 
       # App of apps autoSync should (probably) automatically
       # be enabled
@@ -283,7 +283,7 @@ in
     # This application's resources are printed on
     # stdout when `nixidy bootstrap .#<env>` is run
     applications.__bootstrap = {
-      inherit (cfg.appOfApps) namespace;
+      inherit (cfg.appOfApps) namespace project;
 
       resources.applications.${cfg.appOfApps.name} =
         mkApplication
