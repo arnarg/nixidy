@@ -8,7 +8,11 @@ let
 
   mkApplication = app: {
     metadata = {
-      name = if cfg.appendNameWithEnv then "${app.name}-${cfg.env}" else app.name;
+      name =
+        if (cfg.appendNameWithEnv && cfg.appOfApps.name != app.name) then
+          "${app.name}-${cfg.env}"
+        else
+          app.name;
       annotations = if app.annotations != { } then app.annotations else null;
     };
     spec = {
