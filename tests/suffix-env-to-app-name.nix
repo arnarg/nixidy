@@ -29,6 +29,12 @@
           in
           all (app: app.value.metadata.name == "${app.name}-${config.nixidy.env}") apps;
       }
+
+      {
+        description = "The app of apps should not get the suffix.";
+        expression = config.applications.__bootstrap.resources.applications.${config.nixidy.appOfApps.name};
+        assertion = app: app.metadata.name == config.nixidy.appOfApps.name;
+      }
     ];
   };
 }
