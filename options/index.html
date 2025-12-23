@@ -715,6 +715,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#applicationsnamefinalizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      applications.&lt;name&gt;.finalizer
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#applicationsnamehelmreleases" class="md-nav__link">
     <span class="md-ellipsis">
       applications.&lt;name&gt;.helm.releases
@@ -1240,6 +1249,15 @@
   <a href="#nixidydefaultsdestinationserver" class="md-nav__link">
     <span class="md-ellipsis">
       nixidy.defaults.destination.server
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidydefaultsfinalizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.defaults.finalizer
     </span>
   </a>
   
@@ -1545,6 +1563,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#applicationsnamefinalizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      applications.&lt;name&gt;.finalizer
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#applicationsnamehelmreleases" class="md-nav__link">
     <span class="md-ellipsis">
       applications.&lt;name&gt;.helm.releases
@@ -2070,6 +2097,15 @@
   <a href="#nixidydefaultsdestinationserver" class="md-nav__link">
     <span class="md-ellipsis">
       nixidy.defaults.destination.server
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidydefaultsfinalizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.defaults.finalizer
     </span>
   </a>
   
@@ -2388,6 +2424,16 @@ null or string</p>
 null or string</p>
 <p><strong><em>Default:</em></strong>
 <code class="highlight">config<span class="o">.</span>nixidy<span class="o">.</span>defaults<span class="o">.</span>destination<span class="o">.</span>server</code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/applications">&lt;nixidy/modules/applications&gt;</a></li>
+</ul>
+<h2 id="applicationsnamefinalizer">applications.&lt;name&gt;.finalizer<a class="headerlink" href="#applicationsnamefinalizer" title="Permanent link">#</a></h2>
+<p>Specify the finalizer to apply to the ArgoCD application.</p>
+<p><strong><em>Type:</em></strong>
+one of "background", "foreground", "non-cascading"</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight">config<span class="o">.</span>nixidy<span class="o">.</span>defaults<span class="o">.</span>finalizer</code></p>
 <p><strong><em>Declared by:</em></strong></p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/applications">&lt;nixidy/modules/applications&gt;</a></li>
@@ -3069,6 +3115,16 @@ null or string</p>
 null or string</p>
 <p><strong><em>Default:</em></strong>
 <code class="highlight"><span class="s2">&quot;https://kubernetes.default.svc&quot;</span></code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
+</ul>
+<h2 id="nixidydefaultsfinalizer">nixidy.defaults.finalizer<a class="headerlink" href="#nixidydefaultsfinalizer" title="Permanent link">#</a></h2>
+<p>Specify the default finalizer to apply to all ArgoCD application, by default.</p>
+<p><strong><em>Type:</em></strong>
+one of "background", "foreground", "non-cascading"</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="s2">&quot;non-cascading&quot;</span></code></p>
 <p><strong><em>Declared by:</em></strong></p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy.nix">&lt;nixidy/modules/nixidy.nix&gt;</a></li>
