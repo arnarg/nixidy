@@ -26,9 +26,15 @@
           inherit system;
         };
         packages = import ./nixidy pkgs;
+        mlib = import ./lib {
+          inherit pkgs;
+          kubelib = nix-kube-generators;
+        };
       in
       {
         packages = {
+          inherit (mlib.helm) mkChartAttrs;
+
           default = packages.nixidy;
           cli = pkgs.callPackage ./cli { };
           generators = import ./pkgs/generators {

@@ -65,8 +65,13 @@ let
 
   # Import the generator functions present in the flake.
   generators = import ./pkgs/generators { inherit pkgs kubelib; };
+
+  # Import the modules lib to extract mkChartAttrs.
+  mlib = import ./lib { inherit pkgs kubelib; };
 in
 {
+  inherit (mlib.helm) mkChartAttrs;
+
   # Wrap the lib functions to use the pkgs imported above
   # without having the user needing to pass it in.
   lib = {
