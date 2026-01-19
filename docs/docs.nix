@@ -113,10 +113,11 @@ let
           - 'Transformers': user_guide/transformers.md
           - 'Using nixhelm': user_guide/using_nixhelm.md
           - 'Directly Apply Manifests': user_guide/direct_apply.md
+        - 'Developer Guide':
+          - 'Architecture Guide': developer_guide/architecture.md
         - Reference:
           - 'Library Functions': library.md
           - 'Configuration Options': options.md
-          - 'Architectural Overview': developer_guide/architecture.md
       EOF
     '';
 
