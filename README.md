@@ -7,74 +7,50 @@
 
 <p align="center">Kubernetes GitOps with nix and Argo CD.</p>
 
-## What is it?
+<p align="center">
+  <a href="https://nixidy.dev/user_guide/getting_started/">Getting Started</a> •
+  <a href="https://nixidy.dev/">Documentation</a> •
+  <a href="#features">Features</a> •
+  <a href="#examples">Examples</a>
+</p>
 
-Manage an entire Kubernetes cluster like it's NixOS, then have CI generate plain YAML manifests for ArgoCD.
+## Why Nixidy?
+
+Managing Kubernetes configurations at scale is hard. Helm charts require complex value overrides, Kustomize leads to repetitive overlays, and raw YAML becomes unmaintainable. Reviewing changes across environments is nearly impossible.
+
+**Nixidy solves this** by bringing the power of Nix and the NixOS module system to Kubernetes:
+
+- **Declarative**: Define your entire cluster state in one place
+- **Typed**: Catch configuration errors before deployment
+- **Composable**: Build complex configurations from reusable modules
+- **Reviewable**: Generate plain YAML for easy PR reviews
+- **Reproducible**: Same input always produces the same output
+
+## How It Works
+
+Define your Kubernetes resources using Nix:
 
 ```nix
 {
   applications.demo = {
     namespace = "demo";
-
-    # Automatically generate a namespace resource with the
-    # above set namespace
     createNamespace = true;
 
-    resources = let
-      labels = {
-        "app.kubernetes.io/name" = "nginx";
-      };
-    in {
-      # Define a deployment for running an nginx server
+    resources = {
       deployments.nginx.spec = {
-        selector.matchLabels = labels;
+        replicas = 3;
+        selector.matchLabels.app = "nginx";
         template = {
-          metadata.labels = labels;
-          spec = {
-            securityContext.fsGroup = 1000;
-            containers.nginx = {
-              image = "nginx:1.25.1";
-              imagePullPolicy = "IfNotPresent";
-              volumeMounts = {
-                "/etc/nginx".name = "config";
-                "/var/lib/html".name = "static";
-              };
-            };
-            volumes = {
-              config.configMap.name = "nginx-config";
-              static.configMap.name = "nginx-static";
-            };
+          metadata.labels.app = "nginx";
+          spec.containers.nginx = {
+            image = "nginx:1.25.1";
+            ports.http.containerPort = 80;
           };
         };
       };
 
-      # Define config maps with config for nginx
-      configMaps = {
-        nginx-config.data."nginx.conf" = ''
-          user nginx nginx;
-          error_log /dev/stdout info;
-          pid /dev/null;
-          events {}
-          http {
-            access_log /dev/stdout;
-            server {
-              listen 80;
-              index index.html;
-              location / {
-                root /var/lib/html;
-              }
-            }
-          }
-        '';
-
-        nginx-static.data."index.html" = ''
-          <html><body><h1>Hello from NGINX</h1></body></html>
-        '';
-      };
-
-      # Define service for nginx
       services.nginx.spec = {
-        selector = labels;
+        selector.app = "nginx";
         ports.http.port = 80;
       };
     };
@@ -82,72 +58,287 @@ Manage an entire Kubernetes cluster like it's NixOS, then have CI generate plain
 }
 ```
 
-Then build with nixidy using `nixidy build .#prod`
+Build with nixidy:
+
+```sh
+nixidy build .#prod
+```
+
+Get clean, reviewable YAML:
 
 ```
-tree -l result/
-├── apps
+result/
+├── apps/
 │   └── Application-demo.yaml
-└── demo
-    ├── ConfigMap-nginx-config.yaml
-    ├── ConfigMap-nginx-static.yaml
+└── demo/
     ├── Deployment-nginx.yaml
     ├── Namespace-demo.yaml
     └── Service-nginx.yaml
 ```
 
-## Key Features
+Argo CD picks up the changes, after committing the new manifests to your repository, and deploys to your cluster. That's it.
 
-- **Declarative Cluster Management**: Define your entire Kubernetes cluster state using the Nix language.
-- **NixOS-like Experience**: Leverage the power and structure of the NixOS module system for your Kubernetes configurations.
-- **GitOps Ready**: Generates plain YAML manifests, aligning with the "Rendered Manifests Pattern" for Argo CD.
-- **Strongly-Typed Configuration**: Benefit from NixOS' type system for Kubernetes resources, catching errors early.
-- **Simplified Multi-Environment Management**: Easily manage configurations for development, staging, production, etc.
-- **Helm & Kustomize Integration**: Seamlessly incorporate existing Helm charts and Kustomize overlays.
-- **Extensible**: Generate typed Nix options for your Custom Resource Definitions (CRDs).
+## Features
 
-## Getting Started
+### 🎯 Declarative Cluster Management
 
-Take a look at the [getting started guide](https://arnarg.github.io/nixidy/user_guide/getting_started/).
+Define your entire cluster state using Nix. No more scattered YAML files, Helm value overrides, or Kustomize patches. Everything in one place, with one language.
+
+### 🔒 Strongly-Typed Configuration
+
+Every Kubernetes resource is typed. Catch typos and validate configurations before they hit your cluster.
+
+```nix
+# This will error at build time, not runtime
+resources.deployments.nginx.spec.replicas = "three"; # Type error!
+```
+
+### 📦 First-Class Helm Support
+
+Use existing Helm charts without giving up control. Override values, patch resources, and clean up Helm artifacts.
+
+```nix
+applications.traefik = {
+  namespace = "traefik";
+
+  helm.releases.traefik = {
+    chart = lib.helm.downloadHelmChart {
+      repo = "https://traefik.github.io/charts/";
+      chart = "traefik";
+      version = "25.0.0";
+      chartHash = "sha256-ua8KnUB6MxY7APqrrzaKKSOLwSjDYkk9tfVkb1bqkVM=";
+    };
+    values = {
+      ingressClass.enabled = true;
+    };
+  };
+
+  # Patch Helm output with nixidy
+  resources.deployments.traefik.spec.replicas = lib.mkForce 5;
+};
+```
+
+### 🔧 Kustomize Integration
+
+Seamlessly incorporate Kustomize applications:
+
+```nix
+applications.argocd.kustomize.applications.argocd = {
+  namespace = "argocd";
+  kustomization = {
+    src = pkgs.fetchFromGitHub {
+      owner = "argoproj";
+      repo = "argo-cd";
+      rev = "v2.9.3";
+      hash = "sha256-GaY4Cw/LlSwy35umbB4epXt6ev8ya19UjHRwhDwilqU=";
+    };
+    path = "manifests/cluster-install";
+  };
+};
+```
+
+### 🌍 Multi-Environment Made Easy
+
+Manage dev, staging, and production with shared base configurations and environment-specific overrides:
+
+```nix
+# base.nix - shared configuration
+{lib, ...}: {
+  applications.api.resources.deployments.api.spec = {
+    replicas = lib.mkDefault 1;
+    selector.matchLabels.app = "api";
+    template.spec.containers.api.image = "api:latest";
+  };
+}
+
+# prod.nix - production overrides
+{lib, ...}: {
+  imports = [ ./base.nix ];
+  applications.api.resources.deployments.api.spec = {
+    replicas = lib.mkForce 10;
+    template.spec.containers.api.resources = {
+      requests.memory = "512Mi";
+      limits.memory = "1Gi";
+    };
+  };
+}
+```
+
+### 🏗️ Reusable Templates
+
+Create templates for common patterns and reuse them across applications:
+
+```nix
+templates.webApp = {
+  options = {
+    image = mkOption {
+      type = lib.types.str;
+      description = "The image to use in the web application deployment";
+    };
+    replicas = mkOption {
+      type = lib.types.int;
+      default = 3;
+      description = "The number of replicas for the web application deployment.";
+    };
+    port = mkOption {
+      type = lib.types.port;
+      default = 8080;
+      description = "The web application's port.";
+    };
+  };
+  output = { name, config, ... }: {
+    deployments.${name}.spec = {
+      replicas = config.replicas;
+      selector.matchLabels.app = name;
+      template = {
+        metadata.labels.app = name;
+        spec.containers.${name} = {
+          image = config.image;
+          ports.http.containerPort = config.port;
+        };
+      };
+    };
+    services.${name}.spec = {
+      selector.app = name;
+      ports.http.port = config.port;
+    };
+  };
+};
+
+# Use the template
+applications.frontend.templates.webApp.frontend = {
+  image = "frontend:v1.2.3";
+  replicas = 5;
+};
+```
+
+### 🔄 GitOps Ready
+
+Nixidy implements the [Rendered Manifests Pattern](https://akuity.io/blog/the-rendered-manifests-pattern/). Your CI generates plain YAML, you review the exact changes in PRs, and Argo CD deploys them. No surprises.
+
+### 🚀 App-of-Apps Bootstrap
+
+Bootstrap your entire cluster with a single command:
+
+```sh
+nixidy bootstrap .#prod | kubectl apply -f -
+```
+
+### ⚡ Direct Apply
+
+Skip GitOps if you want to:
+
+```sh
+nixidy apply .#dev
+```
+
+Uses `kubectl apply --prune` for safe, declarative deployments directly to your cluster.
+
+### 🎛️ CRD Support
+
+Generate typed Nix options from any Custom Resource Definition:
+
+```nix
+packages.generators.cilium = nixidy.packages.${system}.generators.fromCRD {
+  name = "cilium";
+  src = pkgs.fetchFromGitHub { /* ... */ };
+  crds = [
+    "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
+  ];
+};
+```
+
+Then use your CRDs with full type safety:
+
+```nix
+resources.ciliumNetworkPolicies.allow-dns.spec = {
+  endpointSelector = {};
+  egress = [{
+    toEndpoints = [{ matchLabels."k8s:io.kubernetes.pod.namespace" = "kube-system"; }];
+    toPorts = [{ ports = [{ port = "53"; protocol = "UDP"; }]; }];
+  }];
+};
+```
+
+## Quick Start
+
+### With Flakes
+
+```nix title="flake.nix"
+{
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixidy.url = "github:arnarg/nixidy";
+  };
+
+  outputs = { nixpkgs, nixidy, ... }: {
+    nixidyEnvs.x86_64-linux = nixidy.lib.mkEnvs {
+      pkgs = nixpkgs.legacyPackages.x86_64-linux;
+      envs.dev.modules = [ ./env/dev.nix ];
+    };
+  };
+}
+```
+
+```nix title="env/dev.nix"
+{
+  nixidy.target.repository = "https://github.com/you/your-repo.git";
+  nixidy.target.branch = "main";
+
+  applications.hello = {
+    namespace = "hello";
+    createNamespace = true;
+    resources.deployments.hello.spec = {
+      selector.matchLabels.app = "hello";
+      template = {
+        metadata.labels.app = "hello";
+        spec.containers.hello.image = "hello-world:latest";
+      };
+    };
+  };
+}
+```
+
+See the [Getting Started Guide](https://nixidy.dev/user_guide/getting_started/) for detailed setup instructions.
+
+## Documentation
+
+- **[Getting Started](https://nixidy.dev/user_guide/getting_started/)** — Set up your first nixidy project
+- **[Helm Charts](https://nixidy.dev/user_guide/helm_charts/)** — Integrate existing Helm charts
+- **[Templates](https://nixidy.dev/user_guide/templates/)** — Create reusable application patterns
+- **[Git Strategies](https://nixidy.dev/user_guide/git_strategies/)** — Monorepo vs. environment branches
+- **[GitHub Actions](https://nixidy.dev/user_guide/github_actions/)** — CI/CD integration
+- **[Typed Resources](https://nixidy.dev/user_guide/typed_resources/)** — Generate types for CRDs
 
 ## Examples
 
-- [arnarg's cluster configuration](https://github.com/arnarg/cluster)
+- **[arnarg/cluster](https://github.com/arnarg/cluster)** — Real-world cluster configuration using nixidy
 
-## Why nixidy?
+## Comparison
 
-It's desirable to manage Kubernetes clusters in a declarative way using a git repository as a source of truth for manifests that should be deployed into the cluster. One popular solution that is often used to achieve this goal is [Argo CD](https://argo-cd.readthedocs.io/).
+| Feature | nixidy | Helm | Kustomize | Raw YAML |
+|---------|--------|------|-----------|----------|
+| Type Safety | ✅ Full | ❌ None | ❌ None | ❌ None |
+| Composability | ✅ Modules | ⚠️ Subcharts | ⚠️ Overlays | ❌ Copy/Paste |
+| Helm Integration | ✅ Native | ✅ Native | ⚠️ Inflate | ❌ Manual |
+| Reviewable Output | ✅ Plain YAML | ❌ Templates | ⚠️ Patches | ✅ Plain YAML |
+| Multi-Environment | ✅ Built-in | ⚠️ Values files | ⚠️ Overlays | ❌ Manual |
+| Reproducibility | ✅ Guaranteed | ⚠️ Depends | ⚠️ Depends | ⚠️ Depends |
 
-Argo CD has a concept of applications. Each application has an entrypoint somewhere in your git repository that is either a Helm chart, kustomize application, jsonnet files or just a directory of YAML files. All the resources that are output when templating the helm chart, kustomizing the kustomize application or are defined in the YAML files in the directory, make up the application and are (usually) deployed into a single namespace.
+## Community
 
-For those reasons these git repositories often need quite elaborate designs once many applications should be deployed, requiring use of application sets (generator for applications) or custom Helm charts just to render all the different applications of the repository.
-
-On top of that it can be quite obscure _what exactly_ will be deployed by just looking at helm charts (along with all the values override, usually set for each environment) or the kustomize overlays (which often are many depending on number of environments/stages) without going in and just running `helm template` or `kubectl kustomize`.
-
-Having dealt with these design decisions and pains that come with the different approaches I'm starting to use [The Rendered Manifests Pattern](https://akuity.io/blog/the-rendered-manifests-pattern/). While it's explained in way more detail in the linked blog post, basically it involves using your CI system to pre-render the helm charts or the kustomize overlays and commit all the rendered manifests to an environment branch (or go through a pull request review where you can review the _exact_ changes to your environment). That way you can just point Argo CD to your different directories full of rendered YAML manifests without having to do any helm templating or kustomize rendering.
-
-### NixOS' Module System
-
-I have been a user and a fan of NixOS for many years and how its module system works to recursively merge all configuration options that are set in many different modules.
-
-I have _not_ been a fan of helm's string templating of a whitespace-sensitive configuration language or kustomize's repetition (defining a `kustomization.yaml` file for each layer statically listing files to include, some are JSON patches some are not...).
-
-Therefore I made nixidy as an experiment to see if I can make something better (at least for myself). As all Argo CD applications are defined in a single configuration it can reference configuration options across applications and automatically generate an [App of Apps](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern) bootstrapping all of them.
-
-## Special Thanks
-
-[farcaller/nix-kube-generators](https://github.com/farcaller/nix-kube-generators) is used internally to pull and render Helm charts and some functions are re-exposed in the lib passed to modules in nixidy.
-
-[hall/kubenix](https://github.com/hall/kubenix) project has code generation of nix module options for every standard kubernetes resource. Instead of doing this work in nixidy I import their generated resource options. The resource option generation scripts in nixidy are also a slight modification of kubenix's. Without their work this wouldn't be possible in nixidy.
+- **Issues**: [GitHub Issues](https://github.com/arnarg/nixidy/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/arnarg/nixidy/discussions)
 
 ## Contributing
 
 Contributions are welcome! Whether it's bug reports, feature requests, documentation improvements, or code contributions, please feel free to open an issue or pull request on our [GitHub repository](https://github.com/arnarg/nixidy).
 
+## Acknowledgments
+
+- **[nix-kube-generators](https://github.com/farcaller/nix-kube-generators)** — Used internally for Helm chart rendering
+- **[kubenix](https://github.com/hall/kubenix)** — Resource options generator forked from kubenix
+
 ## License
 
 nixidy is licensed under the [MIT License](https://github.com/arnarg/nixidy/blob/main/LICENSE).
-
-[license-badge]: https://img.shields.io/github/license/arnarg/nixidy?style=flat
-[tag-badge]: https://img.shields.io/github/v/tag/arnarg/nixidy?style=flat&label=release&color=0a7cbd
-[checks-badge]: https://img.shields.io/github/check-runs/arnarg/nixidy/main?style=flat
