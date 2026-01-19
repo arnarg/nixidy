@@ -1,267 +1,197 @@
 # Getting Started
 
-## Initialize Repository
+This guide walks you through setting up your first nixidy project step by step.
 
-=== "flakes"
+## Prerequisites
 
-    First a `flake.nix` needs to be created in the root of the repository.
+- [Nix](https://nixos.org/download.html) installed with flakes enabled
+- A Git repository for your Kubernetes manifests
+- Basic familiarity with Kubernetes concepts
 
-    ```nix title="flake.nix"
-    {
-      description = "My ArgoCD configuration with nixidy.";
+## What You'll Build
 
-      inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-      inputs.flake-utils.url = "github:numtide/flake-utils";
-      inputs.nixidy.url = "github:arnarg/nixidy";
+By the end of this guide, you'll have:
 
-      outputs = {
-        self,
-        nixpkgs,
-        flake-utils,
-        nixidy,
-      }: (flake-utils.lib.eachDefaultSystem (system: let
-        pkgs = import nixpkgs {
-          inherit system;
+1. A nixidy project that generates Kubernetes manifests
+2. An nginx deployment with configuration
+3. An Argo CD application ready for GitOps
+
+## Step 1: Create Your Project
+
+Create a new directory for your project:
+
+```sh
+mkdir my-cluster && cd my-cluster
+git init
+```
+
+## Step 2: Set Up the Flake
+
+Create a `flake.nix` file in your project root:
+
+```nix title="flake.nix"
+{
+  description = "My Kubernetes cluster managed with nixidy";
+
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
+    nixidy.url = "github:arnarg/nixidy";
+  };
+
+  outputs = {
+    nixpkgs,
+    flake-utils,
+    nixidy,
+    ...
+  }:
+    flake-utils.lib.eachDefaultSystem (system: let
+      pkgs = import nixpkgs {inherit system;};
+    in {
+      # Define your environments
+      nixidyEnvs = nixidy.lib.mkEnvs {
+        inherit pkgs;
+
+        envs = {
+          dev.modules = [./env/dev.nix];
         };
-      in {
-        # This declares the available nixidy envs.
-        nixidyEnvs = nixidy.lib.mkEnvs {
-          inherit pkgs;
+      };
 
-          envs = {
-            # Currently we only have the one dev env.
-            dev.modules = [./env/dev.nix];
-          };
-        };
+      # Make nixidy CLI available
+      packages.nixidy = nixidy.packages.${system}.default;
 
-        # Handy to have nixidy cli available in the local
-        # flake too.
-        packages.nixidy = nixidy.packages.${system}.default;
+      # Development shell with nixidy
+      devShells.default = pkgs.mkShell {
+        buildInputs = [nixidy.packages.${system}.default];
+      };
+    });
+}
+```
 
-        # Useful development shell with nixidy in path.
-        # Run `nix develop` to enter.
-        devShells.default = pkgs.mkShell {
-          buildInputs = [nixidy.packages.${system}.default];
-        };
-      }));
-    }
-    ```
+??? note "Using nixidy without flakes"
 
-    !!! info
+    If you prefer not to use flakes, you can use [npins](https://github.com/andir/npins) or [niv](https://github.com/nmattia/niv) for dependency management.
 
-        In the rest of the guide when running the `nixidy` cli (e.g. `nixidy build`) you can use `nix run .#nixidy -- build` or enter a nix shell with `nix develop` where `nixidy` will be available, with the `flake.nix` example above.
+    === "npins"
 
-    The flake declares a single nixidy environment called `dev`. It includes a single nix module found at `./env/dev.nix`, so let's create that.
+        ```sh
+        npins init --bare
+        npins add github arnarg nixidy --branch main
+        ```
 
-=== "flake-less"
+    === "niv"
 
-    ??? tip "Dependency pinning"
+        ```sh
+        niv init --no-nixpkgs
+        niv add github arnarg/nixidy --branch main
+        ```
 
-        Instead of using nix channels, the recommended way to use nixidy without flakes is to use either [npins](https://github.com/andir/npins) or [niv](https://github.com/nmattia/niv) to lock dependency versions in your repository.
-
-        === "npins"
-            First initialize npins:
-            ```sh
-            npins init --bare
-            ```
-
-            Then add nixidy:
-            ```sh
-            npins add github arnarg nixidy --branch main # or --at vx.x.x
-            ```
-
-        === "niv"
-            First initialize niv:
-            ```sh
-            niv init --no-nixpkgs
-            ```
-
-            Then add nixidy:
-            ```sh
-            niv add github arnarg/nixidy --branch main # or --rev vx.x.x
-            ```
-
-    First a `default.nix` needs to be created in the root of the repository.
+    Then create `default.nix`:
 
     ```nix title="default.nix"
     let
-      # With npins
-      sources = import ./npins;
-      # With niv
-      # sources = import ./nix/sources.nix;
-
-      # Import nixidy
+      sources = import ./npins;  # or ./nix/sources.nix for niv
       nixidy = import sources.nixidy {};
     in
       nixidy.lib.mkEnvs {
-        # This declares the available nixidy envs.
         envs = {
-          # Currently we only have the one dev env.
           dev.modules = [./env/dev.nix];
         };
       }
     ```
 
-    It's also a good idea to have `shell.nix` file in the root of the repository to have the necessary tools available.
+    !!! warning "Command syntax"
+        The rest of this guide uses flake syntax (e.g., `nixidy build .#dev`). Without flakes, omit the `.#` prefix (e.g., `nixidy build dev`).
 
-    ```nix title="shell.nix"
-    let
-      # With npins
-      sources = import ./npins;
-      # With niv
-      # sources = import ./nix/sources.nix;
+## Step 3: Create Your Environment Configuration
 
-      # nixpkgs added with:
-      #   npins: `npins add --name nixpkgs channel nixos-unstable`
-      #   niv: `niv add github nixos/nixpkgs -b nixos-unstable`
-      nixpkgs = sources.nixpkgs;
-      pkgs = import nixpkgs {};
+Create the environment directory and configuration file:
 
-      # Import nixidy
-      nixidy = import sources.nixidy {inherit nixpkgs;};
-    in
-      pkgs.mkShellNoCC {
-        packages = with pkgs; [
-          # Add nixidy cli
-          nixidy.nixidy
-          # npins
-          npins
-          # or niv
-          niv
-        ];
-      }
-    ```
-
-    !!! info
-        In the rest of the guide when running the `nixidy` cli (e.g. `nixidy build`) you can run `nix-shell` to enter a nix shell where `nixidy` will be a avilable, with the `shell.nix` example above.
-
-    !!! warning
-        In the rest of the guide the `nixidy` commands will also use the flakes format (e.g. `nixidy build .#dev`), when using a flake-less setup the `.#` prefix should be removed (e.g. `nixidy build dev`).
-
-    The `default.nix` file declares a single nixidy environment called `dev`. It includes a single nix module found at `./env/dev.nix`, so let's create that.
+```sh
+mkdir -p env
+```
 
 ```nix title="env/dev.nix"
 {
-  # Set the target repository for the rendered manifests
-  # and applications.
-  # This should be replaced with yours, usually the same
-  # repository as the nixidy definitions.
-  nixidy.target.repository = "https://github.com/arnarg/nixidy-demo.git";
-
-  # Set the target branch the rendered manifests for _this_
-  # environment should be pushed to in the repository defined
-  # above.
+  # Where should the generated manifests be stored?
+  nixidy.target.repository = "https://github.com/YOUR_USERNAME/my-cluster.git";
   nixidy.target.branch = "main";
-
-  # Set the target sub-directory to copy the generated
-  # manifests to when running `nixidy switch .#dev`.
   nixidy.target.rootPath = "./manifests/dev";
 }
 ```
 
-Now running `nixidy info .#dev` you can get the same info we just declared above. This verifies that things are set up correctly so far.
+!!! tip "Replace the repository URL"
+    Change `YOUR_USERNAME` to your actual GitHub username, or use your preferred Git hosting URL.
 
-```shell
->> nixidy info .#dev
-Repository: https://github.com/arnarg/nixidy-demo.git
+## Step 4: Verify Your Setup
+
+Enter the development shell and verify everything works:
+
+```sh
+nix develop
+nixidy info .#dev
+```
+
+You should see:
+
+```
+Repository: https://github.com/YOUR_USERNAME/my-cluster.git
 Branch:     main
 ```
 
-If we now attempt to build this new environment with `nixidy build .#dev` we can see that nothing is generated but an empty folder called `apps`.
+Try building (it will be empty for now):
 
-```shell
->> tree result
+```sh
+nixidy build .#dev
+tree result
+```
+
+Output:
+
+```
 result
 └── apps/
 ```
 
-This is because we have not declared any applications yet for this environment.
+The `apps/` folder is empty because we haven't defined any applications yet.
 
-## Our first Application
+## Step 5: Create Your First Application
 
-Applications and their resources are defined under `applications.<applicationName>`.
+Now let's add an nginx application. Update your `env/dev.nix`:
 
 ```nix title="env/dev.nix"
 {
-  # Set the target repository for the rendered manifests
-  # and applications.
-  # This should be replaced with yours, usually the same
-  # repository as the nixidy definitions.
-  nixidy.target.repository = "https://github.com/arnarg/nixidy-demo.git";
-
-  # Set the target branch the rendered manifests for _this_
-  # environment should be pushed to in the repository defined
-  # above.
+  # Target configuration
+  nixidy.target.repository = "https://github.com/YOUR_USERNAME/my-cluster.git";
   nixidy.target.branch = "main";
-
-  # Set the target sub-directory to copy the generated
-  # manifests to when running `nixidy switch .#dev`.
   nixidy.target.rootPath = "./manifests/dev";
 
-  # Define an application called `demo`.
-  applications.demo = {
-    # All resources will be deployed into this namespace.
-    namespace = "demo";
+  # Define the nginx application
+  applications.nginx = {
+    # Deploy to the "nginx" namespace
+    namespace = "nginx";
 
-    # Automatically generate a namespace resource for the
-    # above set namespace
+    # Automatically create the namespace
     createNamespace = true;
 
-    resources = let
-      labels = {
-        "app.kubernetes.io/name" = "nginx";
-      };
-    in {
-      # Define a deployment for running an nginx server
+    # Define Kubernetes resources
+    resources = {
+      # Deployment
       deployments.nginx.spec = {
-        selector.matchLabels = labels;
+        replicas = 2;
+        selector.matchLabels.app = "nginx";
         template = {
-          metadata.labels = labels;
-          spec = {
-            securityContext.fsGroup = 1000;
-            containers.nginx = {
-              image = "nginx:1.25.1";
-              imagePullPolicy = "IfNotPresent";
-              volumeMounts = {
-                "/etc/nginx".name = "config";
-                "/var/lib/html".name = "static";
-              };
-            };
-            volumes = {
-              config.configMap.name = "nginx-config";
-              static.configMap.name = "nginx-static";
-            };
+          metadata.labels.app = "nginx";
+          spec.containers.nginx = {
+            image = "nginx:1.25.1";
+            ports.http.containerPort = 80;
           };
         };
       };
 
-      # Define config maps with config for nginx
-      configMaps = {
-        nginx-config.data."nginx.conf" = ''
-          user nginx nginx;
-          error_log /dev/stdout info;
-          pid /dev/null;
-          events {}
-          http {
-            access_log /dev/stdout;
-            server {
-              listen 80;
-              index index.html;
-              location / {
-                root /var/lib/html;
-              }
-            }
-          }
-        '';
-
-        nginx-static.data."index.html" = ''
-          <html><body><h1>Hello from NGINX</h1></body></html>
-        '';
-      };
-
-      # Define service for nginx
+      # Service
       services.nginx.spec = {
-        selector = labels;
+        selector.app = "nginx";
         ports.http.port = 80;
       };
     };
@@ -269,96 +199,280 @@ Applications and their resources are defined under `applications.<applicationNam
 }
 ```
 
-Running `nixidy build .#dev` will produce the following files.
+## Step 6: Build and Inspect
 
-```shell
->> tree -l result/
+Build your configuration:
+
+```sh
+nixidy build .#dev
+tree result
+```
+
+You should see:
+
+```
+result
 ├── apps
-│   └── Application-demo.yaml
-└── demo
-    ├── ConfigMap-nginx-config.yaml
-    ├── ConfigMap-nginx-static.yaml
+│   └── Application-nginx.yaml
+└── nginx
     ├── Deployment-nginx.yaml
-    ├── Namespace-demo.yaml
+    ├── Namespace-nginx.yaml
     └── Service-nginx.yaml
 ```
 
-And the contents of the Argo CD application automatically generated is the following:
-
-```yaml title="apps/Application-demo.yaml"
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  # This is the name of the application (`applications.demo`).
-  name: demo
-  namespace: argocd
-spec:
-  destination:
-    # This is the destination namespace for the application
-    # specified with `applications.demo.namespace`.
-    namespace: demo
-    server: https://kubernetes.default.svc
-  project: default
-  source:
-    # This is the output path declared for the application with
-    # option `applications.<applicationName>.output.path`
-    # (defaults to the name) with `nixidy.target.rootPath`
-    # prefix.
-    path: ./manifests/dev/demo
-    # Repository specified in `nixidy.target.repository`.
-    repoURL: https://github.com/arnarg/nixidy-demo.git
-    # Branch specified in `nixidy.target.branch`.
-    targetRevision: main
-  syncPolicy:
-    automated:
-      prune: false
-      selfHeal: false
-```
-
-A directory with rendered resources is generated for each application declared with `applications.<name>` as well as an Argo CD application resource YAML file in `apps/`. What this provides is the option to bootstrap the whole rendered branch to a cluster by adding an application pointing to the `apps/` folder.
-
-See [App of Apps Pattern](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern).
-
-Running `nixidy switch .#dev` will create the `./manifests/dev` relative to the current working directory and sync the newly generated manifests into it.
-
-!!! info
-    While nixidy is primary a tool for doing GitOps using Argo CD it also has support for [directly applying manifests](./direct_apply.md) to a Kubernetes cluster.
-
-## Bootstrapping Cluster
-
-After creating a git repository that is specified in `nixidy.target.repository` and pushing the generated manifests (e.g. by running `nixidy switch .#dev`) to the branch specified in `nixidy.target.branch`, your cluster can be bootstrapped.
-
-Make sure you have access to the Kubernetes API and Argo CD is installed and running on your cluster (refer to Argo CD's [getting started guide](https://argo-cd.readthedocs.io/en/stable/getting_started) for that).
-
-For quick bootstrapping you can run the command `nixidy bootstrap` to output an initial `Application` that will trigger a deployment of all other applications.
+Inspect the generated deployment:
 
 ```sh
->> nixidy bootstrap .#dev
----
+cat result/nginx/Deployment-nginx.yaml
+```
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - image: nginx:1.25.1
+          name: nginx
+          ports:
+            - containerPort: 80
+              name: http
+```
+
+Nixidy also generates an Argo CD Application:
+
+```sh
+cat result/apps/Application-nginx.yaml
+```
+
+```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: apps
+  name: nginx
   namespace: argocd
 spec:
   destination:
-    namespace: argocd
+    namespace: nginx
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: ./manifests/dev/apps
-    repoURL: https://github.com/arnarg/nixidy-demo.git
+    path: ./manifests/dev/nginx
+    repoURL: https://github.com/YOUR_USERNAME/my-cluster.git
     targetRevision: main
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
 ```
 
-To actually deploy it, run `nixidy bootstrap .#dev | kubectl apply -f -` (this assumes that the argocd namespace already exists in the cluster).
+## Step 7: Sync Manifests to Your Repository
 
-Alternatively, create a new application in the Argo CD Web GUI by specifying the `manifests/dev/apps` path.
+Copy the generated manifests to your repository:
+
+```sh
+nixidy switch .#dev
+```
+
+This creates the `./manifests/dev` directory with all your manifests. Commit and push:
+
+```sh
+git add .
+git commit -m "Initial nixidy configuration"
+git push
+```
+
+## Step 8: Deploy to Your Cluster
+
+### Option A: Bootstrap with Argo CD
+
+If you have Argo CD installed, bootstrap all applications with one command:
+
+```sh
+nixidy bootstrap .#dev | kubectl apply -f -
+```
+
+This creates an "app of apps" that automatically deploys all your applications.
+
+### Option B: Apply Directly
+
+For quick testing without Argo CD:
+
+```sh
+nixidy apply .#dev
+```
+
+This applies all manifests directly using `kubectl apply --prune`.
+
+## Adding More Resources
+
+Let's extend the nginx application with a ConfigMap:
+
+```nix title="env/dev.nix"
+{
+  nixidy.target.repository = "https://github.com/YOUR_USERNAME/my-cluster.git";
+  nixidy.target.branch = "main";
+  nixidy.target.rootPath = "./manifests/dev";
+
+  applications.nginx = {
+    namespace = "nginx";
+    createNamespace = true;
+
+    resources = {
+      # Deployment with ConfigMap volume
+      deployments.nginx.spec = {
+        replicas = 2;
+        selector.matchLabels.app = "nginx";
+        template = {
+          metadata.labels.app = "nginx";
+          spec = {
+            containers.nginx = {
+              image = "nginx:1.25.1";
+              ports.http.containerPort = 80;
+              volumeMounts."/usr/share/nginx/html".name = "html";
+            };
+            volumes.html.configMap.name = "nginx-html";
+          };
+        };
+      };
+
+      # Service
+      services.nginx.spec = {
+        selector.app = "nginx";
+        ports.http.port = 80;
+      };
+
+      # ConfigMap with HTML content
+      configMaps.nginx-html.data."index.html" = ''
+        <!DOCTYPE html>
+        <html>
+          <body>
+            <h1>Hello from nixidy!</h1>
+          </body>
+        </html>
+      '';
+    };
+  };
+}
+```
+
+Build to see the new ConfigMap:
+
+```sh
+nixidy build .#dev
+cat result/nginx/ConfigMap-nginx-html.yaml
+```
+
+## Adding Multiple Applications
+
+You can define multiple applications in the same file or split them into separate modules:
+
+```nix title="env/dev.nix"
+{
+  nixidy.target.repository = "https://github.com/YOUR_USERNAME/my-cluster.git";
+  nixidy.target.branch = "main";
+  nixidy.target.rootPath = "./manifests/dev";
+
+  # First application
+  applications.nginx = {
+    namespace = "nginx";
+    createNamespace = true;
+    resources.deployments.nginx.spec = {
+      selector.matchLabels.app = "nginx";
+      template = {
+        metadata.labels.app = "nginx";
+        spec.containers.nginx.image = "nginx:1.25.1";
+      };
+    };
+  };
+
+  # Second application
+  applications.redis = {
+    namespace = "redis";
+    createNamespace = true;
+    resources.deployments.redis.spec = {
+      selector.matchLabels.app = "redis";
+      template = {
+        metadata.labels.app = "redis";
+        spec.containers.redis.image = "redis:7";
+      };
+    };
+  };
+}
+```
+
+## Project Structure
+
+A typical nixidy project looks like this:
+
+```
+my-cluster/
+├── flake.nix              # Project definition
+├── flake.lock             # Locked dependencies
+├── env/
+│   ├── dev.nix            # Development environment
+│   ├── staging.nix        # Staging environment
+│   └── prod.nix           # Production environment
+├── modules/
+│   ├── default.nix        # Common module that imports all applications
+│   ├── nginx.nix          # Reusable nginx module
+│   └── redis.nix          # Reusable redis module
+└── manifests/             # Generated manifests
+    ├── dev/
+    ├── staging/
+    └── prod/
+```
+
+## Common Commands
+
+| Command | Description |
+|---------|-------------|
+| `nixidy info .#dev` | Show environment info |
+| `nixidy build .#dev` | Build manifests to `./result` |
+| `nixidy switch .#dev` | Sync manifests to target directory |
+| `nixidy bootstrap .#dev` | Output bootstrap Application YAML |
+| `nixidy apply .#dev` | Apply directly to cluster |
+
+## Troubleshooting
+
+### "nixidy: command not found"
+
+Make sure you're in the development shell:
+
+```sh
+nix develop
+```
+
+Or run nixidy directly:
+
+```sh
+nix run .#nixidy -- build .#dev
+```
+
+### Build fails with type errors
+
+Nixidy validates your configuration against Kubernetes schemas. Check the error message for the specific field that's incorrect. Common issues:
+
+- Wrong types (string instead of number)
+- Misspelled field names
 
 ## Next Steps
 
-Now that the cluster is running the applications specified in your nixidy config, you might want to build your applications on top of [helm charts](./helm_charts.md) or have [Github Actions](./github_actions.md) generate the manifests.
+Now that you have a working nixidy project, explore these topics:
+
+- **[Helm Charts](./helm_charts.md)** — Use existing Helm charts in your applications
+- **[Templates](./templates.md)** — Create reusable application patterns
+- **[Git Strategies](./git_strategies.md)** — Organize manifests across branches or repositories
+- **[GitHub Actions](./github_actions.md)** — Automate manifest generation in CI
+- **[Direct Apply](./direct_apply.md)** — Deploy without Argo CD
+
+## Example Repository
+
+For a complete real-world example, check out [arnarg/cluster](https://github.com/arnarg/cluster).
