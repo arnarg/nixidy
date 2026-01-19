@@ -368,29 +368,185 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#initialize-repository" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
-      Initialize Repository
+      Prerequisites
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#our-first-application" class="md-nav__link">
+  <a href="#what-youll-build" class="md-nav__link">
     <span class="md-ellipsis">
-      Our first Application
+      What You'll Build
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#bootstrapping-cluster" class="md-nav__link">
+  <a href="#step-1-create-your-project" class="md-nav__link">
     <span class="md-ellipsis">
-      Bootstrapping Cluster
+      Step 1: Create Your Project
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-set-up-the-flake" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2: Set Up the Flake
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-create-your-environment-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 3: Create Your Environment Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-verify-your-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 4: Verify Your Setup
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-create-your-first-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 5: Create Your First Application
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-build-and-inspect" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 6: Build and Inspect
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-sync-manifests-to-your-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 7: Sync Manifests to Your Repository
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-deploy-to-your-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 8: Deploy to Your Cluster
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: Deploy to Your Cluster">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-bootstrap-with-argo-cd" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option A: Bootstrap with Argo CD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-apply-directly" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option B: Apply Directly
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-more-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Adding More Resources
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-multiple-applications" class="md-nav__link">
+    <span class="md-ellipsis">
+      Adding Multiple Applications
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#project-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Project Structure
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Commands
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nixidy-command-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      "nixidy: command not found"
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-fails-with-type-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build fails with type errors
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -398,6 +554,15 @@
   <a href="#next-steps" class="md-nav__link">
     <span class="md-ellipsis">
       Next Steps
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Repository
     </span>
   </a>
   
@@ -626,7 +791,7 @@
   
   
   <span class="md-ellipsis">
-    Reference
+    Developer Guide
     
   </span>
   
@@ -636,6 +801,74 @@
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer_guide/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             Reference
           </label>
@@ -687,29 +920,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../developer_guide/architecture/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Architectural Overview
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -744,29 +954,185 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#initialize-repository" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
-      Initialize Repository
+      Prerequisites
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#our-first-application" class="md-nav__link">
+  <a href="#what-youll-build" class="md-nav__link">
     <span class="md-ellipsis">
-      Our first Application
+      What You'll Build
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#bootstrapping-cluster" class="md-nav__link">
+  <a href="#step-1-create-your-project" class="md-nav__link">
     <span class="md-ellipsis">
-      Bootstrapping Cluster
+      Step 1: Create Your Project
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-set-up-the-flake" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2: Set Up the Flake
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-create-your-environment-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 3: Create Your Environment Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-verify-your-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 4: Verify Your Setup
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-create-your-first-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 5: Create Your First Application
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-build-and-inspect" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 6: Build and Inspect
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-sync-manifests-to-your-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 7: Sync Manifests to Your Repository
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-deploy-to-your-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 8: Deploy to Your Cluster
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: Deploy to Your Cluster">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-bootstrap-with-argo-cd" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option A: Bootstrap with Argo CD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-apply-directly" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option B: Apply Directly
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-more-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Adding More Resources
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-multiple-applications" class="md-nav__link">
+    <span class="md-ellipsis">
+      Adding Multiple Applications
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#project-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Project Structure
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Commands
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nixidy-command-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      "nixidy: command not found"
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-fails-with-type-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build fails with type errors
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -774,6 +1140,15 @@
   <a href="#next-steps" class="md-nav__link">
     <span class="md-ellipsis">
       Next Steps
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Repository
     </span>
   </a>
   
@@ -799,330 +1174,407 @@
 
 
 <h1 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">#</a></h1>
-<h2 id="initialize-repository">Initialize Repository<a class="headerlink" href="#initialize-repository" title="Permanent link">#</a></h2>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">flakes</label><label for="__tabbed_1_2">flake-less</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<p>First a <code>flake.nix</code> needs to be created in the root of the repository.</p>
+<p>This guide walks you through setting up your first nixidy project step by step.</p>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://nixos.org/download.html">Nix</a> installed with flakes enabled</li>
+<li>A Git repository for your Kubernetes manifests</li>
+<li>Basic familiarity with Kubernetes concepts</li>
+</ul>
+<h2 id="what-youll-build">What You'll Build<a class="headerlink" href="#what-youll-build" title="Permanent link">#</a></h2>
+<p>By the end of this guide, you'll have:</p>
+<ol>
+<li>A nixidy project that generates Kubernetes manifests</li>
+<li>An nginx deployment with configuration</li>
+<li>An Argo CD application ready for GitOps</li>
+</ol>
+<h2 id="step-1-create-your-project">Step 1: Create Your Project<a class="headerlink" href="#step-1-create-your-project" title="Permanent link">#</a></h2>
+<p>Create a new directory for your project:</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>my-cluster<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>my-cluster
+git<span class="w"> </span>init
+</code></pre></div>
+<h2 id="step-2-set-up-the-flake">Step 2: Set Up the Flake<a class="headerlink" href="#step-2-set-up-the-flake" title="Permanent link">#</a></h2>
+<p>Create a <code>flake.nix</code> file in your project root:</p>
 <div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
-  <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;My ArgoCD configuration with nixidy.&quot;</span><span class="p">;</span>
+  <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;My Kubernetes cluster managed with nixidy&quot;</span><span class="p">;</span>
 
-  inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:nixos/nixpkgs/nixos-unstable&quot;</span><span class="p">;</span>
-  inputs<span class="o">.</span>flake-utils<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:numtide/flake-utils&quot;</span><span class="p">;</span>
-  inputs<span class="o">.</span>nixidy<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:arnarg/nixidy&quot;</span><span class="p">;</span>
+  <span class="ss">inputs</span> <span class="o">=</span> <span class="p">{</span>
+    nixpkgs<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:nixos/nixpkgs/nixos-unstable&quot;</span><span class="p">;</span>
+    flake-utils<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:numtide/flake-utils&quot;</span><span class="p">;</span>
+    nixidy<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:arnarg/nixidy&quot;</span><span class="p">;</span>
+  <span class="p">};</span>
 
   <span class="ss">outputs</span> <span class="o">=</span> <span class="p">{</span>
-    self<span class="p">,</span>
     nixpkgs<span class="p">,</span>
     flake-utils<span class="p">,</span>
     nixidy<span class="p">,</span>
-  <span class="p">}:</span> <span class="p">(</span>flake-utils<span class="o">.</span>lib<span class="o">.</span>eachDefaultSystem <span class="p">(</span>system<span class="p">:</span> <span class="k">let</span>
-    <span class="ss">pkgs</span> <span class="o">=</span> <span class="nb">import</span> nixpkgs <span class="p">{</span>
-      <span class="k">inherit</span> system<span class="p">;</span>
-    <span class="p">};</span>
-  <span class="k">in</span> <span class="p">{</span>
-    <span class="c1"># This declares the available nixidy envs.</span>
-    <span class="ss">nixidyEnvs</span> <span class="o">=</span> nixidy<span class="o">.</span>lib<span class="o">.</span>mkEnvs <span class="p">{</span>
-      <span class="k">inherit</span> pkgs<span class="p">;</span>
+    <span class="o">...</span>
+  <span class="p">}:</span>
+    flake-utils<span class="o">.</span>lib<span class="o">.</span>eachDefaultSystem <span class="p">(</span>system<span class="p">:</span> <span class="k">let</span>
+      <span class="ss">pkgs</span> <span class="o">=</span> <span class="nb">import</span> nixpkgs <span class="p">{</span><span class="k">inherit</span> system<span class="p">;};</span>
+    <span class="k">in</span> <span class="p">{</span>
+      <span class="c1"># Define your environments</span>
+      <span class="ss">nixidyEnvs</span> <span class="o">=</span> nixidy<span class="o">.</span>lib<span class="o">.</span>mkEnvs <span class="p">{</span>
+        <span class="k">inherit</span> pkgs<span class="p">;</span>
 
-      <span class="ss">envs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="c1"># Currently we only have the one dev env.</span>
-        dev<span class="o">.</span><span class="ss">modules</span> <span class="o">=</span> <span class="p">[</span><span class="l">./env/dev.nix</span><span class="p">];</span>
+        <span class="ss">envs</span> <span class="o">=</span> <span class="p">{</span>
+          dev<span class="o">.</span><span class="ss">modules</span> <span class="o">=</span> <span class="p">[</span><span class="l">./env/dev.nix</span><span class="p">];</span>
+        <span class="p">};</span>
       <span class="p">};</span>
-    <span class="p">};</span>
 
-    <span class="c1"># Handy to have nixidy cli available in the local</span>
-    <span class="c1"># flake too.</span>
-    packages<span class="o">.</span><span class="ss">nixidy</span> <span class="o">=</span> nixidy<span class="o">.</span>packages<span class="o">.</span><span class="si">${</span>system<span class="si">}</span><span class="o">.</span>default<span class="p">;</span>
+      <span class="c1"># Make nixidy CLI available</span>
+      packages<span class="o">.</span><span class="ss">nixidy</span> <span class="o">=</span> nixidy<span class="o">.</span>packages<span class="o">.</span><span class="si">${</span>system<span class="si">}</span><span class="o">.</span>default<span class="p">;</span>
 
-    <span class="c1"># Useful development shell with nixidy in path.</span>
-    <span class="c1"># Run `nix develop` to enter.</span>
-    devShells<span class="o">.</span><span class="ss">default</span> <span class="o">=</span> pkgs<span class="o">.</span>mkShell <span class="p">{</span>
-      <span class="ss">buildInputs</span> <span class="o">=</span> <span class="p">[</span>nixidy<span class="o">.</span>packages<span class="o">.</span><span class="si">${</span>system<span class="si">}</span><span class="o">.</span>default<span class="p">];</span>
-    <span class="p">};</span>
-  <span class="p">}));</span>
+      <span class="c1"># Development shell with nixidy</span>
+      devShells<span class="o">.</span><span class="ss">default</span> <span class="o">=</span> pkgs<span class="o">.</span>mkShell <span class="p">{</span>
+        <span class="ss">buildInputs</span> <span class="o">=</span> <span class="p">[</span>nixidy<span class="o">.</span>packages<span class="o">.</span><span class="si">${</span>system<span class="si">}</span><span class="o">.</span>default<span class="p">];</span>
+      <span class="p">};</span>
+    <span class="p">});</span>
 <span class="p">}</span>
 </code></pre></div>
-<div class="admonition info">
-<p class="admonition-title">Info</p>
-<p>In the rest of the guide when running the <code>nixidy</code> cli (e.g. <code>nixidy build</code>) you can use <code>nix run .#nixidy -- build</code> or enter a nix shell with <code>nix develop</code> where <code>nixidy</code> will be available, with the <code>flake.nix</code> example above.</p>
-</div>
-<p>The flake declares a single nixidy environment called <code>dev</code>. It includes a single nix module found at <code>./env/dev.nix</code>, so let's create that.</p>
-</div>
-<div class="tabbed-block">
-<details class="tip">
-<summary>Dependency pinning</summary>
-<p>Instead of using nix channels, the recommended way to use nixidy without flakes is to use either <a href="https://github.com/andir/npins">npins</a> or <a href="https://github.com/nmattia/niv">niv</a> to lock dependency versions in your repository.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">npins</label><label for="__tabbed_2_2">niv</label></div>
+<details class="note">
+<summary>Using nixidy without flakes</summary>
+<p>If you prefer not to use flakes, you can use <a href="https://github.com/andir/npins">npins</a> or <a href="https://github.com/nmattia/niv">niv</a> for dependency management.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">npins</label><label for="__tabbed_1_2">niv</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>First initialize npins:
 <div class="highlight"><pre><span></span><code>npins<span class="w"> </span>init<span class="w"> </span>--bare
-</code></pre></div></p>
-<p>Then add nixidy:
-<div class="highlight"><pre><span></span><code>npins<span class="w"> </span>add<span class="w"> </span>github<span class="w"> </span>arnarg<span class="w"> </span>nixidy<span class="w"> </span>--branch<span class="w"> </span>main<span class="w"> </span><span class="c1"># or --at vx.x.x</span>
-</code></pre></div></p>
+npins<span class="w"> </span>add<span class="w"> </span>github<span class="w"> </span>arnarg<span class="w"> </span>nixidy<span class="w"> </span>--branch<span class="w"> </span>main
+</code></pre></div>
 </div>
 <div class="tabbed-block">
-<p>First initialize niv:
 <div class="highlight"><pre><span></span><code>niv<span class="w"> </span>init<span class="w"> </span>--no-nixpkgs
-</code></pre></div></p>
-<p>Then add nixidy:
-<div class="highlight"><pre><span></span><code>niv<span class="w"> </span>add<span class="w"> </span>github<span class="w"> </span>arnarg/nixidy<span class="w"> </span>--branch<span class="w"> </span>main<span class="w"> </span><span class="c1"># or --rev vx.x.x</span>
-</code></pre></div></p>
+niv<span class="w"> </span>add<span class="w"> </span>github<span class="w"> </span>arnarg/nixidy<span class="w"> </span>--branch<span class="w"> </span>main
+</code></pre></div>
 </div>
 </div>
 </div>
-</details>
-<p>First a <code>default.nix</code> needs to be created in the root of the repository.</p>
+<p>Then create <code>default.nix</code>:</p>
 <div class="highlight"><span class="filename">default.nix</span><pre><span></span><code><span class="k">let</span>
-  <span class="c1"># With npins</span>
-  <span class="ss">sources</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./npins</span><span class="p">;</span>
-  <span class="c1"># With niv</span>
-  <span class="c1"># sources = import ./nix/sources.nix;</span>
-
-  <span class="c1"># Import nixidy</span>
+  <span class="ss">sources</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./npins</span><span class="p">;</span>  <span class="c1"># or ./nix/sources.nix for niv</span>
   <span class="ss">nixidy</span> <span class="o">=</span> <span class="nb">import</span> sources<span class="o">.</span>nixidy <span class="p">{};</span>
 <span class="k">in</span>
   nixidy<span class="o">.</span>lib<span class="o">.</span>mkEnvs <span class="p">{</span>
-    <span class="c1"># This declares the available nixidy envs.</span>
     <span class="ss">envs</span> <span class="o">=</span> <span class="p">{</span>
-      <span class="c1"># Currently we only have the one dev env.</span>
       dev<span class="o">.</span><span class="ss">modules</span> <span class="o">=</span> <span class="p">[</span><span class="l">./env/dev.nix</span><span class="p">];</span>
     <span class="p">};</span>
   <span class="p">}</span>
 </code></pre></div>
-<p>It's also a good idea to have <code>shell.nix</code> file in the root of the repository to have the necessary tools available.</p>
-<div class="highlight"><span class="filename">shell.nix</span><pre><span></span><code><span class="k">let</span>
-  <span class="c1"># With npins</span>
-  <span class="ss">sources</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./npins</span><span class="p">;</span>
-  <span class="c1"># With niv</span>
-  <span class="c1"># sources = import ./nix/sources.nix;</span>
-
-  <span class="c1"># nixpkgs added with:</span>
-  <span class="c1">#   npins: `npins add --name nixpkgs channel nixos-unstable`</span>
-  <span class="c1">#   niv: `niv add github nixos/nixpkgs -b nixos-unstable`</span>
-  <span class="ss">nixpkgs</span> <span class="o">=</span> sources<span class="o">.</span>nixpkgs<span class="p">;</span>
-  <span class="ss">pkgs</span> <span class="o">=</span> <span class="nb">import</span> nixpkgs <span class="p">{};</span>
-
-  <span class="c1"># Import nixidy</span>
-  <span class="ss">nixidy</span> <span class="o">=</span> <span class="nb">import</span> sources<span class="o">.</span>nixidy <span class="p">{</span><span class="k">inherit</span> nixpkgs<span class="p">;};</span>
-<span class="k">in</span>
-  pkgs<span class="o">.</span>mkShellNoCC <span class="p">{</span>
-    <span class="ss">packages</span> <span class="o">=</span> <span class="k">with</span> pkgs<span class="p">;</span> <span class="p">[</span>
-      <span class="c1"># Add nixidy cli</span>
-      nixidy<span class="o">.</span>nixidy
-      <span class="c1"># npins</span>
-      npins
-      <span class="c1"># or niv</span>
-      niv
-    <span class="p">];</span>
-  <span class="p">}</span>
-</code></pre></div>
-<div class="admonition info">
-<p class="admonition-title">Info</p>
-<p>In the rest of the guide when running the <code>nixidy</code> cli (e.g. <code>nixidy build</code>) you can run <code>nix-shell</code> to enter a nix shell where <code>nixidy</code> will be a avilable, with the <code>shell.nix</code> example above.</p>
-</div>
 <div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>In the rest of the guide the <code>nixidy</code> commands will also use the flakes format (e.g. <code>nixidy build .#dev</code>), when using a flake-less setup the <code>.#</code> prefix should be removed (e.g. <code>nixidy build dev</code>).</p>
+<p class="admonition-title">Command syntax</p>
+<p>The rest of this guide uses flake syntax (e.g., <code>nixidy build .#dev</code>). Without flakes, omit the <code>.#</code> prefix (e.g., <code>nixidy build dev</code>).</p>
 </div>
-<p>The <code>default.nix</code> file declares a single nixidy environment called <code>dev</code>. It includes a single nix module found at <code>./env/dev.nix</code>, so let's create that.</p>
-</div>
-</div>
-</div>
+</details>
+<h2 id="step-3-create-your-environment-configuration">Step 3: Create Your Environment Configuration<a class="headerlink" href="#step-3-create-your-environment-configuration" title="Permanent link">#</a></h2>
+<p>Create the environment directory and configuration file:</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>env
+</code></pre></div>
 <div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
-  <span class="c1"># Set the target repository for the rendered manifests</span>
-  <span class="c1"># and applications.</span>
-  <span class="c1"># This should be replaced with yours, usually the same</span>
-  <span class="c1"># repository as the nixidy definitions.</span>
-  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">repository</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/arnarg/nixidy-demo.git&quot;</span><span class="p">;</span>
-
-  <span class="c1"># Set the target branch the rendered manifests for _this_</span>
-  <span class="c1"># environment should be pushed to in the repository defined</span>
-  <span class="c1"># above.</span>
+  <span class="c1"># Where should the generated manifests be stored?</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">repository</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/YOUR_USERNAME/my-cluster.git&quot;</span><span class="p">;</span>
   nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">branch</span> <span class="o">=</span> <span class="s2">&quot;main&quot;</span><span class="p">;</span>
-
-  <span class="c1"># Set the target sub-directory to copy the generated</span>
-  <span class="c1"># manifests to when running `nixidy switch .#dev`.</span>
   nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">rootPath</span> <span class="o">=</span> <span class="s2">&quot;./manifests/dev&quot;</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Now running <code>nixidy info .#dev</code> you can get the same info we just declared above. This verifies that things are set up correctly so far.</p>
-<div class="highlight"><pre><span></span><code>&gt;&gt;<span class="w"> </span>nixidy<span class="w"> </span>info<span class="w"> </span>.#dev
-Repository:<span class="w"> </span>https://github.com/arnarg/nixidy-demo.git
-Branch:<span class="w">     </span>main
+<div class="admonition tip">
+<p class="admonition-title">Replace the repository URL</p>
+<p>Change <code>YOUR_USERNAME</code> to your actual GitHub username, or use your preferred Git hosting URL.</p>
+</div>
+<h2 id="step-4-verify-your-setup">Step 4: Verify Your Setup<a class="headerlink" href="#step-4-verify-your-setup" title="Permanent link">#</a></h2>
+<p>Enter the development shell and verify everything works:</p>
+<div class="highlight"><pre><span></span><code>nix<span class="w"> </span>develop
+nixidy<span class="w"> </span>info<span class="w"> </span>.#dev
 </code></pre></div>
-<p>If we now attempt to build this new environment with <code>nixidy build .#dev</code> we can see that nothing is generated but an empty folder called <code>apps</code>.</p>
-<div class="highlight"><pre><span></span><code>&gt;&gt;<span class="w"> </span>tree<span class="w"> </span>result
-result
-└──<span class="w"> </span>apps/
+<p>You should see:</p>
+<div class="highlight"><pre><span></span><code>Repository: https://github.com/YOUR_USERNAME/my-cluster.git
+Branch:     main
 </code></pre></div>
-<p>This is because we have not declared any applications yet for this environment.</p>
-<h2 id="our-first-application">Our first Application<a class="headerlink" href="#our-first-application" title="Permanent link">#</a></h2>
-<p>Applications and their resources are defined under <code>applications.&lt;applicationName&gt;</code>.</p>
+<p>Try building (it will be empty for now):</p>
+<div class="highlight"><pre><span></span><code>nixidy<span class="w"> </span>build<span class="w"> </span>.#dev
+tree<span class="w"> </span>result
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>result
+└── apps/
+</code></pre></div>
+<p>The <code>apps/</code> folder is empty because we haven't defined any applications yet.</p>
+<h2 id="step-5-create-your-first-application">Step 5: Create Your First Application<a class="headerlink" href="#step-5-create-your-first-application" title="Permanent link">#</a></h2>
+<p>Now let's add an nginx application. Update your <code>env/dev.nix</code>:</p>
 <div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
-  <span class="c1"># Set the target repository for the rendered manifests</span>
-  <span class="c1"># and applications.</span>
-  <span class="c1"># This should be replaced with yours, usually the same</span>
-  <span class="c1"># repository as the nixidy definitions.</span>
-  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">repository</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/arnarg/nixidy-demo.git&quot;</span><span class="p">;</span>
-
-  <span class="c1"># Set the target branch the rendered manifests for _this_</span>
-  <span class="c1"># environment should be pushed to in the repository defined</span>
-  <span class="c1"># above.</span>
+  <span class="c1"># Target configuration</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">repository</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/YOUR_USERNAME/my-cluster.git&quot;</span><span class="p">;</span>
   nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">branch</span> <span class="o">=</span> <span class="s2">&quot;main&quot;</span><span class="p">;</span>
-
-  <span class="c1"># Set the target sub-directory to copy the generated</span>
-  <span class="c1"># manifests to when running `nixidy switch .#dev`.</span>
   nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">rootPath</span> <span class="o">=</span> <span class="s2">&quot;./manifests/dev&quot;</span><span class="p">;</span>
 
-  <span class="c1"># Define an application called `demo`.</span>
-  applications<span class="o">.</span><span class="ss">demo</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="c1"># All resources will be deployed into this namespace.</span>
-    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;demo&quot;</span><span class="p">;</span>
+  <span class="c1"># Define the nginx application</span>
+  applications<span class="o">.</span><span class="ss">nginx</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># Deploy to the &quot;nginx&quot; namespace</span>
+    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
 
-    <span class="c1"># Automatically generate a namespace resource for the</span>
-    <span class="c1"># above set namespace</span>
+    <span class="c1"># Automatically create the namespace</span>
     <span class="ss">createNamespace</span> <span class="o">=</span> <span class="no">true</span><span class="p">;</span>
 
-    <span class="ss">resources</span> <span class="o">=</span> <span class="k">let</span>
-      <span class="ss">labels</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;app.kubernetes.io/name&quot;</span> <span class="o">=</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
-      <span class="p">};</span>
-    <span class="k">in</span> <span class="p">{</span>
-      <span class="c1"># Define a deployment for running an nginx server</span>
+    <span class="c1"># Define Kubernetes resources</span>
+    <span class="ss">resources</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="c1"># Deployment</span>
       deployments<span class="o">.</span>nginx<span class="o">.</span><span class="ss">spec</span> <span class="o">=</span> <span class="p">{</span>
-        selector<span class="o">.</span><span class="ss">matchLabels</span> <span class="o">=</span> labels<span class="p">;</span>
+        <span class="ss">replicas</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+        selector<span class="o">.</span>matchLabels<span class="o">.</span><span class="ss">app</span> <span class="o">=</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
         <span class="ss">template</span> <span class="o">=</span> <span class="p">{</span>
-          metadata<span class="o">.</span><span class="ss">labels</span> <span class="o">=</span> labels<span class="p">;</span>
-          <span class="ss">spec</span> <span class="o">=</span> <span class="p">{</span>
-            securityContext<span class="o">.</span><span class="ss">fsGroup</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">;</span>
-            containers<span class="o">.</span><span class="ss">nginx</span> <span class="o">=</span> <span class="p">{</span>
-              <span class="ss">image</span> <span class="o">=</span> <span class="s2">&quot;nginx:1.25.1&quot;</span><span class="p">;</span>
-              <span class="ss">imagePullPolicy</span> <span class="o">=</span> <span class="s2">&quot;IfNotPresent&quot;</span><span class="p">;</span>
-              <span class="ss">volumeMounts</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;/etc/nginx&quot;</span><span class="o">.</span><span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;config&quot;</span><span class="p">;</span>
-                <span class="s2">&quot;/var/lib/html&quot;</span><span class="o">.</span><span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;static&quot;</span><span class="p">;</span>
-              <span class="p">};</span>
-            <span class="p">};</span>
-            <span class="ss">volumes</span> <span class="o">=</span> <span class="p">{</span>
-              config<span class="o">.</span>configMap<span class="o">.</span><span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;nginx-config&quot;</span><span class="p">;</span>
-              static<span class="o">.</span>configMap<span class="o">.</span><span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;nginx-static&quot;</span><span class="p">;</span>
-            <span class="p">};</span>
+          metadata<span class="o">.</span>labels<span class="o">.</span><span class="ss">app</span> <span class="o">=</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
+          spec<span class="o">.</span>containers<span class="o">.</span><span class="ss">nginx</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="ss">image</span> <span class="o">=</span> <span class="s2">&quot;nginx:1.25.1&quot;</span><span class="p">;</span>
+            ports<span class="o">.</span>http<span class="o">.</span><span class="ss">containerPort</span> <span class="o">=</span> <span class="mi">80</span><span class="p">;</span>
           <span class="p">};</span>
         <span class="p">};</span>
       <span class="p">};</span>
 
-      <span class="c1"># Define config maps with config for nginx</span>
-      <span class="ss">configMaps</span> <span class="o">=</span> <span class="p">{</span>
-        nginx-config<span class="o">.</span>data<span class="o">.</span><span class="s2">&quot;nginx.conf&quot;</span> <span class="o">=</span> <span class="s s-Multiline">&#39;&#39;</span>
-<span class="s s-Multiline">          user nginx nginx;</span>
-<span class="s s-Multiline">          error_log /dev/stdout info;</span>
-<span class="s s-Multiline">          pid /dev/null;</span>
-<span class="s s-Multiline">          events {}</span>
-<span class="s s-Multiline">          http {</span>
-<span class="s s-Multiline">            access_log /dev/stdout;</span>
-<span class="s s-Multiline">            server {</span>
-<span class="s s-Multiline">              listen 80;</span>
-<span class="s s-Multiline">              index index.html;</span>
-<span class="s s-Multiline">              location / {</span>
-<span class="s s-Multiline">                root /var/lib/html;</span>
-<span class="s s-Multiline">              }</span>
-<span class="s s-Multiline">            }</span>
-<span class="s s-Multiline">          }</span>
-<span class="s s-Multiline">        &#39;&#39;</span><span class="p">;</span>
-
-        nginx-static<span class="o">.</span>data<span class="o">.</span><span class="s2">&quot;index.html&quot;</span> <span class="o">=</span> <span class="s s-Multiline">&#39;&#39;</span>
-<span class="s s-Multiline">          &lt;html&gt;&lt;body&gt;&lt;h1&gt;Hello from NGINX&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;</span>
-<span class="s s-Multiline">        &#39;&#39;</span><span class="p">;</span>
-      <span class="p">};</span>
-
-      <span class="c1"># Define service for nginx</span>
+      <span class="c1"># Service</span>
       services<span class="o">.</span>nginx<span class="o">.</span><span class="ss">spec</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="ss">selector</span> <span class="o">=</span> labels<span class="p">;</span>
+        selector<span class="o">.</span><span class="ss">app</span> <span class="o">=</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
         ports<span class="o">.</span>http<span class="o">.</span><span class="ss">port</span> <span class="o">=</span> <span class="mi">80</span><span class="p">;</span>
       <span class="p">};</span>
     <span class="p">};</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Running <code>nixidy build .#dev</code> will produce the following files.</p>
-<div class="highlight"><pre><span></span><code>&gt;&gt;<span class="w"> </span>tree<span class="w"> </span>-l<span class="w"> </span>result/
-├──<span class="w"> </span>apps
-│<span class="w">   </span>└──<span class="w"> </span>Application-demo.yaml
-└──<span class="w"> </span>demo
-<span class="w">    </span>├──<span class="w"> </span>ConfigMap-nginx-config.yaml
-<span class="w">    </span>├──<span class="w"> </span>ConfigMap-nginx-static.yaml
-<span class="w">    </span>├──<span class="w"> </span>Deployment-nginx.yaml
-<span class="w">    </span>├──<span class="w"> </span>Namespace-demo.yaml
-<span class="w">    </span>└──<span class="w"> </span>Service-nginx.yaml
+<h2 id="step-6-build-and-inspect">Step 6: Build and Inspect<a class="headerlink" href="#step-6-build-and-inspect" title="Permanent link">#</a></h2>
+<p>Build your configuration:</p>
+<div class="highlight"><pre><span></span><code>nixidy<span class="w"> </span>build<span class="w"> </span>.#dev
+tree<span class="w"> </span>result
 </code></pre></div>
-<p>And the contents of the Argo CD application automatically generated is the following:</p>
-<div class="highlight"><span class="filename">apps/Application-demo.yaml</span><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<p>You should see:</p>
+<div class="highlight"><pre><span></span><code>result
+├── apps
+│   └── Application-nginx.yaml
+└── nginx
+    ├── Deployment-nginx.yaml
+    ├── Namespace-nginx.yaml
+    └── Service-nginx.yaml
+</code></pre></div>
+<p>Inspect the generated deployment:</p>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>result/nginx/Deployment-nginx.yaml
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx:1.25.1</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">          </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+</code></pre></div>
+<p>Nixidy also generates an Argo CD Application:</p>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>result/apps/Application-nginx.yaml
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Application</span>
 <span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="c1"># This is the name of the application (`applications.demo`).</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
 <span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argocd</span>
 <span class="nt">spec</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">destination</span><span class="p">:</span>
-<span class="w">    </span><span class="c1"># This is the destination namespace for the application</span>
-<span class="w">    </span><span class="c1"># specified with `applications.demo.namespace`.</span>
-<span class="w">    </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo</span>
+<span class="w">    </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
 <span class="w">    </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://kubernetes.default.svc</span>
 <span class="w">  </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
 <span class="w">  </span><span class="nt">source</span><span class="p">:</span>
-<span class="w">    </span><span class="c1"># This is the output path declared for the application with</span>
-<span class="w">    </span><span class="c1"># option `applications.&lt;applicationName&gt;.output.path`</span>
-<span class="w">    </span><span class="c1"># (defaults to the name) with `nixidy.target.rootPath`</span>
-<span class="w">    </span><span class="c1"># prefix.</span>
-<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./manifests/dev/demo</span>
-<span class="w">    </span><span class="c1"># Repository specified in `nixidy.target.repository`.</span>
-<span class="w">    </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/arnarg/nixidy-demo.git</span>
-<span class="w">    </span><span class="c1"># Branch specified in `nixidy.target.branch`.</span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./manifests/dev/nginx</span>
+<span class="w">    </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/YOUR_USERNAME/my-cluster.git</span>
 <span class="w">    </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
-<span class="w">  </span><span class="nt">syncPolicy</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">automated</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">prune</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="w">      </span><span class="nt">selfHeal</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </code></pre></div>
-<p>A directory with rendered resources is generated for each application declared with <code>applications.&lt;name&gt;</code> as well as an Argo CD application resource YAML file in <code>apps/</code>. What this provides is the option to bootstrap the whole rendered branch to a cluster by adding an application pointing to the <code>apps/</code> folder.</p>
-<p>See <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern">App of Apps Pattern</a>.</p>
-<p>Running <code>nixidy switch .#dev</code> will create the <code>./manifests/dev</code> relative to the current working directory and sync the newly generated manifests into it.</p>
-<div class="admonition info">
-<p class="admonition-title">Info</p>
-<p>While nixidy is primary a tool for doing GitOps using Argo CD it also has support for <a href="../direct_apply/">directly applying manifests</a> to a Kubernetes cluster.</p>
-</div>
-<h2 id="bootstrapping-cluster">Bootstrapping Cluster<a class="headerlink" href="#bootstrapping-cluster" title="Permanent link">#</a></h2>
-<p>After creating a git repository that is specified in <code>nixidy.target.repository</code> and pushing the generated manifests (e.g. by running <code>nixidy switch .#dev</code>) to the branch specified in <code>nixidy.target.branch</code>, your cluster can be bootstrapped.</p>
-<p>Make sure you have access to the Kubernetes API and Argo CD is installed and running on your cluster (refer to Argo CD's <a href="https://argo-cd.readthedocs.io/en/stable/getting_started">getting started guide</a> for that).</p>
-<p>For quick bootstrapping you can run the command <code>nixidy bootstrap</code> to output an initial <code>Application</code> that will trigger a deployment of all other applications.</p>
-<div class="highlight"><pre><span></span><code>&gt;&gt;<span class="w"> </span>nixidy<span class="w"> </span>bootstrap<span class="w"> </span>.#dev
----
-apiVersion:<span class="w"> </span>argoproj.io/v1alpha1
-kind:<span class="w"> </span>Application
-metadata:
-<span class="w">  </span>name:<span class="w"> </span>apps
-<span class="w">  </span>namespace:<span class="w"> </span>argocd
-spec:
-<span class="w">  </span>destination:
-<span class="w">    </span>namespace:<span class="w"> </span>argocd
-<span class="w">    </span>server:<span class="w"> </span>https://kubernetes.default.svc
-<span class="w">  </span>project:<span class="w"> </span>default
-<span class="w">  </span>source:
-<span class="w">    </span>path:<span class="w"> </span>./manifests/dev/apps
-<span class="w">    </span>repoURL:<span class="w"> </span>https://github.com/arnarg/nixidy-demo.git
-<span class="w">    </span>targetRevision:<span class="w"> </span>main
-<span class="w">  </span>syncPolicy:
-<span class="w">    </span>automated:
-<span class="w">      </span>prune:<span class="w"> </span><span class="nb">true</span>
-<span class="w">      </span>selfHeal:<span class="w"> </span><span class="nb">true</span>
+<h2 id="step-7-sync-manifests-to-your-repository">Step 7: Sync Manifests to Your Repository<a class="headerlink" href="#step-7-sync-manifests-to-your-repository" title="Permanent link">#</a></h2>
+<p>Copy the generated manifests to your repository:</p>
+<div class="highlight"><pre><span></span><code>nixidy<span class="w"> </span>switch<span class="w"> </span>.#dev
 </code></pre></div>
-<p>To actually deploy it, run <code>nixidy bootstrap .#dev | kubectl apply -f -</code> (this assumes that the argocd namespace already exists in the cluster).</p>
-<p>Alternatively, create a new application in the Argo CD Web GUI by specifying the <code>manifests/dev/apps</code> path.</p>
+<p>This creates the <code>./manifests/dev</code> directory with all your manifests. Commit and push:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Initial nixidy configuration&quot;</span>
+git<span class="w"> </span>push
+</code></pre></div>
+<h2 id="step-8-deploy-to-your-cluster">Step 8: Deploy to Your Cluster<a class="headerlink" href="#step-8-deploy-to-your-cluster" title="Permanent link">#</a></h2>
+<h3 id="option-a-bootstrap-with-argo-cd">Option A: Bootstrap with Argo CD<a class="headerlink" href="#option-a-bootstrap-with-argo-cd" title="Permanent link">#</a></h3>
+<p>If you have Argo CD installed, bootstrap all applications with one command:</p>
+<div class="highlight"><pre><span></span><code>nixidy<span class="w"> </span>bootstrap<span class="w"> </span>.#dev<span class="w"> </span><span class="p">|</span><span class="w"> </span>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-
+</code></pre></div>
+<p>This creates an "app of apps" that automatically deploys all your applications.</p>
+<h3 id="option-b-apply-directly">Option B: Apply Directly<a class="headerlink" href="#option-b-apply-directly" title="Permanent link">#</a></h3>
+<p>For quick testing without Argo CD:</p>
+<div class="highlight"><pre><span></span><code>nixidy<span class="w"> </span>apply<span class="w"> </span>.#dev
+</code></pre></div>
+<p>This applies all manifests directly using <code>kubectl apply --prune</code>.</p>
+<h2 id="adding-more-resources">Adding More Resources<a class="headerlink" href="#adding-more-resources" title="Permanent link">#</a></h2>
+<p>Let's extend the nginx application with a ConfigMap:</p>
+<div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">repository</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/YOUR_USERNAME/my-cluster.git&quot;</span><span class="p">;</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">branch</span> <span class="o">=</span> <span class="s2">&quot;main&quot;</span><span class="p">;</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">rootPath</span> <span class="o">=</span> <span class="s2">&quot;./manifests/dev&quot;</span><span class="p">;</span>
+
+  applications<span class="o">.</span><span class="ss">nginx</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
+    <span class="ss">createNamespace</span> <span class="o">=</span> <span class="no">true</span><span class="p">;</span>
+
+    <span class="ss">resources</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="c1"># Deployment with ConfigMap volume</span>
+      deployments<span class="o">.</span>nginx<span class="o">.</span><span class="ss">spec</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="ss">replicas</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+        selector<span class="o">.</span>matchLabels<span class="o">.</span><span class="ss">app</span> <span class="o">=</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
+        <span class="ss">template</span> <span class="o">=</span> <span class="p">{</span>
+          metadata<span class="o">.</span>labels<span class="o">.</span><span class="ss">app</span> <span class="o">=</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
+          <span class="ss">spec</span> <span class="o">=</span> <span class="p">{</span>
+            containers<span class="o">.</span><span class="ss">nginx</span> <span class="o">=</span> <span class="p">{</span>
+              <span class="ss">image</span> <span class="o">=</span> <span class="s2">&quot;nginx:1.25.1&quot;</span><span class="p">;</span>
+              ports<span class="o">.</span>http<span class="o">.</span><span class="ss">containerPort</span> <span class="o">=</span> <span class="mi">80</span><span class="p">;</span>
+              volumeMounts<span class="o">.</span><span class="s2">&quot;/usr/share/nginx/html&quot;</span><span class="o">.</span><span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;html&quot;</span><span class="p">;</span>
+            <span class="p">};</span>
+            volumes<span class="o">.</span>html<span class="o">.</span>configMap<span class="o">.</span><span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;nginx-html&quot;</span><span class="p">;</span>
+          <span class="p">};</span>
+        <span class="p">};</span>
+      <span class="p">};</span>
+
+      <span class="c1"># Service</span>
+      services<span class="o">.</span>nginx<span class="o">.</span><span class="ss">spec</span> <span class="o">=</span> <span class="p">{</span>
+        selector<span class="o">.</span><span class="ss">app</span> <span class="o">=</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
+        ports<span class="o">.</span>http<span class="o">.</span><span class="ss">port</span> <span class="o">=</span> <span class="mi">80</span><span class="p">;</span>
+      <span class="p">};</span>
+
+      <span class="c1"># ConfigMap with HTML content</span>
+      configMaps<span class="o">.</span>nginx-html<span class="o">.</span>data<span class="o">.</span><span class="s2">&quot;index.html&quot;</span> <span class="o">=</span> <span class="s s-Multiline">&#39;&#39;</span>
+<span class="s s-Multiline">        &lt;!DOCTYPE html&gt;</span>
+<span class="s s-Multiline">        &lt;html&gt;</span>
+<span class="s s-Multiline">          &lt;body&gt;</span>
+<span class="s s-Multiline">            &lt;h1&gt;Hello from nixidy!&lt;/h1&gt;</span>
+<span class="s s-Multiline">          &lt;/body&gt;</span>
+<span class="s s-Multiline">        &lt;/html&gt;</span>
+<span class="s s-Multiline">      &#39;&#39;</span><span class="p">;</span>
+    <span class="p">};</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Build to see the new ConfigMap:</p>
+<div class="highlight"><pre><span></span><code>nixidy<span class="w"> </span>build<span class="w"> </span>.#dev
+cat<span class="w"> </span>result/nginx/ConfigMap-nginx-html.yaml
+</code></pre></div>
+<h2 id="adding-multiple-applications">Adding Multiple Applications<a class="headerlink" href="#adding-multiple-applications" title="Permanent link">#</a></h2>
+<p>You can define multiple applications in the same file or split them into separate modules:</p>
+<div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">repository</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/YOUR_USERNAME/my-cluster.git&quot;</span><span class="p">;</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">branch</span> <span class="o">=</span> <span class="s2">&quot;main&quot;</span><span class="p">;</span>
+  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">rootPath</span> <span class="o">=</span> <span class="s2">&quot;./manifests/dev&quot;</span><span class="p">;</span>
+
+  <span class="c1"># First application</span>
+  applications<span class="o">.</span><span class="ss">nginx</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
+    <span class="ss">createNamespace</span> <span class="o">=</span> <span class="no">true</span><span class="p">;</span>
+    resources<span class="o">.</span>deployments<span class="o">.</span>nginx<span class="o">.</span><span class="ss">spec</span> <span class="o">=</span> <span class="p">{</span>
+      selector<span class="o">.</span>matchLabels<span class="o">.</span><span class="ss">app</span> <span class="o">=</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
+      <span class="ss">template</span> <span class="o">=</span> <span class="p">{</span>
+        metadata<span class="o">.</span>labels<span class="o">.</span><span class="ss">app</span> <span class="o">=</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
+        spec<span class="o">.</span>containers<span class="o">.</span>nginx<span class="o">.</span><span class="ss">image</span> <span class="o">=</span> <span class="s2">&quot;nginx:1.25.1&quot;</span><span class="p">;</span>
+      <span class="p">};</span>
+    <span class="p">};</span>
+  <span class="p">};</span>
+
+  <span class="c1"># Second application</span>
+  applications<span class="o">.</span><span class="ss">redis</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;redis&quot;</span><span class="p">;</span>
+    <span class="ss">createNamespace</span> <span class="o">=</span> <span class="no">true</span><span class="p">;</span>
+    resources<span class="o">.</span>deployments<span class="o">.</span>redis<span class="o">.</span><span class="ss">spec</span> <span class="o">=</span> <span class="p">{</span>
+      selector<span class="o">.</span>matchLabels<span class="o">.</span><span class="ss">app</span> <span class="o">=</span> <span class="s2">&quot;redis&quot;</span><span class="p">;</span>
+      <span class="ss">template</span> <span class="o">=</span> <span class="p">{</span>
+        metadata<span class="o">.</span>labels<span class="o">.</span><span class="ss">app</span> <span class="o">=</span> <span class="s2">&quot;redis&quot;</span><span class="p">;</span>
+        spec<span class="o">.</span>containers<span class="o">.</span>redis<span class="o">.</span><span class="ss">image</span> <span class="o">=</span> <span class="s2">&quot;redis:7&quot;</span><span class="p">;</span>
+      <span class="p">};</span>
+    <span class="p">};</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="project-structure">Project Structure<a class="headerlink" href="#project-structure" title="Permanent link">#</a></h2>
+<p>A typical nixidy project looks like this:</p>
+<div class="highlight"><pre><span></span><code>my-cluster/
+├── flake.nix              # Project definition
+├── flake.lock             # Locked dependencies
+├── env/
+│   ├── dev.nix            # Development environment
+│   ├── staging.nix        # Staging environment
+│   └── prod.nix           # Production environment
+├── modules/
+│   ├── default.nix        # Common module that imports all applications
+│   ├── nginx.nix          # Reusable nginx module
+│   └── redis.nix          # Reusable redis module
+└── manifests/             # Generated manifests
+    ├── dev/
+    ├── staging/
+    └── prod/
+</code></pre></div>
+<h2 id="common-commands">Common Commands<a class="headerlink" href="#common-commands" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nixidy info .#dev</code></td>
+<td>Show environment info</td>
+</tr>
+<tr>
+<td><code>nixidy build .#dev</code></td>
+<td>Build manifests to <code>./result</code></td>
+</tr>
+<tr>
+<td><code>nixidy switch .#dev</code></td>
+<td>Sync manifests to target directory</td>
+</tr>
+<tr>
+<td><code>nixidy bootstrap .#dev</code></td>
+<td>Output bootstrap Application YAML</td>
+</tr>
+<tr>
+<td><code>nixidy apply .#dev</code></td>
+<td>Apply directly to cluster</td>
+</tr>
+</tbody>
+</table>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">#</a></h2>
+<h3 id="nixidy-command-not-found">"nixidy: command not found"<a class="headerlink" href="#nixidy-command-not-found" title="Permanent link">#</a></h3>
+<p>Make sure you're in the development shell:</p>
+<div class="highlight"><pre><span></span><code>nix<span class="w"> </span>develop
+</code></pre></div>
+<p>Or run nixidy directly:</p>
+<div class="highlight"><pre><span></span><code>nix<span class="w"> </span>run<span class="w"> </span>.#nixidy<span class="w"> </span>--<span class="w"> </span>build<span class="w"> </span>.#dev
+</code></pre></div>
+<h3 id="build-fails-with-type-errors">Build fails with type errors<a class="headerlink" href="#build-fails-with-type-errors" title="Permanent link">#</a></h3>
+<p>Nixidy validates your configuration against Kubernetes schemas. Check the error message for the specific field that's incorrect. Common issues:</p>
+<ul>
+<li>Wrong types (string instead of number)</li>
+<li>Misspelled field names</li>
+</ul>
 <h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">#</a></h2>
-<p>Now that the cluster is running the applications specified in your nixidy config, you might want to build your applications on top of <a href="../helm_charts/">helm charts</a> or have <a href="../github_actions/">Github Actions</a> generate the manifests.</p>
+<p>Now that you have a working nixidy project, explore these topics:</p>
+<ul>
+<li><strong><a href="../helm_charts/">Helm Charts</a></strong> — Use existing Helm charts in your applications</li>
+<li><strong><a href="../templates/">Templates</a></strong> — Create reusable application patterns</li>
+<li><strong><a href="../git_strategies/">Git Strategies</a></strong> — Organize manifests across branches or repositories</li>
+<li><strong><a href="../github_actions/">GitHub Actions</a></strong> — Automate manifest generation in CI</li>
+<li><strong><a href="../direct_apply/">Direct Apply</a></strong> — Deploy without Argo CD</li>
+</ul>
+<h2 id="example-repository">Example Repository<a class="headerlink" href="#example-repository" title="Permanent link">#</a></h2>
+<p>For a complete real-world example, check out <a href="https://github.com/arnarg/cluster">arnarg/cluster</a>.</p>
 
 
 
