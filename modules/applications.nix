@@ -58,7 +58,7 @@ in
     nixidy = {
       k8sVersion = mkOption {
         type = with types; enum versions;
-        default = "1.33";
+        default = "1.34";
         description = "The Kubernetes version for generated resource options to use.";
       };
       applicationImports = mkOption {
