@@ -100,20 +100,20 @@ def generate_jsonschema(prefix, files, attr_name_overrides):
             if "type" in definition and definition["type"] == "object":
                 if "properties" not in definition:
                     if "additionalProperties" in definition:
-                        if "anyOf" in definition["additionalProperties"]:
-                            if definition["additionalProperties"].get(
-                                "x-kubernetes-int-or-string", False
-                            ):
-                                # Patch the definition based on the custom x-kubernetes-int-or-string
-                                definition["additionalProperties"] = {
-                                    "type": "string",
-                                    "format": "int-or-string",
-                                }
-                            else:
-                                # The nix generator doesn't support anyOf
-                                definition["additionalProperties"] = definition[
-                                    "additionalProperties"
-                                ]["anyOf"][0]
+                        if definition["additionalProperties"].get(
+                            "x-kubernetes-int-or-string", False
+                        ):
+                            # Patch the definition based on the custom x-kubernetes-int-or-string
+                            definition["additionalProperties"] = {
+                                "type": "string",
+                                "format": "int-or-string",
+                            }
+                        elif "anyOf" in definition["additionalProperties"]:
+                            # The nix generator doesn't support anyOf
+                            definition["additionalProperties"] = definition[
+                                "additionalProperties"
+                            ]["anyOf"][0]
+                    
 
                         # If additionalProperties only contains 'x-kubernetes-preserve-unknown-fields'
                         # we can just drop the `additionalProperties` entirely and the generator
