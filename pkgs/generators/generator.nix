@@ -109,7 +109,7 @@ let
         else if def.type == "array" then
           types.listOf (mapType def.items)
         else if def.type == "any" then
-          types.any
+          types.attrs
         else
           throw "type ${def.type} not supported"
       else
