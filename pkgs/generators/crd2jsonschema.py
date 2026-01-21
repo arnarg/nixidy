@@ -153,7 +153,7 @@ def generate_jsonschema(prefix, files, attr_name_overrides):
                 # If a definition contains `x-kubernetes-preserve-unknown-fields` without
                 # any `type` set, we assume the `type` is `object`.
                 if definition.get("x-kubernetes-preserve-unknown-fields", False):
-                    definition["type"] = "object"
+                    definition["type"] = "any"
                     return definition
 
                 # If a definition contains `x-kubernetes-int-or-string` without any `type`
