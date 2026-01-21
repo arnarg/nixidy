@@ -151,7 +151,7 @@ def generate_jsonschema(prefix, files, attr_name_overrides):
             # Try to infer type from special kubernetes fields
             elif "type" not in definition:
                 # If a definition contains `x-kubernetes-preserve-unknown-fields` without
-                # any `type` set, we assume the `type` is `object`.
+                # any `type` set, we set the `type` to `any` to opt it out of type validation and allow all json values.
                 if definition.get("x-kubernetes-preserve-unknown-fields", False):
                     definition["type"] = "any"
                     return definition
