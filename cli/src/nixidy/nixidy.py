@@ -214,21 +214,21 @@ def apply(environment: str, file: str):
 def diff(environment: str, file: str, path: Optional[str], env: Optional[str]):
     """Diff environment manifests.
 
-    ENVIRONMENT is the environment to build and compare with either --path or --env.
+    ENVIRONMENT is the environment to build and compare with either `--path` or `--env`.
 
-    Use --path to compare with a previously built environment at a specific path.
+    Use `--path` to compare with a previously built environment at a specific path.
 
-    Use --env to build and compare with another environment.
+    Use `--env` to build and compare with another environment.
 
     Examples:
 
-      # Compare prod with staging environment.
+        # Compare prod with staging environment.
 
-      nixidy diff .#prod --env .#staging
+        nixidy diff .#prod --env .#staging
 
-      # Compare prod with previously built manifests in ./manifests/prod
+        # Compare prod with previously built manifests in ./manifests/prod
 
-      nixidy diff .#prod --path ./manifests/prod
+        nixidy diff .#prod --path ./manifests/prod
     """
     # Check that only one of `path` or `env` is defined.
     if path and env:

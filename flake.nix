@@ -25,7 +25,6 @@
         pkgs = import nixpkgs {
           inherit system;
         };
-        packages = import ./nixidy pkgs;
         mlib = import ./lib {
           inherit pkgs;
           kubelib = nix-kube-generators;
@@ -35,7 +34,7 @@
         packages = {
           inherit (mlib.helm) mkChartAttrs;
 
-          default = packages.nixidy;
+          default = self.packages.${system}.cli;
           cli = pkgs.callPackage ./cli { };
           generators = import ./pkgs/generators {
             inherit pkgs;

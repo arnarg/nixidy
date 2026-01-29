@@ -1,6 +1,6 @@
 [project]
 name = "nixidy"
-version = "0.17.0"
+version = "0.18.1"
 description = "CLI for nixidy"
 
 requires-python = ">=3.12"
