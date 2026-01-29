@@ -2,51 +2,45 @@
 
 [nixhelm](https://github.com/farcaller/nixhelm) is a collection of Helm Charts that can be used with [nix-kube-generators](https://github.com/farcaller/nixhelm) and as a result also nixidy. The charts are automatically updated to the most recent version by CI regularly.
 
-=== "flakes"
-    To use with nixidy, pass the nixhelm derivation attribute set to nixidy's `mkEnv` builder like so.
+To use with nixidy, pass the nixhelm derivation attribute set to nixidy's `mkEnv` builder like so.
 
-    ```nix title="flake.nix"
-    {
-      description = "My ArgoCD configuration with nixidy.";
+```nix title="flake.nix"
+{
+  description = "My ArgoCD configuration with nixidy.";
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+  inputs.flake-utils.url = "github:numtide/flake-utils";
+  inputs.nixidy = {
+    url = "github:arnarg/nixidy";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+  inputs.nixhelm = {
+    url = "github:farcaller/nixhelm";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+  outputs = {
+    self,
+    nixpkgs,
+    flake-utils,
+    nixidy,
+    nixhelm,
+  }: (flake-utils.lib.eachDefaultSystem (system: let
+    pkgs = import nixpkgs {
+      inherit system;
+    };
+  in {
+    nixidyEnvs.dev = nixidy.lib.mkEnv {
+      inherit pkgs;
+      # Pass nixhelm to all nixidy modules.
+      charts = nixhelm.chartsDerivations.${system};
+      modules = [./env/dev.nix];
+    };
+  }));
+}
+```
 
-      inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-      inputs.flake-utils.url = "github:numtide/flake-utils";
+??? note "Using nixidy without flakes"
 
-      inputs.nixidy = {
-        url = "github:arnarg/nixidy";
-        inputs.nixpkgs.follows = "nixpkgs";
-      };
-
-      inputs.nixhelm = {
-        url = "github:farcaller/nixhelm";
-        inputs.nixpkgs.follows = "nixpkgs";
-      };
-
-      outputs = {
-        self,
-        nixpkgs,
-        flake-utils,
-        nixidy,
-        nixhelm,
-      }: (flake-utils.lib.eachDefaultSystem (system: let
-        pkgs = import nixpkgs {
-          inherit system;
-        };
-      in {
-        nixidyEnvs.dev = nixidy.lib.mkEnv {
-          inherit pkgs;
-
-          # Pass nixhelm to all nixidy modules.
-          charts = nixhelm.chartsDerivations.${system};
-
-          modules = [./env/dev.nix];
-        };
-      }));
-    }
-    ```
-
-=== "flake-less"
-    To use with nixidy, pass the nixhelm `charts/` directory to nixidy in a module like so:
+    If you prefer not to use flakes, the following can be written to `default.nix` instead.
 
     ```nix title="default.nix"
     let
