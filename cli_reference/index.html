@@ -8,28 +8,28 @@
       
       
       
-        <link rel="canonical" href="https://nixidy.dev/user_guide/git_strategies/">
+        <link rel="canonical" href="https://nixidy.dev/cli_reference/">
       
       
-        <link rel="prev" href="../templates/">
+        <link rel="prev" href="../developer_guide/architecture/">
       
       
-        <link rel="next" href="../github_actions/">
+        <link rel="next" href="../library/">
       
       
-      <link rel="icon" href="../../images/icon.svg">
+      <link rel="icon" href="../images/icon.svg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
     
     
       
-        <title>Git Strategies - nixidy</title>
+        <title>CLI Reference - nixidy</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.342714a4.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -48,9 +48,9 @@
       
     
     
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#git-strategies" class="md-skip">
+        <a href="#cli-reference" class="md-skip">
           Skip to content
         </a>
       
@@ -92,9 +92,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="nixidy" class="md-header__button md-logo" aria-label="nixidy" data-md-component="logo">
+    <a href=".." title="nixidy" class="md-header__button md-logo" aria-label="nixidy" data-md-component="logo">
       
-  <img src="../../images/icon.svg" alt="logo">
+  <img src="../images/icon.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Git Strategies
+              CLI Reference
             
           </span>
         </div>
@@ -227,9 +227,9 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="nixidy" class="md-nav__button md-logo" aria-label="nixidy" data-md-component="logo">
+    <a href=".." title="nixidy" class="md-nav__button md-logo" aria-label="nixidy" data-md-component="logo">
       
-  <img src="../../images/icon.svg" alt="logo">
+  <img src="../images/icon.svg" alt="logo">
 
     </a>
     nixidy
@@ -256,7 +256,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -275,20 +275,18 @@
       
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
         
           
           <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
@@ -304,7 +302,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             User Guide
@@ -318,7 +316,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting_started/" class="md-nav__link">
+      <a href="../user_guide/getting_started/" class="md-nav__link">
         
   
   
@@ -341,7 +339,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../helm_charts/" class="md-nav__link">
+      <a href="../user_guide/helm_charts/" class="md-nav__link">
         
   
   
@@ -364,7 +362,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../typed_resources/" class="md-nav__link">
+      <a href="../user_guide/typed_resources/" class="md-nav__link">
         
   
   
@@ -387,7 +385,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../templates/" class="md-nav__link">
+      <a href="../user_guide/templates/" class="md-nav__link">
         
   
   
@@ -407,32 +405,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Git Strategies
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../user_guide/git_strategies/" class="md-nav__link">
         
   
   
@@ -443,98 +419,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#monorepo" class="md-nav__link">
-    <span class="md-ellipsis">
-      Monorepo
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Monorepo">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      Setup
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#environment-branches" class="md-nav__link">
-    <span class="md-ellipsis">
-      Environment branches
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Environment branches">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#setup_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      Setup
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#environment-repositories" class="md-nav__link">
-    <span class="md-ellipsis">
-      Environment repositories
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Environment repositories">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#setup_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      Setup
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -547,7 +431,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../github_actions/" class="md-nav__link">
+      <a href="../user_guide/github_actions/" class="md-nav__link">
         
   
   
@@ -570,7 +454,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../transformers/" class="md-nav__link">
+      <a href="../user_guide/transformers/" class="md-nav__link">
         
   
   
@@ -593,7 +477,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../using_nixhelm/" class="md-nav__link">
+      <a href="../user_guide/using_nixhelm/" class="md-nav__link">
         
   
   
@@ -616,7 +500,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../direct_apply/" class="md-nav__link">
+      <a href="../user_guide/direct_apply/" class="md-nav__link">
         
   
   
@@ -684,7 +568,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../developer_guide/architecture/" class="md-nav__link">
+      <a href="../developer_guide/architecture/" class="md-nav__link">
         
   
   
@@ -711,18 +595,20 @@
       
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
           <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
@@ -738,7 +624,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             Reference
@@ -749,10 +635,19 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../cli_reference/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -763,6 +658,7 @@
   
 
       </a>
+      
     </li>
   
 
@@ -775,7 +671,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../library/" class="md-nav__link">
+      <a href="../library/" class="md-nav__link">
         
   
   
@@ -798,7 +694,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../options/" class="md-nav__link">
+      <a href="../options/" class="md-nav__link">
         
   
   
@@ -841,86 +737,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#monorepo" class="md-nav__link">
-    <span class="md-ellipsis">
-      Monorepo
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Monorepo">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      Setup
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#environment-branches" class="md-nav__link">
-    <span class="md-ellipsis">
-      Environment branches
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Environment branches">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#setup_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      Setup
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#environment-repositories" class="md-nav__link">
-    <span class="md-ellipsis">
-      Environment repositories
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Environment repositories">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#setup_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      Setup
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -938,97 +754,111 @@
   
 
 
-<h1 id="git-strategies">Git Strategies<a class="headerlink" href="#git-strategies" title="Permanent link">#</a></h1>
-<p>When it comes to planning out how to structure the git repositories for your environments some options are available.</p>
-<h2 id="monorepo">Monorepo<a class="headerlink" href="#monorepo" title="Permanent link">#</a></h2>
-<p>With this strategy everything happens on the <code>main</code>/<code>master</code> branch. With every change to nixidy modules should result in a rebuild and the resulting manifests will be put in a sub-directory on the same branch.</p>
-<p><img alt="Diagram showing the monorepo strategy." src="../../images/monorepo.jpg" /></p>
-<p>The biggest gain from using this strategy is fast iteration locally as any change made to a nixidy module can be previewed by running <code>nixidy switch .#&lt;env&gt;</code> and then followed by <code>git diff</code> to see what has actually changed in the generated manifests.</p>
-<p>This strategy does require more complicated access control mechanism such as <a href="https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners">CODEOWNER file</a> to make sure not everyone can change the generated manifests.</p>
-<h3 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">#</a></h3>
-<p>In a module that's common to all the environment the target repository and branch needs to be set.</p>
-<div class="highlight"><span class="filename">modules/default.nix</span><pre><span></span><code><span class="p">{</span>
-  <span class="c1"># Set the target repository for the rendered manifests</span>
-  <span class="c1"># and applications.</span>
-  <span class="c1"># This should be replaced with yours.</span>
-  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">repository</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/arnarg/nixidy-demo.git&quot;</span><span class="p">;</span>
+<h1 id="cli-reference">CLI Reference<a class="headerlink" href="#cli-reference" title="Permanent link">#</a></h1>
+<p>This page provides documentation for the nixidy command line tool.</p>
+<h1 id="nixidy">nixidy<a class="headerlink" href="#nixidy" title="Permanent link">#</a></h1>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code>nixidy [OPTIONS] COMMAND [ARGS]...
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<div class="highlight"><pre><span></span><code>  --help  Show this message and exit.
+</code></pre></div>
+<p><strong>Subcommands</strong></p>
+<ul>
+<li><em><a href="#nixidy-apply">apply</a></em>: Build and apply declarative manifests to Kubernetes.</li>
+<li><em><a href="#nixidy-bootstrap">bootstrap</a></em>: Output a manifest to bootstrap appOfApps.</li>
+<li><em><a href="#nixidy-build">build</a></em>: Build a nixidy environment.</li>
+<li><em><a href="#nixidy-diff">diff</a></em>: Diff environment manifests.</li>
+<li><em><a href="#nixidy-info">info</a></em>: Get info about a nixidy environment.</li>
+<li><em><a href="#nixidy-switch">switch</a></em>: Build and switch to a nixidy environment.</li>
+</ul>
+<h2 id="nixidy-apply">nixidy apply<a class="headerlink" href="#nixidy-apply" title="Permanent link">#</a></h2>
+<p>Build and apply declarative manifests to Kubernetes.</p>
+<p>ENVIRONMENT is used to determine if flakes or flake-less nix should be used and which environment should be built.</p>
+<p>Example: <code>.#prod</code> Uses a flake in the local directory whereas <code>prod</code> does not use flake but builds the <code>prod</code> environment</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code>nixidy apply [OPTIONS] ENVIRONMENT
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<div class="highlight"><pre><span></span><code>  -f, --file PATH  Path to entrypoint nix file (only flake-less).  [default:
+                   default.nix]
+  --help           Show this message and exit.
+</code></pre></div>
+<h2 id="nixidy-bootstrap">nixidy bootstrap<a class="headerlink" href="#nixidy-bootstrap" title="Permanent link">#</a></h2>
+<p>Output a manifest to bootstrap appOfApps.</p>
+<p>ENVIRONMENT is used to determine if flakes or flake-less nix should be used and which environment should be built.</p>
+<p>Example: <code>.#prod</code> Uses a flake in the local directory whereas <code>prod</code> does not use flake but builds the <code>prod</code> environment</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code>nixidy bootstrap [OPTIONS] ENVIRONMENT
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<div class="highlight"><pre><span></span><code>  -f, --file PATH  Path to entrypoint nix file (only flake-less).  [default:
+                   default.nix]
+  --help           Show this message and exit.
+</code></pre></div>
+<h2 id="nixidy-build">nixidy build<a class="headerlink" href="#nixidy-build" title="Permanent link">#</a></h2>
+<p>Build a nixidy environment.</p>
+<p>ENVIRONMENT is used to determine if flakes or flake-less nix should be used and which environment should be built.</p>
+<p>Example: <code>.#prod</code> Uses a flake in the local directory whereas <code>prod</code> does not use flake but builds the <code>prod</code> environment</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code>nixidy build [OPTIONS] ENVIRONMENT
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<div class="highlight"><pre><span></span><code>  -f, --file PATH    Path to entrypoint nix file (only flake-less).  [default:
+                     default.nix]
+  --no-link          Don&#39;t create a result symlink.
+  --out-link PATH    Create a custom result symlink.
+  --print-out-paths  Print the resulting output paths.
+  --help             Show this message and exit.
+</code></pre></div>
+<h2 id="nixidy-diff">nixidy diff<a class="headerlink" href="#nixidy-diff" title="Permanent link">#</a></h2>
+<p>Diff environment manifests.</p>
+<p>ENVIRONMENT is the environment to build and compare with either <code>--path</code> or <code>--env</code>.</p>
+<p>Use <code>--path</code> to compare with a previously built environment at a specific path.</p>
+<p>Use <code>--env</code> to build and compare with another environment.</p>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code># Compare prod with staging environment.
 
-  <span class="c1"># Set the target branch the rendered manifests for every</span>
-  <span class="c1"># environment should be pushed to in the repository defined</span>
-  <span class="c1"># above.</span>
-  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">branch</span> <span class="o">=</span> <span class="s2">&quot;main&quot;</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>And in a module that's specific to each environment the target root path needs to be set.</p>
-<div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
-  <span class="c1"># Set the target sub-directory to copy the generated</span>
-  <span class="c1"># manifests to when running `nixidy switch .#dev`.</span>
-  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">rootPath</span> <span class="o">=</span> <span class="s2">&quot;./manifests/dev&quot;</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>When using <code>mkEnvs</code> from nixidy, each environment's <code>rootPath</code> is automatically set to <code>./manifests/${dev}</code>.</p>
-</div>
-<h2 id="environment-branches">Environment branches<a class="headerlink" href="#environment-branches" title="Permanent link">#</a></h2>
-<p>With this strategy generated manifests are committed and pushed to separate environment specific branches. As these branches will not share any git history with the <code>main</code> branch or other environment branches (this is not git flow) they need to be created as orphan branches.</p>
-<p><img alt="Diagram showing the environment branches strategy." src="../../images/env-branches.jpg" /></p>
-<p>The biggest gain from this strategy is that it's simpler to implement access control compared to the monorepo, the branches can be setup with basic branch protection rules.</p>
-<h3 id="setup_1">Setup<a class="headerlink" href="#setup_1" title="Permanent link">#</a></h3>
-<p>In a module that's common to all the environments the target repository needs to be set. Unless you want the root path to differ between the environment's that can also be set here.</p>
-<div class="highlight"><span class="filename">modules/default.nix</span><pre><span></span><code><span class="p">{</span>
-  <span class="c1"># Set the target repository for the rendered manifests</span>
-  <span class="c1"># and applications.</span>
-  <span class="c1"># This should be replaced with yours.</span>
-  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">repository</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/arnarg/nixidy-demo.git&quot;</span><span class="p">;</span>
+nixidy diff .#prod --env .#staging
 
-  <span class="c1"># The generated manifests should be at the root of</span>
-  <span class="c1"># each environment branch.</span>
-  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">rootPath</span> <span class="o">=</span> <span class="s2">&quot;./&quot;</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>And in a module that's specific to each environment the target branch needs to be set.</p>
-<div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
-  <span class="c1"># Set the target branch the rendered manifests for _this_</span>
-  <span class="c1"># environment should be pushed to in the repository defined</span>
-  <span class="c1"># above.</span>
-  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">branch</span> <span class="o">=</span> <span class="s2">&quot;env/dev&quot;</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div>
-<div class="admonition info">
-<p class="admonition-title">Info</p>
-<p>The environment branches need to be created manually and they <em>need</em> to be created as orphan branches.</p>
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>checkout<span class="w"> </span>--orphan<span class="w"> </span>env/dev
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;# env/dev&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>README.md
-git<span class="w"> </span>add<span class="w"> </span>README.md
-git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Initial commmit&quot;</span>
-git<span class="w"> </span>push<span class="w"> </span>-u<span class="w"> </span>origin<span class="w"> </span>env/dev
-</code></pre></div>
-</div>
-<h2 id="environment-repositories">Environment repositories<a class="headerlink" href="#environment-repositories" title="Permanent link">#</a></h2>
-<p>With this strategy generated manifests are committed and pushed to separate repositories entirely.</p>
-<p><img alt="Diagram showing the environment repositories strategy." src="../../images/env-repos.jpg" /></p>
-<p>The biggest gain from this strategy is that it's possible to go even further with access control from the environment branches.</p>
-<h3 id="setup_2">Setup<a class="headerlink" href="#setup_2" title="Permanent link">#</a></h3>
-<p>In a module that's common to all the branches only the root path should be set, unless that should differ between the environments.</p>
-<div class="highlight"><span class="filename">modules/default.nix</span><pre><span></span><code><span class="p">{</span>
-  <span class="c1"># The generated manifests should be at the root of</span>
-  <span class="c1"># each environment repository.</span>
-  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">rootPath</span> <span class="o">=</span> <span class="s2">&quot;./&quot;</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>And in a module that's specific to each environment the target repository and target branch needs to be set.</p>
-<div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
-  <span class="c1"># Set the target repository for the rendered manifests</span>
-  <span class="c1"># and applications.</span>
-  <span class="c1"># This should be replaced with yours.</span>
-  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">repository</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/arnarg/nixidy-demo-dev.git&quot;</span><span class="p">;</span>
+# Compare prod with previously built manifests in ./manifests/prod
 
-  <span class="c1"># Set the target branch the rendered manifests for _this_</span>
-  <span class="c1"># environment should be pushed to in the repository defined</span>
-  <span class="c1"># above.</span>
-  nixidy<span class="o">.</span>target<span class="o">.</span><span class="ss">branch</span> <span class="o">=</span> <span class="s2">&quot;main&quot;</span><span class="p">;</span>
-<span class="p">}</span>
+nixidy diff .#prod --path ./manifests/prod
+</code></pre></div>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code>nixidy diff [OPTIONS] ENVIRONMENT
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<div class="highlight"><pre><span></span><code>  -f, --file PATH  Path to entrypoint nix file (only flake-less).  [default:
+                   default.nix]
+  -p, --path PATH  Path to previously built environment to compare to.
+  -e, --env ENV    Another environment to build and compare to.
+  --help           Show this message and exit.
+</code></pre></div>
+<h2 id="nixidy-info">nixidy info<a class="headerlink" href="#nixidy-info" title="Permanent link">#</a></h2>
+<p>Get info about a nixidy environment.</p>
+<p>ENVIRONMENT is used to determine if flakes or flake-less nix should be used and which environment should be built.</p>
+<p>Example: <code>.#prod</code> Uses a flake in the local directory whereas <code>prod</code> does not use flake but builds the <code>prod</code> environment</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code>nixidy info [OPTIONS] ENVIRONMENT
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<div class="highlight"><pre><span></span><code>  -f, --file PATH  Path to entrypoint nix file (only flake-less).  [default:
+                   default.nix]
+  --json           Output info in JSON format.
+  --help           Show this message and exit.
+</code></pre></div>
+<h2 id="nixidy-switch">nixidy switch<a class="headerlink" href="#nixidy-switch" title="Permanent link">#</a></h2>
+<p>Build and switch to a nixidy environment.</p>
+<p>ENVIRONMENT is used to determine if flakes or flake-less nix should be used and which environment should be built.</p>
+<p>Example: <code>.#prod</code> Uses a flake in the local directory whereas <code>prod</code> does not use flake but builds the <code>prod</code> environment</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code>nixidy switch [OPTIONS] ENVIRONMENT
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<div class="highlight"><pre><span></span><code>  -f, --file PATH  Path to entrypoint nix file (only flake-less).  [default:
+                   default.nix]
+  --help           Show this message and exit.
 </code></pre></div>
 
 
@@ -1061,7 +891,7 @@ git<span class="w"> </span>push<span class="w"> </span>-u<span class="w"> </span
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../templates/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Templates">
+          <a href="../developer_guide/architecture/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Architecture Guide">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1071,20 +901,20 @@ git<span class="w"> </span>push<span class="w"> </span>-u<span class="w"> </span
                 Previous
               </span>
               <div class="md-ellipsis">
-                Templates
+                Architecture Guide
               </div>
             </div>
           </a>
         
         
           
-          <a href="../github_actions/" class="md-footer__link md-footer__link--next" aria-label="Next: GitHub Actions">
+          <a href="../library/" class="md-footer__link md-footer__link--next" aria-label="Next: Library Functions">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                GitHub Actions
+                Library Functions
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -1120,10 +950,10 @@ git<span class="w"> </span>push<span class="w"> </span>-u<span class="w"> </span
     
     
       
-      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.footer", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.footer", "content.tabs.link"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.56ea9cef.min.js"></script>
+      <script src="../assets/javascripts/bundle.56ea9cef.min.js"></script>
       
     
   </body>

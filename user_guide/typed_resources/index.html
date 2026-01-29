@@ -713,6 +713,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../../cli_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CLI Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../library/" class="md-nav__link">
         
   
@@ -848,21 +871,15 @@
 <p>The lack of availability of typed resource options only hinders the ability to define the resources in nix. Any manifests that are rendered from a Helm Chart or defined in <code>applications.&lt;applicationName&gt;.yamls</code> and do not have defined resource options for that group, version and kind will go straight to the output for the application and can not be patched by nixidy.</p>
 <h2 id="generating-your-own-resource-options-from-crds">Generating your own resource options from CRDs<a class="headerlink" href="#generating-your-own-resource-options-from-crds" title="Permanent link">#</a></h2>
 <p>Thankfully a code generator for generating resource options from CRDs is provided by nixidy (this is based heavily on kubenix's code generator).</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">flakes</label><label for="__tabbed_1_2">flake-less</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
 <p>As an example, to generate resource options for Cilium's <code>CiliumNetworkPolicy</code> and <code>CiliumClusterwideNetworkPolicy</code> the following can be defined in <code>flake.nix</code>.</p>
 <div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
   <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;My ArgoCD configuration with nixidy.&quot;</span><span class="p">;</span>
-
   inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:nixos/nixpkgs/nixos-unstable&quot;</span><span class="p">;</span>
   inputs<span class="o">.</span>flake-utils<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:numtide/flake-utils&quot;</span><span class="p">;</span>
-
   inputs<span class="o">.</span><span class="ss">nixidy</span> <span class="o">=</span> <span class="p">{</span>
     <span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:arnarg/nixidy&quot;</span><span class="p">;</span>
     inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">follows</span> <span class="o">=</span> <span class="s2">&quot;nixpkgs&quot;</span><span class="p">;</span>
   <span class="p">};</span>
-
   <span class="ss">outputs</span> <span class="o">=</span> <span class="p">{</span>
     self<span class="p">,</span>
     nixpkgs<span class="p">,</span>
@@ -892,9 +909,15 @@
 <span class="p">}</span>
 </code></pre></div>
 <p>Then running <code>nix build .#generators.cilium</code> will produce a nix file that can be copied into place in your repository. After that the generated file has to be added to <code>nixidy.applicationImports</code> in your nixidy modules.</p>
-</div>
-<div class="tabbed-block">
-<p>As an example, to generate resource options for Cilium's <code>CiliumNetworkPolicy</code> and <code>CiliumClusterwideNetworkPolicy</code> the following can be defined in <code>generate.nix</code>.</p>
+<div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
+  nixidy<span class="o">.</span><span class="ss">applicationImports</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="l">./generated/cilium.nix</span>
+  <span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div>
+<details class="note">
+<summary>Using nixidy without flakes</summary>
+<p>If you prefer not to use flakes, you can write the following in <code>generate.nix</code>.</p>
 <div class="highlight"><span class="filename">generate.nix</span><pre><span></span><code><span class="k">let</span>
   <span class="c1"># With npins</span>
   <span class="ss">sources</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./npins</span><span class="p">;</span>
@@ -926,39 +949,24 @@
     <span class="p">};</span>
   <span class="p">}</span>
 </code></pre></div>
-<p>Then running <code>nix-build generate.nix -A cilium</code> will produce a nix file that can be copied into place in your repository. After that the generated file has to be added to <code>nixidy.applicationImports</code> in your nixidy modules.</p>
-</div>
-</div>
-</div>
-<div class="highlight"><span class="filename">env/dev.nix</span><pre><span></span><code><span class="p">{</span>
-  nixidy<span class="o">.</span><span class="ss">applicationImports</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="l">./generated/cilium.nix</span>
-  <span class="p">];</span>
-<span class="p">}</span>
-</code></pre></div>
+<p>Then running <code>nix-build generate.nix -A cilium</code> will produce a nix file that can be copied into place in your repository and imported using <code>nixidy.applicationImports</code> in a nixidy module.</p>
+</details>
 <h3 id="generating-resource-options-from-helm-chart-crds">Generating resource options from Helm Chart CRDs<a class="headerlink" href="#generating-resource-options-from-helm-chart-crds" title="Permanent link">#</a></h3>
 <p>In some cases, CRDs are only available through Helm charts or it's beneficial to keep them in sync with the chart version you're deploying. The <code>fromChartCRD</code> function provides a solution by templating the Helm chart and extracting CRDs from the output, generating nixidy resource options from them.</p>
 <p>This approach also handles CRDs that include Helm templating within their definitions, which would not be properly processed by the regular <code>fromCRD</code> function.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">flakes</label><label for="__tabbed_2_2">flake-less</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
 <p>As an example, to generate resource options for cert-manager's <code>Certificate</code> CRD directly from the Helm chart:</p>
 <div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
   <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;My ArgoCD configuration with nixidy.&quot;</span><span class="p">;</span>
-
   inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:nixos/nixpkgs/nixos-unstable&quot;</span><span class="p">;</span>
   inputs<span class="o">.</span>flake-utils<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:numtide/flake-utils&quot;</span><span class="p">;</span>
-
   inputs<span class="o">.</span><span class="ss">nixidy</span> <span class="o">=</span> <span class="p">{</span>
     <span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:arnarg/nixidy&quot;</span><span class="p">;</span>
     inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">follows</span> <span class="o">=</span> <span class="s2">&quot;nixpkgs&quot;</span><span class="p">;</span>
   <span class="p">};</span>
-
   inputs<span class="o">.</span><span class="ss">nixhelm</span> <span class="o">=</span> <span class="p">{</span>
     <span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:farcaller/nixhelm&quot;</span><span class="p">;</span>
     inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">follows</span> <span class="o">=</span> <span class="s2">&quot;nixpkgs&quot;</span><span class="p">;</span>
   <span class="p">};</span>
-
   <span class="ss">outputs</span> <span class="o">=</span> <span class="p">{</span>
     self<span class="p">,</span>
     nixpkgs<span class="p">,</span>
@@ -973,7 +981,6 @@
     <span class="ss">packages</span> <span class="o">=</span> <span class="p">{</span>
       generators<span class="o">.</span><span class="ss">certManager</span> <span class="o">=</span> nixidy<span class="o">.</span>packages<span class="o">.</span><span class="si">${</span>system<span class="si">}</span><span class="o">.</span>generators<span class="o">.</span>fromChartCRD <span class="p">{</span>
         <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;cert-manager&quot;</span><span class="p">;</span>
-
         <span class="ss">chartAttrs</span> <span class="o">=</span> <span class="p">{</span>
           <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;https://charts.jetstack.io&quot;</span><span class="p">;</span>
           <span class="ss">chart</span> <span class="o">=</span> <span class="s2">&quot;cert-manager&quot;</span><span class="p">;</span>
@@ -982,7 +989,6 @@
         <span class="p">};</span>
         <span class="c1"># Or from nixhelm</span>
         <span class="c1"># chart = nixhelm.chartsDerivations.${system}.jetstack.cert-manager;</span>
-
         <span class="ss">crds</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;Certificate&quot;</span> <span class="p">];</span>  <span class="c1"># Optional: filter by specific CRD kinds</span>
       <span class="p">};</span>
     <span class="p">};</span>
@@ -990,9 +996,9 @@
 <span class="p">}</span>
 </code></pre></div>
 <p>Then running <code>nix build .#generators.certManager</code> will produce a nix file that can be copied into place in your repository.</p>
-</div>
-<div class="tabbed-block">
-<p>As an example, to generate resource options for cert-manager's <code>Certificate</code> CRD directly from the Helm chart:</p>
+<details class="note">
+<summary>Using nixidy without flakes</summary>
+<p>If you prefer not to use flakes, you can write the following in <code>generate.nix</code>.</p>
 <div class="highlight"><span class="filename">generate.nix</span><pre><span></span><code><span class="k">let</span>
   <span class="c1"># With npins</span>
   <span class="ss">sources</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./npins</span><span class="p">;</span>
@@ -1021,10 +1027,8 @@
     <span class="p">};</span>
   <span class="p">}</span>
 </code></pre></div>
-<p>Then running <code>nix-build generate.nix -A certManager</code> will produce a nix file that can be copied into place in your repository.</p>
-</div>
-</div>
-</div>
+<p>Then running <code>nix-build generate.nix -A certManager</code> will produce a nix file that can be copied into place in your repository and imported using <code>nixidy.applicationImports</code> in a nixidy module.</p>
+</details>
 <p>The <code>fromChartCRD</code> function accepts the same optional arguments as <code>fromCRD</code> (<code>namePrefix</code>, <code>attrNameOverrides</code>, and <code>skipCoerceToList</code>) for customization of the generated options. Additionally, it accepts:</p>
 <ul>
 <li><code>chartAttrs</code>: Chart repository, name, version and chartHash configuration</li>

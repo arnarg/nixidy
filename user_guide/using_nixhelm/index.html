@@ -689,6 +689,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../../cli_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CLI Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../library/" class="md-nav__link">
         
   
@@ -791,26 +814,19 @@
 
 <h1 id="using-nixhelm">Using nixhelm<a class="headerlink" href="#using-nixhelm" title="Permanent link">#</a></h1>
 <p><a href="https://github.com/farcaller/nixhelm">nixhelm</a> is a collection of Helm Charts that can be used with <a href="https://github.com/farcaller/nixhelm">nix-kube-generators</a> and as a result also nixidy. The charts are automatically updated to the most recent version by CI regularly.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">flakes</label><label for="__tabbed_1_2">flake-less</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
 <p>To use with nixidy, pass the nixhelm derivation attribute set to nixidy's <code>mkEnv</code> builder like so.</p>
 <div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
   <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;My ArgoCD configuration with nixidy.&quot;</span><span class="p">;</span>
-
   inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:nixos/nixpkgs/nixos-unstable&quot;</span><span class="p">;</span>
   inputs<span class="o">.</span>flake-utils<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:numtide/flake-utils&quot;</span><span class="p">;</span>
-
   inputs<span class="o">.</span><span class="ss">nixidy</span> <span class="o">=</span> <span class="p">{</span>
     <span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:arnarg/nixidy&quot;</span><span class="p">;</span>
     inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">follows</span> <span class="o">=</span> <span class="s2">&quot;nixpkgs&quot;</span><span class="p">;</span>
   <span class="p">};</span>
-
   inputs<span class="o">.</span><span class="ss">nixhelm</span> <span class="o">=</span> <span class="p">{</span>
     <span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:farcaller/nixhelm&quot;</span><span class="p">;</span>
     inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">follows</span> <span class="o">=</span> <span class="s2">&quot;nixpkgs&quot;</span><span class="p">;</span>
   <span class="p">};</span>
-
   <span class="ss">outputs</span> <span class="o">=</span> <span class="p">{</span>
     self<span class="p">,</span>
     nixpkgs<span class="p">,</span>
@@ -824,18 +840,16 @@
   <span class="k">in</span> <span class="p">{</span>
     nixidyEnvs<span class="o">.</span><span class="ss">dev</span> <span class="o">=</span> nixidy<span class="o">.</span>lib<span class="o">.</span>mkEnv <span class="p">{</span>
       <span class="k">inherit</span> pkgs<span class="p">;</span>
-
       <span class="c1"># Pass nixhelm to all nixidy modules.</span>
       <span class="ss">charts</span> <span class="o">=</span> nixhelm<span class="o">.</span>chartsDerivations<span class="o">.</span><span class="si">${</span>system<span class="si">}</span><span class="p">;</span>
-
       <span class="ss">modules</span> <span class="o">=</span> <span class="p">[</span><span class="l">./env/dev.nix</span><span class="p">];</span>
     <span class="p">};</span>
   <span class="p">}));</span>
 <span class="p">}</span>
 </code></pre></div>
-</div>
-<div class="tabbed-block">
-<p>To use with nixidy, pass the nixhelm <code>charts/</code> directory to nixidy in a module like so:</p>
+<details class="note">
+<summary>Using nixidy without flakes</summary>
+<p>If you prefer not to use flakes, the following can be written to <code>default.nix</code> instead.</p>
 <div class="highlight"><span class="filename">default.nix</span><pre><span></span><code><span class="k">let</span>
   <span class="c1"># With npins</span>
   <span class="ss">sources</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./npins</span><span class="p">;</span>
@@ -870,9 +884,7 @@
     <span class="p">};</span>
   <span class="p">}</span>
 </code></pre></div>
-</div>
-</div>
-</div>
+</details>
 <p>And then the argument <code>charts</code> will be passed to every module in nixidy.</p>
 <div class="highlight"><span class="filename">./env/dev.nix</span><pre><span></span><code><span class="p">{</span>
   charts<span class="p">,</span>
