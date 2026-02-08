@@ -221,6 +221,7 @@ in
 
             echo "Applying CRDs"
             ${pkgs.kubectl}/bin/kubectl apply \
+              --server-side --force-conflicts \
               -f $out/crds.yml \
               --prune --selector "${labelPrefix}/crds=${env}" \
               --prune-allowlist "apiextensions.k8s.io/v1/CustomResourceDefinition"
@@ -228,6 +229,7 @@ in
             echo ""
             echo "Applying namespaces"
             ${pkgs.kubectl}/bin/kubectl apply \
+              --server-side --force-conflicts \
               -f $out/namespaces.yml \
               --prune --selector "${labelPrefix}/namespaces=${env}" \
               --prune-allowlist "core/v1/Namespace"
@@ -235,6 +237,7 @@ in
             echo ""
             echo "Applying manifests"
             ${pkgs.kubectl}/bin/kubectl apply \
+              --server-side --force-conflicts \
               -f $out/manifests.yml \
               --prune --selector "${labelPrefix}/manifests=${env}"
             EOF
