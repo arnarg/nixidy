@@ -229,7 +229,6 @@ in
             echo ""
             echo "Applying namespaces"
             ${pkgs.kubectl}/bin/kubectl apply \
-              --server-side --force-conflicts \
               -f $out/namespaces.yml \
               --prune --selector "${labelPrefix}/namespaces=${env}" \
               --prune-allowlist "core/v1/Namespace"
@@ -237,7 +236,6 @@ in
             echo ""
             echo "Applying manifests"
             ${pkgs.kubectl}/bin/kubectl apply \
-              --server-side --force-conflicts \
               -f $out/manifests.yml \
               --prune --selector "${labelPrefix}/manifests=${env}"
             EOF
