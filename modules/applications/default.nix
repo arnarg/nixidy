@@ -322,10 +322,7 @@ in
         clientSideApplyMigration = mkOption {
           type = types.bool;
           default = true;
-          apply = val:
-            if val == false
-            then "ClientSideApplyMigration=false"
-            else null;
+          apply = val: if val then null else "ClientSideApplyMigration=false";
           description = ''
             This option controls the migration of field ownership from client-side apply to server-side apply when `serverSideApply` is enabled.
             By default (`true`), Argo CD attempts to migrate the managed fields.
