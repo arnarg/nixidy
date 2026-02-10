@@ -1173,6 +1173,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#applicationsnamesyncpolicysyncoptionsclientsideapplymigration" class="md-nav__link">
+    <span class="md-ellipsis">
+      applications.&lt;name&gt;.syncPolicy.syncOptions.clientSideApplyMigration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#applicationsnamesyncpolicysyncoptionscreatenamespace" class="md-nav__link">
     <span class="md-ellipsis">
       applications.&lt;name&gt;.syncPolicy.syncOptions.createNamespace
@@ -1992,6 +2001,15 @@
   <a href="#applicationsnamesyncpolicysyncoptionsapplyoutofsynconly" class="md-nav__link">
     <span class="md-ellipsis">
       applications.&lt;name&gt;.syncPolicy.syncOptions.applyOutOfSyncOnly
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#applicationsnamesyncpolicysyncoptionsclientsideapplymigration" class="md-nav__link">
+    <span class="md-ellipsis">
+      applications.&lt;name&gt;.syncPolicy.syncOptions.clientSideApplyMigration
     </span>
   </a>
   
@@ -2962,6 +2980,18 @@ Turning on selective sync option which will sync only out-of-sync resources.</p>
 boolean</p>
 <p><strong><em>Default:</em></strong>
 <code class="highlight"><span class="no">false</span></code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/applications">&lt;nixidy/modules/applications&gt;</a></li>
+</ul>
+<h2 id="applicationsnamesyncpolicysyncoptionsclientsideapplymigration">applications.&lt;name&gt;.syncPolicy.syncOptions.clientSideApplyMigration<a class="headerlink" href="#applicationsnamesyncpolicysyncoptionsclientsideapplymigration" title="Permanent link">#</a></h2>
+<p>This option controls the migration of field ownership from client-side apply to server-side apply when <code>serverSideApply</code> is enabled.
+By default (<code>true</code>), Argo CD attempts to migrate the managed fields.
+If set to <code>false</code>, the <code>ClientSideApplyMigration=false</code> sync option is applied, disabling this automatic migration. This is useful for avoiding conflicts during the transition to Server-Side Apply for existing resources.</p>
+<p><strong><em>Type:</em></strong>
+boolean</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="no">true</span></code></p>
 <p><strong><em>Declared by:</em></strong></p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/applications">&lt;nixidy/modules/applications&gt;</a></li>
