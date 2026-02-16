@@ -9,40 +9,51 @@ let
   mkApp =
     app:
     let
+      grouped = lib.groupBy (
+        obj: "${obj.kind}-${builtins.replaceStrings [ "." ] [ "-" ] obj.metadata.name}"
+      ) app.objects;
+
       writeManifests = ''
         set -e
-
         out=$1
 
       ''
       + (lib.concatStringsSep "\n" (
-        map (
-          obj:
+        lib.mapAttrsToList (
+          groupKey: objs:
           let
-            filename = "${obj.kind}-${builtins.replaceStrings [ "." ] [ "-" ] obj.metadata.name}.yaml";
+            filename = "${groupKey}.yaml";
           in
-          ''
-            echo "Writing ${filename}"
-
-            cat <<'EOF' | ${pkgs.yq-go}/bin/yq -P > $out/${filename}
-            ${builtins.toJSON obj}
-            EOF
-          ''
-        ) app.objects
+          if builtins.length objs == 1 then
+            let
+              obj = builtins.head objs;
+            in
+            ''
+              echo "Writing ${filename}"
+              cat <<'EOF' | ${pkgs.yq-go}/bin/yq -P > $out/${filename}
+              ${builtins.toJSON obj}
+              EOF
+            ''
+          else
+            let
+              sorted = lib.sort (a: b: (a.metadata.namespace or "") < (b.metadata.namespace or "")) objs;
+            in
+            ''
+              echo "Writing ${filename}"
+              cat <<'EOF' | ${pkgs.yq-go}/bin/yq '.[] | split_doc' -P > $out/${filename}
+              ${builtins.toJSON sorted}
+              EOF
+            ''
+        ) grouped
       ));
     in
     pkgs.stdenv.mkDerivation {
       inherit writeManifests;
-
       name = "nixidy-app-${app.name}";
-
       passAsFile = [ "writeManifests" ];
-
       phases = [ "installPhase" ];
-
       installPhase = ''
         mkdir -p $out
-
         sh $writeManifestsPath $out
       '';
     };
