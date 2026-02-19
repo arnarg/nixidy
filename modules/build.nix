@@ -9,7 +9,7 @@ let
   mkApp =
     app:
     let
-      grouped = lib.groupBy (
+      grouped = builtins.groupBy (
         obj: "${obj.kind}-${builtins.replaceStrings [ "." ] [ "-" ] obj.metadata.name}"
       ) app.objects;
 
