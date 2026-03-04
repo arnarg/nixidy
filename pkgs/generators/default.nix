@@ -238,12 +238,13 @@ let
       namePrefix ? "",
       attrNameOverrides ? { },
       skipCoerceToList ? { },
+      extraOpts ? [ ],
     }:
     let
       _chart = if chart != null then chart else klib.downloadHelmChart chartAttrs;
 
       objects = klib.fromHelm {
-        inherit name values;
+        inherit name values extraOpts;
         includeCRDs = true;
         chart = _chart;
       };

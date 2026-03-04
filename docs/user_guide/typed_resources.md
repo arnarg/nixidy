@@ -148,6 +148,7 @@ As an example, to generate resource options for cert-manager's `Certificate` CRD
         # Or from nixhelm
         # chart = nixhelm.chartsDerivations.${system}.jetstack.cert-manager;
         crds = [ "Certificate" ];  # Optional: filter by specific CRD kinds
+        extraOpts = [ "--set", "crds.enabled=true"]; # Optional: pass extra options to helm template generation
       };
     };
   }));
@@ -186,6 +187,7 @@ Then running `nix build .#generators.certManager` will produce a nix file that c
             chartHash = "sha256-fs14wuKK+blC0l+pRfa//oBV2X+Dr3nNX+Z94nrQVrA=";
           };
           crds = [ "Certificate" ];  # Optional: filter by specific CRD kinds
+          extraOpts = [ "--set", "crds.enabled=true"]; # Optional: pass extra options to helm template generation
         };
       }
     ```
@@ -198,6 +200,8 @@ The `fromChartCRD` function accepts the same optional arguments as `fromCRD` (`n
 - `chart`: Alternative to `chartAttrs`, can use a pre-downloaded chart
 - `values`: Values to pass to the Helm chart templating
 - `crds`: List of CRD kinds to extract (empty list extracts all CRDs)
+- `extraOpts`: List of extra arguments to pass through to helm template
+
 
 This approach ensures your CRD definitions stay synchronized with the Helm chart version you're actually deploying in your applications.
 
