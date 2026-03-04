@@ -990,6 +990,7 @@
         <span class="c1"># Or from nixhelm</span>
         <span class="c1"># chart = nixhelm.chartsDerivations.${system}.jetstack.cert-manager;</span>
         <span class="ss">crds</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;Certificate&quot;</span> <span class="p">];</span>  <span class="c1"># Optional: filter by specific CRD kinds</span>
+        <span class="ss">extraOpts</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;--set&quot;</span><span class="p">,</span> <span class="s2">&quot;crds.enabled=true&quot;</span><span class="p">];</span> <span class="c1"># Optional: pass extra options to helm template generation</span>
       <span class="p">};</span>
     <span class="p">};</span>
   <span class="p">}));</span>
@@ -1024,6 +1025,7 @@
         <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">&quot;sha256-fs14wuKK+blC0l+pRfa//oBV2X+Dr3nNX+Z94nrQVrA=&quot;</span><span class="p">;</span>
       <span class="p">};</span>
       <span class="ss">crds</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;Certificate&quot;</span> <span class="p">];</span>  <span class="c1"># Optional: filter by specific CRD kinds</span>
+      <span class="ss">extraOpts</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;--set&quot;</span><span class="p">,</span> <span class="s2">&quot;crds.enabled=true&quot;</span><span class="p">];</span> <span class="c1"># Optional: pass extra options to helm template generation</span>
     <span class="p">};</span>
   <span class="p">}</span>
 </code></pre></div>
@@ -1035,6 +1037,7 @@
 <li><code>chart</code>: Alternative to <code>chartAttrs</code>, can use a pre-downloaded chart</li>
 <li><code>values</code>: Values to pass to the Helm chart templating</li>
 <li><code>crds</code>: List of CRD kinds to extract (empty list extracts all CRDs)</li>
+<li><code>extraOpts</code>: List of extra arguments to pass through to helm template</li>
 </ul>
 <p>This approach ensures your CRD definitions stay synchronized with the Helm chart version you're actually deploying in your applications.</p>
 <h3 id="resolving-naming-conflicts">Resolving Naming Conflicts<a class="headerlink" href="#resolving-naming-conflicts" title="Permanent link">#</a></h3>
