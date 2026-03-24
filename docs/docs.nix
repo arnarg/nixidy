@@ -186,6 +186,7 @@ let
         mkdir -p $out
         python -m mkdocs build
 
+        cp ${./llms.txt} $out/llms.txt
         cp -r ${buildSearch "/options/search/"} $out/options/search
       '';
     };
