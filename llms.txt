@@ -1,0 +1,40 @@
+# nixidy
+
+> Nixidy is a tool for managing Kubernetes configurations using Nix and the NixOS module system. It generates plain YAML manifests that can be deployed via Argo CD or directly applied to clusters. Features include strongly-typed configurations, Helm chart integration, Kustomize support, reusable templates, and GitOps readiness.
+
+Nixidy brings the power of Nix to Kubernetes cluster management, enabling declarative, typed, and composable configurations that produce clean, reviewable YAML for GitOps workflows.
+
+## Getting Started
+
+- [Getting Started Guide](https://nixidy.dev/user_guide/getting_started/): Complete step-by-step guide to setting up your first nixidy project
+- [Quick Start](https://nixidy.dev/#quick-start): Quick overview with flake-based setup
+
+## User Guide
+
+- [Using Helm Charts](https://nixidy.dev/user_guide/helm_charts/): Integrate existing Helm charts with patch support
+- [Typed Resource Options](https://nixidy.dev/user_guide/typed_resources/): Generate typed Nix options from CRDs using fromCRD and fromChartCRD
+- [Templates](https://nixidy.dev/user_guide/templates/): Create reusable application patterns with configurable options
+- [Git Strategies](https://nixidy.dev/user_guide/git_strategies/): Monorepo, environment branches, or separate repositories
+- [GitHub Actions](https://nixidy.dev/user_guide/github_actions/): CI/CD integration with nixidy/build and nixidy/switch actions
+- [Transformers](https://nixidy.dev/user_guide/transformers/): Modify Helm-rendered manifests using transformer functions
+- [Using nixhelm](https://nixidy.dev/user_guide/using_nixhelm/): Use nixhelm chart collections with nixidy
+- [Directly Apply Manifests](https://nixidy.dev/user_guide/direct_apply/): Deploy without Argo CD using kubectl apply --prune
+
+## Reference
+
+- [CLI Reference](https://nixidy.dev/cli_reference/): Complete command documentation for nixidy (build, switch, apply, bootstrap, diff, info)
+- [Library Functions](https://nixidy.dev/library/): Nix library functions (helm, kustomize, kube modules)
+
+## Developer Guide
+
+- [Architecture Guide](https://nixidy.dev/developer_guide/architecture/): Comprehensive codebase overview for contributors
+
+## Examples
+
+- [arnarg/cluster](https://github.com/arnarg/cluster): Real-world cluster configuration using nixidy
+
+## Optional
+
+- [GitHub Repository](https://github.com/arnarg/nixidy/): Source code and issue tracking
+- [GitHub Discussions](https://github.com/arnarg/nixidy/discussions): Community support
+
