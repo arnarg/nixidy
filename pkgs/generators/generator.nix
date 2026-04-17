@@ -18,17 +18,21 @@ let
     in
     lib.fix (lib.extends overlay f);
 
+  # Escape ${...} sequences so they appear as literal text in generated
+  # Nix "..." strings instead of being parsed as string interpolations.
+  escapeNixStr = str: builtins.replaceStrings [ "\${" ] [ "\\$\{" ] str;
+
   gen = rec {
-    mkMerge = values: ''mkMerge [${concatMapStrings (value: "
+    mkMerge = values: "mkMerge [${concatMapStrings (value: "
       ${value}
-    ") values}]'';
+    ") values}]";
 
     toNixString =
       value:
       if isAttrs value || isList value then
-        builtins.toJSON value
+        escapeNixStr (builtins.toJSON value)
       else if isString value then
-        ''"${value}"''
+        ''"${escapeNixStr value}"''
       else if value == null then
         "null"
       else
@@ -47,10 +51,12 @@ let
       }:
       removeEmptyLines ''
         mkOption {
-              ${optionalString (description != null) "description = ${builtins.toJSON description};"}
-              ${optionalString (type != null) ''type = ${type};''}
-              ${optionalString (default != null) ''default = ${toNixString default};''}
-              ${optionalString (apply != null) ''apply = ${apply};''}
+              ${optionalString (
+                description != null
+              ) "description = ${escapeNixStr (builtins.toJSON description)};"}
+              ${optionalString (type != null) "type = ${type};"}
+              ${optionalString (default != null) "default = ${toNixString default};"}
+              ${optionalString (apply != null) "apply = ${apply};"}
             }'';
 
     mkOverride = priority: value: "mkOverride ${toString priority} ${toNixString value}";
