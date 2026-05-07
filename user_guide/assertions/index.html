@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://nixidy.dev/user_guide/helm_charts/">
+        <link rel="canonical" href="https://nixidy.dev/user_guide/assertions/">
       
       
-        <link rel="prev" href="../getting_started/">
+        <link rel="prev" href="../direct_apply/">
       
       
-        <link rel="next" href="../typed_resources/">
+        <link rel="next" href="../../developer_guide/architecture/">
       
       
       <link rel="icon" href="../../images/icon.svg">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Using Helm Charts - nixidy</title>
+        <title>Assertions & Warnings - nixidy</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#using-helm-charts" class="md-skip">
+        <a href="#assertions-warnings" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Using Helm Charts
+              Assertions & Warnings
             
           </span>
         </div>
@@ -338,32 +338,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Using Helm Charts
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../helm_charts/" class="md-nav__link">
         
   
   
@@ -374,74 +352,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#adding-a-helm-release-as-part-of-an-application" class="md-nav__link">
-    <span class="md-ellipsis">
-      Adding a Helm release as part of an application
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Adding a Helm release as part of an application">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#example" class="md-nav__link">
-    <span class="md-ellipsis">
-      Example
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#patching-manifests-rendered-by-helm" class="md-nav__link">
-    <span class="md-ellipsis">
-      Patching manifests rendered by Helm
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Patching manifests rendered by Helm">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#example_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      Example
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -612,10 +522,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../assertions/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Assertions & Warnings
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -626,6 +558,119 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#assertions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assertions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Assertions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#per-application-assertions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Per-application assertions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#global-assertions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Global assertions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error output
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Warnings
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Warnings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#per-application-warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Per-application warnings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shorthand-for-unconditional-warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shorthand for unconditional warnings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#global-warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Global warnings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-assertions-vs-warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      When to use assertions vs. warnings
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -847,19 +892,37 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#adding-a-helm-release-as-part-of-an-application" class="md-nav__link">
+  <a href="#assertions" class="md-nav__link">
     <span class="md-ellipsis">
-      Adding a Helm release as part of an application
+      Assertions
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Adding a Helm release as part of an application">
+    <nav class="md-nav" aria-label="Assertions">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example" class="md-nav__link">
+  <a href="#per-application-assertions" class="md-nav__link">
     <span class="md-ellipsis">
-      Example
+      Per-application assertions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#global-assertions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Global assertions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error output
     </span>
   </a>
   
@@ -871,19 +934,37 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#patching-manifests-rendered-by-helm" class="md-nav__link">
+  <a href="#warnings" class="md-nav__link">
     <span class="md-ellipsis">
-      Patching manifests rendered by Helm
+      Warnings
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Patching manifests rendered by Helm">
+    <nav class="md-nav" aria-label="Warnings">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example_1" class="md-nav__link">
+  <a href="#per-application-warnings" class="md-nav__link">
     <span class="md-ellipsis">
-      Example
+      Per-application warnings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shorthand-for-unconditional-warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shorthand for unconditional warnings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#global-warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Global warnings
     </span>
   </a>
   
@@ -891,6 +972,15 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-assertions-vs-warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      When to use assertions vs. warnings
+    </span>
+  </a>
   
 </li>
       
@@ -913,69 +1003,91 @@
   
 
 
-<h1 id="using-helm-charts">Using Helm Charts<a class="headerlink" href="#using-helm-charts" title="Permanent link">#</a></h1>
-<p>For better or for worse majority of software that's deployable to Kubernetes is packaged using Helm by developers or its community. It would be a waste not to use them and having to define all of its manifest yourself in nixidy.</p>
-<h2 id="adding-a-helm-release-as-part-of-an-application">Adding a Helm release as part of an application<a class="headerlink" href="#adding-a-helm-release-as-part-of-an-application" title="Permanent link">#</a></h2>
-<p>Nixidy supports rendering Helm charts as part of applications. This can be done by specifying <code>applications.&lt;applicationName&gt;.helm.releases.&lt;releaseName&gt;</code>.</p>
-<h3 id="example">Example<a class="headerlink" href="#example" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>lib<span class="p">,</span> <span class="o">...</span><span class="p">}:</span> <span class="p">{</span>
-  applications<span class="o">.</span><span class="ss">traefik</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;traefik&quot;</span><span class="p">;</span>
-    <span class="ss">createNamespace</span> <span class="o">=</span> <span class="no">true</span><span class="p">;</span>
-
-    helm<span class="o">.</span>releases<span class="o">.</span><span class="ss">traefik</span> <span class="o">=</span> <span class="p">{</span>
-      <span class="c1"># Use `lib.helm.downloadHelmChart` to fetch</span>
-      <span class="c1"># the Helm Chart to use.</span>
-      <span class="ss">chart</span> <span class="o">=</span> lib<span class="o">.</span>helm<span class="o">.</span>downloadHelmChart <span class="p">{</span>
-        <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;https://traefik.github.io/charts/&quot;</span><span class="p">;</span>
-        <span class="ss">chart</span> <span class="o">=</span> <span class="s2">&quot;traefik&quot;</span><span class="p">;</span>
-        <span class="ss">version</span> <span class="o">=</span> <span class="s2">&quot;25.0.0&quot;</span><span class="p">;</span>
-        <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">&quot;sha256-ua8KnUB6MxY7APqrrzaKKSOLwSjDYkk9tfVkb1bqkVM=&quot;</span><span class="p">;</span>
-      <span class="p">};</span>
-
-      <span class="c1"># Example values to pass to the Helm Chart.</span>
-      <span class="ss">values</span> <span class="o">=</span> <span class="p">{</span>
-        ingressClass<span class="o">.</span><span class="ss">enabled</span> <span class="o">=</span> <span class="no">true</span><span class="p">;</span>
-      <span class="p">};</span>
-    <span class="p">};</span>
-  <span class="p">};</span>
-<span class="p">}</span>
-</code></pre></div>
-<h2 id="patching-manifests-rendered-by-helm">Patching manifests rendered by Helm<a class="headerlink" href="#patching-manifests-rendered-by-helm" title="Permanent link">#</a></h2>
-<p>In some cases the Helm Chart doesn't support changing certain aspects of the final manifests. These can be modified to nixidy by overriding certain fields.</p>
-<h3 id="example_1">Example<a class="headerlink" href="#example_1" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>lib<span class="p">,</span> <span class="o">...</span><span class="p">}:</span> <span class="p">{</span>
-  applications<span class="o">.</span><span class="ss">traefik</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;traefik&quot;</span><span class="p">;</span>
-    <span class="ss">createNamespace</span> <span class="o">=</span> <span class="no">true</span><span class="p">;</span>
-
-    helm<span class="o">.</span>releases<span class="o">.</span><span class="ss">traefik</span> <span class="o">=</span> <span class="p">{</span>
-      <span class="c1"># Use `lib.helm.downloadHelmChart` to fetch</span>
-      <span class="c1"># the Helm Chart to use.</span>
-      <span class="ss">chart</span> <span class="o">=</span> lib<span class="o">.</span>helm<span class="o">.</span>downloadHelmChart <span class="p">{</span>
-        <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;https://traefik.github.io/charts/&quot;</span><span class="p">;</span>
-        <span class="ss">chart</span> <span class="o">=</span> <span class="s2">&quot;traefik&quot;</span><span class="p">;</span>
-        <span class="ss">version</span> <span class="o">=</span> <span class="s2">&quot;25.0.0&quot;</span><span class="p">;</span>
-        <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">&quot;sha256-ua8KnUB6MxY7APqrrzaKKSOLwSjDYkk9tfVkb1bqkVM=&quot;</span><span class="p">;</span>
-      <span class="p">};</span>
-
-      <span class="c1"># Example values to pass to the Helm Chart.</span>
-      <span class="ss">values</span> <span class="o">=</span> <span class="p">{</span>
-        ingressClass<span class="o">.</span><span class="ss">enabled</span> <span class="o">=</span> <span class="no">true</span><span class="p">;</span>
-      <span class="p">};</span>
-    <span class="p">};</span>
-
+<h1 id="assertions-warnings">Assertions &amp; Warnings<a class="headerlink" href="#assertions-warnings" title="Permanent link">#</a></h1>
+<p>Nixidy supports build-time assertions and warnings, similar to the NixOS module system. These allow you to define invariants that are checked during evaluation, catching misconfigurations early with clear error messages.</p>
+<h2 id="assertions">Assertions<a class="headerlink" href="#assertions" title="Permanent link">#</a></h2>
+<p>Assertions are conditions that <strong>must</strong> be true. If any assertion fails, the build will fail with a descriptive message.</p>
+<h3 id="per-application-assertions">Per-application assertions<a class="headerlink" href="#per-application-assertions" title="Permanent link">#</a></h3>
+<p>Each application can define its own assertions under <code>applications.&lt;name&gt;.assertions</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+  applications<span class="o">.</span><span class="ss">my-app</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;my-app&quot;</span><span class="p">;</span>
     <span class="ss">resources</span> <span class="o">=</span> <span class="p">{</span>
-      <span class="c1"># Add a label to the traefik pod and change</span>
-      <span class="c1"># the image.</span>
-      deployments<span class="o">.</span>traefik<span class="o">.</span>spec<span class="o">.</span><span class="ss">template</span> <span class="o">=</span> <span class="p">{</span>
-        metadata<span class="o">.</span>labels<span class="o">.</span><span class="ss">my-custom-label</span> <span class="o">=</span> <span class="s2">&quot;my-custom-values&quot;</span><span class="p">;</span>
-        spec<span class="o">.</span>containers<span class="o">.</span>traefik<span class="o">.</span><span class="ss">image</span> <span class="o">=</span> lib<span class="o">.</span>mkForce <span class="s2">&quot;my-registry.io/patched-traefik:v3.0.0&quot;</span><span class="p">;</span>
+      deployments<span class="o">.</span>my-app<span class="o">.</span><span class="ss">spec</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="c1"># ...</span>
       <span class="p">};</span>
     <span class="p">};</span>
+
+    <span class="ss">assertions</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="p">{</span>
+        <span class="ss">assertion</span> <span class="o">=</span> <span class="nb">builtins</span><span class="o">.</span>length <span class="p">(</span><span class="nb">builtins</span><span class="o">.</span>attrNames config<span class="o">.</span>applications<span class="o">.</span>my-app<span class="o">.</span>resources<span class="o">.</span>deployments<span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="ss">message</span> <span class="o">=</span> <span class="s2">&quot;my-app must have at least one deployment&quot;</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">];</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
+<h3 id="global-assertions">Global assertions<a class="headerlink" href="#global-assertions" title="Permanent link">#</a></h3>
+<p>Global assertions can be defined under <code>nixidy.assertions</code>. These are useful for checking invariants that span multiple applications:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+  applications<span class="o">.</span><span class="ss">app-a</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
+  applications<span class="o">.</span><span class="ss">app-b</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
+
+  nixidy<span class="o">.</span><span class="ss">assertions</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="ss">assertion</span> <span class="o">=</span> config<span class="o">.</span>applications <span class="o">?</span> app-a <span class="o">&amp;&amp;</span> config<span class="o">.</span>applications <span class="o">?</span> app-b<span class="p">;</span>
+      <span class="ss">message</span> <span class="o">=</span> <span class="s2">&quot;Both app-a and app-b must be defined&quot;</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="error-output">Error output<a class="headerlink" href="#error-output" title="Permanent link">#</a></h3>
+<p>When an assertion fails, the build will produce an error like:</p>
+<div class="highlight"><pre><span></span><code>error: failed assertions:
+- assertion(my-app): my-app must have at least one deployment
+</code></pre></div>
+<p>The context (e.g. <code>my-app</code> or <code>global</code>) tells you where the assertion was defined.</p>
+<h2 id="warnings">Warnings<a class="headerlink" href="#warnings" title="Permanent link">#</a></h2>
+<p>Warnings are messages that are printed during evaluation but <strong>do not</strong> fail the build. They are useful for deprecation notices or highlighting potential issues.</p>
+<h3 id="per-application-warnings">Per-application warnings<a class="headerlink" href="#per-application-warnings" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+  applications<span class="o">.</span><span class="ss">my-app</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;my-app&quot;</span><span class="p">;</span>
+
+    <span class="ss">warnings</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="p">{</span>
+        <span class="ss">when</span> <span class="o">=</span> config<span class="o">.</span>applications<span class="o">.</span>my-app<span class="o">.</span><span class="ss">createNamespace</span> <span class="o">==</span> <span class="no">false</span><span class="p">;</span>
+        <span class="ss">message</span> <span class="o">=</span> <span class="s2">&quot;Not creating namespace for my-app, make sure it exists on the cluster&quot;</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">];</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="shorthand-for-unconditional-warnings">Shorthand for unconditional warnings<a class="headerlink" href="#shorthand-for-unconditional-warnings" title="Permanent link">#</a></h3>
+<p>Warnings that should always be displayed can be written as plain strings:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+  applications<span class="o">.</span><span class="ss">my-app</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;my-app&quot;</span><span class="p">;</span>
+    <span class="ss">warnings</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;my-app is using a deprecated configuration, see the docs for migration steps&quot;</span> <span class="p">];</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>This is equivalent to <code>{ when = true; message = "..."; }</code>.</p>
+<h3 id="global-warnings">Global warnings<a class="headerlink" href="#global-warnings" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+  nixidy<span class="o">.</span><span class="ss">warnings</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="ss">when</span> <span class="o">=</span> config<span class="o">.</span>nixidy<span class="o">.</span>target<span class="o">.</span>branch <span class="o">!=</span> <span class="s2">&quot;main&quot;</span><span class="p">;</span>
+      <span class="ss">message</span> <span class="o">=</span> <span class="s2">&quot;Target branch is not &#39;main&#39;, make sure this is intentional&quot;</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="when-to-use-assertions-vs-warnings">When to use assertions vs. warnings<a class="headerlink" href="#when-to-use-assertions-vs-warnings" title="Permanent link">#</a></h2>
+<ul>
+<li>Use <strong>assertions</strong> when the configuration is <em>invalid</em> and should not be built. For example, missing required resources, conflicting settings, or values that would produce broken manifests.</li>
+<li>Use <strong>warnings</strong> when the configuration is technically valid but may indicate a mistake or something the user should be aware of. For example, deprecated options, unusual configurations, or migration reminders.</li>
+</ul>
 
 
 
@@ -1007,7 +1119,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../getting_started/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Getting Started">
+          <a href="../direct_apply/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Directly Apply Manifests">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1017,20 +1129,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Getting Started
+                Directly Apply Manifests
               </div>
             </div>
           </a>
         
         
           
-          <a href="../typed_resources/" class="md-footer__link md-footer__link--next" aria-label="Next: Typed Resource Options">
+          <a href="../../developer_guide/architecture/" class="md-footer__link md-footer__link--next" aria-label="Next: Architecture Guide">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Typed Resource Options
+                Architecture Guide
               </div>
             </div>
             <div class="md-footer__button md-icon">
