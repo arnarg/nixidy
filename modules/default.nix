@@ -19,8 +19,38 @@ let
     }
     // extraSpecialArgs;
   };
+
+  allAssertions =
+    module.config.nixidy.assertions
+    ++ lib.concatMap (name: module.config.applications.${name}.assertions) (
+      builtins.attrNames module.config.applications
+    );
+
+  failed = lib.filter (a: !a.assertion) allAssertions;
+
+  formatFailed =
+    assertions:
+    "failed assertions:\n"
+    + (lib.concatMapStringsSep "\n" (a: "- assertion(${a.context}): ${a.message}") assertions);
+
+  allWarnings = lib.filter (warning: warning.when) (
+    module.config.nixidy.warnings
+    ++ lib.concatMap (name: module.config.applications.${name}.warnings) (
+      builtins.attrNames module.config.applications
+    )
+  );
+
+  traceIfWarnings =
+    ret:
+    if allWarnings != [ ] then
+      builtins.trace (
+        "warnings:\n"
+        + (lib.concatMapStringsSep "\n" (w: "- warning(${w.context}): ${w.message}") allWarnings)
+      ) ret
+    else
+      ret;
 in
-{
+lib.throwIf (failed != [ ]) (formatFailed failed) (traceIfWarnings {
   inherit (module) config;
   inherit (module.config.build)
     environmentPackage
@@ -29,4 +59,4 @@ in
     declarativePackage
     ;
   meta = { inherit (module.config.nixidy.target) repository branch; };
-}
+})

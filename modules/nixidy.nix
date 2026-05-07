@@ -261,6 +261,67 @@ in
       description = "Path to a directory containing sub-directory structure that can be used to build a charts attrset. This will be passed as `charts` to every module.";
     };
 
+    assertions = mkOption {
+      type = types.listOf (
+        types.submodule {
+          options = {
+            assertion = mkOption {
+              type = types.bool;
+              description = "Whether the assertion holds.";
+            };
+            message = mkOption {
+              type = types.str;
+              description = "Message to display if assertion fails.";
+            };
+          };
+        }
+      );
+      default = [ ];
+      # Add context field to assertions
+      apply = map (a: {
+        inherit (a) assertion message;
+        context = "global";
+      });
+      description = ''
+        List of global assertions that must hold during build time. If any assertion is false,
+        the build will fail with the corresponding message.
+
+        These assertions are evaluated alongside per-application assertions.
+      '';
+    };
+
+    warnings = mkOption {
+      type = types.listOf (
+        types.coercedTo (types.str)
+          (x: {
+            when = true;
+            message = x;
+          })
+          (
+            types.submodule {
+              options = {
+                when = mkOption {
+                  type = types.bool;
+                  default = false;
+                };
+                message = mkOption {
+                  type = types.str;
+                };
+              };
+            }
+          )
+      );
+      default = [ ];
+      # Add context field to warnings
+      apply = map (warning: {
+        inherit (warning) when message;
+        context = "global";
+      });
+      description = ''
+        List of warnings that will be printed during build time when `when` is `true`, but will not fail the build.
+      '';
+    };
+
     publicApps = mkOption {
       type = with types; listOf str;
       default = [ ];

@@ -173,6 +173,7 @@ let
             - 'Transformers': user_guide/transformers.md
             - 'Using nixhelm': user_guide/using_nixhelm.md
             - 'Directly Apply Manifests': user_guide/direct_apply.md
+            - 'Assertions & Warnings': user_guide/assertions.md
           - 'Developer Guide':
             - 'Architecture Guide': developer_guide/architecture.md
           - Reference:

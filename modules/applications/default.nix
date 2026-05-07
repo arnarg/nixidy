@@ -423,6 +423,63 @@ in
       default = [ ];
       internal = true;
     };
+    assertions = mkOption {
+      type = types.listOf (
+        types.submodule {
+          options = {
+            assertion = mkOption {
+              type = types.bool;
+              description = "Whether the assertion holds";
+            };
+            message = mkOption {
+              type = types.str;
+              description = "Message to display if assertion fails";
+            };
+          };
+        }
+      );
+      default = [ ];
+      # Add context field to assertions
+      apply = map (a: {
+        inherit (a) assertion message;
+        context = config.name;
+      });
+      description = ''
+        List of assertions that must hold during build time. If any assertion is false,
+        the build will fail with the corresponding message.
+      '';
+    };
+    warnings = mkOption {
+      type = types.listOf (
+        types.coercedTo (types.str)
+          (x: {
+            when = true;
+            message = x;
+          })
+          (
+            types.submodule {
+              options = {
+                when = mkOption {
+                  type = types.bool;
+                  default = false;
+                };
+                message = mkOption {
+                  type = types.str;
+                };
+              };
+            }
+          )
+      );
+      default = [ ];
+      # Add context field to warnings
+      apply = map (warning: {
+        inherit (warning) when message;
+        context = config.name;
+      });
+      description = ''
+        List of warnings that will be printed during build time when `when` is `true`, but will not fail the build.
+      '';
+    };
 
     # Options for resource definitions
     definitions = mkOption {
