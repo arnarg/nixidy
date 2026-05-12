@@ -9,6 +9,7 @@ let
     imports = [ ./eval.nix ];
 
     _module.args.applicationImports = config.nixidy.applicationImports;
+    _module.args.pkgs = pkgs;
   };
 in
 {

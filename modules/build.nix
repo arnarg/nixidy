@@ -13,6 +13,11 @@ let
         obj: "${obj.kind}-${builtins.replaceStrings [ "." ] [ "-" ] obj.metadata.name}"
       ) app.objects;
 
+      rawYamlFiles = map (source: {
+        filename = baseNameOf source;
+        inherit source;
+      }) app.extraRawYamls;
+
       writeManifests = ''
         set -e
         out=$1
@@ -45,7 +50,14 @@ let
               EOF
             ''
         ) grouped
-      ));
+      ))
+      + lib.optionalString (rawYamlFiles != [ ]) (
+        "\n"
+        + lib.concatMapStringsSep "\n" (f: ''
+          echo "Writing ${f.filename}"
+          cp ${f.source} "$out/${f.filename}"
+        '') rawYamlFiles
+      );
     in
     pkgs.stdenv.mkDerivation {
       inherit writeManifests;

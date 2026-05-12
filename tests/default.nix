@@ -26,6 +26,7 @@
       ./argo-syncpolicy-managed-namespace-metadata.nix
       ./argo-syncpolicy-retry.nix
       ./yamls.nix
+      ./extra-raw-yamls.nix
       ./override-name.nix
       ./internal-apps.nix
       ./no-port-protocol.nix

@@ -11,6 +11,25 @@ For example:
 
 The lack of availability of typed resource options only hinders the ability to define the resources in nix. Any manifests that are rendered from a Helm Chart or defined in `applications.<applicationName>.yamls` and do not have defined resource options for that group, version and kind will go straight to the output for the application and can not be patched by nixidy.
 
+## Including arbitrary YAML
+
+To include YAML files in an application's output without nixidy parsing them, use `applications.<applicationName>.extraRawYamls`. The listed files are copied into the application's output directory and are never round-tripped through `kube.fromYAML`, so they are not available under `resources` and cannot be patched in nix.
+
+A common use case is [SOPS](https://github.com/getsops/sops)-encrypted manifests: the top-level `sops` metadata block would otherwise be stripped, and `ENC[...]` ciphertext values would be re-formatted in ways that break decryption.
+
+```nix
+applications.my-app = {
+  namespace = "my-app";
+
+  extraRawYamls = [ ./encrypted-secret.yaml ];
+};
+```
+
+Each file's basename becomes the output filename. Basenames must be unique within an application and must not collide with typed-resource output filenames (e.g. `Secret-<name>.yaml`); both cases produce build-time assertion failures.
+
+!!! warning
+    `extraRawYamls` is only included in the ArgoCD-targeted environment output. The `kubectl apply --prune` flow produced by [`direct_apply`](./direct_apply.md) only handles typed `objects` and skips raw files. SOPS-encrypted manifests aren't valid Kubernetes objects until decrypted, so they are expected to be applied by ArgoCD (with a SOPS plugin) rather than `kubectl apply`.
+
 ## Generating your own resource options from CRDs
 
 Thankfully a code generator for generating resource options from CRDs is provided by nixidy (this is based heavily on kubenix's code generator).
