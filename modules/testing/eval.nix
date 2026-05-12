@@ -1,5 +1,6 @@
 {
   lib,
+  pkgs,
   config,
   applicationImports,
   ...
@@ -61,6 +62,9 @@ let
 
     # Include templates
     ../templates.nix
+
+    # Thread pkgs through so tests can build derivations defined by modules.
+    { _module.args.pkgs = pkgs; }
 
     {
       nixidy = {
