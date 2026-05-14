@@ -14,6 +14,7 @@ let
         else
           app.name;
       annotations = if app.annotations != { } then app.annotations else null;
+      labels = if app.labels != { } then app.labels else null;
       finalizers = lib.mkMerge [
         (lib.mkIf (app.finalizer == "background") (
           lib.singleton "resources-finalizer.argocd.argoproj.io/background"

@@ -3,6 +3,7 @@
     name = "nixidy modules";
 
     tests = [
+      ./application-labels.nix
       ./appOfApps-default-destination.nix
       ./appOfApps-custom-default-destination.nix
       ./appOfApps-custom-project.nix
