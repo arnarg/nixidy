@@ -120,6 +120,11 @@ in
       default = { };
       description = "Annotations to add to the rendered ArgoCD application.";
     };
+    labels = mkOption {
+      type = types.attrsOf types.str;
+      default = { };
+      description = "Labels to add to the rendered ArgoCD application.";
+    };
     compareOptions = {
       serverSideDiff = mkOption {
         type = types.nullOr types.bool;
