@@ -854,6 +854,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#applicationsnameextrarawyamls" class="md-nav__link">
+    <span class="md-ellipsis">
+      applications.&lt;name&gt;.extraRawYamls
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#applicationsnamefinalizer" class="md-nav__link">
     <span class="md-ellipsis">
       applications.&lt;name&gt;.finalizer
@@ -1799,6 +1808,15 @@
   <a href="#applicationsnamedestinationserver" class="md-nav__link">
     <span class="md-ellipsis">
       applications.&lt;name&gt;.destination.server
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#applicationsnameextrarawyamls" class="md-nav__link">
+    <span class="md-ellipsis">
+      applications.&lt;name&gt;.extraRawYamls
     </span>
   </a>
   
@@ -2795,6 +2813,24 @@ null or string</p>
 <p><strong><em>Declared by:</em></strong></p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/applications">&lt;nixidy/modules/applications&gt;</a></li>
+</ul>
+<h2 id="applicationsnameextrarawyamls">applications.&lt;name&gt;.extraRawYamls<a class="headerlink" href="#applicationsnameextrarawyamls" title="Permanent link">#</a></h2>
+<p>List of YAML files to include in the application's output directory.
+Each file's basename becomes the output filename.</p>
+<p>Unlike <code>yamls</code>, the content is <strong>not</strong> parsed into Nix and therefore cannot be patched through
+<code>resources</code>. This is intended for files that contain fields incompatible with the typed schema;
+most notably <a href="https://github.com/getsops/sops">SOPS</a>-encrypted manifests, which carry a top-level
+<code>sops</code> metadata block that would otherwise be stripped or altered by a parse/emit round-trip.</p>
+<p><strong><em>Type:</em></strong>
+list of absolute path</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="p">[</span> <span class="p">]</span></code></p>
+<p><strong><em>Example:</em></strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">[</span> <span class="l">./encrypted-secret.yaml</span> <span class="p">]</span>
+</code></pre></div>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/applications/yamls.nix">&lt;nixidy/modules/applications/yamls.nix&gt;</a></li>
 </ul>
 <h2 id="applicationsnamefinalizer">applications.&lt;name&gt;.finalizer<a class="headerlink" href="#applicationsnamefinalizer" title="Permanent link">#</a></h2>
 <p>Specify the finalizer to apply to the ArgoCD application.</p>

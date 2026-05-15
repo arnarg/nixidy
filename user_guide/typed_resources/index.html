@@ -414,6 +414,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#including-arbitrary-yaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      Including arbitrary YAML
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#generating-your-own-resource-options-from-crds" class="md-nav__link">
     <span class="md-ellipsis">
       Generating your own resource options from CRDs
@@ -832,6 +841,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#including-arbitrary-yaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      Including arbitrary YAML
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#generating-your-own-resource-options-from-crds" class="md-nav__link">
     <span class="md-ellipsis">
       Generating your own resource options from CRDs
@@ -892,6 +910,20 @@
 <li><code>resources."networking.k8s.io".v1.NetworkPolicy</code> -&gt; <code>resources.networkPolicies</code></li>
 </ul>
 <p>The lack of availability of typed resource options only hinders the ability to define the resources in nix. Any manifests that are rendered from a Helm Chart or defined in <code>applications.&lt;applicationName&gt;.yamls</code> and do not have defined resource options for that group, version and kind will go straight to the output for the application and can not be patched by nixidy.</p>
+<h2 id="including-arbitrary-yaml">Including arbitrary YAML<a class="headerlink" href="#including-arbitrary-yaml" title="Permanent link">#</a></h2>
+<p>To include YAML files in an application's output without nixidy parsing them, use <code>applications.&lt;applicationName&gt;.extraRawYamls</code>. The listed files are copied into the application's output directory and are never round-tripped through <code>kube.fromYAML</code>, so they are not available under <code>resources</code> and cannot be patched in nix.</p>
+<p>A common use case is <a href="https://github.com/getsops/sops">SOPS</a>-encrypted manifests: the top-level <code>sops</code> metadata block would otherwise be stripped, and <code>ENC[...]</code> ciphertext values would be re-formatted in ways that break decryption.</p>
+<div class="highlight"><pre><span></span><code>applications<span class="o">.</span><span class="ss">my-app</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;my-app&quot;</span><span class="p">;</span>
+
+  <span class="ss">extraRawYamls</span> <span class="o">=</span> <span class="p">[</span> <span class="l">./encrypted-secret.yaml</span> <span class="p">];</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>Each file's basename becomes the output filename. Basenames must be unique within an application and must not collide with typed-resource output filenames (e.g. <code>Secret-&lt;name&gt;.yaml</code>); both cases produce build-time assertion failures.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code>extraRawYamls</code> is only included in the ArgoCD-targeted environment output. The <code>kubectl apply --prune</code> flow produced by <a href="../direct_apply/"><code>direct_apply</code></a> only handles typed <code>objects</code> and skips raw files. SOPS-encrypted manifests aren't valid Kubernetes objects until decrypted, so they are expected to be applied by ArgoCD (with a SOPS plugin) rather than <code>kubectl apply</code>.</p>
+</div>
 <h2 id="generating-your-own-resource-options-from-crds">Generating your own resource options from CRDs<a class="headerlink" href="#generating-your-own-resource-options-from-crds" title="Permanent link">#</a></h2>
 <p>Thankfully a code generator for generating resource options from CRDs is provided by nixidy (this is based heavily on kubenix's code generator).</p>
 <p>As an example, to generate resource options for Cilium's <code>CiliumNetworkPolicy</code> and <code>CiliumClusterwideNetworkPolicy</code> the following can be defined in <code>flake.nix</code>.</p>
