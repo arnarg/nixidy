@@ -1,6 +1,5 @@
 [
   ./applications.nix
-  ./nixidy.nix
+  ./nixidy
   ./build.nix
-  ./extra-files.nix
 ]

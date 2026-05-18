@@ -9,10 +9,6 @@ let
   ) (import ../pkgs/generators/versions.nix);
 in
 {
-  imports = [
-    (lib.mkRenamedOptionModule [ "nixidy" "resourceImports" ] [ "nixidy" "applicationImports" ])
-  ];
-
   options = with lib; {
     applications = mkOption {
       type =
