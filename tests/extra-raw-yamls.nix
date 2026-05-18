@@ -1,5 +1,6 @@
 {
   lib,
+  pkgs,
   config,
   ...
 }:
@@ -51,10 +52,19 @@ in
       }
       {
         description = "Built application output should contain the raw YAML file with unmodified contents.";
-        expression = builtins.readFile (
-          config.build.environmentPackage + "/${apps.demo.output.path}/encrypted-secret.yaml"
-        );
-        expected = builtins.readFile encryptedSecretFile;
+        # Use a derivation instead of builtins.readFile so the test stays pure.
+        # builtins.readFile on a path inside environmentPackage requires --impure
+        # because Nix cannot verify the store path as a safe dependency.
+        # The derivation compares files at build time; assertion checks it succeeded.
+        expression = pkgs.runCommand "check-raw-yaml" { } ''
+          if diff ${config.build.environmentPackage}/${apps.demo.output.path}/encrypted-secret.yaml ${encryptedSecretFile}; then
+            touch $out
+          else
+            echo "FILES DIFFER" >&2
+            exit 1
+          fi
+        '';
+        assertion = drv: builtins.pathExists drv;
       }
     ];
   };
