@@ -299,6 +299,32 @@ let
       };
     };
 
+  # Extract the raw CustomResourceDefinition objects from a set of CRD YAML
+  # files. The objects counterpart to `fromCRD`: same `src`/`crds` inputs, but
+  # returns the CRD manifests as values (e.g. to apply them to a cluster)
+  # instead of generating resource option modules. Deployment-agnostic — what
+  # you do with the objects is up to you.
+  #
+  # `kindFilter`, when non-empty, keeps only CRDs whose `spec.names.kind` is in
+  # the list (mirrors `fromCRD`'s `kindFilter` and `fromChartCRD`'s `crds`).
+  crdObjects =
+    {
+      src,
+      crds,
+      kindFilter ? [ ],
+    }:
+    let
+      objects = lib.concatMap (f: klib.fromYAML (builtins.readFile "${src}/${f}")) crds;
+
+      isWanted =
+        obj:
+        obj != null
+        && obj ? kind
+        && obj.kind == "CustomResourceDefinition"
+        && (kindFilter == [ ] || lib.any (x: obj.spec.names.kind == x) kindFilter);
+    in
+    lib.filter isWanted objects;
+
   fromChartCRD =
     {
       name,
@@ -358,6 +384,7 @@ in
     fromCRD
     fromCRDModule
     fromChartCRD
+    crdObjects
     k8s
     ;
 
