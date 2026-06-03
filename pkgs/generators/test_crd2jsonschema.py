@@ -996,6 +996,169 @@ metadata:
 
         self.assertEqual(schema, expected_schema)
 
+    def test_kind_filter_keeps_only_listed_kinds(self):
+        # A manifest stream with two CRDs; the filter keeps only one of them.
+        mock_crd_content = """
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: foobars.stable.example.com
+spec:
+  group: stable.example.com
+  names:
+    kind: FooBar
+    plural: foobars
+    singular: foobar
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                image:
+                  type: string
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: seconds.stable.example.com
+spec:
+  group: stable.example.com
+  names:
+    kind: Second
+    plural: seconds
+    singular: second
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                image:
+                  type: string
+"""
+
+        with patch("builtins.open", mock_open(read_data=mock_crd_content)):
+            schema = generate_jsonschema(
+                "", ["/fake/path/crd.yaml"], {}, kind_filter=["FooBar"]
+            )
+
+        self.assertIn("stable.example.com.v1.FooBar", schema["definitions"])
+        self.assertNotIn("stable.example.com.v1.Second", schema["definitions"])
+        self.assertEqual(
+            list(schema["roots"].keys()), ["stable.example.com.v1.FooBar"]
+        )
+
+    def test_empty_kind_filter_keeps_all_kinds(self):
+        # An empty filter is equivalent to no filter: every CRD is generated.
+        mock_crd_content = """
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: foobars.stable.example.com
+spec:
+  group: stable.example.com
+  names:
+    kind: FooBar
+    plural: foobars
+    singular: foobar
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                image:
+                  type: string
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: seconds.stable.example.com
+spec:
+  group: stable.example.com
+  names:
+    kind: Second
+    plural: seconds
+    singular: second
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                image:
+                  type: string
+"""
+
+        with patch("builtins.open", mock_open(read_data=mock_crd_content)):
+            schema = generate_jsonschema(
+                "", ["/fake/path/crd.yaml"], {}, kind_filter=[]
+            )
+
+        self.assertIn("stable.example.com.v1.FooBar", schema["definitions"])
+        self.assertIn("stable.example.com.v1.Second", schema["definitions"])
+
+    def test_skips_none_documents(self):
+        # Comment-only/empty documents parse to None (common in
+        # `helm template` output) and must be skipped rather than raising.
+        mock_crd_content = """
+# This leading document is a comment only and parses to None.
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: foobars.stable.example.com
+spec:
+  group: stable.example.com
+  names:
+    kind: FooBar
+    plural: foobars
+    singular: foobar
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                image:
+                  type: string
+"""
+
+        schema = mock_generate_jsonschema(mock_crd_content, "", {})
+
+        self.assertIn("stable.example.com.v1.FooBar", schema["definitions"])
+
 
 if __name__ == "__main__":
     unittest.main()

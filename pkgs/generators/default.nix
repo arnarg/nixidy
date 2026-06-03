@@ -184,11 +184,21 @@ let
       namePrefix ? "",
       attrNameOverrides ? { },
       skipCoerceToList ? { },
+      # Optional list of CRD `kind` names to generate. When empty (the
+      # default) every CustomResourceDefinition found in `crds` is generated.
+      # Useful when `crds` points at a multi-document stream (e.g. raw
+      # `helm template` output) containing more kinds than you want.
+      kindFilter ? [ ],
     }:
     let
       options = pkgs.writeText "${name}-crd2jsonschema-options.json" (
         builtins.toJSON {
-          inherit crds namePrefix attrNameOverrides;
+          inherit
+            crds
+            namePrefix
+            attrNameOverrides
+            kindFilter
+            ;
         }
       );
 

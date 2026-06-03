@@ -43,7 +43,7 @@ def uppercase_first(name):
     return name[0].upper() + name[1:]
 
 
-def generate_jsonschema(prefix, files, attr_name_overrides):
+def generate_jsonschema(prefix, files, attr_name_overrides, kind_filter=None):
     schema = {"definitions": {}, "roots": {}}
 
     # This lovely hack is here to circumvent an issue with
@@ -57,13 +57,22 @@ def generate_jsonschema(prefix, files, attr_name_overrides):
             docs = yaml.safe_load_all(f)
 
             for data in docs:
+                # yaml.safe_load_all yields None for empty or comment-only
+                # documents (common in `helm template` output). Skip them so
+                # callers can pass raw multi-document streams directly.
+                if data is None:
+                    continue
                 if (
                     "spec" in data
                     and "kind" in data
                     and data["kind"] == "CustomResourceDefinition"
                 ):
-                    group = data["spec"]["group"]
                     kind = data["spec"]["names"]["kind"]
+                    # When a kind filter is supplied, only generate schemas for
+                    # the listed kinds. An empty/unset filter keeps every CRD.
+                    if kind_filter and kind not in kind_filter:
+                        continue
+                    group = data["spec"]["group"]
                     plural = data["spec"]["names"]["plural"]
                     namespaced = (
                         "scope" in data["spec"]
@@ -234,6 +243,9 @@ if __name__ == "__main__":
     prefix = options.get("namePrefix", "")
     files = options.get("crds", [])
     attr_name_overrides = options.get("attrNameOverrides", {})
+    kind_filter = options.get("kindFilter", [])
 
-    schema = generate_jsonschema(prefix, files, attr_name_overrides)
+    schema = generate_jsonschema(
+        prefix, files, attr_name_overrides, kind_filter=kind_filter
+    )
     print(json.dumps(schema, indent=2))
