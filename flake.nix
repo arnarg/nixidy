@@ -168,6 +168,23 @@
               '').outPath;
           };
 
+          # Assert the native CRD module generator (fromCRDModule) renders
+          # identically to the file generator (fromCRD).
+          crdModuleTest = {
+            type = "app";
+            program =
+              let
+                check = import ./pkgs/generators/equiv-test.nix {
+                  inherit pkgs;
+                  mkEnv = self.lib.mkEnv;
+                  generators = self.packages.${system}.generators;
+                };
+              in
+              (pkgs.writeShellScript "crd-module-test" ''
+                echo "native CRD module == file generator output (${check})"
+              '').outPath;
+          };
+
           # Serve docs
           docsServe = {
             type = "app";
