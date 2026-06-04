@@ -1,26 +1,26 @@
-# Equivalence test for the native CRD module generator.
+# Tests for the CRD value accessors. Every accessor that returns Nix values
+# must agree with the file generator and with its src/chart counterpart:
 #
-# `fromCRDModule` (native, returns a module value) must render byte-for-byte
-# identically to `fromCRD` (builds a `.nix` file that gets imported) for the
-# same CRD. We generate both from one small inline CRD, render a custom
-# resource through each via `mkEnv`, and assert the rendered objects are equal.
+#   - fromCRDModule       renders identically to fromCRD (file)
+#   - fromChartCRDModule  renders identically to fromCRDModule for the same CRD
+#   - crdObjects          returns the raw CRD manifests (+ kindFilter narrows)
+#   - crdObjectsFromChart returns the same objects as crdObjects for the same CRD
+#   - the chart accessors honor `kubeVersion`
 #
-# Returns a derivation that builds iff the two backends agree.
+# Returns a derivation that builds iff every check passes.
 {
   pkgs,
   mkEnv,
   generators,
 }:
 let
-  # A CRD shaped to exercise the type/coercion branches most at risk of
-  # diverging between the two generator backends:
-  #   - int-or-string                          (targetPort)
-  #   - additionalProperties -> attrsOf         (labels)
-  #   - array of submodules coerced by "name"   (ports)
-  #   - array of submodules with patch-merge-key (env)
-  #   - array left as a plain list via skipCoerceToList (volumes)
-  #   - nested submodule                        (resources)
-  #   - global ObjectMeta metadata ref          (every CRD)
+  lib = pkgs.lib;
+
+  # ── A FooBar CRD, as both a `src` tree and a local helm chart ──────────────
+  # Shaped to exercise the at-risk type/coercion branches: int-or-string
+  # (targetPort), additionalProperties→attrsOf (labels), coerce-by-name (ports),
+  # patch-merge-key (env), skipCoerceToList (volumes), nested submodule
+  # (resources), and the global ObjectMeta metadata ref.
   crdYaml = ''
     apiVersion: apiextensions.k8s.io/v1
     kind: CustomResourceDefinition
@@ -101,22 +101,93 @@ let
     cp ${pkgs.writeText "foobar.yaml" crdYaml} $out/foobar.yaml
   '';
 
-  args = {
-    name = "foobar";
-    inherit src;
-    crds = [ "foobar.yaml" ];
-    # Exercise the skip branch: `volumes` stays a plain list instead of being
-    # coerced to an attrset-by-name.
-    skipCoerceToList = {
-      "stable.example.com.v1.FooBarSpec" = [ "volumes" ];
-    };
+  # Local helm chart shipping the same CRD in crds/ (helm --include-crds copies
+  # crds/ verbatim, so the chart path must match the src path exactly).
+  chart = pkgs.runCommand "foobar-chart" { } ''
+    mkdir -p $out/crds
+    cp ${pkgs.writeText "Chart.yaml" ''
+      apiVersion: v2
+      name: foobar
+      version: 0.0.0
+    ''} $out/Chart.yaml
+    cp ${pkgs.writeText "foobar.yaml" crdYaml} $out/crds/foobar.yaml
+  '';
+
+  # A chart whose CRD is *templated* (in templates/, not crds/) and embeds the
+  # helm `.Capabilities.KubeVersion` — so a passed kubeVersion is observable.
+  verChart = pkgs.runCommand "ver-chart" { } ''
+    mkdir -p $out/templates
+    cp ${pkgs.writeText "Chart.yaml" ''
+      apiVersion: v2
+      name: ver
+      version: 0.0.0
+    ''} $out/Chart.yaml
+    cp ${pkgs.writeText "crd.yaml" ''
+      apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      metadata:
+        name: vers.test.example.com
+        annotations:
+          test/kube-version: "{{ .Capabilities.KubeVersion.Version }}"
+      spec:
+        group: test.example.com
+        names:
+          kind: Ver
+          plural: vers
+          singular: ver
+        scope: Namespaced
+        versions:
+          - name: v1
+            served: true
+            storage: true
+            schema:
+              openAPIV3Schema:
+                type: object
+    ''} $out/templates/crd.yaml
+  '';
+
+  skipCoerceToList = {
+    "stable.example.com.v1.FooBarSpec" = [ "volumes" ];
   };
 
-  # File backend: generate a .nix file, then import it back.
-  fileMod = import (generators.fromCRD args);
-  # Native backend: a module value, no file round-trip.
-  nativeMod = generators.fromCRDModule args;
+  # ── The accessors under test ───────────────────────────────────────────────
+  fileMod = import (
+    generators.fromCRD {
+      name = "foobar";
+      inherit src skipCoerceToList;
+      crds = [ "foobar.yaml" ];
+    }
+  );
+  nativeMod = generators.fromCRDModule {
+    name = "foobar";
+    inherit src skipCoerceToList;
+    crds = [ "foobar.yaml" ];
+  };
+  chartMod = generators.fromChartCRDModule {
+    name = "foobar";
+    inherit chart skipCoerceToList;
+    crds = [ "FooBar" ];
+  };
 
+  srcObjs = generators.crdObjects {
+    inherit src;
+    crds = [ "foobar.yaml" ];
+  };
+  chartObjs = generators.crdObjectsFromChart {
+    name = "foobar";
+    inherit chart;
+  };
+  verObjs =
+    kubeVersion:
+    generators.crdObjectsFromChart {
+      name = "ver";
+      chart = verChart;
+      inherit kubeVersion;
+    };
+
+  # Render a FooBar resource through a CRD type module (via mkEnv). Base imports
+  # (k8s core + argocd) provide ObjectMeta; the base doesn't define FooBar, so
+  # any difference is isolated to this resource.
   render =
     crdMod:
     (mkEnv {
@@ -127,22 +198,18 @@ let
             repository = "x";
             branch = "main";
           };
-          # Base imports (k8s core + argocd) stay on; we only add the CRD
-          # under test. The base modules don't define FooBar, so the
-          # file-vs-native difference is isolated to this resource.
           nixidy.applicationImports = [ crdMod ];
           applications.test = {
             namespace = "default";
             resources."stable.example.com"."v1"."FooBar".myfoo.spec = {
               image = "nginx";
               replicas = 2;
-              targetPort = 8080; # int-or-string
-              labels.app = "demo"; # additionalProperties -> attrsOf str
-              ports.http.port = 8080; # coerce-by-name -> attrset key becomes name
-              env.FOO.value = "bar"; # coerce-by-key (patch-merge-key "key")
+              targetPort = 8080;
+              labels.app = "demo";
+              ports.http.port = 8080;
+              env.FOO.value = "bar";
               volumes = [
                 {
-                  # skipped -> plain list
                   name = "data";
                   path = "/data";
                 }
@@ -150,21 +217,56 @@ let
               resources = {
                 cpu = "100m";
                 memory = "128Mi";
-              }; # nested submodule
+              };
             };
           };
         }
       ];
     }).config.applications.test.resources."stable.example.com"."v1"."FooBar".myfoo;
 
-  equal = render fileMod == render nativeMod;
+  checks = {
+    "fromCRDModule == fromCRD (file)" = render nativeMod == render fileMod;
+
+    "fromChartCRDModule == fromCRDModule" = render chartMod == render nativeMod;
+
+    "crdObjects returns the CRD" =
+      lib.length srcObjs == 1 && (lib.head srcObjs).spec.names.kind == "FooBar";
+
+    "crdObjects kindFilter hit" =
+      lib.length (
+        generators.crdObjects {
+          inherit src;
+          crds = [ "foobar.yaml" ];
+          kindFilter = [ "FooBar" ];
+        }
+      ) == 1;
+
+    "crdObjects kindFilter miss" =
+      generators.crdObjects {
+        inherit src;
+        crds = [ "foobar.yaml" ];
+        kindFilter = [ "Nope" ];
+      } == [ ];
+
+    "crdObjectsFromChart == crdObjects" = chartObjs == srcObjs;
+
+    "crdObjectsFromChart honors kubeVersion" =
+      let
+        ann = kv: (lib.head (verObjs kv)).metadata.annotations."test/kube-version";
+      in
+      lib.hasInfix "1.31" (ann "v1.31.0")
+      && lib.hasInfix "1.40" (ann "v1.40.0")
+      && ann "v1.31.0" != ann "v1.40.0";
+  };
+
+  failed = lib.attrNames (lib.filterAttrs (_: ok: !ok) checks);
 in
-pkgs.runCommand "crd-module-equiv-test" { } (
-  if equal then
+pkgs.runCommand "crd-accessor-test" { } (
+  if failed == [ ] then
     ''
-      echo "PASS: fromCRDModule renders identically to fromCRD"
+      echo "PASS: ${toString (lib.length (lib.attrNames checks))} CRD accessor checks"
       touch $out
     ''
   else
-    throw "fromCRDModule output differs from fromCRD output"
+    throw "CRD accessor checks failed: ${lib.concatStringsSep "; " failed}"
 )

@@ -168,9 +168,10 @@
               '').outPath;
           };
 
-          # Assert the native CRD module generator (fromCRDModule) renders
-          # identically to the file generator (fromCRD).
-          crdModuleTest = {
+          # Assert the CRD value accessors (fromCRDModule, crdObjects, and their
+          # chart variants) agree with the file generator and each other, and
+          # honor kubeVersion. The check derivation builds iff all pass.
+          crdAccessorTest = {
             type = "app";
             program =
               let
@@ -180,8 +181,8 @@
                   generators = self.packages.${system}.generators;
                 };
               in
-              (pkgs.writeShellScript "crd-module-test" ''
-                echo "native CRD module == file generator output (${check})"
+              (pkgs.writeShellScript "crd-accessor-test" ''
+                echo "CRD accessor checks passed (${check})"
               '').outPath;
           };
 
