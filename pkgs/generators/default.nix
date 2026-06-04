@@ -336,12 +336,21 @@ let
       attrNameOverrides ? { },
       skipCoerceToList ? { },
       extraOpts ? [ ],
+      # Kubernetes version to template the chart against (`helm template
+      # --kube-version`). Defaults to the version in nixidy's nixpkgs; override
+      # to match the cluster the CRDs are destined for.
+      kubeVersion ? "v${pkgs.kubernetes.version}",
     }:
     let
       _chart = if chart != null then chart else klib.downloadHelmChart chartAttrs;
 
       objects = klib.fromHelm {
-        inherit name values extraOpts;
+        inherit
+          name
+          values
+          extraOpts
+          kubeVersion
+          ;
         includeCRDs = true;
         chart = _chart;
       };
@@ -378,13 +387,121 @@ let
         "crds.yaml"
       ];
     };
+
+  # Template a chart's CRDs to a raw `crds.yaml` derivation (helm template
+  # --include-crds). Shared by the chart-based module/object accessors so the
+  # chart is templated once; calling both with identical args reuses this one
+  # derivation. Unlike `fromChartCRD`, the output is the raw helm YAML (no
+  # re-serialization), which the downstream accessors parse directly.
+  mkChartCRDsYaml =
+    {
+      name,
+      chart ? null,
+      chartAttrs ? { },
+      values ? { },
+      extraOpts ? [ ],
+      kubeVersion ? "v${pkgs.kubernetes.version}",
+    }:
+    let
+      _chart = if chart != null then chart else klib.downloadHelmChart chartAttrs;
+    in
+    pkgs.stdenv.mkDerivation {
+      name = "chart-crds-${name}";
+
+      passAsFile = [ "helmValues" ];
+      helmValues = builtins.toJSON values;
+
+      allowSubstitutes = false;
+      preferLocalBuild = true;
+
+      phases = [ "installPhase" ];
+      installPhase = ''
+        export HELM_CACHE_HOME="$TMP/.nix-helm-build-cache"
+        mkdir -p $out
+
+        ${pkgs.kubernetes-helm}/bin/helm template \
+        --include-crds \
+        --kube-version "${kubeVersion}" \
+        --values "$helmValuesPath" \
+        "${name}" \
+        "${_chart}" \
+        ${builtins.concatStringsSep " " extraOpts} \
+        > $out/crds.yaml
+      '';
+    };
+
+  # Chart counterpart to `fromCRDModule`: template a chart's CRDs and return a
+  # module value (resource type options). `crds`, when non-empty, narrows the
+  # generated types to those CRD kinds (mirrors `fromChartCRD`).
+  fromChartCRDModule =
+    {
+      name,
+      chart ? null,
+      chartAttrs ? { },
+      values ? { },
+      crds ? [ ],
+      extraOpts ? [ ],
+      kubeVersion ? "v${pkgs.kubernetes.version}",
+      namePrefix ? "",
+      attrNameOverrides ? { },
+      skipCoerceToList ? { },
+    }:
+    fromCRDModule {
+      inherit
+        name
+        namePrefix
+        attrNameOverrides
+        skipCoerceToList
+        ;
+      src = mkChartCRDsYaml {
+        inherit
+          name
+          chart
+          chartAttrs
+          values
+          extraOpts
+          kubeVersion
+          ;
+      };
+      crds = [ "crds.yaml" ];
+      kindFilter = crds;
+    };
+
+  # Chart counterpart to `crdObjects`: template a chart's CRDs and return the
+  # raw CustomResourceDefinition manifests as values. `crds` empty = every CRD.
+  crdObjectsFromChart =
+    {
+      name,
+      chart ? null,
+      chartAttrs ? { },
+      values ? { },
+      crds ? [ ],
+      extraOpts ? [ ],
+      kubeVersion ? "v${pkgs.kubernetes.version}",
+    }:
+    crdObjects {
+      src = mkChartCRDsYaml {
+        inherit
+          name
+          chart
+          chartAttrs
+          values
+          extraOpts
+          kubeVersion
+          ;
+      };
+      crds = [ "crds.yaml" ];
+      kindFilter = crds;
+    };
 in
 {
   inherit
     fromCRD
     fromCRDModule
     fromChartCRD
+    fromChartCRDModule
     crdObjects
+    crdObjectsFromChart
     k8s
     ;
 
