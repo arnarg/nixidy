@@ -12,7 +12,7 @@ Nixidy brings the power of Nix to Kubernetes cluster management, enabling declar
 ## User Guide
 
 - [Using Helm Charts](https://nixidy.dev/user_guide/helm_charts/): Integrate existing Helm charts with patch support
-- [Typed Resource Options](https://nixidy.dev/user_guide/typed_resources/): Generate typed Nix options from CRDs using fromCRD and fromChartCRD
+- [Typed Resource Options](https://nixidy.dev/user_guide/typed_resources/): Generate typed Nix options from CRDs — fromCRD/fromChartCRD (generated file), fromCRDModule/fromChartCRDModule (module value, no file), and crdObjects/crdObjectsFromChart (raw CRD manifests)
 - [Templates](https://nixidy.dev/user_guide/templates/): Create reusable application patterns with configurable options
 - [Git Strategies](https://nixidy.dev/user_guide/git_strategies/): Monorepo, environment branches, or separate repositories
 - [GitHub Actions](https://nixidy.dev/user_guide/github_actions/): CI/CD integration with nixidy/build and nixidy/switch actions

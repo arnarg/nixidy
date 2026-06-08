@@ -433,9 +433,36 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#generating-resource-options-from-helm-chart-crds" class="md-nav__link">
+  <a href="#from-source-files-fromcrd" class="md-nav__link">
     <span class="md-ellipsis">
-      Generating resource options from Helm Chart CRDs
+      From source files (fromCRD)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-helm-chart-crds-fromchartcrd" class="md-nav__link">
+    <span class="md-ellipsis">
+      From Helm Chart CRDs (fromChartCRD)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#as-a-module-value-fromcrdmodule-fromchartcrdmodule" class="md-nav__link">
+    <span class="md-ellipsis">
+      As a module value (fromCRDModule / fromChartCRDModule)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#raw-crd-objects-crdobjects-crdobjectsfromchart" class="md-nav__link">
+    <span class="md-ellipsis">
+      Raw CRD objects (crdObjects / crdObjectsFromChart)
     </span>
   </a>
   
@@ -860,9 +887,36 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#generating-resource-options-from-helm-chart-crds" class="md-nav__link">
+  <a href="#from-source-files-fromcrd" class="md-nav__link">
     <span class="md-ellipsis">
-      Generating resource options from Helm Chart CRDs
+      From source files (fromCRD)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-helm-chart-crds-fromchartcrd" class="md-nav__link">
+    <span class="md-ellipsis">
+      From Helm Chart CRDs (fromChartCRD)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#as-a-module-value-fromcrdmodule-fromchartcrdmodule" class="md-nav__link">
+    <span class="md-ellipsis">
+      As a module value (fromCRDModule / fromChartCRDModule)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#raw-crd-objects-crdobjects-crdobjectsfromchart" class="md-nav__link">
+    <span class="md-ellipsis">
+      Raw CRD objects (crdObjects / crdObjectsFromChart)
     </span>
   </a>
   
@@ -926,6 +980,40 @@
 </div>
 <h2 id="generating-your-own-resource-options-from-crds">Generating your own resource options from CRDs<a class="headerlink" href="#generating-your-own-resource-options-from-crds" title="Permanent link">#</a></h2>
 <p>Thankfully a code generator for generating resource options from CRDs is provided by nixidy (this is based heavily on kubenix's code generator).</p>
+<p>nixidy offers a small matrix of CRD accessors. Pick one by <strong>what you want back</strong> (a generated <code>.nix</code> file, a live module value, or the raw CRD manifests) and <strong>where the CRDs come from</strong> (local source files, or a Helm chart):</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>source files (<code>src</code>)</th>
+<th>Helm chart</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>→ generated file</strong></td>
+<td><a href="#from-source-files-fromcrd"><code>fromCRD</code></a></td>
+<td><a href="#from-helm-chart-crds-fromchartcrd"><code>fromChartCRD</code></a></td>
+</tr>
+<tr>
+<td><strong>→ module value</strong></td>
+<td><a href="#as-a-module-value-fromcrdmodule-fromchartcrdmodule"><code>fromCRDModule</code></a></td>
+<td><a href="#as-a-module-value-fromcrdmodule-fromchartcrdmodule"><code>fromChartCRDModule</code></a></td>
+</tr>
+<tr>
+<td><strong>→ raw objects</strong></td>
+<td><a href="#raw-crd-objects-crdobjects-crdobjectsfromchart"><code>crdObjects</code></a></td>
+<td><a href="#raw-crd-objects-crdobjects-crdobjectsfromchart"><code>crdObjectsFromChart</code></a></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>→ generated file</strong> renders the resource options to Nix source, formats it, and writes a <code>.nix</code> file you commit and <code>import</code>. Good when you want the generated types checked into your repository and reviewable in diffs.</li>
+<li><strong>→ module value</strong> returns the resource options as a module value directly — no generated file, no <code>import</code>. Drop it straight into <code>nixidy.applicationImports</code>. Good for flake/programmatic consumers that don't need a committed file.</li>
+<li><strong>→ raw objects</strong> returns the <code>CustomResourceDefinition</code> manifests themselves as Nix values (not resource options), e.g. so you can deploy the CRDs alongside the resources that use them.</li>
+</ul>
+<p>All variants share the same <code>name</code>, <code>namePrefix</code>, <code>attrNameOverrides</code> and <code>skipCoerceToList</code> arguments; the source-based ones take <code>crdFiles</code> and the chart-based ones take <code>chartAttrs</code>/<code>chart</code>/<code>values</code>/<code>kubeVersion</code>. Both families take an optional <code>kindFilter</code> to narrow which CRD kinds are processed.</p>
+<h3 id="from-source-files-fromcrd">From source files (<code>fromCRD</code>)<a class="headerlink" href="#from-source-files-fromcrd" title="Permanent link">#</a></h3>
 <p>As an example, to generate resource options for Cilium's <code>CiliumNetworkPolicy</code> and <code>CiliumClusterwideNetworkPolicy</code> the following can be defined in <code>flake.nix</code>.</p>
 <div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
   <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;My ArgoCD configuration with nixidy.&quot;</span><span class="p">;</span>
@@ -954,7 +1042,7 @@
           <span class="ss">rev</span> <span class="o">=</span> <span class="s2">&quot;v1.15.6&quot;</span><span class="p">;</span>
           <span class="ss">hash</span> <span class="o">=</span> <span class="s2">&quot;sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=&quot;</span><span class="p">;</span>
         <span class="p">};</span>
-        <span class="ss">crds</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="ss">crdFiles</span> <span class="o">=</span> <span class="p">[</span>
           <span class="s2">&quot;pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml&quot;</span>
           <span class="s2">&quot;pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml&quot;</span>
         <span class="p">];</span>
@@ -997,7 +1085,7 @@
         <span class="ss">rev</span> <span class="o">=</span> <span class="s2">&quot;v1.15.6&quot;</span><span class="p">;</span>
         <span class="ss">hash</span> <span class="o">=</span> <span class="s2">&quot;sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=&quot;</span><span class="p">;</span>
       <span class="p">};</span>
-      <span class="ss">crds</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="ss">crdFiles</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml&quot;</span>
         <span class="s2">&quot;pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml&quot;</span>
       <span class="p">];</span>
@@ -1006,7 +1094,7 @@
 </code></pre></div>
 <p>Then running <code>nix-build generate.nix -A cilium</code> will produce a nix file that can be copied into place in your repository and imported using <code>nixidy.applicationImports</code> in a nixidy module.</p>
 </details>
-<h3 id="generating-resource-options-from-helm-chart-crds">Generating resource options from Helm Chart CRDs<a class="headerlink" href="#generating-resource-options-from-helm-chart-crds" title="Permanent link">#</a></h3>
+<h3 id="from-helm-chart-crds-fromchartcrd">From Helm Chart CRDs (<code>fromChartCRD</code>)<a class="headerlink" href="#from-helm-chart-crds-fromchartcrd" title="Permanent link">#</a></h3>
 <p>In some cases, CRDs are only available through Helm charts or it's beneficial to keep them in sync with the chart version you're deploying. The <code>fromChartCRD</code> function provides a solution by templating the Helm chart and extracting CRDs from the output, generating nixidy resource options from them.</p>
 <p>This approach also handles CRDs that include Helm templating within their definitions, which would not be properly processed by the regular <code>fromCRD</code> function.</p>
 <p>As an example, to generate resource options for cert-manager's <code>Certificate</code> CRD directly from the Helm chart:</p>
@@ -1044,7 +1132,7 @@
         <span class="p">};</span>
         <span class="c1"># Or from nixhelm</span>
         <span class="c1"># chart = nixhelm.chartsDerivations.${system}.jetstack.cert-manager;</span>
-        <span class="ss">crds</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;Certificate&quot;</span> <span class="p">];</span>  <span class="c1"># Optional: filter by specific CRD kinds</span>
+        <span class="ss">kindFilter</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;Certificate&quot;</span> <span class="p">];</span>  <span class="c1"># Optional: filter by specific CRD kinds</span>
         <span class="ss">extraOpts</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;--set&quot;</span><span class="p">,</span> <span class="s2">&quot;crds.enabled=true&quot;</span><span class="p">];</span> <span class="c1"># Optional: pass extra options to helm template generation</span>
       <span class="p">};</span>
     <span class="p">};</span>
@@ -1079,7 +1167,7 @@
         <span class="ss">version</span> <span class="o">=</span> <span class="s2">&quot;v1.19.1&quot;</span><span class="p">;</span>
         <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">&quot;sha256-fs14wuKK+blC0l+pRfa//oBV2X+Dr3nNX+Z94nrQVrA=&quot;</span><span class="p">;</span>
       <span class="p">};</span>
-      <span class="ss">crds</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;Certificate&quot;</span> <span class="p">];</span>  <span class="c1"># Optional: filter by specific CRD kinds</span>
+      <span class="ss">kindFilter</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;Certificate&quot;</span> <span class="p">];</span>  <span class="c1"># Optional: filter by specific CRD kinds</span>
       <span class="ss">extraOpts</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;--set&quot;</span><span class="p">,</span> <span class="s2">&quot;crds.enabled=true&quot;</span><span class="p">];</span> <span class="c1"># Optional: pass extra options to helm template generation</span>
     <span class="p">};</span>
   <span class="p">}</span>
@@ -1091,10 +1179,61 @@
 <li><code>chartAttrs</code>: Chart repository, name, version and chartHash configuration</li>
 <li><code>chart</code>: Alternative to <code>chartAttrs</code>, can use a pre-downloaded chart</li>
 <li><code>values</code>: Values to pass to the Helm chart templating</li>
-<li><code>crds</code>: List of CRD kinds to extract (empty list extracts all CRDs)</li>
+<li><code>kindFilter</code>: List of CRD kinds to extract (empty list extracts all CRDs)</li>
+<li><code>kubeVersion</code>: Kubernetes version to template the chart against (<code>helm template --kube-version</code>). Defaults to the version in nixidy's nixpkgs; set it to match the cluster the CRDs are destined for.</li>
 <li><code>extraOpts</code>: List of extra arguments to pass through to helm template</li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">Renamed argument</p>
+<p><code>kindFilter</code> was previously called <code>crds</code>. The old name still works as a deprecated alias (it emits a warning pointing at <code>kindFilter</code>); prefer <code>kindFilter</code> in new code. Note that on <code>fromCRD</code> the <code>crds</code> argument instead became <code>crdFiles</code> — the two used to share a name despite meaning different things (a kind filter vs. a list of YAML files).</p>
+</div>
 <p>This approach ensures your CRD definitions stay synchronized with the Helm chart version you're actually deploying in your applications.</p>
+<h3 id="as-a-module-value-fromcrdmodule-fromchartcrdmodule">As a module value (<code>fromCRDModule</code> / <code>fromChartCRDModule</code>)<a class="headerlink" href="#as-a-module-value-fromcrdmodule-fromchartcrdmodule" title="Permanent link">#</a></h3>
+<p><code>fromCRD</code> and <code>fromChartCRD</code> build a <code>.nix</code> file that you commit and <code>import</code>. For flake or other programmatic consumers that don't need a committed file, <code>fromCRDModule</code> (and its chart counterpart <code>fromChartCRDModule</code>) return the resource options as a <strong>module value</strong> instead — skipping the render-to-source, format, write-file and <code>import</code> round-trip. The result is a module function, which is exactly what <code>nixidy.applicationImports</code> accepts, so it drops straight in.</p>
+<div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="ss">nixidyEnvs</span> <span class="o">=</span> nixidy<span class="o">.</span>lib<span class="o">.</span>mkEnvs <span class="p">{</span>
+  <span class="k">inherit</span> pkgs<span class="p">;</span>
+
+  envs<span class="o">.</span>dev<span class="o">.</span><span class="ss">modules</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="l">./env/dev.nix</span>
+    <span class="p">{</span>
+      nixidy<span class="o">.</span><span class="ss">applicationImports</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span>nixidy<span class="o">.</span>packages<span class="o">.</span><span class="si">${</span>system<span class="si">}</span><span class="o">.</span>generators<span class="o">.</span>fromCRDModule <span class="p">{</span>
+          <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;cilium&quot;</span><span class="p">;</span>
+          <span class="ss">src</span> <span class="o">=</span> pkgs<span class="o">.</span>fetchFromGitHub <span class="p">{</span>
+            <span class="ss">owner</span> <span class="o">=</span> <span class="s2">&quot;cilium&quot;</span><span class="p">;</span>
+            <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;cilium&quot;</span><span class="p">;</span>
+            <span class="ss">rev</span> <span class="o">=</span> <span class="s2">&quot;v1.15.6&quot;</span><span class="p">;</span>
+            <span class="ss">hash</span> <span class="o">=</span> <span class="s2">&quot;sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=&quot;</span><span class="p">;</span>
+          <span class="p">};</span>
+          <span class="ss">crdFiles</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml&quot;</span>
+            <span class="s2">&quot;pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml&quot;</span>
+          <span class="p">];</span>
+        <span class="p">})</span>
+      <span class="p">];</span>
+    <span class="p">}</span>
+  <span class="p">];</span>
+<span class="p">};</span>
+</code></pre></div>
+<p><code>fromChartCRDModule</code> takes the same chart arguments as <code>fromChartCRD</code> (<code>chartAttrs</code>/<code>chart</code>/<code>values</code>/<code>kindFilter</code>/<code>kubeVersion</code>/<code>extraOpts</code>). Because no file is generated there is nothing to <code>nix build</code> or commit — the types are produced during evaluation.</p>
+<h3 id="raw-crd-objects-crdobjects-crdobjectsfromchart">Raw CRD objects (<code>crdObjects</code> / <code>crdObjectsFromChart</code>)<a class="headerlink" href="#raw-crd-objects-crdobjects-crdobjectsfromchart" title="Permanent link">#</a></h3>
+<p>Sometimes you don't want resource <em>options</em> at all — you want the <code>CustomResourceDefinition</code> manifests themselves, for example to deploy the CRDs into the cluster alongside the resources that use them. <code>crdObjects</code> (source files) and <code>crdObjectsFromChart</code> (Helm chart) return the CRD manifests as a list of plain Nix attribute sets. They are deployment-agnostic — what you do with them is up to you.</p>
+<p>One way to deploy them is to feed them into an application's <code>yamls</code>, which parses YAML/JSON strings into the application's output (<code>builtins.toJSON</code> output is valid YAML):</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># inside an env module</span>
+applications<span class="o">.</span><span class="ss">crds</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;kube-system&quot;</span><span class="p">;</span>
+  <span class="ss">yamls</span> <span class="o">=</span> <span class="nb">map</span> <span class="nb">builtins</span><span class="o">.</span>toJSON <span class="p">(</span>
+    nixidy<span class="o">.</span>packages<span class="o">.</span><span class="si">${</span>system<span class="si">}</span><span class="o">.</span>generators<span class="o">.</span>crdObjects <span class="p">{</span>
+      <span class="ss">src</span> <span class="o">=</span> ciliumSrc<span class="p">;</span> <span class="c1"># the pkgs.fetchFromGitHub from the fromCRD example</span>
+      <span class="ss">crdFiles</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml&quot;</span>
+        <span class="s2">&quot;pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml&quot;</span>
+      <span class="p">];</span>
+    <span class="p">}</span>
+  <span class="p">);</span>
+<span class="p">};</span>
+</code></pre></div>
+<p><code>crdObjectsFromChart</code> takes the same chart arguments as <code>fromChartCRD</code>. Both accept an optional <code>kindFilter</code> to keep only specific CRD kinds (an empty or unset list keeps all of them).</p>
 <h3 id="resolving-naming-conflicts">Resolving Naming Conflicts<a class="headerlink" href="#resolving-naming-conflicts" title="Permanent link">#</a></h3>
 <p>Sometimes, multiple Custom Resource Definitions from different sources might define the same resource <code>kind</code>. This can lead to conflicts in the generated attribute names. For instance, if two different operators both define a CRD with the kind <code>Database</code>, they would both try to generate options for <code>resources.databases</code>.</p>
 <p>To resolve this, the <code>fromCRD</code> function accepts a <code>namePrefix</code> argument. This prefix will be added to the generated attribute name, making it unique.</p>
@@ -1126,7 +1265,7 @@
       <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;provider-keycloak&quot;</span><span class="p">;</span>
       <span class="o">...</span>
     <span class="p">};</span>
-    <span class="ss">crds</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="ss">crdFiles</span> <span class="o">=</span> <span class="p">[</span>
       <span class="c1"># This CRD conflicts with Kubernetes builtin Binding</span>
       <span class="s2">&quot;package/crds/authenticationflow.keycloak.crossplane.io_bindings.yaml&quot;</span>
       <span class="c1"># These CRDs have identical plural references</span>

@@ -824,6 +824,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#shared-schema-walk-and-backends" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shared schema walk and backends
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#crd-generation" class="md-nav__link">
     <span class="md-ellipsis">
       CRD Generation
@@ -1412,6 +1421,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#shared-schema-walk-and-backends" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shared schema walk and backends
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#crd-generation" class="md-nav__link">
     <span class="md-ellipsis">
       CRD Generation
@@ -1731,8 +1749,13 @@
 ├── pkgs/                   # Nix packages and generators
 │   └── generators/         # CRD and K8s schema generators
 │       ├── crd2jsonschema.py   # CRD to JSON schema converter
-│       ├── default.nix         # Generator entry point
-│       ├── generator.nix       # Nix options generator
+│       ├── default.nix         # Generator entry point (accessors)
+│       ├── walk.nix            # Shared schema traversal (backend-parameterized)
+│       ├── backend-text.nix    # Text backend — emits Nix source
+│       ├── backend-value.nix   # Value backend — live module values
+│       ├── generator.nix       # File assembler (text backend → .nix file)
+│       ├── module.nix          # Module assembler (value backend → module value)
+│       ├── runtime.nix         # Runtime helpers as values (for module.nix)
 │       └── versions.nix        # Kubernetes versions config
 ├── tests/                  # Module unit tests
 │   ├── helm/               # Helm-specific tests
@@ -2009,31 +2032,72 @@ resources<span class="o">.</span>ingresses<span class="o">.</span><span class="s
 <li>Produces Nix options via <code>generator.nix</code></li>
 </ol>
 <p>Output: <code>modules/generated/k8s/v1.XX.nix</code></p>
+<h3 id="shared-schema-walk-and-backends">Shared schema walk and backends<a class="headerlink" href="#shared-schema-walk-and-backends" title="Permanent link">#</a></h3>
+<p>The schema-to-options logic lives in one place, <code>walk.nix</code>, parameterized over a <em>backend</em> so the same traversal can produce either Nix <strong>source text</strong> or live module <strong>values</strong>:</p>
+<ul>
+<li><code>walk.nix</code> — the single traversal of the (JSON) schema. All type/coercion branch logic (int-or-string, <code>additionalProperties</code>→<code>attrsOf</code>, coerce-by-name lists, patch-merge-key, <code>skipCoerceToList</code>, <code>specialMapKeys</code>, nested submodules, etc.) lives here, expressed against an abstract backend <code>b</code>.</li>
+<li><code>backend-text.nix</code> — emits Nix <strong>source</strong>. Used by the file generators; it also inlines the runtime helpers (see below) as source so committed standalone files stay self-contained.</li>
+<li><code>backend-value.nix</code> — produces live module <strong>values</strong> using <code>runtime.nix</code>.</li>
+<li><code>generator.nix</code> — thin assembler over the text backend (renders + <code>nixfmt</code> + writes a <code>.nix</code> file).</li>
+<li><code>module.nix</code> — thin assembler over the value backend (returns a module function).</li>
+<li><code>runtime.nix</code> — the per-generated-module runtime helpers (<code>coercedTo</code>, <code>mergeValuesByKey</code>, <code>submoduleForDefinition</code>, …) as <strong>values</strong>, imported by the value backend. The text backend inlines source-form equivalents of these same helpers. Only the <em>walk</em> is single-sourced; the helpers must exist in both forms because live values can't be serialized back to source and committed files can't reference nixidy internals.</li>
+</ul>
 <h3 id="crd-generation">CRD Generation<a class="headerlink" href="#crd-generation" title="Permanent link">#</a></h3>
-<p>Two entry points:</p>
-<h4 id="fromcrd"><code>fromCRD</code><a class="headerlink" href="#fromcrd" title="Permanent link">#</a></h4>
+<p>CRD accessors form a matrix over output shape × source, all built on the shared walk:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>source files (<code>src</code>)</th>
+<th>Helm chart</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>→ generated file</td>
+<td><code>fromCRD</code></td>
+<td><code>fromChartCRD</code></td>
+</tr>
+<tr>
+<td>→ module value</td>
+<td><code>fromCRDModule</code></td>
+<td><code>fromChartCRDModule</code></td>
+</tr>
+<tr>
+<td>→ raw objects</td>
+<td><code>crdObjects</code></td>
+<td><code>crdObjectsFromChart</code></td>
+</tr>
+</tbody>
+</table>
 <div class="highlight"><pre><span></span><code>fromCRD <span class="p">{</span>
   <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;cilium&quot;</span><span class="p">;</span>
   <span class="ss">src</span> <span class="o">=</span> pkgs<span class="o">.</span>fetchFromGitHub <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
-  <span class="ss">crds</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;path/to/crd.yaml&quot;</span> <span class="p">];</span>
+  <span class="ss">crdFiles</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;path/to/crd.yaml&quot;</span> <span class="p">];</span>  <span class="c1"># list of YAML files under `src`</span>
+  <span class="ss">kindFilter</span> <span class="o">=</span> <span class="p">[</span> <span class="p">];</span>          <span class="c1"># Optional: only these CRD kinds (default: all)</span>
   <span class="ss">namePrefix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>           <span class="c1"># Optional prefix for attribute names</span>
   <span class="ss">attrNameOverrides</span> <span class="o">=</span> <span class="p">{</span> <span class="p">};</span>   <span class="c1"># Manual name overrides</span>
   <span class="ss">skipCoerceToList</span> <span class="o">=</span> <span class="p">{</span> <span class="p">};</span>    <span class="c1"># Skip list coercion for specific fields</span>
 <span class="p">}</span>
-</code></pre></div>
-<h4 id="fromchartcrd"><code>fromChartCRD</code><a class="headerlink" href="#fromchartcrd" title="Permanent link">#</a></h4>
-<div class="highlight"><pre><span></span><code>fromChartCRD <span class="p">{</span>
+
+fromChartCRD <span class="p">{</span>
   <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;cert-manager&quot;</span><span class="p">;</span>
   <span class="ss">chartAttrs</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;...&quot;</span><span class="p">;</span> <span class="ss">chart</span> <span class="o">=</span> <span class="s2">&quot;...&quot;</span><span class="p">;</span> <span class="ss">version</span> <span class="o">=</span> <span class="s2">&quot;...&quot;</span><span class="p">;</span> <span class="p">};</span>
-  <span class="ss">crds</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;Certificate&quot;</span> <span class="p">];</span>  <span class="c1"># Filter by kind</span>
+  <span class="ss">kindFilter</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;Certificate&quot;</span> <span class="p">];</span>  <span class="c1"># Optional: only these CRD kinds (default: all)</span>
+  <span class="ss">kubeVersion</span> <span class="o">=</span> <span class="s2">&quot;v1.31.0&quot;</span><span class="p">;</span>         <span class="c1"># Optional: helm template --kube-version</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>The <code>*Module</code> variants take the same arguments and return a module value (no file); <code>crdObjects</code>/<code>crdObjectsFromChart</code> return the raw <code>CustomResourceDefinition</code> manifests as values.</p>
+<div class="admonition note">
+<p class="admonition-title">Renamed arguments</p>
+<p>The overloaded <code>crds</code> argument was split: source-based accessors now take <code>crdFiles</code> (the list of YAML files) and chart-based accessors take <code>kindFilter</code> (the kind filter). <code>crds</code> remains as a deprecated alias on every accessor (resolved by the shared <code>renamedArg</code> helper, which warns and points at the new name).</p>
+</div>
 <h3 id="crd-processing-crd2jsonschemapy">CRD Processing (<code>crd2jsonschema.py</code>)<a class="headerlink" href="#crd-processing-crd2jsonschemapy" title="Permanent link">#</a></h3>
 <p>Python script that:
 1. Reads CRD YAML files
 2. Extracts OpenAPI v3 schemas
 3. Flattens <code>$ref</code> references
-4. Outputs JSON schema for <code>generator.nix</code></p>
+4. Outputs JSON schema for the shared walk (<code>walk.nix</code>)</p>
 <h2 id="testing-framework">Testing Framework<a class="headerlink" href="#testing-framework" title="Permanent link">#</a></h2>
 <h3 id="module-tests-tests">Module Tests (<code>tests/</code>)<a class="headerlink" href="#module-tests-tests" title="Permanent link">#</a></h3>
 <p>Located in <code>tests/</code>, using nixidy's testing framework.</p>
