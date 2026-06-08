@@ -52,8 +52,13 @@ nixidy/
 ├── pkgs/                   # Nix packages and generators
 │   └── generators/         # CRD and K8s schema generators
 │       ├── crd2jsonschema.py   # CRD to JSON schema converter
-│       ├── default.nix         # Generator entry point
-│       ├── generator.nix       # Nix options generator
+│       ├── default.nix         # Generator entry point (accessors)
+│       ├── walk.nix            # Shared schema traversal (backend-parameterized)
+│       ├── backend-text.nix    # Text backend — emits Nix source
+│       ├── backend-value.nix   # Value backend — live module values
+│       ├── generator.nix       # File assembler (text backend → .nix file)
+│       ├── module.nix          # Module assembler (value backend → module value)
+│       ├── runtime.nix         # Runtime helpers as values (for module.nix)
 │       └── versions.nix        # Kubernetes versions config
 ├── tests/                  # Module unit tests
 │   ├── helm/               # Helm-specific tests
