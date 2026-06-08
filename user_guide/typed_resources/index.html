@@ -963,7 +963,7 @@
 <li><code>resources.core.v1.Service</code> -&gt; <code>resources.services</code></li>
 <li><code>resources."networking.k8s.io".v1.NetworkPolicy</code> -&gt; <code>resources.networkPolicies</code></li>
 </ul>
-<p>The lack of availability of typed resource options only hinders the ability to define the resources in nix. Any manifests that are rendered from a Helm Chart or defined in <code>applications.&lt;applicationName&gt;.yamls</code> and do not have defined resource options for that group, version and kind will go straight to the output for the application and can not be patched by nixidy.</p>
+<p>The lack of typed resource options only prevents defining resources in nix. Manifests rendered from a Helm Chart or defined in <code>applications.&lt;applicationName&gt;.yamls</code> that do not have resource options for that group, version and kind go straight to the application output and cannot be patched by nixidy.</p>
 <h2 id="including-arbitrary-yaml">Including arbitrary YAML<a class="headerlink" href="#including-arbitrary-yaml" title="Permanent link">#</a></h2>
 <p>To include YAML files in an application's output without nixidy parsing them, use <code>applications.&lt;applicationName&gt;.extraRawYamls</code>. The listed files are copied into the application's output directory and are never round-tripped through <code>kube.fromYAML</code>, so they are not available under <code>resources</code> and cannot be patched in nix.</p>
 <p>A common use case is <a href="https://github.com/getsops/sops">SOPS</a>-encrypted manifests: the top-level <code>sops</code> metadata block would otherwise be stripped, and <code>ENC[...]</code> ciphertext values would be re-formatted in ways that break decryption.</p>
@@ -979,8 +979,8 @@
 <p><code>extraRawYamls</code> is only included in the ArgoCD-targeted environment output. The <code>kubectl apply --prune</code> flow produced by <a href="../direct_apply/"><code>direct_apply</code></a> only handles typed <code>objects</code> and skips raw files. SOPS-encrypted manifests aren't valid Kubernetes objects until decrypted, so they are expected to be applied by ArgoCD (with a SOPS plugin) rather than <code>kubectl apply</code>.</p>
 </div>
 <h2 id="generating-your-own-resource-options-from-crds">Generating your own resource options from CRDs<a class="headerlink" href="#generating-your-own-resource-options-from-crds" title="Permanent link">#</a></h2>
-<p>Thankfully a code generator for generating resource options from CRDs is provided by nixidy (this is based heavily on kubenix's code generator).</p>
-<p>nixidy offers a small matrix of CRD accessors. Pick one by <strong>what you want back</strong> (a generated <code>.nix</code> file, a live module value, or the raw CRD manifests) and <strong>where the CRDs come from</strong> (local source files, or a Helm chart):</p>
+<p>nixidy provides a code generator for generating resource options from CRDs (this is based heavily on kubenix's code generator).</p>
+<p>A matrix of CRD accessors are available. Pick one by <strong>what you want back</strong> (a generated <code>.nix</code> file, a live module value, or the raw CRD manifests) and <strong>where the CRDs come from</strong> (local source files, or a Helm chart):</p>
 <table>
 <thead>
 <tr>
@@ -1008,9 +1008,9 @@
 </tbody>
 </table>
 <ul>
-<li><strong>→ generated file</strong> renders the resource options to Nix source, formats it, and writes a <code>.nix</code> file you commit and <code>import</code>. Good when you want the generated types checked into your repository and reviewable in diffs.</li>
-<li><strong>→ module value</strong> returns the resource options as a module value directly — no generated file, no <code>import</code>. Drop it straight into <code>nixidy.applicationImports</code>. Good for flake/programmatic consumers that don't need a committed file.</li>
-<li><strong>→ raw objects</strong> returns the <code>CustomResourceDefinition</code> manifests themselves as Nix values (not resource options), e.g. so you can deploy the CRDs alongside the resources that use them.</li>
+<li><strong>→ generated file</strong> renders the resource options to Nix source, formats it, and writes a <code>.nix</code> file you commit and <code>import</code>. Use this when you want the generated types checked into your repository and reviewable in diffs.</li>
+<li><strong>→ module value</strong> returns the resource options as a module value directly, with no generated file and no <code>import</code>. Pass the result directly to <code>nixidy.applicationImports</code>. This is useful for flake or programmatic consumers that do not need a committed file.</li>
+<li><strong>→ raw objects</strong> returns the <code>CustomResourceDefinition</code> manifests themselves as Nix values (not resource options), for example to deploy the CRDs alongside the resources that use them.</li>
 </ul>
 <p>All variants share the same <code>name</code>, <code>namePrefix</code>, <code>attrNameOverrides</code> and <code>skipCoerceToList</code> arguments; the source-based ones take <code>crdFiles</code> and the chart-based ones take <code>chartAttrs</code>/<code>chart</code>/<code>values</code>/<code>kubeVersion</code>. Both families take an optional <code>kindFilter</code> to narrow which CRD kinds are processed.</p>
 <h3 id="from-source-files-fromcrd">From source files (<code>fromCRD</code>)<a class="headerlink" href="#from-source-files-fromcrd" title="Permanent link">#</a></h3>
@@ -1096,7 +1096,7 @@
 </details>
 <h3 id="from-helm-chart-crds-fromchartcrd">From Helm Chart CRDs (<code>fromChartCRD</code>)<a class="headerlink" href="#from-helm-chart-crds-fromchartcrd" title="Permanent link">#</a></h3>
 <p>In some cases, CRDs are only available through Helm charts or it's beneficial to keep them in sync with the chart version you're deploying. The <code>fromChartCRD</code> function provides a solution by templating the Helm chart and extracting CRDs from the output, generating nixidy resource options from them.</p>
-<p>This approach also handles CRDs that include Helm templating within their definitions, which would not be properly processed by the regular <code>fromCRD</code> function.</p>
+<p>This approach also handles CRDs that include Helm templating within their definitions, which would not be properly processed by <code>fromCRD</code>.</p>
 <p>As an example, to generate resource options for cert-manager's <code>Certificate</code> CRD directly from the Helm chart:</p>
 <div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
   <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;My ArgoCD configuration with nixidy.&quot;</span><span class="p">;</span>
@@ -1185,11 +1185,10 @@
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Renamed argument</p>
-<p><code>kindFilter</code> was previously called <code>crds</code>. The old name still works as a deprecated alias (it emits a warning pointing at <code>kindFilter</code>); prefer <code>kindFilter</code> in new code. Note that on <code>fromCRD</code> the <code>crds</code> argument instead became <code>crdFiles</code> — the two used to share a name despite meaning different things (a kind filter vs. a list of YAML files).</p>
+<p><code>kindFilter</code> was previously called <code>crds</code>. The old name still works as a deprecated alias (it emits a warning pointing at <code>kindFilter</code>); prefer <code>kindFilter</code> in new code. Note that on <code>fromCRD</code> the <code>crds</code> argument instead became <code>crdFiles</code> (the two used to share a name despite meaning different things: a kind filter vs. a list of YAML files).</p>
 </div>
-<p>This approach ensures your CRD definitions stay synchronized with the Helm chart version you're actually deploying in your applications.</p>
 <h3 id="as-a-module-value-fromcrdmodule-fromchartcrdmodule">As a module value (<code>fromCRDModule</code> / <code>fromChartCRDModule</code>)<a class="headerlink" href="#as-a-module-value-fromcrdmodule-fromchartcrdmodule" title="Permanent link">#</a></h3>
-<p><code>fromCRD</code> and <code>fromChartCRD</code> build a <code>.nix</code> file that you commit and <code>import</code>. For flake or other programmatic consumers that don't need a committed file, <code>fromCRDModule</code> (and its chart counterpart <code>fromChartCRDModule</code>) return the resource options as a <strong>module value</strong> instead — skipping the render-to-source, format, write-file and <code>import</code> round-trip. The result is a module function, which is exactly what <code>nixidy.applicationImports</code> accepts, so it drops straight in.</p>
+<p><code>fromCRD</code> and <code>fromChartCRD</code> build a <code>.nix</code> file that you commit and <code>import</code>. For flake or other programmatic consumers that do not need a committed file, <code>fromCRDModule</code> (and its chart counterpart <code>fromChartCRDModule</code>) return the resource options as a <strong>module value</strong> instead, skipping the render-to-source, format, write-file and <code>import</code> round-trip. The result is a module function, which is exactly what <code>nixidy.applicationImports</code> accepts.</p>
 <div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="ss">nixidyEnvs</span> <span class="o">=</span> nixidy<span class="o">.</span>lib<span class="o">.</span>mkEnvs <span class="p">{</span>
   <span class="k">inherit</span> pkgs<span class="p">;</span>
 
@@ -1215,9 +1214,9 @@
   <span class="p">];</span>
 <span class="p">};</span>
 </code></pre></div>
-<p><code>fromChartCRDModule</code> takes the same chart arguments as <code>fromChartCRD</code> (<code>chartAttrs</code>/<code>chart</code>/<code>values</code>/<code>kindFilter</code>/<code>kubeVersion</code>/<code>extraOpts</code>). Because no file is generated there is nothing to <code>nix build</code> or commit — the types are produced during evaluation.</p>
+<p><code>fromChartCRDModule</code> takes the same chart arguments as <code>fromChartCRD</code> (<code>chartAttrs</code>/<code>chart</code>/<code>values</code>/<code>kindFilter</code>/<code>kubeVersion</code>/<code>extraOpts</code>). Because no file is generated there is nothing to <code>nix build</code> or commit; the types are produced during evaluation.</p>
 <h3 id="raw-crd-objects-crdobjects-crdobjectsfromchart">Raw CRD objects (<code>crdObjects</code> / <code>crdObjectsFromChart</code>)<a class="headerlink" href="#raw-crd-objects-crdobjects-crdobjectsfromchart" title="Permanent link">#</a></h3>
-<p>Sometimes you don't want resource <em>options</em> at all — you want the <code>CustomResourceDefinition</code> manifests themselves, for example to deploy the CRDs into the cluster alongside the resources that use them. <code>crdObjects</code> (source files) and <code>crdObjectsFromChart</code> (Helm chart) return the CRD manifests as a list of plain Nix attribute sets. They are deployment-agnostic — what you do with them is up to you.</p>
+<p>Sometimes you do not want resource <em>options</em> at all but rather the <code>CustomResourceDefinition</code> manifests themselves, for example to deploy the CRDs into the cluster alongside the resources that use them. <code>crdObjects</code> (source files) and <code>crdObjectsFromChart</code> (Helm chart) return the CRD manifests as a list of plain Nix attribute sets.</p>
 <p>One way to deploy them is to feed them into an application's <code>yamls</code>, which parses YAML/JSON strings into the application's output (<code>builtins.toJSON</code> output is valid YAML):</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># inside an env module</span>
 applications<span class="o">.</span><span class="ss">crds</span> <span class="o">=</span> <span class="p">{</span>
