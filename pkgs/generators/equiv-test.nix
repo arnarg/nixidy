@@ -155,23 +155,23 @@ let
     generators.fromCRD {
       name = "foobar";
       inherit src skipCoerceToList;
-      crds = [ "foobar.yaml" ];
+      crdFiles = [ "foobar.yaml" ];
     }
   );
   nativeMod = generators.fromCRDModule {
     name = "foobar";
     inherit src skipCoerceToList;
-    crds = [ "foobar.yaml" ];
+    crdFiles = [ "foobar.yaml" ];
   };
   chartMod = generators.fromChartCRDModule {
     name = "foobar";
     inherit chart skipCoerceToList;
-    crds = [ "FooBar" ];
+    kindFilter = [ "FooBar" ];
   };
 
   srcObjs = generators.crdObjects {
     inherit src;
-    crds = [ "foobar.yaml" ];
+    crdFiles = [ "foobar.yaml" ];
   };
   chartObjs = generators.crdObjectsFromChart {
     name = "foobar";
@@ -236,7 +236,7 @@ let
       lib.length (
         generators.crdObjects {
           inherit src;
-          crds = [ "foobar.yaml" ];
+          crdFiles = [ "foobar.yaml" ];
           kindFilter = [ "FooBar" ];
         }
       ) == 1;
@@ -244,9 +244,28 @@ let
     "crdObjects kindFilter miss" =
       generators.crdObjects {
         inherit src;
-        crds = [ "foobar.yaml" ];
+        crdFiles = [ "foobar.yaml" ];
         kindFilter = [ "Nope" ];
       } == [ ];
+
+    # Deprecated `crds` alias still resolves (src-based → crdFiles).
+    "crdObjects deprecated `crds` alias == `crdFiles`" =
+      generators.crdObjects {
+        inherit src;
+        crds = [ "foobar.yaml" ];
+      } == srcObjs;
+
+    # Deprecated `crds` alias still resolves (chart-based → kindFilter).
+    "crdObjectsFromChart deprecated `crds` alias == `kindFilter`" =
+      generators.crdObjectsFromChart {
+        name = "foobar";
+        inherit chart;
+        crds = [ "FooBar" ];
+      } == generators.crdObjectsFromChart {
+        name = "foobar";
+        inherit chart;
+        kindFilter = [ "FooBar" ];
+      };
 
     "crdObjectsFromChart == crdObjects" = chartObjs == srcObjs;
 

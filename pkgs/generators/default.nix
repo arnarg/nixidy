@@ -184,26 +184,47 @@ let
   # pre-process the CRD with a crude python script to flatten it before running
   # the generator. See: crd2jsonschema.py
   #
+  # Resolve a renamed argument: prefer the new name, fall back to the
+  # deprecated `crds` alias (emitting a warning that points at the new name),
+  # else the supplied default. `default` is only forced when neither is given,
+  # so passing a `throw` makes the new argument effectively required.
+  renamedArg =
+    {
+      fn,
+      old ? "crds",
+      new,
+      newVal,
+      oldVal,
+      default,
+    }:
+    if newVal != null then
+      newVal
+    else if oldVal != null then
+      lib.warn "${fn}: argument `${old}` is deprecated, use `${new}` instead" oldVal
+    else
+      default;
+
   # This Python parse is the one unavoidable IFD; both the file generator
   # (`fromCRD`) and the native module generator (`fromCRDModule`) share it.
   crdSchema =
     {
       name,
       src,
-      crds,
+      crdFiles,
       namePrefix ? "",
       attrNameOverrides ? { },
       # Optional list of CRD `kind` names to generate. When empty (the
-      # default) every CustomResourceDefinition found in `crds` is generated.
-      # Useful when `crds` points at a multi-document stream (e.g. raw
-      # `helm template` output) containing more kinds than you want.
+      # default) every CustomResourceDefinition found in `crdFiles` is
+      # generated. Useful when `crdFiles` points at a multi-document stream
+      # (e.g. raw `helm template` output) containing more kinds than you want.
       kindFilter ? [ ],
     }:
     let
       options = pkgs.writeText "${name}-crd2jsonschema-options.json" (
         builtins.toJSON {
+          # crd2jsonschema.py reads this under the JSON key `crds`.
+          crds = crdFiles;
           inherit
-            crds
             namePrefix
             attrNameOverrides
             kindFilter
@@ -236,7 +257,10 @@ let
     {
       name,
       src,
-      crds,
+      # List of CRD YAML files (relative to `src`) to generate types from.
+      crdFiles ? null,
+      # Deprecated alias for `crdFiles`.
+      crds ? null,
       namePrefix ? "",
       attrNameOverrides ? { },
       skipCoerceToList ? { },
@@ -254,11 +278,17 @@ let
         inherit
           name
           src
-          crds
           namePrefix
           attrNameOverrides
           kindFilter
           ;
+        crdFiles = renamedArg {
+          fn = "fromCRD";
+          new = "crdFiles";
+          newVal = crdFiles;
+          oldVal = crds;
+          default = throw "fromCRD: `crdFiles` is required";
+        };
       };
     };
 
@@ -272,7 +302,10 @@ let
     {
       name,
       src,
-      crds,
+      # List of CRD YAML files (relative to `src`) to generate types from.
+      crdFiles ? null,
+      # Deprecated alias for `crdFiles`.
+      crds ? null,
       namePrefix ? "",
       attrNameOverrides ? { },
       skipCoerceToList ? { },
@@ -291,30 +324,47 @@ let
         inherit
           name
           src
-          crds
           namePrefix
           attrNameOverrides
           kindFilter
           ;
+        crdFiles = renamedArg {
+          fn = "fromCRDModule";
+          new = "crdFiles";
+          newVal = crdFiles;
+          oldVal = crds;
+          default = throw "fromCRDModule: `crdFiles` is required";
+        };
       };
     };
 
   # Extract the raw CustomResourceDefinition objects from a set of CRD YAML
-  # files. The objects counterpart to `fromCRD`: same `src`/`crds` inputs, but
-  # returns the CRD manifests as values (e.g. to apply them to a cluster)
+  # files. The objects counterpart to `fromCRD`: same `src`/`crdFiles` inputs,
+  # but returns the CRD manifests as values (e.g. to apply them to a cluster)
   # instead of generating resource option modules. Deployment-agnostic — what
   # you do with the objects is up to you.
   #
   # `kindFilter`, when non-empty, keeps only CRDs whose `spec.names.kind` is in
-  # the list (mirrors `fromCRD`'s `kindFilter` and `fromChartCRD`'s `crds`).
+  # the list (mirrors `fromCRD`'s and `fromChartCRD`'s `kindFilter`).
   crdObjects =
     {
       src,
-      crds,
+      # List of CRD YAML files (relative to `src`) to read.
+      crdFiles ? null,
+      # Deprecated alias for `crdFiles`.
+      crds ? null,
       kindFilter ? [ ],
     }:
     let
-      objects = lib.concatMap (f: klib.fromYAML (builtins.readFile "${src}/${f}")) crds;
+      files = renamedArg {
+        fn = "crdObjects";
+        new = "crdFiles";
+        newVal = crdFiles;
+        oldVal = crds;
+        default = throw "crdObjects: `crdFiles` is required";
+      };
+
+      objects = lib.concatMap (f: klib.fromYAML (builtins.readFile "${src}/${f}")) files;
 
       isWanted =
         obj:
@@ -331,7 +381,10 @@ let
       chartAttrs ? { },
       chart ? null,
       values ? { },
-      crds ? [ ],
+      # Optional list of CRD `kind` names to keep. Empty/unset = every CRD.
+      kindFilter ? null,
+      # Deprecated alias for `kindFilter`.
+      crds ? null,
       namePrefix ? "",
       attrNameOverrides ? { },
       skipCoerceToList ? { },
@@ -342,6 +395,14 @@ let
       kubeVersion ? "v${pkgs.kubernetes.version}",
     }:
     let
+      kindFilter' = renamedArg {
+        fn = "fromChartCRD";
+        new = "kindFilter";
+        newVal = kindFilter;
+        oldVal = crds;
+        default = [ ];
+      };
+
       _chart = if chart != null then chart else klib.downloadHelmChart chartAttrs;
 
       objects = klib.fromHelm {
@@ -359,7 +420,7 @@ let
         obj:
         obj ? kind
         && obj.kind == "CustomResourceDefinition"
-        && (crds == [ ] || (lib.any (x: obj.spec.names.kind == x) crds));
+        && (kindFilter' == [ ] || (lib.any (x: obj.spec.names.kind == x) kindFilter'));
 
       filtered = lib.filter isWanted objects;
 
@@ -383,7 +444,7 @@ let
         skipCoerceToList
         ;
 
-      crds = [
+      crdFiles = [
         "crds.yaml"
       ];
     };
@@ -427,15 +488,18 @@ let
     '';
 
   # Chart counterpart to `fromCRDModule`: template a chart's CRDs and return a
-  # module value (resource type options). `crds`, when non-empty, narrows the
-  # generated types to those CRD kinds (mirrors `fromChartCRD`).
+  # module value (resource type options). `kindFilter`, when non-empty, narrows
+  # the generated types to those CRD kinds (mirrors `fromChartCRD`).
   fromChartCRDModule =
     {
       name,
       chart ? null,
       chartAttrs ? { },
       values ? { },
-      crds ? [ ],
+      # Optional list of CRD `kind` names to keep. Empty/unset = every CRD.
+      kindFilter ? null,
+      # Deprecated alias for `kindFilter`.
+      crds ? null,
       extraOpts ? [ ],
       kubeVersion ? "v${pkgs.kubernetes.version}",
       namePrefix ? "",
@@ -459,19 +523,29 @@ let
           kubeVersion
           ;
       };
-      crds = [ "crds.yaml" ];
-      kindFilter = crds;
+      crdFiles = [ "crds.yaml" ];
+      kindFilter = renamedArg {
+        fn = "fromChartCRDModule";
+        new = "kindFilter";
+        newVal = kindFilter;
+        oldVal = crds;
+        default = [ ];
+      };
     };
 
   # Chart counterpart to `crdObjects`: template a chart's CRDs and return the
-  # raw CustomResourceDefinition manifests as values. `crds` empty = every CRD.
+  # raw CustomResourceDefinition manifests as values. `kindFilter` empty = every
+  # CRD.
   crdObjectsFromChart =
     {
       name,
       chart ? null,
       chartAttrs ? { },
       values ? { },
-      crds ? [ ],
+      # Optional list of CRD `kind` names to keep. Empty/unset = every CRD.
+      kindFilter ? null,
+      # Deprecated alias for `kindFilter`.
+      crds ? null,
       extraOpts ? [ ],
       kubeVersion ? "v${pkgs.kubernetes.version}",
     }:
@@ -486,8 +560,14 @@ let
           kubeVersion
           ;
       };
-      crds = [ "crds.yaml" ];
-      kindFilter = crds;
+      crdFiles = [ "crds.yaml" ];
+      kindFilter = renamedArg {
+        fn = "crdObjectsFromChart";
+        new = "kindFilter";
+        newVal = kindFilter;
+        oldVal = crds;
+        default = [ ];
+      };
     };
 in
 {
@@ -509,7 +589,7 @@ in
       rev = "v3.0.0";
       hash = "sha256-g401mpNEhCNe8H6lk2HToAEZlZa16Py8ozK2z5/UozA=";
     };
-    crds = [
+    crdFiles = [
       "manifests/crds/application-crd.yaml"
       "manifests/crds/applicationset-crd.yaml"
       "manifests/crds/appproject-crd.yaml"
