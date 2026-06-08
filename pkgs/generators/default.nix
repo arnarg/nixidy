@@ -176,14 +176,6 @@ let
   #########
   ## CRD ##
   #########
-  # Run the CRD YAML through crd2jsonschema.py and read the resulting JSON
-  # schema back into Nix.
-  #
-  # The nix code generator is slightly modified from kubenix's generator. As
-  # it kind of depends on the jsonschema to be flattened with `$ref`s we first
-  # pre-process the CRD with a crude python script to flatten it before running
-  # the generator. See: crd2jsonschema.py
-  #
   # Resolve a renamed argument: prefer the new name, fall back to the
   # deprecated `crds` alias (emitting a warning that points at the new name),
   # else the supplied default. `default` is only forced when neither is given,
@@ -198,12 +190,22 @@ let
       default,
     }:
     if newVal != null then
-      newVal
+      lib.warnIf (
+        oldVal != null
+      ) "${fn}: both `${old}` and `${new}` given; ignoring deprecated `${old}`" newVal
     else if oldVal != null then
       lib.warn "${fn}: argument `${old}` is deprecated, use `${new}` instead" oldVal
     else
       default;
 
+  # Run the CRD YAML through crd2jsonschema.py and read the resulting JSON
+  # schema back into Nix.
+  #
+  # The nix code generator is slightly modified from kubenix's generator. As
+  # it kind of depends on the jsonschema to be flattened with `$ref`s we first
+  # pre-process the CRD with a crude python script to flatten it before running
+  # the generator. See: crd2jsonschema.py
+  #
   # This Python parse is the one unavoidable IFD; both the file generator
   # (`fromCRD`) and the native module generator (`fromCRDModule`) share it.
   crdSchema =

@@ -224,6 +224,37 @@ let
       ];
     }).config.applications.test.resources."stable.example.com"."v1"."FooBar".myfoo;
 
+  # `specialMapKeys` is exposed only on the *module* accessors — `fromCRD` does
+  # not take it — so it can't be diffed against the file backend. Exercise the
+  # value backend's branch directly by rendering `spec.ports` as a *list* of
+  # name-less entries: coerceAttrsOfSubmodulesToListByKey synthesizes the merge
+  # key from `specialMapKeys` for entries lacking `name`, so distinct key values
+  # keep entries separate while the empty default collapses them.
+  renderPorts =
+    specialMapKeys: portsList:
+    (mkEnv {
+      inherit pkgs;
+      modules = [
+        {
+          nixidy.target = {
+            repository = "x";
+            branch = "main";
+          };
+          nixidy.applicationImports = [
+            (generators.fromCRDModule {
+              name = "foobar";
+              inherit src skipCoerceToList specialMapKeys;
+              crdFiles = [ "foobar.yaml" ];
+            })
+          ];
+          applications.test = {
+            namespace = "default";
+            resources."stable.example.com"."v1"."FooBar".myfoo.spec.ports = portsList;
+          };
+        }
+      ];
+    }).config.applications.test.resources."stable.example.com"."v1"."FooBar".myfoo.spec.ports;
+
   checks = {
     "fromCRDModule == fromCRD (file)" = render nativeMod == render fileMod;
 
@@ -266,6 +297,20 @@ let
         inherit chart;
         kindFilter = [ "FooBar" ];
       };
+
+    # Value backend honors specialMapKeys (module-only arg). Two name-less ports
+    # with distinct `port` values: a `port` merge key keeps them separate (2);
+    # the empty default collapses them to one (1).
+    "fromCRDModule honors specialMapKeys (value backend)" =
+      let
+        portsList = [
+          { port = 1; }
+          { port = 2; }
+        ];
+        withKey = renderPorts { "stable.example.com.v1.FooBarSpec".ports = [ "port" ]; } portsList;
+        without = renderPorts { } portsList;
+      in
+      lib.length withKey == 2 && lib.length without == 1;
 
     "crdObjectsFromChart == crdObjects" = chartObjs == srcObjs;
 
