@@ -355,30 +355,50 @@ Nixidy generates typed Nix options from:
 
 Output: `modules/generated/k8s/v1.XX.nix`
 
+### Shared schema walk and backends
+
+The schema-to-options logic lives in one place, `walk.nix`, parameterized over a *backend* so the same traversal can produce either Nix **source text** or live module **values**:
+
+- `walk.nix` — the single traversal of the (JSON) schema. All type/coercion branch logic (int-or-string, `additionalProperties`→`attrsOf`, coerce-by-name lists, patch-merge-key, `skipCoerceToList`, `specialMapKeys`, nested submodules, etc.) lives here, expressed against an abstract backend `b`.
+- `backend-text.nix` — emits Nix **source**. Used by the file generators; it also inlines the runtime helpers (see below) as source so committed standalone files stay self-contained.
+- `backend-value.nix` — produces live module **values** using `runtime.nix`.
+- `generator.nix` — thin assembler over the text backend (renders + `nixfmt` + writes a `.nix` file).
+- `module.nix` — thin assembler over the value backend (returns a module function).
+- `runtime.nix` — the per-generated-module runtime helpers (`coercedTo`, `mergeValuesByKey`, `submoduleForDefinition`, …) as **values**, imported by the value backend. The text backend inlines source-form equivalents of these same helpers. Only the *walk* is single-sourced; the helpers must exist in both forms because live values can't be serialized back to source and committed files can't reference nixidy internals.
+
 ### CRD Generation
 
-Two entry points:
+CRD accessors form a matrix over output shape × source, all built on the shared walk:
 
-#### `fromCRD`
+| | source files (`src`) | Helm chart |
+| --- | --- | --- |
+| → generated file | `fromCRD` | `fromChartCRD` |
+| → module value | `fromCRDModule` | `fromChartCRDModule` |
+| → raw objects | `crdObjects` | `crdObjectsFromChart` |
+
 ```nix
 fromCRD {
   name = "cilium";
   src = pkgs.fetchFromGitHub { ... };
-  crds = [ "path/to/crd.yaml" ];
+  crdFiles = [ "path/to/crd.yaml" ];  # list of YAML files under `src`
+  kindFilter = [ ];          # Optional: only these CRD kinds (default: all)
   namePrefix = "";           # Optional prefix for attribute names
   attrNameOverrides = { };   # Manual name overrides
   skipCoerceToList = { };    # Skip list coercion for specific fields
 }
-```
 
-#### `fromChartCRD`
-```nix
 fromChartCRD {
   name = "cert-manager";
   chartAttrs = { repo = "..."; chart = "..."; version = "..."; };
-  crds = [ "Certificate" ];  # Filter by kind
+  kindFilter = [ "Certificate" ];  # Optional: only these CRD kinds (default: all)
+  kubeVersion = "v1.31.0";         # Optional: helm template --kube-version
 }
 ```
+
+The `*Module` variants take the same arguments and return a module value (no file); `crdObjects`/`crdObjectsFromChart` return the raw `CustomResourceDefinition` manifests as values.
+
+!!! note "Renamed arguments"
+    The overloaded `crds` argument was split: source-based accessors now take `crdFiles` (the list of YAML files) and chart-based accessors take `kindFilter` (the kind filter). `crds` remains as a deprecated alias on every accessor (resolved by the shared `renamedArg` helper, which warns and points at the new name).
 
 ### CRD Processing (`crd2jsonschema.py`)
 
@@ -386,7 +406,7 @@ Python script that:
 1. Reads CRD YAML files
 2. Extracts OpenAPI v3 schemas
 3. Flattens `$ref` references
-4. Outputs JSON schema for `generator.nix`
+4. Outputs JSON schema for the shared walk (`walk.nix`)
 
 ## Testing Framework
 
