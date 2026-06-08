@@ -9,6 +9,16 @@ rec {
       charts ? { },
       libOverlay ? null,
     }:
+    let
+      generators = lib.getAttrs [
+        "fromCRD"
+        "fromCRDModule"
+        "fromChartCRD"
+        "fromChartCRDModule"
+        "crdObjects"
+        "crdObjectsFromChart"
+      ] (import ./pkgs/generators { inherit pkgs kubelib; });
+    in
     import ./modules {
       inherit
         pkgs
@@ -19,6 +29,7 @@ rec {
         ;
       modules = modules ++ [
         {
+          _module.args.generators = lib.mkDefault generators;
           nixidy.charts = charts;
         }
       ];
