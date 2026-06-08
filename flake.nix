@@ -168,6 +168,24 @@
               '').outPath;
           };
 
+          # Assert the CRD value accessors (fromCRDModule, crdObjects, and their
+          # chart variants) agree with the file generator and each other, and
+          # honor kubeVersion. The check derivation builds iff all pass.
+          crdAccessorTest = {
+            type = "app";
+            program =
+              let
+                check = import ./pkgs/generators/equiv-test.nix {
+                  inherit pkgs;
+                  mkEnv = self.lib.mkEnv;
+                  generators = self.packages.${system}.generators;
+                };
+              in
+              (pkgs.writeShellScript "crd-accessor-test" ''
+                echo "CRD accessor checks passed (${check})"
+              '').outPath;
+          };
+
           # Serve docs
           docsServe = {
             type = "app";

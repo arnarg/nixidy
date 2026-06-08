@@ -34,6 +34,22 @@ Each file's basename becomes the output filename. Basenames must be unique withi
 
 Thankfully a code generator for generating resource options from CRDs is provided by nixidy (this is based heavily on kubenix's code generator).
 
+nixidy offers a small matrix of CRD accessors. Pick one by **what you want back** (a generated `.nix` file, a live module value, or the raw CRD manifests) and **where the CRDs come from** (local source files, or a Helm chart):
+
+|                    | source files (`src`) | Helm chart            |
+| ------------------ | -------------------- | --------------------- |
+| **→ generated file** | [`fromCRD`](#from-source-files-fromcrd) | [`fromChartCRD`](#from-helm-chart-crds-fromchartcrd) |
+| **→ module value**   | [`fromCRDModule`](#as-a-module-value-fromcrdmodule-fromchartcrdmodule) | [`fromChartCRDModule`](#as-a-module-value-fromcrdmodule-fromchartcrdmodule) |
+| **→ raw objects**    | [`crdObjects`](#raw-crd-objects-crdobjects-crdobjectsfromchart) | [`crdObjectsFromChart`](#raw-crd-objects-crdobjects-crdobjectsfromchart) |
+
+- **→ generated file** renders the resource options to Nix source, formats it, and writes a `.nix` file you commit and `import`. Good when you want the generated types checked into your repository and reviewable in diffs.
+- **→ module value** returns the resource options as a module value directly — no generated file, no `import`. Drop it straight into `nixidy.applicationImports`. Good for flake/programmatic consumers that don't need a committed file.
+- **→ raw objects** returns the `CustomResourceDefinition` manifests themselves as Nix values (not resource options), e.g. so you can deploy the CRDs alongside the resources that use them.
+
+All variants share the same `name`, `namePrefix`, `attrNameOverrides` and `skipCoerceToList` arguments; the source-based ones take `crdFiles` and the chart-based ones take `chartAttrs`/`chart`/`values`/`kubeVersion`. Both families take an optional `kindFilter` to narrow which CRD kinds are processed.
+
+### From source files (`fromCRD`)
+
 As an example, to generate resource options for Cilium's `CiliumNetworkPolicy` and `CiliumClusterwideNetworkPolicy` the following can be defined in `flake.nix`.
 
 ```nix title="flake.nix"
@@ -64,7 +80,7 @@ As an example, to generate resource options for Cilium's `CiliumNetworkPolicy` a
           rev = "v1.15.6";
           hash = "sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=";
         };
-        crds = [
+        crdFiles = [
           "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
           "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml"
         ];
@@ -113,7 +129,7 @@ Then running `nix build .#generators.cilium` will produce a nix file that can be
             rev = "v1.15.6";
             hash = "sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=";
           };
-          crds = [
+          crdFiles = [
             "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
             "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml"
           ];
@@ -123,7 +139,7 @@ Then running `nix build .#generators.cilium` will produce a nix file that can be
 
     Then running `nix-build generate.nix -A cilium` will produce a nix file that can be copied into place in your repository and imported using `nixidy.applicationImports` in a nixidy module.
 
-### Generating resource options from Helm Chart CRDs
+### From Helm Chart CRDs (`fromChartCRD`)
 
 In some cases, CRDs are only available through Helm charts or it's beneficial to keep them in sync with the chart version you're deploying. The `fromChartCRD` function provides a solution by templating the Helm chart and extracting CRDs from the output, generating nixidy resource options from them.
 
@@ -166,7 +182,7 @@ As an example, to generate resource options for cert-manager's `Certificate` CRD
         };
         # Or from nixhelm
         # chart = nixhelm.chartsDerivations.${system}.jetstack.cert-manager;
-        crds = [ "Certificate" ];  # Optional: filter by specific CRD kinds
+        kindFilter = [ "Certificate" ];  # Optional: filter by specific CRD kinds
         extraOpts = [ "--set", "crds.enabled=true"]; # Optional: pass extra options to helm template generation
       };
     };
@@ -205,7 +221,7 @@ Then running `nix build .#generators.certManager` will produce a nix file that c
             version = "v1.19.1";
             chartHash = "sha256-fs14wuKK+blC0l+pRfa//oBV2X+Dr3nNX+Z94nrQVrA=";
           };
-          crds = [ "Certificate" ];  # Optional: filter by specific CRD kinds
+          kindFilter = [ "Certificate" ];  # Optional: filter by specific CRD kinds
           extraOpts = [ "--set", "crds.enabled=true"]; # Optional: pass extra options to helm template generation
         };
       }
@@ -218,11 +234,71 @@ The `fromChartCRD` function accepts the same optional arguments as `fromCRD` (`n
 - `chartAttrs`: Chart repository, name, version and chartHash configuration
 - `chart`: Alternative to `chartAttrs`, can use a pre-downloaded chart
 - `values`: Values to pass to the Helm chart templating
-- `crds`: List of CRD kinds to extract (empty list extracts all CRDs)
+- `kindFilter`: List of CRD kinds to extract (empty list extracts all CRDs)
+- `kubeVersion`: Kubernetes version to template the chart against (`helm template --kube-version`). Defaults to the version in nixidy's nixpkgs; set it to match the cluster the CRDs are destined for.
 - `extraOpts`: List of extra arguments to pass through to helm template
 
+!!! note "Renamed argument"
+    `kindFilter` was previously called `crds`. The old name still works as a deprecated alias (it emits a warning pointing at `kindFilter`); prefer `kindFilter` in new code. Note that on `fromCRD` the `crds` argument instead became `crdFiles` — the two used to share a name despite meaning different things (a kind filter vs. a list of YAML files).
 
 This approach ensures your CRD definitions stay synchronized with the Helm chart version you're actually deploying in your applications.
+
+### As a module value (`fromCRDModule` / `fromChartCRDModule`)
+
+`fromCRD` and `fromChartCRD` build a `.nix` file that you commit and `import`. For flake or other programmatic consumers that don't need a committed file, `fromCRDModule` (and its chart counterpart `fromChartCRDModule`) return the resource options as a **module value** instead — skipping the render-to-source, format, write-file and `import` round-trip. The result is a module function, which is exactly what `nixidy.applicationImports` accepts, so it drops straight in.
+
+```nix title="flake.nix"
+nixidyEnvs = nixidy.lib.mkEnvs {
+  inherit pkgs;
+
+  envs.dev.modules = [
+    ./env/dev.nix
+    {
+      nixidy.applicationImports = [
+        (nixidy.packages.${system}.generators.fromCRDModule {
+          name = "cilium";
+          src = pkgs.fetchFromGitHub {
+            owner = "cilium";
+            repo = "cilium";
+            rev = "v1.15.6";
+            hash = "sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=";
+          };
+          crdFiles = [
+            "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
+            "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml"
+          ];
+        })
+      ];
+    }
+  ];
+};
+```
+
+`fromChartCRDModule` takes the same chart arguments as `fromChartCRD` (`chartAttrs`/`chart`/`values`/`kindFilter`/`kubeVersion`/`extraOpts`). Because no file is generated there is nothing to `nix build` or commit — the types are produced during evaluation.
+
+### Raw CRD objects (`crdObjects` / `crdObjectsFromChart`)
+
+Sometimes you don't want resource *options* at all — you want the `CustomResourceDefinition` manifests themselves, for example to deploy the CRDs into the cluster alongside the resources that use them. `crdObjects` (source files) and `crdObjectsFromChart` (Helm chart) return the CRD manifests as a list of plain Nix attribute sets. They are deployment-agnostic — what you do with them is up to you.
+
+One way to deploy them is to feed them into an application's `yamls`, which parses YAML/JSON strings into the application's output (`builtins.toJSON` output is valid YAML):
+
+```nix
+# inside an env module
+applications.crds = {
+  namespace = "kube-system";
+  yamls = map builtins.toJSON (
+    nixidy.packages.${system}.generators.crdObjects {
+      src = ciliumSrc; # the pkgs.fetchFromGitHub from the fromCRD example
+      crdFiles = [
+        "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
+        "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml"
+      ];
+    }
+  );
+};
+```
+
+`crdObjectsFromChart` takes the same chart arguments as `fromChartCRD`. Both accept an optional `kindFilter` to keep only specific CRD kinds (an empty or unset list keeps all of them).
 
 ### Resolving Naming Conflicts
 
@@ -265,7 +341,7 @@ This argument is a mapping from the CRD's name (`<plural>.<group>`) to the desir
       repo = "provider-keycloak";
       ...
     };
-    crds = [
+    crdFiles = [
       # This CRD conflicts with Kubernetes builtin Binding
       "package/crds/authenticationflow.keycloak.crossplane.io_bindings.yaml"
       # These CRDs have identical plural references
