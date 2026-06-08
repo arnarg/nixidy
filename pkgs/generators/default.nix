@@ -404,31 +404,27 @@ let
     }:
     let
       _chart = if chart != null then chart else klib.downloadHelmChart chartAttrs;
+
+      templated = klib.buildHelmChart {
+        inherit
+          name
+          values
+          extraOpts
+          kubeVersion
+          ;
+        chart = _chart;
+        includeCRDs = true;
+      };
     in
-    pkgs.stdenv.mkDerivation {
-      name = "chart-crds-${name}";
-
-      passAsFile = [ "helmValues" ];
-      helmValues = builtins.toJSON values;
-
-      allowSubstitutes = false;
-      preferLocalBuild = true;
-
-      phases = [ "installPhase" ];
-      installPhase = ''
-        export HELM_CACHE_HOME="$TMP/.nix-helm-build-cache"
-        mkdir -p $out
-
-        ${pkgs.kubernetes-helm}/bin/helm template \
-        --include-crds \
-        --kube-version "${kubeVersion}" \
-        --values "$helmValuesPath" \
-        "${name}" \
-        "${_chart}" \
-        ${builtins.concatStringsSep " " extraOpts} \
-        > $out/crds.yaml
-      '';
-    };
+    # `buildHelmChart` emits a single YAML *file*; copy (not symlink) it into a
+    # directory `$out/crds.yaml`. `crdObjects` reads this at eval time via
+    # `readFile "${src}/crds.yaml"`, and a `linkFarm` symlink would make that
+    # read follow into a separate derivation output not carried in the string's
+    # context — forbidden in pure eval. A real file keeps the read in-context.
+    pkgs.runCommand "chart-crds-${name}" { } ''
+      mkdir -p $out
+      cp ${templated} $out/crds.yaml
+    '';
 
   # Chart counterpart to `fromCRDModule`: template a chart's CRDs and return a
   # module value (resource type options). `crds`, when non-empty, narrows the
