@@ -65,9 +65,9 @@ let
     );
 
   # Flatten every app's fileRenders into a single { path -> rules } map for the
-  # environment. Safe to flatten because the uniqueness assertion guarantees no
-  # path collisions within an app, and distinct apps live under distinct
-  # `app.output.path` prefixes.
+  # environment. Within an app, the uniqueness assertion guarantees no path
+  # collisions. Across apps, paths cannot collide because each app's paths are
+  # prefixed by its distinct `app.output.path` (mkApp's linkFarm name).
   allFileRenders = lib.foldl' (acc: app: acc // fileRenders app) { } (
     lib.attrValues config.applications
   );
@@ -77,11 +77,22 @@ let
   renderBlock =
     path: rules:
     let
-      binPath = lib.makeBinPath (lib.concatMap (r: r.render.runtimeInputs) rules);
-      chained = lib.concatMapStringsSep " | " (r: r.render.command) rules;
+      nameFor = i: "nixidy-render-${builtins.replaceStrings [ "/" "." ] [ "-" "-" ] path}-${toString i}";
+      scriptOf =
+        i: r:
+        pkgs.writeShellApplication {
+          name = nameFor i;
+          runtimeInputs = r.render.runtimeInputs;
+          # Verbatim command body: quotes/$vars/pipes preserved. The script is
+          # invoked by store path, so there is no `sh -c '...'` requote step.
+          text = r.render.command;
+        };
+      scripts = lib.imap0 scriptOf rules;
+      chain = lib.concatMapStringsSep " | " (s: lib.getExe s) scripts;
     in
     ''
       if [ "\''${NIXIDY_SKIP_RENDER:-}" = "1" ]; then
+        mkdir -p "\$(dirname "\$staging/${path}")"
         if [ -f "\$dest/${path}" ]; then
           cp "\$dest/${path}" "\$staging/${path}"
         else
@@ -89,8 +100,9 @@ let
         fi
       else
         echo "Rendering ${path}"
-        TARGET_PATH="\$dest/${path}" PATH="${binPath}:\$PATH" \
-          sh -c '${chained}' < "\$staging/${path}" > "\$staging/${path}.tmp" \
+        mkdir -p "\$(dirname "\$staging/${path}")"
+        TARGET_PATH="\$dest/${path}" ${chain} \
+          < "\$staging/${path}" > "\$staging/${path}.tmp" \
           && mv "\$staging/${path}.tmp" "\$staging/${path}"
       fi
     '';
@@ -100,9 +112,9 @@ let
   mkApp =
     app:
     let
-      grouped = builtins.groupBy (
-        obj: "${obj.kind}-${builtins.replaceStrings [ "." ] [ "-" ] obj.metadata.name}"
-      ) (transformedObjects app);
+      grouped = builtins.groupBy (obj: "${obj.kind}-${sanitize obj.metadata.name}") (
+        transformedObjects app
+      );
 
       rawYamlFiles = map (source: {
         filename = baseNameOf source;
