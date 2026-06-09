@@ -11,6 +11,21 @@ in
     namespace = "test";
     resources.secrets."a-b".stringData.x = "y";
     resources.configMaps.cm.data.FOO = "bar";
+    objectTransforms = [
+      {
+        match.kind = "SopsSecret";
+        map =
+          o:
+          o
+          // {
+            metadata = (o.metadata or { }) // {
+              annotations = (o.metadata.annotations or { }) // {
+                "ordering-proof" = "app-ran-after-env";
+              };
+            };
+          };
+      }
+    ];
   };
 
   nixidy.objectTransforms = [
@@ -48,6 +63,11 @@ in
         description = "rewritten SopsSecret retains its metadata.name";
         expression = lib.head (lib.filter (o: o.kind == "SopsSecret") objs);
         assertion = o: o.metadata.name == "a-b";
+      }
+      {
+        description = "env rules apply before app rules";
+        expression = objs;
+        assertion = os: lib.any (o: (o.metadata.annotations or { }) ? "ordering-proof") os;
       }
     ];
   };
