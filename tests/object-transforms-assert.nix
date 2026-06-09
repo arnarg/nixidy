@@ -13,7 +13,7 @@ in
     namespace = "test";
     objectTransforms = [
       {
-        map = res: res;
+        rewrite = res: res;
       }
     ];
   };
@@ -22,7 +22,8 @@ in
     namespace = "test";
     objectTransforms = [
       {
-        map = res: res;
+        name = "double-action";
+        rewrite = res: res;
         render.command = "cat";
       }
     ];
@@ -30,14 +31,14 @@ in
 
   nixidy.objectTransforms = [
     {
-      map = res: res;
+      rewrite = res: res;
       render.command = "cat";
     }
   ];
 
   test = {
     name = "objectTransforms XOR assertion";
-    description = "objectTransforms rules must set exactly one of map/render at env + app scope";
+    description = "objectTransforms rules must set exactly one of rewrite/render at env + app scope";
     assertions = [
       {
         description = "good app assertion passes";
@@ -48,6 +49,11 @@ in
         description = "bad app has a failing XOR assertion";
         expression = apps.bad.assertions;
         assertion = as: lib.any mentionsXor as;
+      }
+      {
+        description = "the failing message names the offending rule";
+        expression = apps.bad.assertions;
+        assertion = as: lib.any (a: !a.assertion && lib.hasInfix "double-action" a.message) as;
       }
       {
         description = "env has a failing XOR assertion";

@@ -7,14 +7,14 @@
 let
   inherit (config.nixidy) env;
 
-  # Apply eval-time `map` rules to a list of objects, in declaration order.
-  # A rule whose predicate matches rewrites the object via `map`; `map`
-  # returning null drops the object. Rules without `map` (i.e. `render`) are
-  # ignored here.
-  applyMaps =
+  # Apply eval-time `rewrite` rules to a list of objects, in declaration order.
+  # A rule whose predicate matches rewrites the object via `rewrite`; returning
+  # null drops the object. Rules without `rewrite` (i.e. `render`) are ignored
+  # here.
+  applyRewrites =
     rules: objs:
     let
-      maps = lib.filter (r: r.map != null) rules;
+      rewrites = lib.filter (r: r.rewrite != null) rules;
     in
     lib.concatMap (
       obj:
@@ -24,18 +24,18 @@ let
           if o == null then
             null
           else if r.predicate o then
-            r.map o
+            r.rewrite o
           else
             o
-        ) obj maps;
+        ) obj rewrites;
       in
       lib.optional (out != null) out
     ) objs;
 
-  # Per-app objects after eval-time map transforms: env rules first, then
+  # Per-app objects after eval-time rewrite transforms: env rules first, then
   # app rules.
   transformedObjects =
-    app: applyMaps app.objectTransforms (applyMaps config.nixidy.objectTransforms app.objects);
+    app: applyRewrites app.objectTransforms (applyRewrites config.nixidy.objectTransforms app.objects);
 
   # Sanitize a resource name the same way mkApp does when forming the
   # on-disk group key / filename.
@@ -109,6 +109,9 @@ let
         };
       scripts = lib.imap0 scriptOf rules;
       chain = lib.concatMapStringsSep " | " (s: lib.getExe s) scripts;
+      # Named rules in the chain, for the activation log.
+      ruleNames = lib.filter (n: n != null) (map (r: r.name) rules);
+      label = path + lib.optionalString (ruleNames != [ ]) " (${lib.concatStringsSep ", " ruleNames})";
     in
     ''
       if [ "\''${NIXIDY_SKIP_RENDER:-}" = "1" ]; then
@@ -119,7 +122,7 @@ let
           rm -f "\$staging/${path}"
         fi
       else
-        echo "Rendering ${path}"
+        echo "Rendering ${label}"
         mkdir -p "\$(dirname "\$staging/${path}")"
         TARGET_PATH="\$dest/${path}" ${chain} \
           < "\$staging/${path}" > "\$staging/${path}.tmp" \

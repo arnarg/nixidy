@@ -47,50 +47,88 @@ let
     && hasAll (m.labels or { }) (sel.labels or { })
     && hasAll (m.annotations or { }) (sel.annotations or { });
 
+  # Runtime render stage. A bare string is the common case (one command, no
+  # extra PATH) and coerces to `{ command = <string>; runtimeInputs = []; }`,
+  # matching the `files` library's `onChange` ergonomics.
+  renderType = types.submodule {
+    options = {
+      runtimeInputs = mkOption {
+        type = types.listOf types.package;
+        default = [ ];
+        description = "Packages added to the render command's PATH.";
+      };
+      command = mkOption {
+        type = types.either types.lines (types.functionTo types.lines);
+        description = ''
+          Runtime stage producing final on-disk content.
+          stdin  = store content for the matched file
+          stdout = content written to disk
+          env    = $TARGET_PATH (absolute existing file path; may not exist)
+
+          Either a literal shell snippet, or a function resolved at eval time
+          against the matched object:
+            { resource, path, pkgs, lib }: <shell snippet>
+          where `resource` is the post-rewrite object and `path` its on-disk
+          relative path (note: `$TARGET_PATH` is the absolute destination,
+          known only at activation). Use the function form to specialize the
+          command per object (e.g. choose a recipient key from
+          `resource.metadata.namespace`) instead of re-parsing the manifest on
+          stdin.
+        '';
+      };
+    };
+  };
+
   ruleType = types.submodule (
     { config, ... }:
     {
       options = {
+        name = mkOption {
+          type = types.nullOr types.str;
+          default = null;
+          description = ''
+            Optional label for this rule, surfaced in assertion messages and
+            the activation render log. Helps identify a rule among many;
+            purely diagnostic.
+          '';
+        };
         match = mkOption {
           type = types.either (types.functionTo types.bool) selectorType;
           default = _: true;
-          description = "Resource predicate, or a declarative selector that desugars to one.";
+          description = ''
+            Which resources this rule applies to: a predicate `resource -> bool`,
+            or a declarative selector that desugars to one.
+
+            Selector fields are ANDed. `kind`/`apiVersion`/`namespace`/`name`
+            match by exact equality (a `null` field is a wildcard); `labels`/
+            `annotations` are SUBSET matches (the resource may carry extra keys;
+            the default `{ }` matches anything).
+
+            The default matches EVERY resource in scope — omitting `match` on a
+            `rewrite`/`render` rule applies it cluster-wide. Set `match` unless
+            that is intended.
+
+            Predicates run against the resource as seen at this point in the
+            pipeline, i.e. AFTER earlier rules' `rewrite`s. A rule that renames
+            a kind must be matched by its NEW kind in later rules.
+          '';
         };
-        map = mkOption {
+        rewrite = mkOption {
           type = types.nullOr (types.functionTo (types.nullOr (types.attrsOf types.anything)));
           default = null;
-          description = "Eval-time transform: resource -> resource (or null to drop).";
+          description = ''
+            Eval-time transform `resource -> resource`. Returning `null` drops
+            the resource. Exactly one of `rewrite`/`render` must be set.
+          '';
         };
         render = mkOption {
-          type = types.nullOr (
-            types.submodule {
-              options = {
-                runtimeInputs = mkOption {
-                  type = types.listOf types.package;
-                  default = [ ];
-                };
-                command = mkOption {
-                  type = types.either types.lines (types.functionTo types.lines);
-                  description = ''
-                    Runtime stage producing final on-disk content.
-                    stdin  = store content for the matched file
-                    stdout = content written to disk
-                    env    = $TARGET_PATH (existing file path; may not exist)
-
-                    Either a literal shell snippet, or a function resolved at
-                    eval time against the matched object:
-                      { resource, path, pkgs, lib }: <shell snippet>
-                    where `resource` is the post-map object, `path` its on-disk
-                    relative path. Use this to specialize the command per object
-                    (e.g. choose a recipient key from `resource.metadata.namespace`)
-                    instead of re-parsing the manifest on stdin.
-                  '';
-                };
-              };
-            }
-          );
+          type = types.nullOr (types.coercedTo types.lines (command: { inherit command; }) renderType);
           default = null;
-          description = "Runtime stage rendering the final on-disk artifact for the matched file.";
+          description = ''
+            Activation-time stage rendering the final on-disk artifact for the
+            matched file (a stdin -> stdout filter). Exactly one of
+            `rewrite`/`render` must be set.
+          '';
         };
         predicate = mkOption {
           internal = true;

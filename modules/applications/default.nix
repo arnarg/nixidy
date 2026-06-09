@@ -117,8 +117,11 @@
 
   config = {
     assertions = lib.imap0 (i: r: {
-      assertion = (r.map != null) != (r.render != null);
-      message = "application `${name}` objectTransforms rule ${toString i}: set exactly one of `map` or `render`.";
+      assertion = (r.rewrite != null) != (r.render != null);
+      message =
+        "application `${name}` objectTransforms rule ${toString i}"
+        + lib.optionalString (r.name != null) " (`${r.name}`)"
+        + ": set exactly one of `rewrite` or `render`.";
     }) config.objectTransforms;
 
     # If createNamespace is set to `true` we should

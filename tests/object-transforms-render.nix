@@ -18,9 +18,10 @@ in
 
   nixidy.objectTransforms = [
     {
-      # Eval-time map: Secret -> SopsSecret (so render sees the rewritten kind).
+      # Eval-time rewrite: Secret -> SopsSecret (so render sees the new kind).
+      name = "secret-to-sopssecret";
       match.kind = "Secret";
-      map =
+      rewrite =
         s:
         s
         // {
@@ -29,9 +30,10 @@ in
         };
     }
     {
-      # Runtime render attached to the rewritten resource's output file.
+      # String shortcut: coerces to { command = "cat"; runtimeInputs = []; }.
+      name = "passthrough";
       match.kind = "SopsSecret";
-      render.command = "cat";
+      render = "cat";
     }
     {
       # Function-form command: resolved at eval time against the matched object.
@@ -48,7 +50,7 @@ in
 
   test = {
     name = "objectTransforms render";
-    description = "render rules key the post-map SopsSecret output file (sanitized dotted name) and skip non-matched resources";
+    description = "render rules key the post-rewrite SopsSecret output file (sanitized dotted name) and skip non-matched resources";
     assertions = [
       {
         description = "fileRenders has a key for the rewritten SopsSecret with sanitized dotted name";
@@ -69,6 +71,17 @@ in
             key = lib.head (lib.filter (p: lib.hasSuffix "SopsSecret-x-y.yaml" p) (lib.attrNames r));
           in
           lib.isList r.${key}.rules && r.${key}.rules != [ ] && r.${key}.resource.kind == "SopsSecret";
+      }
+      {
+        description = "the string-form render coerces to { command = \"cat\"; runtimeInputs = []; }";
+        expression = renders;
+        assertion =
+          r:
+          let
+            key = lib.head (lib.filter (p: lib.hasSuffix "SopsSecret-x-y.yaml" p) (lib.attrNames r));
+            strRule = lib.head (lib.filter (rule: rule.name == "passthrough") r.${key}.rules);
+          in
+          strRule.render.command == "cat" && strRule.render.runtimeInputs == [ ];
       }
       {
         description = "a function-form render command resolves against the matched resource and path";

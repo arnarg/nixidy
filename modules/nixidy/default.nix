@@ -142,8 +142,11 @@ in
 
     nixidy = {
       assertions = lib.imap0 (i: r: {
-        assertion = (r.map != null) != (r.render != null);
-        message = "nixidy.objectTransforms rule ${toString i}: set exactly one of `map` or `render`.";
+        assertion = (r.rewrite != null) != (r.render != null);
+        message =
+          "nixidy.objectTransforms rule ${toString i}"
+          + lib.optionalString (r.name != null) " (`${r.name}`)"
+          + ": set exactly one of `rewrite` or `render`.";
       }) cfg.objectTransforms;
 
       charts = lib.optionalAttrs (cfg.chartsDir != null) (lib.helm.mkChartAttrs cfg.chartsDir);

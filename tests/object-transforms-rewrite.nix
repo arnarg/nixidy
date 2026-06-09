@@ -14,7 +14,7 @@ in
     objectTransforms = [
       {
         match.kind = "SopsSecret";
-        map =
+        rewrite =
           o:
           o
           // {
@@ -30,8 +30,9 @@ in
 
   nixidy.objectTransforms = [
     {
+      name = "secret-to-sopssecret";
       match.kind = "Secret";
-      map =
+      rewrite =
         s:
         s
         // {
@@ -41,13 +42,13 @@ in
     }
     {
       match.kind = "ConfigMap";
-      map = _: null;
+      rewrite = _: null;
     }
   ];
 
   test = {
-    name = "objectTransforms map";
-    description = "eval-time map rewrites Secret -> SopsSecret and drops ConfigMap via map -> null";
+    name = "objectTransforms rewrite";
+    description = "eval-time rewrite renames Secret -> SopsSecret and drops ConfigMap via rewrite -> null";
     assertions = [
       {
         description = "Secret was rewritten to SopsSecret";
@@ -55,7 +56,7 @@ in
         assertion = os: lib.any (o: o.kind == "SopsSecret") os;
       }
       {
-        description = "ConfigMap was dropped (map -> null)";
+        description = "ConfigMap was dropped (rewrite -> null)";
         expression = objs;
         assertion = os: lib.length (lib.filter (o: o.kind == "ConfigMap") os) == 0;
       }
