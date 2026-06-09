@@ -33,6 +33,17 @@ in
       match.kind = "SopsSecret";
       render.command = "cat";
     }
+    {
+      # Function-form command: resolved at eval time against the matched object.
+      match.kind = "SopsSecret";
+      render.command =
+        {
+          resource,
+          path,
+          ...
+        }:
+        "cat # ns=${resource.metadata.namespace} path=${path}";
+    }
   ];
 
   test = {
@@ -50,14 +61,32 @@ in
         assertion = _: !(lib.any (p: lib.hasInfix "ConfigMap-" p) paths);
       }
       {
-        description = "the SopsSecret render entry is a non-empty list of rules";
+        description = "the SopsSecret render entry carries the matched resource and a non-empty rules list";
         expression = renders;
         assertion =
           r:
           let
             key = lib.head (lib.filter (p: lib.hasSuffix "SopsSecret-x-y.yaml" p) (lib.attrNames r));
           in
-          lib.isList r.${key} && r.${key} != [ ];
+          lib.isList r.${key}.rules && r.${key}.rules != [ ] && r.${key}.resource.kind == "SopsSecret";
+      }
+      {
+        description = "a function-form render command resolves against the matched resource and path";
+        expression = renders;
+        assertion =
+          r:
+          let
+            key = lib.head (lib.filter (p: lib.hasSuffix "SopsSecret-x-y.yaml" p) (lib.attrNames r));
+            entry = r.${key};
+            fnRule = lib.head (lib.filter (rule: lib.isFunction rule.render.command) entry.rules);
+            resolved = fnRule.render.command {
+              resource = entry.resource;
+              path = key;
+              pkgs = { };
+              inherit lib;
+            };
+          in
+          lib.hasInfix "ns=test" resolved && lib.hasInfix "path=${key}" resolved;
       }
     ];
   };

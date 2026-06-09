@@ -57,11 +57,19 @@ let
   # Post-map objects of an app that have at least one matching render rule.
   renderMatchedObjs = app: lib.filter (obj: renderRulesFor app obj != [ ]) (transformedObjects app);
 
-  # Per-app map: on-disk relative path -> chained list of render rules.
+  # Per-app map: on-disk relative path -> { resource; rules; }. `resource` is
+  # the post-map object (carried so function-form render commands can resolve
+  # against it); `rules` is its chained list of render rules.
   fileRenders =
     app:
     lib.listToAttrs (
-      map (obj: lib.nameValuePair (objPath app obj) (renderRulesFor app obj)) (renderMatchedObjs app)
+      map (
+        obj:
+        lib.nameValuePair (objPath app obj) {
+          resource = obj;
+          rules = renderRulesFor app obj;
+        }
+      ) (renderMatchedObjs app)
     );
 
   # Flatten every app's fileRenders into a single { path -> rules } map for the
@@ -75,9 +83,21 @@ let
   # Activation render block for a single (path, rules) entry: render the staged
   # file in place via the chained rule commands, honoring NIXIDY_SKIP_RENDER.
   renderBlock =
-    path: rules:
+    path:
+    { resource, rules }:
     let
       nameFor = i: "nixidy-render-${builtins.replaceStrings [ "/" "." ] [ "-" "-" ] path}-${toString i}";
+      # Resolve a function-form command against the matched object; a literal
+      # snippet is used verbatim.
+      commandOf =
+        r:
+        if lib.isFunction r.render.command then
+          r.render.command {
+            inherit resource path pkgs;
+            inherit (pkgs) lib;
+          }
+        else
+          r.render.command;
       scriptOf =
         i: r:
         pkgs.writeShellApplication {
@@ -85,7 +105,7 @@ let
           runtimeInputs = r.render.runtimeInputs;
           # Verbatim command body: quotes/$vars/pipes preserved. The script is
           # invoked by store path, so there is no `sh -c '...'` requote step.
-          text = r.render.command;
+          text = commandOf r;
         };
       scripts = lib.imap0 scriptOf rules;
       chain = lib.concatMapStringsSep " | " (s: lib.getExe s) scripts;
@@ -213,7 +233,7 @@ in
         readOnly = true;
         type = types.attrsOf (types.attrsOf types.anything);
         default = lib.mapAttrs (_: fileRenders) config.applications;
-        description = "Internal: per-app output-path -> chained render rules (for tests).";
+        description = "Internal: per-app output-path -> { resource; rules; } (for tests).";
       };
     };
   };

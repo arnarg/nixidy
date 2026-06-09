@@ -70,12 +70,20 @@ let
                   default = [ ];
                 };
                 command = mkOption {
-                  type = types.lines;
+                  type = types.either types.lines (types.functionTo types.lines);
                   description = ''
                     Runtime stage producing final on-disk content.
                     stdin  = store content for the matched file
                     stdout = content written to disk
                     env    = $TARGET_PATH (existing file path; may not exist)
+
+                    Either a literal shell snippet, or a function resolved at
+                    eval time against the matched object:
+                      { resource, path, pkgs, lib }: <shell snippet>
+                    where `resource` is the post-map object, `path` its on-disk
+                    relative path. Use this to specialize the command per object
+                    (e.g. choose a recipient key from `resource.metadata.namespace`)
+                    instead of re-parsing the manifest on stdin.
                   '';
                 };
               };
