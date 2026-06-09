@@ -4,11 +4,13 @@ let
   res = {
     kind = "Secret";
     apiVersion = "v1";
-    metadata.namespace = "argocd";
-    metadata.name = "argocd-secret";
-    metadata.labels = {
-      "app.kubernetes.io/name" = "x";
-      "custom" = "y";
+    metadata = {
+      namespace = "argocd";
+      name = "argocd-secret";
+      labels = {
+        "app.kubernetes.io/name" = "x";
+        "custom" = "y";
+      };
     };
   };
   p = sel: selectorToPredicate sel res;

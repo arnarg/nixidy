@@ -205,14 +205,14 @@ in
         internal = true;
         readOnly = true;
         type = types.attrsOf (types.listOf types.attrs);
-        default = lib.mapAttrs (_: app: transformedObjects app) config.applications;
+        default = lib.mapAttrs (_: transformedObjects) config.applications;
         description = "Internal: per-application objects after eval-time map transforms (for tests).";
       };
       _fileRenders = mkOption {
         internal = true;
         readOnly = true;
         type = types.attrsOf (types.attrsOf types.anything);
-        default = lib.mapAttrs (_: app: fileRenders app) config.applications;
+        default = lib.mapAttrs (_: fileRenders) config.applications;
         description = "Internal: per-app output-path -> chained render rules (for tests).";
       };
     };
