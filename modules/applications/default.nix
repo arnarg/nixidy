@@ -53,6 +53,11 @@
         '';
       };
     };
+    objectTransforms = mkOption {
+      type = types.listOf (import ../nixidy/transforms.nix { inherit lib; }).ruleType;
+      default = [ ];
+      description = "Resource transform rules applied to this application's objects.";
+    };
     assertions = mkOption {
       type = types.listOf (
         types.submodule {
@@ -111,6 +116,11 @@
   };
 
   config = {
+    assertions = lib.imap0 (i: r: {
+      assertion = (r.map != null) != (r.render != null);
+      message = "application `${name}` objectTransforms rule ${toString i}: set exactly one of `map` or `render`.";
+    }) config.objectTransforms;
+
     # If createNamespace is set to `true` we should
     # create one.
     resources = lib.mkIf config.createNamespace {

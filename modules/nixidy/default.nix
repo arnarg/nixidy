@@ -49,6 +49,12 @@ in
       };
     };
 
+    objectTransforms = mkOption {
+      type = types.listOf (import ./transforms.nix { inherit lib; }).ruleType;
+      default = [ ];
+      description = "Resource transform rules applied across all applications in this environment.";
+    };
+
     charts = mkOption {
       type = with types; attrsOf anything;
       default = { };
@@ -135,6 +141,11 @@ in
     _module.args.charts = config.nixidy.charts;
 
     nixidy = {
+      assertions = lib.imap0 (i: r: {
+        assertion = (r.map != null) != (r.render != null);
+        message = "nixidy.objectTransforms rule ${toString i}: set exactly one of `map` or `render`.";
+      }) cfg.objectTransforms;
+
       charts = lib.optionalAttrs (cfg.chartsDir != null) (lib.helm.mkChartAttrs cfg.chartsDir);
 
       extraFiles = lib.optionalAttrs (cfg.build.revision != null) {
