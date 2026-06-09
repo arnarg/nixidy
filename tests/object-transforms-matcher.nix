@@ -1,6 +1,6 @@
 { lib, ... }:
 let
-  inherit (import ../modules/nixidy/transforms.nix { inherit lib; }) selectorToPredicate;
+  inherit (import ../modules/nixidy/transforms.nix { inherit lib; }) selectorToPredicate ruleType;
   res = {
     kind = "Secret";
     apiVersion = "v1";
@@ -12,6 +12,16 @@ let
     };
   };
   p = sel: selectorToPredicate sel res;
+  evalRule =
+    match:
+    (lib.evalModules {
+      modules = [
+        {
+          options.rule = lib.mkOption { type = ruleType; };
+          config.rule = { inherit match; };
+        }
+      ];
+    }).config.rule.predicate;
 in
 {
   test = {
@@ -57,6 +67,21 @@ in
           namespace = "argocd";
           name = "argocd-secret";
         };
+        expected = true;
+      }
+      {
+        description = "predicate resolves declarative selector match";
+        expression = (evalRule { kind = "Secret"; }) res;
+        expected = true;
+      }
+      {
+        description = "predicate resolves declarative selector mismatch";
+        expression = (evalRule { kind = "ConfigMap"; }) res;
+        expected = false;
+      }
+      {
+        description = "predicate uses predicate-fn form directly";
+        expression = (evalRule (r: r.kind == "Secret")) res;
         expected = true;
       }
     ];
