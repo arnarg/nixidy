@@ -34,6 +34,7 @@
       ./suffix-env-to-app-name.nix
       ./templates.nix
       ./assertions.nix
+      ./object-transforms-matcher.nix
       ./helm/no-values.nix
       ./helm/with-values.nix
       ./helm/transformer.nix
