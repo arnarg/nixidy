@@ -6,12 +6,43 @@
 }:
 let
   inherit (config.nixidy) env;
+
+  # Apply eval-time `map` rules to a list of objects, in declaration order.
+  # A rule whose predicate matches rewrites the object via `map`; `map`
+  # returning null drops the object. Rules without `map` (i.e. `render`) are
+  # ignored here.
+  applyMaps =
+    rules: objs:
+    let
+      maps = lib.filter (r: r.map != null) rules;
+    in
+    lib.concatMap (
+      obj:
+      let
+        out = lib.foldl' (
+          o: r:
+          if o == null then
+            null
+          else if r.predicate o then
+            r.map o
+          else
+            o
+        ) obj maps;
+      in
+      lib.optional (out != null) out
+    ) objs;
+
+  # Per-app objects after eval-time map transforms: env rules first, then
+  # app rules.
+  transformedObjects =
+    app: applyMaps app.objectTransforms (applyMaps config.nixidy.objectTransforms app.objects);
+
   mkApp =
     app:
     let
       grouped = builtins.groupBy (
         obj: "${obj.kind}-${builtins.replaceStrings [ "." ] [ "-" ] obj.metadata.name}"
-      ) app.objects;
+      ) (transformedObjects app);
 
       rawYamlFiles = map (source: {
         filename = baseNameOf source;
@@ -97,6 +128,13 @@ in
         type = types.package;
         internal = true;
         description = "The package containing manifests meant to be deployed directly using `kubectl apply --prune`.";
+      };
+      _transformedObjects = mkOption {
+        internal = true;
+        readOnly = true;
+        type = types.attrsOf (types.listOf types.attrs);
+        default = lib.mapAttrs (_: app: transformedObjects app) config.applications;
+        description = "Internal: per-application objects after eval-time map transforms (for tests).";
       };
     };
   };
@@ -212,7 +250,7 @@ in
           manifests =
             with lib;
             pipe apps [
-              (mapAttrsToList (_: app: labelObjects app.name app.objects))
+              (mapAttrsToList (_: app: labelObjects app.name (transformedObjects app)))
               flatten
               (groupBy classify)
               builtins.toJSON

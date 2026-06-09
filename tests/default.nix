@@ -36,6 +36,7 @@
       ./assertions.nix
       ./object-transforms-matcher.nix
       ./object-transforms-assert.nix
+      ./object-transforms-map.nix
       ./helm/no-values.nix
       ./helm/with-values.nix
       ./helm/transformer.nix
