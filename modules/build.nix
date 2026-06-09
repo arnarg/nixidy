@@ -37,6 +37,66 @@ let
   transformedObjects =
     app: applyMaps app.objectTransforms (applyMaps config.nixidy.objectTransforms app.objects);
 
+  # Sanitize a resource name the same way mkApp does when forming the
+  # on-disk group key / filename.
+  sanitize = n: builtins.replaceStrings [ "." ] [ "-" ] n;
+
+  # All transform rules visible to an app: env rules first, then app rules
+  # (chained in that order, matching `applyMaps`).
+  allRules = app: config.nixidy.objectTransforms ++ app.objectTransforms;
+
+  # Render rules matching a (post-map) object, in env-then-app order.
+  renderRulesFor = app: obj: lib.filter (r: r.render != null && r.predicate obj) (allRules app);
+
+  # The exact on-disk relative path (within the environment package, and
+  # therefore within both the staging tree and the deploy target) for a
+  # given post-map object. Must equal the path mkApp writes:
+  #   <app.output.path>/<kind>-<sanitized name>.yaml
+  objPath = app: obj: "${app.output.path}/${obj.kind}-${sanitize obj.metadata.name}.yaml";
+
+  # Post-map objects of an app that have at least one matching render rule.
+  renderMatchedObjs = app: lib.filter (obj: renderRulesFor app obj != [ ]) (transformedObjects app);
+
+  # Per-app map: on-disk relative path -> chained list of render rules.
+  fileRenders =
+    app:
+    lib.listToAttrs (
+      map (obj: lib.nameValuePair (objPath app obj) (renderRulesFor app obj)) (renderMatchedObjs app)
+    );
+
+  # Flatten every app's fileRenders into a single { path -> rules } map for the
+  # environment. Safe to flatten because the uniqueness assertion guarantees no
+  # path collisions within an app, and distinct apps live under distinct
+  # `app.output.path` prefixes.
+  allFileRenders = lib.foldl' (acc: app: acc // fileRenders app) { } (
+    lib.attrValues config.applications
+  );
+
+  # Activation render block for a single (path, rules) entry: render the staged
+  # file in place via the chained rule commands, honoring NIXIDY_SKIP_RENDER.
+  renderBlock =
+    path: rules:
+    let
+      binPath = lib.makeBinPath (lib.concatMap (r: r.render.runtimeInputs) rules);
+      chained = lib.concatMapStringsSep " | " (r: r.render.command) rules;
+    in
+    ''
+      if [ "\''${NIXIDY_SKIP_RENDER:-}" = "1" ]; then
+        if [ -f "\$dest/${path}" ]; then
+          cp "\$dest/${path}" "\$staging/${path}"
+        else
+          rm -f "\$staging/${path}"
+        fi
+      else
+        echo "Rendering ${path}"
+        TARGET_PATH="\$dest/${path}" PATH="${binPath}:\$PATH" \
+          sh -c '${chained}' < "\$staging/${path}" > "\$staging/${path}.tmp" \
+          && mv "\$staging/${path}.tmp" "\$staging/${path}"
+      fi
+    '';
+
+  renderBlocks = lib.concatStringsSep "\n" (lib.mapAttrsToList renderBlock allFileRenders);
+
   mkApp =
     app:
     let
@@ -136,10 +196,37 @@ in
         default = lib.mapAttrs (_: app: transformedObjects app) config.applications;
         description = "Internal: per-application objects after eval-time map transforms (for tests).";
       };
+      _fileRenders = mkOption {
+        internal = true;
+        readOnly = true;
+        type = types.attrsOf (types.attrsOf types.anything);
+        default = lib.mapAttrs (_: app: fileRenders app) config.applications;
+        description = "Internal: per-app output-path -> chained render rules (for tests).";
+      };
     };
   };
 
   config = {
+    # Per-app: rendered-file paths must be unique. `listToAttrs` collapses
+    # colliding keys, so a count mismatch means two rendered objects share an
+    # on-disk file (group-key collision); rendering over a multi-document file
+    # is undefined. Emitted as a single env-scope assertion naming the offender.
+    nixidy.assertions =
+      let
+        colliding = lib.filter (
+          app: lib.length (renderMatchedObjs app) != lib.length (lib.attrNames (fileRenders app))
+        ) (lib.attrValues config.applications);
+      in
+      [
+        {
+          assertion = colliding == [ ];
+          message =
+            "objectTransforms render rules collide on a shared on-disk file in application(s): "
+            + lib.concatMapStringsSep ", " (app: "`${app.name}`") colliding
+            + " (group-key collision among rendered objects); rendering over a multi-document file is undefined.";
+        }
+      ];
+
     build = {
       bootstrapPackage = mkApp config.applications.__bootstrap;
 
@@ -189,23 +276,24 @@ in
 
           mkdir -p "\$dest"
 
-          # We need to check if there is a difference between
-          # the newly built environment and the destination
-          # excluding ".revision" because that will most likely
-          # always change when going through CI, avoiding infinite
-          # loop.
-          if ! ${pkgs.diffutils}/bin/diff -q -r --exclude .revision "${config.build.environmentPackage}" "\$dest" &>/dev/null; then
-            echo "switching manifests"
+          echo "switching manifests"
 
-            ${pkgs.rsync}/bin/rsync \
-              --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r \
-              --recursive --delete --copy-links \
-              "${config.build.environmentPackage}/" "\$dest"
+          # Stage the built environment, then run any runtime render rules over
+          # the matched files before syncing the staging tree to the target.
+          # Set NIXIDY_SKIP_RENDER=1 to preserve the existing rendered target
+          # files (re-use what is already on disk instead of re-rendering).
+          staging=\$(mktemp -d)
+          trap 'rm -rf "\$staging"' EXIT
+          cp -rL --no-preserve=mode "${config.build.environmentPackage}"/. "\$staging"/
 
-            echo "done!"
-          else
-            echo "no changes!"
-          fi
+          ${renderBlocks}
+
+          ${pkgs.rsync}/bin/rsync \
+            --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r \
+            --recursive --delete --copy-links \
+            "\$staging/" "\$dest"
+
+          echo "done!"
           EOF
 
           chmod +x $out/activate
