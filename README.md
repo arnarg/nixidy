@@ -239,13 +239,17 @@ Uses `kubectl apply --prune` for safe, declarative deployments directly to your 
 Generate typed Nix options from any Custom Resource Definition:
 
 ```nix
-packages.generators.cilium = nixidy.packages.${system}.generators.fromCRD {
-  name = "cilium";
-  src = pkgs.fetchFromGitHub { /* ... */ };
-  crds = [
-    "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
+{ generators, ... }: {
+  nixidy.applicationImports = [
+    (generators.fromCRDModule {
+      name = "cilium";
+      src = pkgs.fetchFromGitHub { /* ... */ };
+      crdFiles = [
+        "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
+      ];
+    })
   ];
-};
+}
 ```
 
 Then use your CRDs with full type safety:

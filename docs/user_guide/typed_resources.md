@@ -245,31 +245,24 @@ The `fromChartCRD` function accepts the same optional arguments as `fromCRD` (`n
 
 `fromCRD` and `fromChartCRD` build a `.nix` file that you commit and `import`. For flake or other programmatic consumers that do not need a committed file, `fromCRDModule` (and its chart counterpart `fromChartCRDModule`) return the resource options as a **module value** instead, skipping the render-to-source, format, write-file and `import` round-trip. The result is a module function, which is exactly what `nixidy.applicationImports` accepts.
 
-```nix title="flake.nix"
-nixidyEnvs = nixidy.lib.mkEnvs {
-  inherit pkgs;
-
-  envs.dev.modules = [
-    ./env/dev.nix
-    {
-      nixidy.applicationImports = [
-        (nixidy.packages.${system}.generators.fromCRDModule {
-          name = "cilium";
-          src = pkgs.fetchFromGitHub {
-            owner = "cilium";
-            repo = "cilium";
-            rev = "v1.15.6";
-            hash = "sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=";
-          };
-          crdFiles = [
-            "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
-            "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml"
-          ];
-        })
+```nix title="modules/cilium.nix"
+{ generators, ... }: {
+  nixidy.applicationImports = [
+    (generators.fromCRDModule {
+      name = "cilium";
+      src = pkgs.fetchFromGitHub {
+        owner = "cilium";
+        repo = "cilium";
+        rev = "v1.15.6";
+        hash = "sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=";
+      };
+      crdFiles = [
+        "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
+        "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml"
       ];
-    }
+    })
   ];
-};
+}
 ```
 
 `fromChartCRDModule` takes the same chart arguments as `fromChartCRD` (`chartAttrs`/`chart`/`values`/`kindFilter`/`kubeVersion`/`extraOpts`). Because no file is generated there is nothing to `nix build` or commit; the types are produced during evaluation.
