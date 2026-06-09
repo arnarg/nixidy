@@ -144,7 +144,19 @@ let
       };
     }
   );
+  # Build the "exactly one of rewrite/render" assertions for a list of rules.
+  # `scope` is the option path used to prefix each message; a rule's optional
+  # `name` is appended so the offender is identifiable.
+  mkXorAssertions =
+    scope: rules:
+    lib.imap0 (i: r: {
+      assertion = (r.rewrite != null) != (r.render != null);
+      message =
+        "${scope} rule ${toString i}"
+        + lib.optionalString (r.name != null) " (`${r.name}`)"
+        + ": set exactly one of `rewrite` or `render`.";
+    }) rules;
 in
 {
-  inherit ruleType selectorToPredicate;
+  inherit ruleType selectorToPredicate mkXorAssertions;
 }

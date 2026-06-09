@@ -7,6 +7,9 @@ let
   renders = config.build._fileRenders.test1;
   paths = lib.attrNames renders;
   hasSuffix = suf: lib.any (p: lib.hasSuffix suf p) paths;
+  # The single rendered SopsSecret entry (post-rewrite, sanitized dotted name).
+  sopsKey = lib.head (lib.filter (lib.hasSuffix "SopsSecret-x-y.yaml") paths);
+  sopsEntry = renders.${sopsKey};
 in
 {
   applications.test1 = {
@@ -64,42 +67,34 @@ in
       }
       {
         description = "the SopsSecret render entry carries the matched resource and a non-empty rules list";
-        expression = renders;
-        assertion =
-          r:
-          let
-            key = lib.head (lib.filter (p: lib.hasSuffix "SopsSecret-x-y.yaml" p) (lib.attrNames r));
-          in
-          lib.isList r.${key}.rules && r.${key}.rules != [ ] && r.${key}.resource.kind == "SopsSecret";
+        expression = sopsEntry;
+        assertion = e: lib.isList e.rules && e.rules != [ ] && e.resource.kind == "SopsSecret";
       }
       {
         description = "the string-form render coerces to { command = \"cat\"; runtimeInputs = []; }";
-        expression = renders;
+        expression = sopsEntry;
         assertion =
-          r:
+          e:
           let
-            key = lib.head (lib.filter (p: lib.hasSuffix "SopsSecret-x-y.yaml" p) (lib.attrNames r));
-            strRule = lib.head (lib.filter (rule: rule.name == "passthrough") r.${key}.rules);
+            strRule = lib.head (lib.filter (rule: rule.name == "passthrough") e.rules);
           in
           strRule.render.command == "cat" && strRule.render.runtimeInputs == [ ];
       }
       {
         description = "a function-form render command resolves against the matched resource and path";
-        expression = renders;
+        expression = sopsEntry;
         assertion =
-          r:
+          e:
           let
-            key = lib.head (lib.filter (p: lib.hasSuffix "SopsSecret-x-y.yaml" p) (lib.attrNames r));
-            entry = r.${key};
-            fnRule = lib.head (lib.filter (rule: lib.isFunction rule.render.command) entry.rules);
+            fnRule = lib.head (lib.filter (rule: lib.isFunction rule.render.command) e.rules);
             resolved = fnRule.render.command {
-              resource = entry.resource;
-              path = key;
+              resource = e.resource;
+              path = sopsKey;
               pkgs = { };
               inherit lib;
             };
           in
-          lib.hasInfix "ns=test" resolved && lib.hasInfix "path=${key}" resolved;
+          lib.hasInfix "ns=test" resolved && lib.hasInfix "path=${sopsKey}" resolved;
       }
     ];
   };

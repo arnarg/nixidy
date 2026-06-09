@@ -116,13 +116,10 @@
   };
 
   config = {
-    assertions = lib.imap0 (i: r: {
-      assertion = (r.rewrite != null) != (r.render != null);
-      message =
-        "application `${name}` objectTransforms rule ${toString i}"
-        + lib.optionalString (r.name != null) " (`${r.name}`)"
-        + ": set exactly one of `rewrite` or `render`.";
-    }) config.objectTransforms;
+    assertions =
+      (import ../nixidy/transforms.nix { inherit lib; }).mkXorAssertions
+        "application `${name}` objectTransforms"
+        config.objectTransforms;
 
     # If createNamespace is set to `true` we should
     # create one.

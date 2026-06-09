@@ -41,6 +41,11 @@ let
   # on-disk group key / filename.
   sanitize = n: builtins.replaceStrings [ "." ] [ "-" ] n;
 
+  # The on-disk group key / filename stem for an object. mkApp groups objects
+  # under this key; render rules resolve the matching path from the same helper
+  # so the two never drift.
+  groupKeyOf = obj: "${obj.kind}-${sanitize obj.metadata.name}";
+
   # All transform rules visible to an app: env rules first, then app rules
   # (chained in that order, matching `applyRewrites`).
   allRules = app: config.nixidy.objectTransforms ++ app.objectTransforms;
@@ -48,28 +53,34 @@ let
   # Render rules matching a (post-rewrite) object, in env-then-app order.
   renderRulesFor = app: obj: lib.filter (r: r.render != null && r.predicate obj) (allRules app);
 
-  # The exact on-disk relative path (within the environment package, and
-  # therefore within both the staging tree and the deploy target) for a
-  # given post-rewrite object. Must equal the path mkApp writes:
-  #   <app.output.path>/<kind>-<sanitized name>.yaml
-  objPath = app: obj: "${app.output.path}/${obj.kind}-${sanitize obj.metadata.name}.yaml";
+  # The on-disk relative path (within the environment package, and therefore
+  # within both the staging tree and the deploy target) for a post-rewrite
+  # object: <app.output.path>/<groupKey>.yaml.
+  objPath = app: obj: "${app.output.path}/${groupKeyOf obj}.yaml";
 
-  # Post-rewrite objects of an app that have at least one matching render rule.
-  renderMatchedObjs = app: lib.filter (obj: renderRulesFor app obj != [ ]) (transformedObjects app);
+  # Per-app render entries: one { path; resource; rules; } per post-rewrite
+  # object with at least one matching render rule. `renderRulesFor` is computed
+  # once per object here. `resource` is carried so function-form render commands
+  # can resolve against it.
+  renderEntriesFor =
+    app:
+    lib.concatMap (
+      obj:
+      let
+        rules = renderRulesFor app obj;
+      in
+      lib.optional (rules != [ ]) {
+        path = objPath app obj;
+        resource = obj;
+        inherit rules;
+      }
+    ) (transformedObjects app);
 
-  # Per-app map: on-disk relative path -> { resource; rules; }. `resource` is
-  # the post-rewrite object (carried so function-form render commands can
-  # resolve against it); `rules` is its chained list of render rules.
+  # Per-app map: on-disk relative path -> { resource; rules; }.
   fileRenders =
     app:
     lib.listToAttrs (
-      map (
-        obj:
-        lib.nameValuePair (objPath app obj) {
-          resource = obj;
-          rules = renderRulesFor app obj;
-        }
-      ) (renderMatchedObjs app)
+      map (e: lib.nameValuePair e.path { inherit (e) resource rules; }) (renderEntriesFor app)
     );
 
   # Flatten every app's fileRenders into a single { path -> rules } map for the
@@ -135,9 +146,7 @@ let
   mkApp =
     app:
     let
-      grouped = builtins.groupBy (obj: "${obj.kind}-${sanitize obj.metadata.name}") (
-        transformedObjects app
-      );
+      grouped = builtins.groupBy groupKeyOf (transformedObjects app);
 
       rawYamlFiles = map (source: {
         filename = baseNameOf source;
@@ -229,7 +238,7 @@ in
         readOnly = true;
         type = types.attrsOf (types.listOf types.attrs);
         default = lib.mapAttrs (_: transformedObjects) config.applications;
-        description = "Internal: per-application objects after eval-time map transforms (for tests).";
+        description = "Internal: per-application objects after eval-time rewrite transforms (for tests).";
       };
       _fileRenders = mkOption {
         internal = true;
@@ -249,7 +258,7 @@ in
     nixidy.assertions =
       let
         colliding = lib.filter (
-          app: lib.length (renderMatchedObjs app) != lib.length (lib.attrNames (fileRenders app))
+          app: lib.length (renderEntriesFor app) != lib.length (lib.attrNames (fileRenders app))
         ) (lib.attrValues config.applications);
       in
       [
@@ -299,40 +308,58 @@ in
         name = "nixidy-activation-environment-${env}";
         phases = [ "installPhase" ];
 
-        installPhase = ''
-          mkdir -p $out
+        installPhase =
+          let
+            rsyncFlags = "--chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r --recursive --delete --copy-links";
 
-          ln -s ${config.build.environmentPackage} $out/environment
+            # No render rules: sync the built environment straight to the
+            # target, skipping all work when nothing changed (excluding
+            # .revision, which churns through CI and would otherwise loop).
+            directSwitch = ''
+              if ! ${pkgs.diffutils}/bin/diff -q -r --exclude .revision "${config.build.environmentPackage}" "\$dest" &>/dev/null; then
+                echo "switching manifests"
+                ${pkgs.rsync}/bin/rsync ${rsyncFlags} "${config.build.environmentPackage}/" "\$dest"
+                echo "done!"
+              else
+                echo "no changes!"
+              fi
+            '';
 
-          cat <<EOF > $out/activate
-          #!/usr/bin/env bash
-          set -eo pipefail
-          dest="${config.nixidy.target.rootPath}"
+            # Render rules present: stage the environment, run the rules over
+            # the matched files, then sync the staging tree to the target.
+            # NIXIDY_SKIP_RENDER=1 preserves the existing rendered target files
+            # (re-use what is on disk instead of re-rendering).
+            stagedSwitch = ''
+              echo "switching manifests"
 
-          mkdir -p "\$dest"
+              staging=\$(mktemp -d)
+              trap 'rm -rf "\$staging"' EXIT
+              cp -rL --no-preserve=mode "${config.build.environmentPackage}"/. "\$staging"/
 
-          echo "switching manifests"
+              ${renderBlocks}
 
-          # Stage the built environment, then run any runtime render rules over
-          # the matched files before syncing the staging tree to the target.
-          # Set NIXIDY_SKIP_RENDER=1 to preserve the existing rendered target
-          # files (re-use what is already on disk instead of re-rendering).
-          staging=\$(mktemp -d)
-          trap 'rm -rf "\$staging"' EXIT
-          cp -rL --no-preserve=mode "${config.build.environmentPackage}"/. "\$staging"/
+              ${pkgs.rsync}/bin/rsync ${rsyncFlags} "\$staging/" "\$dest"
 
-          ${renderBlocks}
+              echo "done!"
+            '';
+          in
+          ''
+            mkdir -p $out
 
-          ${pkgs.rsync}/bin/rsync \
-            --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r \
-            --recursive --delete --copy-links \
-            "\$staging/" "\$dest"
+            ln -s ${config.build.environmentPackage} $out/environment
 
-          echo "done!"
-          EOF
+            cat <<EOF > $out/activate
+            #!/usr/bin/env bash
+            set -eo pipefail
+            dest="${config.nixidy.target.rootPath}"
 
-          chmod +x $out/activate
-        '';
+            mkdir -p "\$dest"
+
+            ${if allFileRenders == { } then directSwitch else stagedSwitch}
+            EOF
+
+            chmod +x $out/activate
+          '';
       };
 
       declarativePackage =

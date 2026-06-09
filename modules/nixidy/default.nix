@@ -141,13 +141,9 @@ in
     _module.args.charts = config.nixidy.charts;
 
     nixidy = {
-      assertions = lib.imap0 (i: r: {
-        assertion = (r.rewrite != null) != (r.render != null);
-        message =
-          "nixidy.objectTransforms rule ${toString i}"
-          + lib.optionalString (r.name != null) " (`${r.name}`)"
-          + ": set exactly one of `rewrite` or `render`.";
-      }) cfg.objectTransforms;
+      assertions =
+        (import ./transforms.nix { inherit lib; }).mkXorAssertions "nixidy.objectTransforms"
+          cfg.objectTransforms;
 
       charts = lib.optionalAttrs (cfg.chartsDir != null) (lib.helm.mkChartAttrs cfg.chartsDir);
 
