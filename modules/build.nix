@@ -42,24 +42,24 @@ let
   sanitize = n: builtins.replaceStrings [ "." ] [ "-" ] n;
 
   # All transform rules visible to an app: env rules first, then app rules
-  # (chained in that order, matching `applyMaps`).
+  # (chained in that order, matching `applyRewrites`).
   allRules = app: config.nixidy.objectTransforms ++ app.objectTransforms;
 
-  # Render rules matching a (post-map) object, in env-then-app order.
+  # Render rules matching a (post-rewrite) object, in env-then-app order.
   renderRulesFor = app: obj: lib.filter (r: r.render != null && r.predicate obj) (allRules app);
 
   # The exact on-disk relative path (within the environment package, and
   # therefore within both the staging tree and the deploy target) for a
-  # given post-map object. Must equal the path mkApp writes:
+  # given post-rewrite object. Must equal the path mkApp writes:
   #   <app.output.path>/<kind>-<sanitized name>.yaml
   objPath = app: obj: "${app.output.path}/${obj.kind}-${sanitize obj.metadata.name}.yaml";
 
-  # Post-map objects of an app that have at least one matching render rule.
+  # Post-rewrite objects of an app that have at least one matching render rule.
   renderMatchedObjs = app: lib.filter (obj: renderRulesFor app obj != [ ]) (transformedObjects app);
 
   # Per-app map: on-disk relative path -> { resource; rules; }. `resource` is
-  # the post-map object (carried so function-form render commands can resolve
-  # against it); `rules` is its chained list of render rules.
+  # the post-rewrite object (carried so function-form render commands can
+  # resolve against it); `rules` is its chained list of render rules.
   fileRenders =
     app:
     lib.listToAttrs (

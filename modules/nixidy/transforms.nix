@@ -65,6 +65,11 @@ let
           stdout = content written to disk
           env    = $TARGET_PATH (absolute existing file path; may not exist)
 
+          stdin/stdout is the contract so stages compose as a pipe, but the
+          command body is arbitrary shell. For a tool that needs a real file
+          path (e.g. `sops -i`, `yq -i`), capture stdin to a temp file and emit
+          it back: `f=$(mktemp); cat > "$f"; sops -e -i "$f"; cat "$f"`.
+
           Either a literal shell snippet, or a function resolved at eval time
           against the matched object:
             { resource, path, pkgs, lib }: <shell snippet>
