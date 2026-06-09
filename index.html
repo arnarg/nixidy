@@ -1419,13 +1419,17 @@ applications<span class="o">.</span>frontend<span class="o">.</span>templates<sp
 <p>Uses <code>kubectl apply --prune</code> for safe, declarative deployments directly to your cluster.</p>
 <h3 id="crd-support">🎛️ CRD Support<a class="headerlink" href="#crd-support" title="Permanent link">#</a></h3>
 <p>Generate typed Nix options from any Custom Resource Definition:</p>
-<div class="highlight"><pre><span></span><code>packages<span class="o">.</span>generators<span class="o">.</span><span class="ss">cilium</span> <span class="o">=</span> nixidy<span class="o">.</span>packages<span class="o">.</span><span class="si">${</span>system<span class="si">}</span><span class="o">.</span>generators<span class="o">.</span>fromCRD <span class="p">{</span>
-  <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;cilium&quot;</span><span class="p">;</span>
-  <span class="ss">src</span> <span class="o">=</span> pkgs<span class="o">.</span>fetchFromGitHub <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">};</span>
-  <span class="ss">crds</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span> generators<span class="p">,</span> <span class="o">...</span> <span class="p">}:</span> <span class="p">{</span>
+  nixidy<span class="o">.</span><span class="ss">applicationImports</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span>generators<span class="o">.</span>fromCRDModule <span class="p">{</span>
+      <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;cilium&quot;</span><span class="p">;</span>
+      <span class="ss">src</span> <span class="o">=</span> pkgs<span class="o">.</span>fetchFromGitHub <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">};</span>
+      <span class="ss">crdFiles</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml&quot;</span>
+      <span class="p">];</span>
+    <span class="p">})</span>
   <span class="p">];</span>
-<span class="p">};</span>
+<span class="p">}</span>
 </code></pre></div>
 <p>Then use your CRDs with full type safety:</p>
 <div class="highlight"><pre><span></span><code>resources<span class="o">.</span>ciliumNetworkPolicies<span class="o">.</span>allow-dns<span class="o">.</span><span class="ss">spec</span> <span class="o">=</span> <span class="p">{</span>
