@@ -11,7 +11,7 @@
   <a href="https://nixidy.dev/user_guide/getting_started/">Getting Started</a> •
   <a href="https://nixidy.dev/">Documentation</a> •
   <a href="#features">Features</a> •
-  <a href="#examples">Examples</a>
+  <a href="#resources">Resources</a>
 </p>
 
 ## Why Nixidy?
@@ -307,16 +307,17 @@ See the [Getting Started Guide](https://nixidy.dev/user_guide/getting_started/) 
 
 ## Documentation
 
-- **[Getting Started](https://nixidy.dev/user_guide/getting_started/)** — Set up your first nixidy project
-- **[Helm Charts](https://nixidy.dev/user_guide/helm_charts/)** — Integrate existing Helm charts
-- **[Templates](https://nixidy.dev/user_guide/templates/)** — Create reusable application patterns
-- **[Git Strategies](https://nixidy.dev/user_guide/git_strategies/)** — Monorepo vs. environment branches
-- **[GitHub Actions](https://nixidy.dev/user_guide/github_actions/)** — CI/CD integration
-- **[Typed Resources](https://nixidy.dev/user_guide/typed_resources/)** — Generate types for CRDs
+- **[Getting Started](https://nixidy.dev/user_guide/getting_started/)** - Set up your first nixidy project
+- **[Helm Charts](https://nixidy.dev/user_guide/helm_charts/)** - Integrate existing Helm charts
+- **[Templates](https://nixidy.dev/user_guide/templates/)** - Create reusable application patterns
+- **[Git Strategies](https://nixidy.dev/user_guide/git_strategies/)** - Monorepo vs. environment branches
+- **[GitHub Actions](https://nixidy.dev/user_guide/github_actions/)** - CI/CD integration
+- **[Typed Resources](https://nixidy.dev/user_guide/typed_resources/)** - Generate types for CRDs
 
-## Examples
+## Resources
 
-- **[arnarg/cluster](https://github.com/arnarg/cluster)** — Real-world cluster configuration using nixidy
+- **[arnarg/cluster](https://github.com/arnarg/cluster)** - Real-world cluster configuration using nixidy
+- **[Introduction to nixidy](https://codedbearder.com/posts/nixidy-part-1-introduction/)** - Tutorial series
 
 ## Comparison
 
@@ -340,8 +341,8 @@ Contributions are welcome! Whether it's bug reports, feature requests, documenta
 
 ## Acknowledgments
 
-- **[nix-kube-generators](https://github.com/farcaller/nix-kube-generators)** — Used internally for Helm chart rendering
-- **[kubenix](https://github.com/hall/kubenix)** — Resource options generator forked from kubenix
+- **[nix-kube-generators](https://github.com/farcaller/nix-kube-generators)** - Used internally for Helm chart rendering
+- **[kubenix](https://github.com/hall/kubenix)** - Resource options generator forked from kubenix
 
 ## License
 
