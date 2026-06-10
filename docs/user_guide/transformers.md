@@ -4,6 +4,9 @@ Nixidy supports adding a transformers to Helm releases and Kustomize application
 
 Transformers can be set globally in `#!nix nixidy.defaults.helm.transformer` for Helm releases and `#!nix nixidy.defaults.kustomize.transformer` for kustomize applications.
 
+!!! tip
+    Transformers act on a single Helm release or Kustomize application. To match and modify objects across _all_ applications in an environment — including a runtime stage for things like encrypting secrets on write — see [Object Transforms](object_transforms.md).
+
 ## Remove Version Specific Labels
 
 It's very common that helm charts will add the labels `helm.sh/chart` and `app.kubernetes.io/version` to _all_ resources it renders. This can produce _very_ big diffs when they're updated and nixidy renders them and commits the manifests to a git branch. The changes in these labels are not very relevant and will mostly just be noise to distract from the actual relevant changes of the rendered output.

@@ -171,6 +171,7 @@ let
             - 'Git Strategies': user_guide/git_strategies.md
             - 'GitHub Actions': user_guide/github_actions.md
             - 'Transformers': user_guide/transformers.md
+            - 'Object Transforms': user_guide/object_transforms.md
             - 'Using nixhelm': user_guide/using_nixhelm.md
             - 'Directly Apply Manifests': user_guide/direct_apply.md
             - 'Assertions & Warnings': user_guide/assertions.md

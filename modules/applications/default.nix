@@ -53,6 +53,11 @@
         '';
       };
     };
+    objectTransforms = mkOption {
+      type = types.listOf (import ../nixidy/transforms.nix { inherit lib; }).ruleType;
+      default = [ ];
+      description = "Resource transform rules applied to this application's objects.";
+    };
     assertions = mkOption {
       type = types.listOf (
         types.submodule {
@@ -111,6 +116,11 @@
   };
 
   config = {
+    assertions =
+      (import ../nixidy/transforms.nix { inherit lib; }).mkXorAssertions
+        "application `${name}` objectTransforms"
+        config.objectTransforms;
+
     # If createNamespace is set to `true` we should
     # create one.
     resources = lib.mkIf config.createNamespace {

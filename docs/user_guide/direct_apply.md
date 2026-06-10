@@ -12,6 +12,11 @@ When you run `nixidy apply`, it builds a nix package that contains all your Kube
 
 It uses `kubectl apply --prune` to apply the manifests. The `--prune` flag is used to remove any resources from the cluster that are no longer defined in your nixidy configuration. Specific labels are added to all resources to make pruning safe and effective.
 
+If you use [Object Transforms](object_transforms.md), any `postProcess` rules run here too, so `nixidy apply` deploys the same manifests as `nixidy switch`. Each object is streamed through its post-process command before being applied.
+
+!!! warning
+    A `postProcess` command's output must be a valid Kubernetes manifest for `nixidy apply` to deploy it; a transform whose result only a GitOps controller can consume is `switch`-only. See [Object Transforms](object_transforms.md#applying-directly) for details.
+
 ## Usage
 
 To apply the manifests for a specific environment, you can run:
