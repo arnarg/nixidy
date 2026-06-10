@@ -17,6 +17,7 @@ Nixidy brings the power of Nix to Kubernetes cluster management, enabling declar
 - [Git Strategies](https://nixidy.dev/user_guide/git_strategies/): Monorepo, environment branches, or separate repositories
 - [GitHub Actions](https://nixidy.dev/user_guide/github_actions/): CI/CD integration with nixidy/build and nixidy/switch actions
 - [Transformers](https://nixidy.dev/user_guide/transformers/): Modify Helm-rendered manifests using transformer functions
+- [Object Transforms](https://nixidy.dev/user_guide/object_transforms/): Match and modify objects across all applications — eval-time rewrites and runtime post-process stages (e.g. encrypting secrets on write)
 - [Using nixhelm](https://nixidy.dev/user_guide/using_nixhelm/): Use nixhelm chart collections with nixidy
 - [Directly Apply Manifests](https://nixidy.dev/user_guide/direct_apply/): Deploy without Argo CD using kubectl apply --prune
 
