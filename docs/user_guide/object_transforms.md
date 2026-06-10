@@ -47,7 +47,11 @@ Each rule selects objects with `match` and sets exactly one of `rewrite` or `pos
   };
 
   # equivalent predicate form
-  match = resource: resource.kind == "Secret";
+  match =
+    resource:
+    resource.kind == "Secret"
+    && (resource.metadata.namespace or null) == "default"
+    && (resource.metadata.labels."app.kubernetes.io/managed-by" or null) == "nixidy";
 }
 ```
 
@@ -58,7 +62,7 @@ Selector fields are ANDed together. `kind`, `apiVersion`, `namespace` and `name`
 
 ## Rewriting objects
 
-`rewrite` is an evaluation-time function `#!nix resource -> resource`. Returning `#!nix null` drops the object entirely. Because it runs during evaluation, the result feeds every output consistently — both `nixidy switch` and `nixidy apply` see the rewritten object.
+`rewrite` is an evaluation-time function `resource -> resource`. Returning `#!nix null` drops the object entirely. Because it runs during evaluation, the result feeds every output consistently — both `nixidy switch` and `nixidy apply` see the rewritten object.
 
 ```nix
 {
