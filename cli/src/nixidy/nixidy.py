@@ -338,5 +338,9 @@ def diff(
     sys.exit(diff.returncode)
 
 
+def main():
+    cli(prog_name="nixidy")
+
+
 if __name__ == "__main__":
-    cli()
+    main()

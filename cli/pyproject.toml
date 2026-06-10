@@ -10,7 +10,7 @@ dependencies = [
 ]
 
 [project.scripts]
-nixidy = "nixidy.nixidy:cli"
+nixidy = "nixidy.nixidy:main"
 
 [build-system]
 requires = ["setuptools>=64", "wheel"]
