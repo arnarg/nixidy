@@ -1247,7 +1247,7 @@ git<span class="w"> </span>init
   <span class="ss">inputs</span> <span class="o">=</span> <span class="p">{</span>
     nixpkgs<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:nixos/nixpkgs/nixos-unstable&quot;</span><span class="p">;</span>
     flake-utils<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:numtide/flake-utils&quot;</span><span class="p">;</span>
-    nixidy<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:arnarg/nixidy&quot;</span><span class="p">;</span>
+    nixidy<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:arnarg/nixidy/latest&quot;</span><span class="p">;</span>
   <span class="p">};</span>
 
   <span class="ss">outputs</span> <span class="o">=</span> <span class="p">{</span>
@@ -1285,7 +1285,7 @@ git<span class="w"> </span>init
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>npins<span class="w"> </span>init<span class="w"> </span>--bare
-npins<span class="w"> </span>add<span class="w"> </span>github<span class="w"> </span>arnarg<span class="w"> </span>nixidy<span class="w"> </span>--branch<span class="w"> </span>main
+npins<span class="w"> </span>add<span class="w"> </span>github<span class="w"> </span>arnarg<span class="w"> </span>nixidy
 </code></pre></div>
 <p>Then create <code>default.nix</code>:</p>
 <div class="highlight"><span class="filename">default.nix</span><pre><span></span><code><span class="k">let</span>
@@ -1317,7 +1317,7 @@ niv<span class="w"> </span>add<span class="w"> </span>github<span class="w"> </s
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>devenv<span class="w"> </span>init
-devenv<span class="w"> </span>inputs<span class="w"> </span>add<span class="w"> </span>nixidy<span class="w"> </span>github:arnarg/nixidy
+devenv<span class="w"> </span>inputs<span class="w"> </span>add<span class="w"> </span>nixidy<span class="w"> </span>github:arnarg/nixidy/latest
 </code></pre></div>
 <p>Then create <code>devenv.nix</code>:</p>
 <div class="highlight"><span class="filename">devenv.nix</span><pre><span></span><code><span class="p">{</span>
