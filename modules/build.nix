@@ -113,7 +113,7 @@ let
   # Up-front notice + TTY prompt. NOT gated on NIXIDY_SKIP_POST_PROCESS (apply
   # always post-processes). Runtime $ is heredoc-escaped (\''${…}, \$).
   applyPostProcessNotice = lib.optionalString (applyChainFiles != [ ]) ''
-    echo "post-processing ${toString (lib.length applyChainFiles)} manifest file(s); the following commands run outside any sandbox — review them before continuing:"
+    echo "post-processing ${toString (lib.length applyChainFiles)} manifest file(s); the following commands run outside any sandbox. Review them before continuing:"
     cat ${applyPostProcessListing}
     if [ "\''${NIXIDY_POST_PROCESS_APPROVE:-}" != "1" ] && [ -t 0 ]; then
       printf 'Continue with post-processing? [y/N] '
@@ -277,7 +277,7 @@ let
   # Up-front activation notice: print every post-process command about to run,
   # against which file, once before any command executes. These commands run
   # outside any sandbox, so this is visibility (not a gate) for the "switching to
-  # someone else's config is code execution" case — showing the actual command
+  # someone else's config is code execution" case. Showing the actual command
   # (not just a rule name) is the honest signal for a due-diligence bail.
   # Rendered to a store file and `cat`ed so arbitrary command text needs no
   # heredoc escaping. Skipped under NIXIDY_SKIP_POST_PROCESS, where nothing runs.
@@ -300,7 +300,7 @@ let
     in
     ''
       if [ "\''${NIXIDY_SKIP_POST_PROCESS:-}" != "1" ]; then
-        echo "post-processing ${toString fileCount} manifest file(s); the following commands run outside any sandbox — review them before continuing:"
+        echo "post-processing ${toString fileCount} manifest file(s); the following commands run outside any sandbox. Review them before continuing:"
         cat ${postProcessListing}
         # Pause for confirmation only when stdin is a terminal: a piped/CI/
         # pre-commit run is non-interactive and proceeds untouched, so

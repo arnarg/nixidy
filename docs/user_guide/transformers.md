@@ -5,7 +5,7 @@ Nixidy supports adding a transformers to Helm releases and Kustomize application
 Transformers can be set globally in `#!nix nixidy.defaults.helm.transformer` for Helm releases and `#!nix nixidy.defaults.kustomize.transformer` for kustomize applications.
 
 !!! tip
-    Transformers act on a single Helm release or Kustomize application. To match and modify objects across _all_ applications in an environment — including a runtime stage for things like encrypting secrets on write — see [Object Transforms](object_transforms.md).
+    Transformers act on a single Helm release or Kustomize application. To match and modify objects across _all_ applications in an environment, including a runtime stage for things like encrypting secrets on write, see [Object Transforms](object_transforms.md).
 
 ## Remove Version Specific Labels
 
