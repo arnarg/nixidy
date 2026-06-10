@@ -4,12 +4,12 @@
   ...
 }:
 let
-  renders = config.build._fileRenders.test1;
-  paths = lib.attrNames renders;
+  postProcesses = config.build._filePostProcesses.test1;
+  paths = lib.attrNames postProcesses;
   hasSuffix = suf: lib.any (p: lib.hasSuffix suf p) paths;
-  # The single rendered SopsSecret entry (post-rewrite, sanitized dotted name).
+  # The single post-processed SopsSecret entry (post-rewrite, sanitized dotted name).
   sopsKey = lib.head (lib.filter (lib.hasSuffix "SopsSecret-x-y.yaml") paths);
-  sopsEntry = renders.${sopsKey};
+  sopsEntry = postProcesses.${sopsKey};
 in
 {
   applications.test1 = {
@@ -21,7 +21,7 @@ in
 
   nixidy.objectTransforms = [
     {
-      # Eval-time rewrite: Secret -> SopsSecret (so render sees the new kind).
+      # Eval-time rewrite: Secret -> SopsSecret (so postProcess sees the new kind).
       name = "secret-to-sopssecret";
       match.kind = "Secret";
       rewrite =
@@ -36,12 +36,12 @@ in
       # String shortcut: coerces to { command = "cat"; runtimeInputs = []; }.
       name = "passthrough";
       match.kind = "SopsSecret";
-      render = "cat";
+      postProcess = "cat";
     }
     {
       # Function-form command: resolved at eval time against the matched object.
       match.kind = "SopsSecret";
-      render.command =
+      postProcess.command =
         {
           resource,
           path,
@@ -52,42 +52,42 @@ in
   ];
 
   test = {
-    name = "objectTransforms render";
-    description = "render rules key the post-rewrite SopsSecret output file (sanitized dotted name) and skip non-matched resources";
+    name = "objectTransforms postProcess";
+    description = "postProcess rules key the post-rewrite SopsSecret output file (sanitized dotted name) and skip non-matched resources";
     assertions = [
       {
-        description = "fileRenders has a key for the rewritten SopsSecret with sanitized dotted name";
+        description = "filePostProcesses has a key for the rewritten SopsSecret with sanitized dotted name";
         expression = paths;
         assertion = _: hasSuffix "SopsSecret-x-y.yaml";
       }
       {
-        description = "fileRenders has no key for the non-matched ConfigMap";
+        description = "filePostProcesses has no key for the non-matched ConfigMap";
         expression = paths;
         assertion = _: !(lib.any (p: lib.hasInfix "ConfigMap-" p) paths);
       }
       {
-        description = "the SopsSecret render entry carries the matched resource and a non-empty rules list";
+        description = "the SopsSecret post-process entry carries the matched resource and a non-empty rules list";
         expression = sopsEntry;
         assertion = e: lib.isList e.rules && e.rules != [ ] && e.resource.kind == "SopsSecret";
       }
       {
-        description = "the string-form render coerces to { command = \"cat\"; runtimeInputs = []; }";
+        description = "the string-form postProcess coerces to { command = \"cat\"; runtimeInputs = []; }";
         expression = sopsEntry;
         assertion =
           e:
           let
             strRule = lib.head (lib.filter (rule: rule.name == "passthrough") e.rules);
           in
-          strRule.render.command == "cat" && strRule.render.runtimeInputs == [ ];
+          strRule.postProcess.command == "cat" && strRule.postProcess.runtimeInputs == [ ];
       }
       {
-        description = "a function-form render command resolves against the matched resource and path";
+        description = "a function-form postProcess command resolves against the matched resource and path";
         expression = sopsEntry;
         assertion =
           e:
           let
-            fnRule = lib.head (lib.filter (rule: lib.isFunction rule.render.command) e.rules);
-            resolved = fnRule.render.command {
+            fnRule = lib.head (lib.filter (rule: lib.isFunction rule.postProcess.command) e.rules);
+            resolved = fnRule.postProcess.command {
               resource = e.resource;
               path = sopsKey;
               pkgs = { };

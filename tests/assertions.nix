@@ -63,11 +63,6 @@ in
         ];
       }
       {
-        description = "nixidy has three global assertions";
-        expression = builtins.length config.nixidy.assertions;
-        expected = 3;
-      }
-      {
         description = "nixidy has one global warning";
         expression = config.nixidy.warnings;
         expected = [

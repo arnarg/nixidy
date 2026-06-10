@@ -9,8 +9,8 @@ let
 
   # Apply eval-time `rewrite` rules to a list of objects, in declaration order.
   # A rule whose predicate matches rewrites the object via `rewrite`; returning
-  # null drops the object. Rules without `rewrite` (i.e. `render`) are ignored
-  # here.
+  # null drops the object. Rules without `rewrite` (i.e. `postProcess`) are
+  # ignored here.
   applyRewrites =
     rules: objs:
     let
@@ -42,32 +42,33 @@ let
   sanitize = n: builtins.replaceStrings [ "." ] [ "-" ] n;
 
   # The on-disk group key / filename stem for an object. mkApp groups objects
-  # under this key; render rules resolve the matching path from the same helper
-  # so the two never drift.
+  # under this key; post-process rules resolve the matching path from the same
+  # helper so the two never drift.
   groupKeyOf = obj: "${obj.kind}-${sanitize obj.metadata.name}";
 
   # All transform rules visible to an app: env rules first, then app rules
   # (chained in that order, matching `applyRewrites`).
   allRules = app: config.nixidy.objectTransforms ++ app.objectTransforms;
 
-  # Render rules matching a (post-rewrite) object, in env-then-app order.
-  renderRulesFor = app: obj: lib.filter (r: r.render != null && r.predicate obj) (allRules app);
+  # Post-process rules matching a (post-rewrite) object, in env-then-app order.
+  postProcessRulesFor =
+    app: obj: lib.filter (r: r.postProcess != null && r.predicate obj) (allRules app);
 
   # The on-disk relative path (within the environment package, and therefore
   # within both the staging tree and the deploy target) for a post-rewrite
   # object: <app.output.path>/<groupKey>.yaml.
   objPath = app: obj: "${app.output.path}/${groupKeyOf obj}.yaml";
 
-  # Per-app render entries: one { path; resource; rules; } per post-rewrite
-  # object with at least one matching render rule. `renderRulesFor` is computed
-  # once per object here. `resource` is carried so function-form render commands
-  # can resolve against it.
-  renderEntriesFor =
+  # Per-app post-process entries: one { path; resource; rules; } per
+  # post-rewrite object with at least one matching post-process rule.
+  # `postProcessRulesFor` is computed once per object here. `resource` is
+  # carried so function-form post-process commands can resolve against it.
+  postProcessEntriesFor =
     app:
     lib.concatMap (
       obj:
       let
-        rules = renderRulesFor app obj;
+        rules = postProcessRulesFor app obj;
       in
       lib.optional (rules != [ ]) {
         path = objPath app obj;
@@ -77,43 +78,45 @@ let
     ) (transformedObjects app);
 
   # Per-app map: on-disk relative path -> { resource; rules; }.
-  fileRenders =
+  filePostProcesses =
     app:
     lib.listToAttrs (
-      map (e: lib.nameValuePair e.path { inherit (e) resource rules; }) (renderEntriesFor app)
+      map (e: lib.nameValuePair e.path { inherit (e) resource rules; }) (postProcessEntriesFor app)
     );
 
-  # Flatten every app's fileRenders into a single { path -> rules } map for the
-  # environment. Within an app, the uniqueness assertion guarantees no path
-  # collisions. Across apps, paths cannot collide because each app's paths are
-  # prefixed by its distinct `app.output.path` (mkApp's linkFarm name).
-  allFileRenders = lib.foldl' (acc: app: acc // fileRenders app) { } (
+  # Flatten every app's filePostProcesses into a single { path -> rules } map
+  # for the environment. Within an app, the uniqueness assertion guarantees no
+  # path collisions. Across apps, paths cannot collide because each app's paths
+  # are prefixed by its distinct `app.output.path` (mkApp's linkFarm name).
+  allFilePostProcesses = lib.foldl' (acc: app: acc // filePostProcesses app) { } (
     lib.attrValues config.applications
   );
 
-  # Activation render block for a single (path, rules) entry: render the staged
-  # file in place via the chained rule commands, honoring NIXIDY_SKIP_RENDER.
-  renderBlock =
+  # Activation post-process block for a single (path, rules) entry: rewrite the
+  # staged file in place via the chained rule commands, honoring
+  # NIXIDY_SKIP_POST_PROCESS.
+  postProcessBlock =
     path:
     { resource, rules }:
     let
-      nameFor = i: "nixidy-render-${builtins.replaceStrings [ "/" "." ] [ "-" "-" ] path}-${toString i}";
+      nameFor =
+        i: "nixidy-post-process-${builtins.replaceStrings [ "/" "." ] [ "-" "-" ] path}-${toString i}";
       # Resolve a function-form command against the matched object; a literal
       # snippet is used verbatim.
       commandOf =
         r:
-        if lib.isFunction r.render.command then
-          r.render.command {
+        if lib.isFunction r.postProcess.command then
+          r.postProcess.command {
             inherit resource path pkgs;
             inherit (pkgs) lib;
           }
         else
-          r.render.command;
+          r.postProcess.command;
       scriptOf =
         i: r:
         pkgs.writeShellApplication {
           name = nameFor i;
-          runtimeInputs = r.render.runtimeInputs;
+          runtimeInputs = r.postProcess.runtimeInputs;
           # Verbatim command body: quotes/$vars/pipes preserved. The script is
           # invoked by store path, so there is no `sh -c '...'` requote step.
           text = commandOf r;
@@ -125,7 +128,7 @@ let
       label = path + lib.optionalString (ruleNames != [ ]) " (${lib.concatStringsSep ", " ruleNames})";
     in
     ''
-      if [ "\''${NIXIDY_SKIP_RENDER:-}" = "1" ]; then
+      if [ "\''${NIXIDY_SKIP_POST_PROCESS:-}" = "1" ]; then
         mkdir -p "\$(dirname "\$staging/${path}")"
         if [ -f "\$dest/${path}" ]; then
           cp "\$dest/${path}" "\$staging/${path}"
@@ -133,7 +136,7 @@ let
           rm -f "\$staging/${path}"
         fi
       else
-        echo "Rendering ${label}"
+        echo "Post-processing ${label}"
         mkdir -p "\$(dirname "\$staging/${path}")"
         TARGET_PATH="\$dest/${path}" ${chain} \
           < "\$staging/${path}" > "\$staging/${path}.tmp" \
@@ -141,7 +144,9 @@ let
       fi
     '';
 
-  renderBlocks = lib.concatStringsSep "\n" (lib.mapAttrsToList renderBlock allFileRenders);
+  postProcessBlocks = lib.concatStringsSep "\n" (
+    lib.mapAttrsToList postProcessBlock allFilePostProcesses
+  );
 
   mkApp =
     app:
@@ -240,34 +245,35 @@ in
         default = lib.mapAttrs (_: transformedObjects) config.applications;
         description = "Internal: per-application objects after eval-time rewrite transforms (for tests).";
       };
-      _fileRenders = mkOption {
+      _filePostProcesses = mkOption {
         internal = true;
         readOnly = true;
         type = types.attrsOf (types.attrsOf types.anything);
-        default = lib.mapAttrs (_: fileRenders) config.applications;
+        default = lib.mapAttrs (_: filePostProcesses) config.applications;
         description = "Internal: per-app output-path -> { resource; rules; } (for tests).";
       };
     };
   };
 
   config = {
-    # Per-app: rendered-file paths must be unique. `listToAttrs` collapses
-    # colliding keys, so a count mismatch means two rendered objects share an
-    # on-disk file (group-key collision); rendering over a multi-document file
-    # is undefined. Emitted as a single env-scope assertion naming the offender.
+    # Per-app: post-processed file paths must be unique. `listToAttrs` collapses
+    # colliding keys, so a count mismatch means two post-processed objects share
+    # an on-disk file (group-key collision); post-processing a multi-document
+    # file is undefined. Emitted as a single env-scope assertion naming the
+    # offender.
     nixidy.assertions =
       let
         colliding = lib.filter (
-          app: lib.length (renderEntriesFor app) != lib.length (lib.attrNames (fileRenders app))
+          app: lib.length (postProcessEntriesFor app) != lib.length (lib.attrNames (filePostProcesses app))
         ) (lib.attrValues config.applications);
       in
       [
         {
           assertion = colliding == [ ];
           message =
-            "objectTransforms render rules collide on a shared on-disk file in application(s): "
+            "objectTransforms postProcess rules collide on a shared on-disk file in application(s): "
             + lib.concatMapStringsSep ", " (app: "`${app.name}`") colliding
-            + " (group-key collision among rendered objects); rendering over a multi-document file is undefined.";
+            + " (group-key collision among post-processed objects); post-processing a multi-document file is undefined.";
         }
       ];
 
@@ -312,7 +318,7 @@ in
           let
             rsyncFlags = "--chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r --recursive --delete --copy-links";
 
-            # No render rules: sync the built environment straight to the
+            # No post-process rules: sync the built environment straight to the
             # target, skipping all work when nothing changed (excluding
             # .revision, which churns through CI and would otherwise loop).
             directSwitch = ''
@@ -325,10 +331,10 @@ in
               fi
             '';
 
-            # Render rules present: stage the environment, run the rules over
-            # the matched files, then sync the staging tree to the target.
-            # NIXIDY_SKIP_RENDER=1 preserves the existing rendered target files
-            # (re-use what is on disk instead of re-rendering).
+            # Post-process rules present: stage the environment, run the rules
+            # over the matched files, then sync the staging tree to the target.
+            # NIXIDY_SKIP_POST_PROCESS=1 preserves the existing post-processed
+            # target files (re-use what is on disk instead of re-processing).
             stagedSwitch = ''
               echo "switching manifests"
 
@@ -336,7 +342,7 @@ in
               trap 'rm -rf "\$staging"' EXIT
               cp -rL --no-preserve=mode "${config.build.environmentPackage}"/. "\$staging"/
 
-              ${renderBlocks}
+              ${postProcessBlocks}
 
               ${pkgs.rsync}/bin/rsync ${rsyncFlags} "\$staging/" "\$dest"
 
@@ -355,7 +361,7 @@ in
 
             mkdir -p "\$dest"
 
-            ${if allFileRenders == { } then directSwitch else stagedSwitch}
+            ${if allFilePostProcesses == { } then directSwitch else stagedSwitch}
             EOF
 
             chmod +x $out/activate

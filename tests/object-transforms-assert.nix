@@ -24,7 +24,7 @@ in
       {
         name = "double-action";
         rewrite = res: res;
-        render.command = "cat";
+        postProcess.command = "cat";
       }
     ];
   };
@@ -32,13 +32,13 @@ in
   nixidy.objectTransforms = [
     {
       rewrite = res: res;
-      render.command = "cat";
+      postProcess.command = "cat";
     }
   ];
 
   test = {
     name = "objectTransforms XOR assertion";
-    description = "objectTransforms rules must set exactly one of rewrite/render at env + app scope";
+    description = "objectTransforms rules must set exactly one of rewrite/postProcess at env + app scope";
     assertions = [
       {
         description = "good app assertion passes";

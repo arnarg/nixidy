@@ -47,15 +47,15 @@ let
     && hasAll (m.labels or { }) (sel.labels or { })
     && hasAll (m.annotations or { }) (sel.annotations or { });
 
-  # Runtime render stage. A bare string is the common case (one command, no
-  # extra PATH) and coerces to `{ command = <string>; runtimeInputs = []; }`,
+  # Runtime post-process stage. A bare string is the common case (one command,
+  # no extra PATH) and coerces to `{ command = <string>; runtimeInputs = []; }`,
   # matching the `files` library's `onChange` ergonomics.
-  renderType = types.submodule {
+  postProcessType = types.submodule {
     options = {
       runtimeInputs = mkOption {
         type = types.listOf types.package;
         default = [ ];
-        description = "Packages added to the render command's PATH.";
+        description = "Packages added to the post-process command's PATH.";
       };
       command = mkOption {
         type = types.either types.lines (types.functionTo types.lines);
@@ -72,7 +72,9 @@ let
 
           Either a literal shell snippet, or a function resolved at eval time
           against the matched object:
-            { resource, path, pkgs, lib }: <shell snippet>
+          ```nix
+          { resource, path, pkgs, lib }: <shell snippet>
+          ```
           where `resource` is the post-rewrite object and `path` its on-disk
           relative path (note: `$TARGET_PATH` is the absolute destination,
           known only at activation). Use the function form to specialize the
@@ -93,8 +95,8 @@ let
           default = null;
           description = ''
             Optional label for this rule, surfaced in assertion messages and
-            the activation render log. Helps identify a rule among many;
-            purely diagnostic.
+            the activation post-process log. Helps identify a rule among many
+            and is purely diagnostic.
           '';
         };
         match = mkOption {
@@ -109,9 +111,9 @@ let
             `annotations` are SUBSET matches (the resource may carry extra keys;
             the default `{ }` matches anything).
 
-            The default matches EVERY resource in scope — omitting `match` on a
-            `rewrite`/`render` rule applies it cluster-wide. Set `match` unless
-            that is intended.
+            The default matches EVERY resource in scope meaning that omitting
+            `match` on a `rewrite`/`postProcess` rule applies it cluster-wide.
+            Set `match` unless that is intended.
 
             Predicates run against the resource as seen at this point in the
             pipeline, i.e. AFTER earlier rules' `rewrite`s. A rule that renames
@@ -123,16 +125,16 @@ let
           default = null;
           description = ''
             Eval-time transform `resource -> resource`. Returning `null` drops
-            the resource. Exactly one of `rewrite`/`render` must be set.
+            the resource. Exactly one of `rewrite`/`postProcess` must be set.
           '';
         };
-        render = mkOption {
-          type = types.nullOr (types.coercedTo types.lines (command: { inherit command; }) renderType);
+        postProcess = mkOption {
+          type = types.nullOr (types.coercedTo types.lines (command: { inherit command; }) postProcessType);
           default = null;
           description = ''
-            Activation-time stage rendering the final on-disk artifact for the
+            Activation-time stage producing the final on-disk artifact for the
             matched file (a stdin -> stdout filter). Exactly one of
-            `rewrite`/`render` must be set.
+            `rewrite`/`postProcess` must be set.
           '';
         };
         predicate = mkOption {
@@ -144,17 +146,17 @@ let
       };
     }
   );
-  # Build the "exactly one of rewrite/render" assertions for a list of rules.
-  # `scope` is the option path used to prefix each message; a rule's optional
-  # `name` is appended so the offender is identifiable.
+  # Build the "exactly one of rewrite/postProcess" assertions for a list of
+  # rules. `scope` is the option path used to prefix each message; a rule's
+  # optional `name` is appended so the offender is identifiable.
   mkXorAssertions =
     scope: rules:
     lib.imap0 (i: r: {
-      assertion = (r.rewrite != null) != (r.render != null);
+      assertion = (r.rewrite != null) != (r.postProcess != null);
       message =
         "${scope} rule ${toString i}"
         + lib.optionalString (r.name != null) " (`${r.name}`)"
-        + ": set exactly one of `rewrite` or `render`.";
+        + ": set exactly one of `rewrite` or `postProcess`.";
     }) rules;
 in
 {
