@@ -477,6 +477,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../../user_guide/object_transforms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Object Transforms
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../user_guide/using_nixhelm/" class="md-nav__link">
         
   
@@ -1909,7 +1932,7 @@ resources<span class="o">.</span>ingresses<span class="o">.</span><span class="s
 <ul>
 <li><code>environmentPackage</code>: All application manifests combined</li>
 <li><code>activationPackage</code>: For <code>nixidy switch</code> operations</li>
-<li><code>declarativePackage</code>: For <code>kubectl apply --prune</code></li>
+<li><code>declarativePackage</code>: For <code>kubectl apply --prune</code>. Emits an <code>apply</code> script that consumes <code>environmentPackage</code> and runs <code>objectTransforms</code> <code>postProcess</code> rules at apply time; it no longer renders standalone manifest files.</li>
 <li><code>bootstrapPackage</code>: App-of-apps manifest</li>
 </ul>
 <h4 id="modulestemplatesnix"><code>modules/templates.nix</code><a class="headerlink" href="#modulestemplatesnix" title="Permanent link">#</a></h4>

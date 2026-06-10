@@ -14,7 +14,7 @@
         <link rel="prev" href="../github_actions/">
       
       
-        <link rel="next" href="../using_nixhelm/">
+        <link rel="next" href="../object_transforms/">
       
       
       <link rel="icon" href="../../images/icon.svg">
@@ -530,6 +530,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../object_transforms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Object Transforms
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../using_nixhelm/" class="md-nav__link">
         
   
@@ -838,6 +861,10 @@
 <h1 id="transformers">Transformers<a class="headerlink" href="#transformers" title="Permanent link">#</a></h1>
 <p>Nixidy supports adding a transformers to Helm releases and Kustomize applications. A transformer is only a function that takes in a list of Kubernetes manifests in attribute sets and returns the same (<code>[AttrSet] -&gt; [AttrSet]</code>). It is called <em>after</em> the manifests have been rendered and parsed into nix but <em>before</em> they're transformed into the nixidy form (<code>&lt;group&gt;.&lt;version&gt;.&lt;kind&gt;.&lt;name&gt;</code>) and can be used to modify the resources.</p>
 <p>Transformers can be set globally in <code class="highlight">nixidy<span class="o">.</span>defaults<span class="o">.</span>helm<span class="o">.</span>transformer</code> for Helm releases and <code class="highlight">nixidy<span class="o">.</span>defaults<span class="o">.</span>kustomize<span class="o">.</span>transformer</code> for kustomize applications.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Transformers act on a single Helm release or Kustomize application. To match and modify objects across <em>all</em> applications in an environment — including a runtime stage for things like encrypting secrets on write — see <a href="../object_transforms/">Object Transforms</a>.</p>
+</div>
 <h2 id="remove-version-specific-labels">Remove Version Specific Labels<a class="headerlink" href="#remove-version-specific-labels" title="Permanent link">#</a></h2>
 <p>It's very common that helm charts will add the labels <code>helm.sh/chart</code> and <code>app.kubernetes.io/version</code> to <em>all</em> resources it renders. This can produce <em>very</em> big diffs when they're updated and nixidy renders them and commits the manifests to a git branch. The changes in these labels are not very relevant and will mostly just be noise to distract from the actual relevant changes of the rendered output.</p>
 <p>A transformer can be used to filter out these labels.</p>
@@ -903,13 +930,13 @@ The example uses function currying, this is equivalent to <code class="highlight
         
         
           
-          <a href="../using_nixhelm/" class="md-footer__link md-footer__link--next" aria-label="Next: Using nixhelm">
+          <a href="../object_transforms/" class="md-footer__link md-footer__link--next" aria-label="Next: Object Transforms">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Using nixhelm
+                Object Transforms
               </div>
             </div>
             <div class="md-footer__button md-icon">

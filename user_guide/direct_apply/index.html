@@ -479,6 +479,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../object_transforms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Object Transforms
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../using_nixhelm/" class="md-nav__link">
         
   
@@ -863,6 +886,11 @@
 <li><strong>Other manifests</strong>: All other manifests, such as Deployments, Services, and ConfigMaps, are applied last.</li>
 </ol>
 <p>It uses <code>kubectl apply --prune</code> to apply the manifests. The <code>--prune</code> flag is used to remove any resources from the cluster that are no longer defined in your nixidy configuration. Specific labels are added to all resources to make pruning safe and effective.</p>
+<p>If you use <a href="../object_transforms/">Object Transforms</a>, any <code>postProcess</code> rules run here too, so <code>nixidy apply</code> deploys the same manifests as <code>nixidy switch</code>. Each object is streamed through its post-process command before being applied.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>A <code>postProcess</code> command's output must be a valid Kubernetes manifest for <code>nixidy apply</code> to deploy it; a transform whose result only a GitOps controller can consume is <code>switch</code>-only. See <a href="../object_transforms/#applying-directly">Object Transforms</a> for details.</p>
+</div>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
 <p>To apply the manifests for a specific environment, you can run:</p>
 <div class="highlight"><pre><span></span><code>nixidy<span class="w"> </span>apply<span class="w"> </span>.#dev

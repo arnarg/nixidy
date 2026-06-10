@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://nixidy.dev/user_guide/assertions/">
+        <link rel="canonical" href="https://nixidy.dev/user_guide/object_transforms/">
       
       
-        <link rel="prev" href="../direct_apply/">
+        <link rel="prev" href="../transformers/">
       
       
-        <link rel="next" href="../../developer_guide/architecture/">
+        <link rel="next" href="../using_nixhelm/">
       
       
       <link rel="icon" href="../../images/icon.svg">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Assertions & Warnings - nixidy</title>
+        <title>Object Transforms - nixidy</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#assertions-warnings" class="md-skip">
+        <a href="#object-transforms" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Assertions & Warnings
+              Object Transforms
             
           </span>
         </div>
@@ -476,10 +476,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../object_transforms/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Object Transforms
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -490,6 +512,95 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#a-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      A rule
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#matching-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Matching resources
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rewriting-objects" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rewriting objects
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-processing-rendered-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Post-processing rendered files
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Post-processing rendered files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#visibility-and-safety" class="md-nav__link">
+    <span class="md-ellipsis">
+      Visibility and safety
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#applying-directly" class="md-nav__link">
+    <span class="md-ellipsis">
+      Applying directly
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ordering-and-scoping" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ordering and scoping
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -545,32 +656,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Assertions & Warnings
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../assertions/" class="md-nav__link">
         
   
   
@@ -581,119 +670,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#assertions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Assertions
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Assertions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#per-application-assertions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Per-application assertions
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#global-assertions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Global assertions
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#error-output" class="md-nav__link">
-    <span class="md-ellipsis">
-      Error output
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#warnings" class="md-nav__link">
-    <span class="md-ellipsis">
-      Warnings
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Warnings">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#per-application-warnings" class="md-nav__link">
-    <span class="md-ellipsis">
-      Per-application warnings
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#shorthand-for-unconditional-warnings" class="md-nav__link">
-    <span class="md-ellipsis">
-      Shorthand for unconditional warnings
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#global-warnings" class="md-nav__link">
-    <span class="md-ellipsis">
-      Global warnings
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#when-to-use-assertions-vs-warnings" class="md-nav__link">
-    <span class="md-ellipsis">
-      When to use assertions vs. warnings
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -915,37 +891,46 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#assertions" class="md-nav__link">
+  <a href="#a-rule" class="md-nav__link">
     <span class="md-ellipsis">
-      Assertions
+      A rule
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Assertions">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#matching-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Matching resources
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rewriting-objects" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rewriting objects
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-processing-rendered-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Post-processing rendered files
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Post-processing rendered files">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#per-application-assertions" class="md-nav__link">
+  <a href="#visibility-and-safety" class="md-nav__link">
     <span class="md-ellipsis">
-      Per-application assertions
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#global-assertions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Global assertions
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#error-output" class="md-nav__link">
-    <span class="md-ellipsis">
-      Error output
+      Visibility and safety
     </span>
   </a>
   
@@ -957,51 +942,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#warnings" class="md-nav__link">
+  <a href="#applying-directly" class="md-nav__link">
     <span class="md-ellipsis">
-      Warnings
+      Applying directly
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Warnings">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#per-application-warnings" class="md-nav__link">
-    <span class="md-ellipsis">
-      Per-application warnings
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#shorthand-for-unconditional-warnings" class="md-nav__link">
-    <span class="md-ellipsis">
-      Shorthand for unconditional warnings
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#global-warnings" class="md-nav__link">
-    <span class="md-ellipsis">
-      Global warnings
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#when-to-use-assertions-vs-warnings" class="md-nav__link">
+  <a href="#ordering-and-scoping" class="md-nav__link">
     <span class="md-ellipsis">
-      When to use assertions vs. warnings
+      Ordering and scoping
     </span>
   </a>
   
@@ -1026,91 +978,137 @@
   
 
 
-<h1 id="assertions-warnings">Assertions &amp; Warnings<a class="headerlink" href="#assertions-warnings" title="Permanent link">#</a></h1>
-<p>Nixidy supports build-time assertions and warnings, similar to the NixOS module system. These allow you to define invariants that are checked during evaluation, catching misconfigurations early with clear error messages.</p>
-<h2 id="assertions">Assertions<a class="headerlink" href="#assertions" title="Permanent link">#</a></h2>
-<p>Assertions are conditions that <strong>must</strong> be true. If any assertion fails, the build will fail with a descriptive message.</p>
-<h3 id="per-application-assertions">Per-application assertions<a class="headerlink" href="#per-application-assertions" title="Permanent link">#</a></h3>
-<p>Each application can define its own assertions under <code>applications.&lt;name&gt;.assertions</code>:</p>
+<h1 id="object-transforms">Object Transforms<a class="headerlink" href="#object-transforms" title="Permanent link">#</a></h1>
+<p>Object transforms are a declarative rule engine for modifying rendered Kubernetes objects across your whole environment. A rule matches objects and either <strong>rewrites</strong> them while nixidy is still evaluating, or <strong>post-processes</strong> their rendered file content when the environment is applied. They are useful for cluster-wide policy (injecting labels or annotations, rewriting a kind, dropping resources) and for runtime content stages (such as piping a manifest through an external encryptor before it is written).</p>
+<p>Rules can be set environment-wide in <code class="highlight">nixidy<span class="o">.</span>objectTransforms</code>, or per application in <code class="highlight">applications<span class="o">.</span><span class="l">&lt;name&gt;</span><span class="o">.</span>objectTransforms</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-  applications<span class="o">.</span><span class="ss">my-app</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;my-app&quot;</span><span class="p">;</span>
-    <span class="ss">resources</span> <span class="o">=</span> <span class="p">{</span>
-      deployments<span class="o">.</span>my-app<span class="o">.</span><span class="ss">spec</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="c1"># ...</span>
-      <span class="p">};</span>
-    <span class="p">};</span>
+  nixidy<span class="o">.</span><span class="ss">objectTransforms</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># applied to every application&#39;s objects</span>
+  <span class="p">];</span>
 
-    <span class="ss">assertions</span> <span class="o">=</span> <span class="p">[</span>
-      <span class="p">{</span>
-        <span class="ss">assertion</span> <span class="o">=</span> <span class="nb">builtins</span><span class="o">.</span>length <span class="p">(</span><span class="nb">builtins</span><span class="o">.</span>attrNames config<span class="o">.</span>applications<span class="o">.</span>my-app<span class="o">.</span>resources<span class="o">.</span>deployments<span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span>
-        <span class="ss">message</span> <span class="o">=</span> <span class="s2">&quot;my-app must have at least one deployment&quot;</span><span class="p">;</span>
-      <span class="p">}</span>
-    <span class="p">];</span>
-  <span class="p">};</span>
+  applications<span class="o">.</span>my-app<span class="o">.</span><span class="ss">objectTransforms</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># applied only to my-app&#39;s objects</span>
+  <span class="p">];</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="global-assertions">Global assertions<a class="headerlink" href="#global-assertions" title="Permanent link">#</a></h3>
-<p>Global assertions can be defined under <code>nixidy.assertions</code>. These are useful for checking invariants that span multiple applications:</p>
+<p>Where <a href="../transformers/">Transformers</a> act on a single Helm release or Kustomize application, object transforms are matched against objects from <em>all</em> applications, so they are a good fit for policy you want to apply consistently across an environment.</p>
+<h2 id="a-rule">A rule<a class="headerlink" href="#a-rule" title="Permanent link">#</a></h2>
+<p>Each rule selects objects with <code>match</code> and sets exactly one of <code>rewrite</code> or <code>postProcess</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-  applications<span class="o">.</span><span class="ss">app-a</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
-  applications<span class="o">.</span><span class="ss">app-b</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
+  <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;encrypt-secrets&quot;</span><span class="p">;</span>   <span class="c1"># optional; shown in assertion messages and the post-process log</span>
+  match<span class="o">.</span><span class="ss">kind</span> <span class="o">=</span> <span class="s2">&quot;Secret&quot;</span><span class="p">;</span>      <span class="c1"># predicate or selector; omit to match every object</span>
 
-  nixidy<span class="o">.</span><span class="ss">assertions</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="c1"># exactly one of the following:</span>
+  <span class="ss">rewrite</span> <span class="o">=</span> resource<span class="p">:</span> resource<span class="p">;</span>                 <span class="c1"># evaluation-time transform</span>
+  <span class="ss">postProcess</span> <span class="o">=</span> <span class="s2">&quot;&lt;command&gt;&quot;</span><span class="p">;</span>                    <span class="c1"># activation-time stdin -&gt; stdout filter</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="matching-resources">Matching resources<a class="headerlink" href="#matching-resources" title="Permanent link">#</a></h2>
+<p><code>match</code> is either a predicate <code class="highlight">resource <span class="o">-&gt;</span> bool</code> or a declarative selector that desugars to one:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+  <span class="c1"># selector form</span>
+  <span class="ss">match</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ss">kind</span> <span class="o">=</span> <span class="s2">&quot;Secret&quot;</span><span class="p">;</span>
+    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">;</span>
+    labels<span class="o">.</span><span class="s2">&quot;app.kubernetes.io/managed-by&quot;</span> <span class="o">=</span> <span class="s2">&quot;nixidy&quot;</span><span class="p">;</span>
+  <span class="p">};</span>
+
+  <span class="c1"># equivalent predicate form</span>
+  <span class="ss">match</span> <span class="o">=</span>
+    resource<span class="p">:</span>
+    resource<span class="o">.</span><span class="ss">kind</span> <span class="o">==</span> <span class="s2">&quot;Secret&quot;</span>
+    <span class="o">&amp;&amp;</span> <span class="p">(</span>resource<span class="o">.</span>metadata<span class="o">.</span>namespace <span class="ow">or</span> <span class="no">null</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span>
+    <span class="o">&amp;&amp;</span> <span class="p">(</span>resource<span class="o">.</span>metadata<span class="o">.</span>labels<span class="o">.</span><span class="s2">&quot;app.kubernetes.io/managed-by&quot;</span> <span class="ow">or</span> <span class="no">null</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;nixidy&quot;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Selector fields are ANDed together. <code>kind</code>, <code>apiVersion</code>, <code>namespace</code> and <code>name</code> match by exact equality, where a <code class="highlight"><span class="no">null</span></code> field is a wildcard. <code>labels</code> and <code>annotations</code> are <strong>subset</strong> matches — the object may carry extra keys. The default matches <em>every</em> object in scope, so omitting <code>match</code> applies the rule cluster-wide.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A rule's predicate runs against the object <em>as seen at that point in the pipeline</em>, i.e. after earlier rules' <code>rewrite</code>s. A rule that renames a kind must be matched by its <strong>new</strong> kind in any later rule.</p>
+</div>
+<h2 id="rewriting-objects">Rewriting objects<a class="headerlink" href="#rewriting-objects" title="Permanent link">#</a></h2>
+<p><code>rewrite</code> is an evaluation-time function <code>resource -&gt; resource</code>. Returning <code class="highlight"><span class="no">null</span></code> drops the object entirely. Because it runs during evaluation, the result feeds every output consistently — both <code>nixidy switch</code> and <code>nixidy apply</code> see the rewritten object.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+  nixidy<span class="o">.</span><span class="ss">objectTransforms</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># Add a managed-by label to every object in the environment.</span>
     <span class="p">{</span>
-      <span class="ss">assertion</span> <span class="o">=</span> config<span class="o">.</span>applications <span class="o">?</span> app-a <span class="o">&amp;&amp;</span> config<span class="o">.</span>applications <span class="o">?</span> app-b<span class="p">;</span>
-      <span class="ss">message</span> <span class="o">=</span> <span class="s2">&quot;Both app-a and app-b must be defined&quot;</span><span class="p">;</span>
+      <span class="ss">rewrite</span> <span class="o">=</span>
+        resource<span class="p">:</span>
+        resource
+        <span class="o">//</span> <span class="p">{</span>
+          <span class="ss">metadata</span> <span class="o">=</span> resource<span class="o">.</span>metadata <span class="o">//</span> <span class="p">{</span>
+            <span class="ss">labels</span> <span class="o">=</span> <span class="p">(</span>resource<span class="o">.</span>metadata<span class="o">.</span>labels <span class="ow">or</span> <span class="p">{</span> <span class="p">})</span> <span class="o">//</span> <span class="p">{</span>
+              <span class="s2">&quot;app.kubernetes.io/managed-by&quot;</span> <span class="o">=</span> <span class="s2">&quot;nixidy&quot;</span><span class="p">;</span>
+            <span class="p">};</span>
+          <span class="p">};</span>
+        <span class="p">};</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Drop every HorizontalPodAutoscaler.</span>
+    <span class="p">{</span>
+      match<span class="o">.</span><span class="ss">kind</span> <span class="o">=</span> <span class="s2">&quot;HorizontalPodAutoscaler&quot;</span><span class="p">;</span>
+      <span class="ss">rewrite</span> <span class="o">=</span> _<span class="p">:</span> <span class="no">null</span><span class="p">;</span>
     <span class="p">}</span>
   <span class="p">];</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="error-output">Error output<a class="headerlink" href="#error-output" title="Permanent link">#</a></h3>
-<p>When an assertion fails, the build will produce an error like:</p>
-<div class="highlight"><pre><span></span><code>error: failed assertions:
-- assertion(my-app): my-app must have at least one deployment
-</code></pre></div>
-<p>The context (e.g. <code>my-app</code> or <code>global</code>) tells you where the assertion was defined.</p>
-<h2 id="warnings">Warnings<a class="headerlink" href="#warnings" title="Permanent link">#</a></h2>
-<p>Warnings are messages that are printed during evaluation but <strong>do not</strong> fail the build. They are useful for deprecation notices or highlighting potential issues.</p>
-<h3 id="per-application-warnings">Per-application warnings<a class="headerlink" href="#per-application-warnings" title="Permanent link">#</a></h3>
+<h2 id="post-processing-rendered-files">Post-processing rendered files<a class="headerlink" href="#post-processing-rendered-files" title="Permanent link">#</a></h2>
+<p><code>postProcess</code> attaches a stage that runs when the environment is applied, <em>after</em> the object has been rendered to its file. It is a <strong>stdin → stdout filter</strong>: the rendered manifest is fed in on stdin and whatever it writes to stdout becomes the final content.</p>
+<p>A bare string is the common case — a single command with no extra packages on its <code>PATH</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-  applications<span class="o">.</span><span class="ss">my-app</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;my-app&quot;</span><span class="p">;</span>
-
-    <span class="ss">warnings</span> <span class="o">=</span> <span class="p">[</span>
-      <span class="p">{</span>
-        <span class="ss">when</span> <span class="o">=</span> config<span class="o">.</span>applications<span class="o">.</span>my-app<span class="o">.</span><span class="ss">createNamespace</span> <span class="o">==</span> <span class="no">false</span><span class="p">;</span>
-        <span class="ss">message</span> <span class="o">=</span> <span class="s2">&quot;Not creating namespace for my-app, make sure it exists on the cluster&quot;</span><span class="p">;</span>
-      <span class="p">}</span>
-    <span class="p">];</span>
+  match<span class="o">.</span><span class="ss">kind</span> <span class="o">=</span> <span class="s2">&quot;ConfigMap&quot;</span><span class="p">;</span>
+  <span class="ss">postProcess</span> <span class="o">=</span> <span class="s2">&quot;yq -P &#39;sort_keys(..)&#39;&quot;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The full form adds <code>runtimeInputs</code> (packages placed on the command's <code>PATH</code>) and accepts a function resolved at evaluation time against the matched object, which lets you specialise the command per object without re-parsing the manifest:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+  match<span class="o">.</span><span class="ss">kind</span> <span class="o">=</span> <span class="s2">&quot;SopsSecret&quot;</span><span class="p">;</span>
+  <span class="ss">postProcess</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ss">runtimeInputs</span> <span class="o">=</span> <span class="p">[</span> pkgs<span class="o">.</span>sops <span class="p">];</span>
+    <span class="ss">command</span> <span class="o">=</span>
+      <span class="p">{</span> resource<span class="p">,</span> <span class="o">...</span> <span class="p">}:</span>
+      <span class="s2">&quot;sops --encrypt --input-type yaml --output-type yaml /dev/stdin&quot;</span><span class="p">;</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="shorthand-for-unconditional-warnings">Shorthand for unconditional warnings<a class="headerlink" href="#shorthand-for-unconditional-warnings" title="Permanent link">#</a></h3>
-<p>Warnings that should always be displayed can be written as plain strings:</p>
+<p>The command body is arbitrary shell, so a tool that needs a real file path (<code>sops -i</code>, <code>yq -i</code>) can capture stdin to a temporary file and emit it back:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-  applications<span class="o">.</span><span class="ss">my-app</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;my-app&quot;</span><span class="p">;</span>
-    <span class="ss">warnings</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;my-app is using a deprecated configuration, see the docs for migration steps&quot;</span> <span class="p">];</span>
-  <span class="p">};</span>
+  <span class="ss">postProcess</span> <span class="o">=</span> <span class="s s-Multiline">&#39;&#39;</span>
+<span class="s s-Multiline">    f=$(mktemp)</span>
+<span class="s s-Multiline">    cat &gt; &quot;$f&quot;</span>
+<span class="s s-Multiline">    sops --encrypt --in-place &quot;$f&quot;</span>
+<span class="s s-Multiline">    cat &quot;$f&quot;</span>
+<span class="s s-Multiline">  &#39;&#39;</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>This is equivalent to <code>{ when = true; message = "..."; }</code>.</p>
-<h3 id="global-warnings">Global warnings<a class="headerlink" href="#global-warnings" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-  nixidy<span class="o">.</span><span class="ss">warnings</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">{</span>
-      <span class="ss">when</span> <span class="o">=</span> config<span class="o">.</span>nixidy<span class="o">.</span>target<span class="o">.</span>branch <span class="o">!=</span> <span class="s2">&quot;main&quot;</span><span class="p">;</span>
-      <span class="ss">message</span> <span class="o">=</span> <span class="s2">&quot;Target branch is not &#39;main&#39;, make sure this is intentional&quot;</span><span class="p">;</span>
-    <span class="p">}</span>
-  <span class="p">];</span>
-<span class="p">}</span>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p><code>postProcess</code> runs <strong>outside</strong> the evaluation sandbox on purpose, so it can reach things a <code>rewrite</code> cannot — the network, a hardware key, or host tools. That is the whole reason it is a separate stage and not a <code>rewrite</code>. <code>$TARGET_PATH</code> (the absolute destination path) is available at runtime on <code>switch</code>.</p>
+</div>
+<h3 id="visibility-and-safety">Visibility and safety<a class="headerlink" href="#visibility-and-safety" title="Permanent link">#</a></h3>
+<p>Because <code>postProcess</code> commands run with the privileges of whoever runs <code>nixidy switch</code>, applying a configuration you have not vetted is arbitrary code execution. To make this visible, <code>nixidy switch</code> prints every command it is about to run — resolved against its matched object — and, when attached to a terminal, pauses for confirmation:</p>
+<div class="highlight"><pre><span></span><code>post-processing<span class="w"> </span><span class="m">1</span><span class="w"> </span>manifest<span class="w"> </span>file<span class="o">(</span>s<span class="o">)</span><span class="p">;</span><span class="w"> </span>the<span class="w"> </span>following<span class="w"> </span>commands<span class="w"> </span>run<span class="w"> </span>outside<span class="w"> </span>any<span class="w"> </span>sandbox<span class="w"> </span>—<span class="w"> </span>review<span class="w"> </span>them<span class="w"> </span>before<span class="w"> </span>continuing:
+<span class="w">  </span>myapp/SopsSecret-db.yaml:
+<span class="w">    </span>encrypt-secrets:<span class="w"> </span>sops<span class="w"> </span>--encrypt<span class="w"> </span>--input-type<span class="w"> </span>yaml<span class="w"> </span>--output-type<span class="w"> </span>yaml<span class="w"> </span>/dev/stdin
+Continue<span class="w"> </span>with<span class="w"> </span>post-processing?<span class="w"> </span><span class="o">[</span>y/N<span class="o">]</span>
 </code></pre></div>
-<h2 id="when-to-use-assertions-vs-warnings">When to use assertions vs. warnings<a class="headerlink" href="#when-to-use-assertions-vs-warnings" title="Permanent link">#</a></h2>
+<p>A piped, CI or pre-commit run is non-interactive and proceeds without prompting, so automation never blocks. Two environment variables tune the behaviour:</p>
 <ul>
-<li>Use <strong>assertions</strong> when the configuration is <em>invalid</em> and should not be built. For example, missing required resources, conflicting settings, or values that would produce broken manifests.</li>
-<li>Use <strong>warnings</strong> when the configuration is technically valid but may indicate a mistake or something the user should be aware of. For example, deprecated options, unusual configurations, or migration reminders.</li>
+<li><code>NIXIDY_POST_PROCESS_APPROVE=1</code> skips the prompt for trusted, repeated interactive use.</li>
+<li><code>NIXIDY_SKIP_POST_PROCESS=1</code> reuses the already-rendered target files without running anything — for an environment that lacks the post-process toolchain (for example, CI re-rendering manifests).</li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>These are visibility aids, <strong>not</strong> a security boundary — a configuration that defines a <code>postProcess</code> rule can also set the approval variable. The point is to surface arbitrary execution to a human, not to sandbox it.</p>
+</div>
+<h2 id="applying-directly">Applying directly<a class="headerlink" href="#applying-directly" title="Permanent link">#</a></h2>
+<p><a href="../direct_apply/"><code>nixidy apply</code></a> runs <code>postProcess</code> too, so applying directly deploys the same manifests as <code>nixidy switch</code>. Each object is streamed through its post-process command and piped to <code>kubectl apply</code>. The same notice and confirmation prompt run before anything is applied, and <code>NIXIDY_POST_PROCESS_APPROVE=1</code> skips it.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>A <code>postProcess</code> command's output must be a valid Kubernetes manifest for <code>nixidy apply</code> to deploy it. A transform whose result only a GitOps controller can consume (for example a ksops, fully-encrypted file) is <code>switch</code>-only — <code>kubectl apply</code> will reject it. <code>NIXIDY_SKIP_POST_PROCESS</code> is not honoured on <code>apply</code>, since there is no rendered target to fall back to; the command always runs. <code>$TARGET_PATH</code> is set only on <code>switch</code>.</p>
+</div>
+<h2 id="ordering-and-scoping">Ordering and scoping<a class="headerlink" href="#ordering-and-scoping" title="Permanent link">#</a></h2>
+<p>Environment rules run first, then the matched application's rules, in declaration order within each. A rule must set exactly one of <code>rewrite</code> or <code>postProcess</code>; setting both, or neither, fails evaluation with an assertion that names the offending rule.</p>
 
 
 
@@ -1142,7 +1140,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../direct_apply/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Directly Apply Manifests">
+          <a href="../transformers/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Transformers">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1152,20 +1150,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Directly Apply Manifests
+                Transformers
               </div>
             </div>
           </a>
         
         
           
-          <a href="../../developer_guide/architecture/" class="md-footer__link md-footer__link--next" aria-label="Next: Architecture Guide">
+          <a href="../using_nixhelm/" class="md-footer__link md-footer__link--next" aria-label="Next: Using nixhelm">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Architecture Guide
+                Using nixhelm
               </div>
             </div>
             <div class="md-footer__button md-icon">
