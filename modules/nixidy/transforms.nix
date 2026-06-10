@@ -138,33 +138,32 @@ let
             matched file (a stdin -> stdout filter). Exactly one of
             `rewrite`/`postProcess` must be set.
 
-            ::: warning
-            `postProcess` commands run at activation time, outside any sandbox,
-            with the privileges of whoever runs `nixidy switch`. A `postProcess`
-            rule from a configuration you have not vetted is arbitrary code
-            execution on `switch`. To surface this, `switch` prints the commands
-            it is about to run and, when attached to a terminal, pauses for
-            confirmation (`NIXIDY_POST_PROCESS_APPROVE=1` skips the prompt;
-            `NIXIDY_SKIP_POST_PROCESS=1` reuses the already-rendered target files
-            without running anything). These are visibility aids, not a security
-            boundary as the configuration that defines the rule can also set the
-            approval variable.
+            !!! warning
+                `postProcess` commands run at activation time, outside any sandbox,
+                with the privileges of whoever runs `nixidy switch`. A `postProcess`
+                rule from a configuration you have not vetted is arbitrary code
+                execution on `switch`. To surface this, `switch` prints the commands
+                it is about to run and, when attached to a terminal, pauses for
+                confirmation (`NIXIDY_POST_PROCESS_APPROVE=1` skips the prompt;
+                `NIXIDY_SKIP_POST_PROCESS=1` reuses the already-rendered target files
+                without running anything). These are visibility aids, not a security
+                boundary as the configuration that defines the rule can also set the
+                approval variable.
 
-            `nixidy apply` also runs `postProcess`: its `apply` script consumes
-            the same `environmentPackage` the switch path renders and streams
-            each resource through the chain before `kubectl apply`, so `switch`
-            and `apply` deploy the same manifests. The chain output must be a
-            valid cluster manifest. A transform whose result only a GitOps
-            controller can consume (e.g. a ksops / whole-document-encrypted
-            file) is switch-only; `kubectl apply` rejects it. The same
-            visibility/prompt applies on `apply`, but `NIXIDY_SKIP_POST_PROCESS`
-            is NOT honored there (no rendered target to fall back to) and the chain
-            always runs. The build outputs of `environmentPackage` /
-            `declarativePackage` still contain the pre-`postProcess` manifests
-            (the transform is runtime-only); keep real secret material out of
-            nixidy resources (use references), as rendered values land in the
-            world-readable nix store regardless.
-            :::
+                `nixidy apply` also runs `postProcess`: its `apply` script consumes
+                the same `environmentPackage` the switch path renders and streams
+                each resource through the chain before `kubectl apply`, so `switch`
+                and `apply` deploy the same manifests. The chain output must be a
+                valid cluster manifest. A transform whose result only a GitOps
+                controller can consume (e.g. a ksops / whole-document-encrypted
+                file) is switch-only; `kubectl apply` rejects it. The same
+                visibility/prompt applies on `apply`, but `NIXIDY_SKIP_POST_PROCESS`
+                is NOT honored there (no rendered target to fall back to) and the chain
+                always runs. The build outputs of `environmentPackage` /
+                `declarativePackage` still contain the pre-`postProcess` manifests
+                (the transform is runtime-only); keep real secret material out of
+                nixidy resources (use references), as rendered values land in the
+                world-readable nix store regardless.
           '';
         };
         predicate = mkOption {
