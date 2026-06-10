@@ -3438,17 +3438,17 @@ it is about to run and, when attached to a terminal, pauses for
 confirmation (<code>NIXIDY_POST_PROCESS_APPROVE=1</code> skips the prompt;
 <code>NIXIDY_SKIP_POST_PROCESS=1</code> reuses the already-rendered target files
 without running anything). These are visibility aids, not a security
-boundary — the configuration that defines the rule can also set the
+boundary as the configuration that defines the rule can also set the
 approval variable.</p>
 <p><code>nixidy apply</code> also runs <code>postProcess</code>: its <code>apply</code> script consumes
 the same <code>environmentPackage</code> the switch path renders and streams
 each resource through the chain before <code>kubectl apply</code>, so <code>switch</code>
 and <code>apply</code> deploy the same manifests. The chain output must be a
-valid cluster manifest — a transform whose result only a GitOps
+valid cluster manifest. A transform whose result only a GitOps
 controller can consume (e.g. a ksops / whole-document-encrypted
 file) is switch-only; <code>kubectl apply</code> rejects it. The same
 visibility/prompt applies on <code>apply</code>, but <code>NIXIDY_SKIP_POST_PROCESS</code>
-is NOT honored there (no rendered target to fall back to) — the chain
+is NOT honored there (no rendered target to fall back to) and the chain
 always runs. The build outputs of <code>environmentPackage</code> /
 <code>declarativePackage</code> still contain the pre-<code>postProcess</code> manifests
 (the transform is runtime-only); keep real secret material out of
@@ -4205,17 +4205,17 @@ it is about to run and, when attached to a terminal, pauses for
 confirmation (<code>NIXIDY_POST_PROCESS_APPROVE=1</code> skips the prompt;
 <code>NIXIDY_SKIP_POST_PROCESS=1</code> reuses the already-rendered target files
 without running anything). These are visibility aids, not a security
-boundary — the configuration that defines the rule can also set the
+boundary as the configuration that defines the rule can also set the
 approval variable.</p>
 <p><code>nixidy apply</code> also runs <code>postProcess</code>: its <code>apply</code> script consumes
 the same <code>environmentPackage</code> the switch path renders and streams
 each resource through the chain before <code>kubectl apply</code>, so <code>switch</code>
 and <code>apply</code> deploy the same manifests. The chain output must be a
-valid cluster manifest — a transform whose result only a GitOps
+valid cluster manifest. A transform whose result only a GitOps
 controller can consume (e.g. a ksops / whole-document-encrypted
 file) is switch-only; <code>kubectl apply</code> rejects it. The same
 visibility/prompt applies on <code>apply</code>, but <code>NIXIDY_SKIP_POST_PROCESS</code>
-is NOT honored there (no rendered target to fall back to) — the chain
+is NOT honored there (no rendered target to fall back to) and the chain
 always runs. The build outputs of <code>environmentPackage</code> /
 <code>declarativePackage</code> still contain the pre-<code>postProcess</code> manifests
 (the transform is runtime-only); keep real secret material out of
