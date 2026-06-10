@@ -106,6 +106,26 @@ let
     else
       r.postProcess.command;
 
+  # Build the `cmd1 | cmd2 | …` chain of writeShellApplication store paths for a
+  # group's postProcess rules. `cmdPath` keys the script names and is the on-disk
+  # path passed to function-form commands. Shared by the switch block and (later)
+  # the apply script.
+  chainOf =
+    cmdPath: resource: rules:
+    let
+      scriptOf =
+        i: r:
+        pkgs.writeShellApplication {
+          name = "nixidy-post-process-${
+            builtins.replaceStrings [ "/" "." ] [ "-" "-" ] cmdPath
+          }-${toString i}";
+          runtimeInputs = r.postProcess.runtimeInputs;
+          # Verbatim command body; invoked by store path (no `sh -c` requote).
+          text = resolveCommand cmdPath resource r;
+        };
+    in
+    lib.concatMapStringsSep " | " (s: lib.getExe s) (lib.imap0 scriptOf rules);
+
   # Activation post-process block for a single (path, rules) entry: rewrite the
   # staged file in place via the chained rule commands, honoring
   # NIXIDY_SKIP_POST_PROCESS.
@@ -113,19 +133,7 @@ let
     path:
     { resource, rules }:
     let
-      nameFor =
-        i: "nixidy-post-process-${builtins.replaceStrings [ "/" "." ] [ "-" "-" ] path}-${toString i}";
-      scriptOf =
-        i: r:
-        pkgs.writeShellApplication {
-          name = nameFor i;
-          runtimeInputs = r.postProcess.runtimeInputs;
-          # Verbatim command body: quotes/$vars/pipes preserved. The script is
-          # invoked by store path, so there is no `sh -c '...'` requote step.
-          text = resolveCommand path resource r;
-        };
-      scripts = lib.imap0 scriptOf rules;
-      chain = lib.concatMapStringsSep " | " (s: lib.getExe s) scripts;
+      chain = chainOf path resource rules;
       # Named rules in the chain, for the activation log.
       ruleNames = lib.filter (n: n != null) (map (r: r.name) rules);
       label = path + lib.optionalString (ruleNames != [ ]) " (${lib.concatStringsSep ", " ruleNames})";
