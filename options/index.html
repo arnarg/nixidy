@@ -3429,8 +3429,9 @@ null or string</p>
 <p>Activation-time stage producing the final on-disk artifact for the
 matched file (a stdin -&gt; stdout filter). Exactly one of
 <code>rewrite</code>/<code>postProcess</code> must be set.</p>
-<p>::: warning
-<code>postProcess</code> commands run at activation time, outside any sandbox,
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code>postProcess</code> commands run at activation time, outside any sandbox,
 with the privileges of whoever runs <code>nixidy switch</code>. A <code>postProcess</code>
 rule from a configuration you have not vetted is arbitrary code
 execution on <code>switch</code>. To surface this, <code>switch</code> prints the commands
@@ -3453,8 +3454,8 @@ always runs. The build outputs of <code>environmentPackage</code> /
 <code>declarativePackage</code> still contain the pre-<code>postProcess</code> manifests
 (the transform is runtime-only); keep real secret material out of
 nixidy resources (use references), as rendered values land in the
-world-readable nix store regardless.
-:::</p>
+world-readable nix store regardless.</p>
+</div>
 <p><strong><em>Type:</em></strong>
 null or ((submodule) or strings concatenated with "\n" convertible to it)</p>
 <p><strong><em>Default:</em></strong>
@@ -4196,8 +4197,9 @@ null or string</p>
 <p>Activation-time stage producing the final on-disk artifact for the
 matched file (a stdin -&gt; stdout filter). Exactly one of
 <code>rewrite</code>/<code>postProcess</code> must be set.</p>
-<p>::: warning
-<code>postProcess</code> commands run at activation time, outside any sandbox,
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code>postProcess</code> commands run at activation time, outside any sandbox,
 with the privileges of whoever runs <code>nixidy switch</code>. A <code>postProcess</code>
 rule from a configuration you have not vetted is arbitrary code
 execution on <code>switch</code>. To surface this, <code>switch</code> prints the commands
@@ -4220,8 +4222,8 @@ always runs. The build outputs of <code>environmentPackage</code> /
 <code>declarativePackage</code> still contain the pre-<code>postProcess</code> manifests
 (the transform is runtime-only); keep real secret material out of
 nixidy resources (use references), as rendered values land in the
-world-readable nix store regardless.
-:::</p>
+world-readable nix store regardless.</p>
+</div>
 <p><strong><em>Type:</em></strong>
 null or ((submodule) or strings concatenated with "\n" convertible to it)</p>
 <p><strong><em>Default:</em></strong>
