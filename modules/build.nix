@@ -97,6 +97,68 @@ let
     ) (builtins.groupBy groupKeyOf (transformedObjects app))
   ) (lib.attrValues applyApps);
 
+  # Files whose chain runs at apply time (for the up-front notice/listing).
+  applyChainFiles = lib.filter (f: f.rules != [ ]) applyFiles;
+
+  applyPostProcessListing = pkgs.writeText "nixidy-apply-post-process-listing-${env}" (
+    lib.concatMapStrings (
+      f:
+      "  ${f.path}:\n"
+      + lib.concatMapStrings (
+        r: "    ${lib.optionalString (r.name != null) "${r.name}: "}${resolveCommand f.path f.resource r}\n"
+      ) f.rules
+    ) applyChainFiles
+  );
+
+  # Up-front notice + TTY prompt. NOT gated on NIXIDY_SKIP_POST_PROCESS (apply
+  # always post-processes). Runtime $ is heredoc-escaped (\''${…}, \$).
+  applyPostProcessNotice = lib.optionalString (applyChainFiles != [ ]) ''
+    echo "post-processing ${toString (lib.length applyChainFiles)} manifest file(s); the following commands run outside any sandbox — review them before continuing:"
+    cat ${applyPostProcessListing}
+    if [ "\''${NIXIDY_POST_PROCESS_APPROVE:-}" != "1" ] && [ -t 0 ]; then
+      printf 'Continue with post-processing? [y/N] '
+      read -r _nixidy_pp_reply
+      case "\$_nixidy_pp_reply" in
+        [yY] | [yY][eE][sS]) ;;
+        *)
+          echo "aborted; nothing applied." >&2
+          exit 1
+          ;;
+      esac
+    fi
+  '';
+
+  # Per-file stream: clean environmentPackage file → add prune labels (BEFORE the
+  # chain) → chain if the file has rules. yq labels every document in the file.
+  applyFileStream =
+    f:
+    let
+      labelExpr = ''.metadata.labels."${labelPrefix}/application" = "${f.app}" | .metadata.labels."${labelPrefix}/${f.class}" = "${env}"'';
+      labeled = ''cat "${config.build.environmentPackage}/${f.path}" | ${pkgs.yq-go}/bin/yq -P '${labelExpr}' '';
+    in
+    if f.rules == [ ] then labeled else "${labeled} | ${chainOf f.path f.resource f.rules}";
+
+  applyClass =
+    class: pruneAllowlist:
+    let
+      files = lib.filter (f: f.class == class) applyFiles;
+      allowlistFlag = lib.optionalString (
+        pruneAllowlist != null
+      ) ''--prune-allowlist "${pruneAllowlist}"'';
+      stream =
+        if files == [ ] then
+          "printf -- '---\\n'"
+        else
+          lib.concatMapStringsSep "\n        printf -- '---\\n'\n        " applyFileStream files;
+    in
+    ''
+      echo "Applying ${class}"
+      {
+        ${stream}
+      } | ${pkgs.kubectl}/bin/kubectl apply -f - \
+        --prune --selector "${labelPrefix}/${class}=${env}" ${allowlistFlag}
+    '';
+
   # Per-app post-process entries: one { path; resource; rules; } per
   # post-rewrite object with at least one matching post-process rule.
   # `postProcessRulesFor` is computed once per object here. `resource` is
@@ -474,89 +536,26 @@ in
           '';
       };
 
-      declarativePackage =
-        let
-          apps = lib.filterAttrs (
-            n: _: n != config.nixidy.appOfApps.name && !(lib.hasPrefix "__" n)
-          ) config.applications;
+      declarativePackage = pkgs.stdenv.mkDerivation {
+        name = "nixidy-declarative-package-${env}";
+        phases = [ "installPhase" ];
+        installPhase = ''
+          mkdir -p $out
 
-          labelObjects =
-            app: objs:
-            map (
-              obj:
-              let
-                label = "${labelPrefix}/${classify obj}";
-              in
-              obj
-              // {
-                metadata = obj.metadata // {
-                  labels = (obj.metadata.labels or { }) // {
-                    "${labelPrefix}/application" = app;
-                    "${label}" = env;
-                  };
-                };
-              }
-            ) objs;
+          cat <<EOF > $out/apply
+          #!/usr/bin/env bash
+          set -eo pipefail
 
-          manifests =
-            with lib;
-            pipe apps [
-              (mapAttrsToList (_: app: labelObjects app.name (transformedObjects app)))
-              flatten
-              (groupBy classify)
-              builtins.toJSON
-            ];
-        in
-        pkgs.stdenv.mkDerivation {
-          inherit manifests;
+          ${applyPostProcessNotice}
 
-          name = "nixidy-declarative-package-${env}";
+          ${applyClass "crds" "apiextensions.k8s.io/v1/CustomResourceDefinition"}
+          ${applyClass "namespaces" "core/v1/Namespace"}
+          ${applyClass "manifests" null}
+          EOF
 
-          passAsFile = [ "manifests" ];
-
-          phases = [ "installPhase" ];
-
-          installPhase = ''
-            mkdir -p $out
-            ${lib.optionalString (allFilePostProcesses != { }) ''
-              echo "warning: ${toString (lib.length (lib.attrNames allFilePostProcesses))} file(s) have postProcess rules that are NOT applied here — postProcess runs only on the switch/activation path. This declarativePackage contains the pre-postProcess manifests (e.g. an encrypt-secrets rule leaves the Secret unencrypted)." >&2
-            ''}
-
-            # Write different stages of manifests to YAML files
-            cat $manifestsPath | \
-              ${pkgs.yq-go}/bin/yq '.crds[] | split_doc' -P > $out/crds.yml
-            cat $manifestsPath | \
-              ${pkgs.yq-go}/bin/yq '.namespaces[] | split_doc' -P > $out/namespaces.yml
-            cat $manifestsPath | \
-              ${pkgs.yq-go}/bin/yq '.manifests[] | split_doc' -P > $out/manifests.yml
-
-            # Write apply script
-            cat <<EOF > $out/apply
-            #!/usr/bin/env bash
-
-            echo "Applying CRDs"
-            ${pkgs.kubectl}/bin/kubectl apply \
-              -f $out/crds.yml \
-              --prune --selector "${labelPrefix}/crds=${env}" \
-              --prune-allowlist "apiextensions.k8s.io/v1/CustomResourceDefinition"
-
-            echo ""
-            echo "Applying namespaces"
-            ${pkgs.kubectl}/bin/kubectl apply \
-              -f $out/namespaces.yml \
-              --prune --selector "${labelPrefix}/namespaces=${env}" \
-              --prune-allowlist "core/v1/Namespace"
-
-            echo ""
-            echo "Applying manifests"
-            ${pkgs.kubectl}/bin/kubectl apply \
-              -f $out/manifests.yml \
-              --prune --selector "${labelPrefix}/manifests=${env}"
-            EOF
-
-            chmod +x $out/apply
-          '';
-        };
+          chmod +x $out/apply
+        '';
+      };
     };
   };
 }
