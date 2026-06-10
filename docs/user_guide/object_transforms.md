@@ -135,7 +135,7 @@ Because `postProcess` commands run with the privileges of whoever runs `nixidy s
 
 ```sh
 post-processing 1 manifest file(s); the following commands run outside any sandbox — review them before continuing:
-  apps/SopsSecret-db.yaml:
+  myapp/SopsSecret-db.yaml:
     encrypt-secrets: sops --encrypt --input-type yaml --output-type yaml /dev/stdin
 Continue with post-processing? [y/N]
 ```

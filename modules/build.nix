@@ -159,6 +159,21 @@ let
         --prune --selector "${labelPrefix}/${class}=${env}" ${allowlistFlag}
     '';
 
+  # The generated `apply` script body (consumes environmentPackage, runs
+  # postProcess, streams to `kubectl apply -f -` per class). Factored out so
+  # `build._applyScript` can expose it for regression tests of the generated
+  # bash.
+  applyScript = ''
+    #!/usr/bin/env bash
+    set -eo pipefail
+
+    ${applyPostProcessNotice}
+
+    ${applyClass "crds" "apiextensions.k8s.io/v1/CustomResourceDefinition"}
+    ${applyClass "namespaces" "core/v1/Namespace"}
+    ${applyClass "manifests" null}
+  '';
+
   # Per-app post-process entries: one { path; resource; rules; } per
   # post-rewrite object with at least one matching post-process rule.
   # `postProcessRulesFor` is computed once per object here. `resource` is
@@ -418,6 +433,13 @@ in
         type = types.listOf types.attrs;
         default = applyFiles;
       };
+      _applyScript = mkOption {
+        internal = true;
+        readOnly = true;
+        type = types.str;
+        default = applyScript;
+        description = "Internal: the generated `apply` script body (for tests).";
+      };
     };
   };
 
@@ -543,14 +565,7 @@ in
           mkdir -p $out
 
           cat <<EOF > $out/apply
-          #!/usr/bin/env bash
-          set -eo pipefail
-
-          ${applyPostProcessNotice}
-
-          ${applyClass "crds" "apiextensions.k8s.io/v1/CustomResourceDefinition"}
-          ${applyClass "namespaces" "core/v1/Namespace"}
-          ${applyClass "manifests" null}
+          ${applyScript}
           EOF
 
           chmod +x $out/apply

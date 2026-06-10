@@ -75,19 +75,40 @@ in
         assertion = fs: !(lib.any (e: lib.hasInfix rawYamlName e.path) fs);
       }
       {
-        description = "function-form postProcess command resolves against the apply entry's resource/path identically to the switch path";
+        # Cross-references the independently-built apply and switch maps: the
+        # apply entry's path must be a key in the switch map (`_filePostProcesses`,
+        # keyed by `objPath`), and resolving the command from each entry must
+        # yield the same string. Guards the parity invariant directly.
+        description = "function-form postProcess command resolves identically on the apply and switch paths";
         expression = sopsEntry;
         assertion =
           e:
           let
-            resolved = (builtins.head e.rules).postProcess.command {
-              resource = e.resource;
-              path = e.path;
-              pkgs = { };
-              inherit lib;
-            };
+            switchEntry = config.build._filePostProcesses.${e.app}.${e.path};
+            resolve =
+              entry:
+              (builtins.head entry.rules).postProcess.command {
+                resource = entry.resource;
+                path = e.path;
+                pkgs = { };
+                inherit lib;
+              };
           in
-          lib.hasInfix "ns=test" resolved;
+          resolve e == resolve switchEntry && lib.hasInfix "ns=test" (resolve e);
+      }
+      {
+        # Regression guard on the generated bash itself (the riskiest surface).
+        description = "the generated apply script streams to `kubectl apply -f -` per class and emits no glued *.yml";
+        expression = config.build._applyScript;
+        assertion =
+          s:
+          lib.hasInfix "set -eo pipefail" s
+          && lib.hasInfix "kubectl apply -f -" s
+          && lib.hasInfix ''--prune --selector "apps.nixidy.dev/manifests='' s
+          && lib.hasInfix "SopsSecret-x-y.yaml" s
+          && !(lib.hasInfix "crds.yml" s)
+          && !(lib.hasInfix "namespaces.yml" s)
+          && !(lib.hasInfix "manifests.yml" s);
       }
     ];
   };
