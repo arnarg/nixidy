@@ -2,8 +2,48 @@ import sys
 import click
 import subprocess
 import os
-from nix.nixidy import Nixidy, NixCommandException
+from nix.builder import NixBuilder, DevenvBuilder, NixCommandException
+from nix.nixidy import Nixidy
 from typing import Optional
+
+_devenv_warning_printed = False
+
+
+def _make_nixidy(file: str, environment: str, devenv: bool) -> Nixidy:
+    global _devenv_warning_printed
+
+    auto_devenv = (
+        not devenv
+        and "#" not in environment
+        and os.path.exists("devenv.nix")
+        and not os.path.exists("flake.nix")
+        and not os.path.exists(file)
+    )
+
+    if devenv or auto_devenv:
+        if auto_devenv and not _devenv_warning_printed:
+            click.echo(
+                click.style(
+                    "Auto-detected devenv.nix, using devenv mode.",
+                    fg="yellow",
+                ),
+                err=True,
+            )
+            _devenv_warning_printed = True
+        if "#" in environment:
+            click.echo("Flake syntax (.#env) is not supported with --devenv.", err=True)
+            sys.exit(1)
+        builder = DevenvBuilder(environment)
+    else:
+        builder = NixBuilder(file, environment)
+    return Nixidy(builder)
+
+
+_devenv_option = click.option(
+    "--devenv",
+    is_flag=True,
+    help="Use devenv to build environments.",
+)
 
 
 @click.group()
@@ -29,14 +69,15 @@ def cli():
     type=bool,
     is_flag=True,
 )
-def info(environment: str, file: str, print_json: bool):
+@_devenv_option
+def info(environment: str, file: str, print_json: bool, devenv: bool):
     """Get info about a nixidy environment.
 
     ENVIRONMENT is used to determine if flakes or flake-less nix should be used and which environment should be built.
 
     Example: `.#prod` Uses a flake in the local directory whereas `prod` does not use flake but builds the `prod` environment
     """
-    nix = Nixidy(file, environment)
+    nix = _make_nixidy(file, environment, devenv)
 
     try:
         info = nix.info()
@@ -82,12 +123,14 @@ def info(environment: str, file: str, print_json: bool):
     type=bool,
     is_flag=True,
 )
+@_devenv_option
 def build(
     environment: str,
     file: str,
     no_link: bool,
     out_link: Optional[str],
     print_paths: bool,
+    devenv: bool,
 ):
     """Build a nixidy environment.
 
@@ -95,14 +138,14 @@ def build(
 
     Example: `.#prod` Uses a flake in the local directory whereas `prod` does not use flake but builds the `prod` environment
     """
-    nix = Nixidy(file, environment)
+    nix = _make_nixidy(file, environment, devenv)
 
     try:
         out = nix.build(no_link, out_link, print_paths)
     except NixCommandException as e:
         sys.exit(e.returncode)
 
-    if print_paths:
+    if print_paths or nix.force_print_build_output:
         click.echo(out)
 
 
@@ -117,14 +160,15 @@ def build(
     show_default=True,
     metavar="PATH",
 )
-def switch(environment: str, file: str):
+@_devenv_option
+def switch(environment: str, file: str, devenv: bool):
     """Build and switch to a nixidy environment.
 
     ENVIRONMENT is used to determine if flakes or flake-less nix should be used and which environment should be built.
 
     Example: `.#prod` Uses a flake in the local directory whereas `prod` does not use flake but builds the `prod` environment
     """
-    nix = Nixidy(file, environment)
+    nix = _make_nixidy(file, environment, devenv)
 
     try:
         nix.switch()
@@ -143,14 +187,15 @@ def switch(environment: str, file: str):
     show_default=True,
     metavar="PATH",
 )
-def bootstrap(environment: str, file: str):
+@_devenv_option
+def bootstrap(environment: str, file: str, devenv: bool):
     """Output a manifest to bootstrap appOfApps.
 
     ENVIRONMENT is used to determine if flakes or flake-less nix should be used and which environment should be built.
 
     Example: `.#prod` Uses a flake in the local directory whereas `prod` does not use flake but builds the `prod` environment
     """
-    nix = Nixidy(file, environment)
+    nix = _make_nixidy(file, environment, devenv)
 
     try:
         manifests = nix.bootstrap()
@@ -171,14 +216,15 @@ def bootstrap(environment: str, file: str):
     show_default=True,
     metavar="PATH",
 )
-def apply(environment: str, file: str):
+@_devenv_option
+def apply(environment: str, file: str, devenv: bool):
     """Build and apply declarative manifests to Kubernetes.
 
     ENVIRONMENT is used to determine if flakes or flake-less nix should be used and which environment should be built.
 
     Example: `.#prod` Uses a flake in the local directory whereas `prod` does not use flake but builds the `prod` environment
     """
-    nix = Nixidy(file, environment)
+    nix = _make_nixidy(file, environment, devenv)
 
     try:
         nix.apply()
@@ -211,7 +257,14 @@ def apply(environment: str, file: str):
     type=str,
     metavar="ENV",
 )
-def diff(environment: str, file: str, path: Optional[str], env: Optional[str]):
+@_devenv_option
+def diff(
+    environment: str,
+    file: str,
+    path: Optional[str],
+    env: Optional[str],
+    devenv: bool,
+):
     """Diff environment manifests.
 
     ENVIRONMENT is the environment to build and compare with either `--path` or `--env`.
@@ -247,14 +300,14 @@ def diff(environment: str, file: str, path: Optional[str], env: Optional[str]):
 
     # If `env` is defined, create an instance of Nixidy and build the environment.
     elif env:
-        nix_old = Nixidy(file, env)
+        nix_old = _make_nixidy(file, env, devenv)
         try:
             a = nix_old.build(no_link=True, print_paths=True)
         except NixCommandException as e:
             sys.exit(e.returncode)
 
     # Build new environment
-    nix = Nixidy(file, environment)
+    nix = _make_nixidy(file, environment, devenv)
 
     try:
         b = nix.build(no_link=True, print_paths=True)
