@@ -135,6 +135,27 @@ let
             Activation-time stage producing the final on-disk artifact for the
             matched file (a stdin -> stdout filter). Exactly one of
             `rewrite`/`postProcess` must be set.
+
+            ::: warning
+            `postProcess` commands run at activation time, outside any sandbox,
+            with the privileges of whoever runs `nixidy switch`. A `postProcess`
+            rule from a configuration you have not vetted is arbitrary code
+            execution on `switch`. To surface this, `switch` prints the commands
+            it is about to run and, when attached to a terminal, pauses for
+            confirmation (`NIXIDY_POST_PROCESS_APPROVE=1` skips the prompt;
+            `NIXIDY_SKIP_POST_PROCESS=1` reuses the already-rendered target files
+            without running anything). These are visibility aids, not a security
+            boundary — the configuration that defines the rule can also set the
+            approval variable.
+
+            `postProcess` runs on the `switch`/activation path only. Building
+            `declarativePackage` (or `environmentPackage`) does NOT run it, so
+            those outputs contain the pre-`postProcess` manifests. For an
+            `encrypt-secrets` rule that means `declarativePackage` holds the
+            UNENCRYPTED Secret — keep real secret material out of nixidy
+            resources (use references), as the rendered values land in the
+            world-readable nix store regardless.
+            :::
           '';
         };
         predicate = mkOption {

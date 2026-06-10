@@ -92,6 +92,20 @@ let
     lib.attrValues config.applications
   );
 
+  # Resolve a rule's post-process command against a matched object: function-form
+  # commands are applied to the resource; a literal snippet is used verbatim.
+  # Shared by the activation block (compiles it to a script) and the up-front
+  # notice (prints it), so what is shown is exactly what runs.
+  resolveCommand =
+    path: resource: r:
+    if lib.isFunction r.postProcess.command then
+      r.postProcess.command {
+        inherit resource path pkgs;
+        inherit (pkgs) lib;
+      }
+    else
+      r.postProcess.command;
+
   # Activation post-process block for a single (path, rules) entry: rewrite the
   # staged file in place via the chained rule commands, honoring
   # NIXIDY_SKIP_POST_PROCESS.
@@ -101,17 +115,6 @@ let
     let
       nameFor =
         i: "nixidy-post-process-${builtins.replaceStrings [ "/" "." ] [ "-" "-" ] path}-${toString i}";
-      # Resolve a function-form command against the matched object; a literal
-      # snippet is used verbatim.
-      commandOf =
-        r:
-        if lib.isFunction r.postProcess.command then
-          r.postProcess.command {
-            inherit resource path pkgs;
-            inherit (pkgs) lib;
-          }
-        else
-          r.postProcess.command;
       scriptOf =
         i: r:
         pkgs.writeShellApplication {
@@ -119,7 +122,7 @@ let
           runtimeInputs = r.postProcess.runtimeInputs;
           # Verbatim command body: quotes/$vars/pipes preserved. The script is
           # invoked by store path, so there is no `sh -c '...'` requote step.
-          text = commandOf r;
+          text = resolveCommand path resource r;
         };
       scripts = lib.imap0 scriptOf rules;
       chain = lib.concatMapStringsSep " | " (s: lib.getExe s) scripts;
@@ -147,6 +150,55 @@ let
   postProcessBlocks = lib.concatStringsSep "\n" (
     lib.mapAttrsToList postProcessBlock allFilePostProcesses
   );
+
+  # Up-front activation notice: print every post-process command about to run,
+  # against which file, once before any command executes. These commands run
+  # outside any sandbox, so this is visibility (not a gate) for the "switching to
+  # someone else's config is code execution" case — showing the actual command
+  # (not just a rule name) is the honest signal for a due-diligence bail.
+  # Rendered to a store file and `cat`ed so arbitrary command text needs no
+  # heredoc escaping. Skipped under NIXIDY_SKIP_POST_PROCESS, where nothing runs.
+  postProcessListing = pkgs.writeText "nixidy-post-process-listing-${env}" (
+    lib.concatStrings (
+      lib.mapAttrsToList (
+        path:
+        { resource, rules }:
+        "  ${path}:\n"
+        + lib.concatMapStrings (
+          r: "    ${lib.optionalString (r.name != null) "${r.name}: "}${resolveCommand path resource r}\n"
+        ) rules
+      ) allFilePostProcesses
+    )
+  );
+
+  postProcessNotice =
+    let
+      fileCount = lib.length (lib.attrNames allFilePostProcesses);
+    in
+    ''
+      if [ "\''${NIXIDY_SKIP_POST_PROCESS:-}" != "1" ]; then
+        echo "post-processing ${toString fileCount} manifest file(s); the following commands run outside any sandbox — review them before continuing:"
+        cat ${postProcessListing}
+        # Pause for confirmation only when stdin is a terminal: a piped/CI/
+        # pre-commit run is non-interactive and proceeds untouched, so
+        # automation never blocks. NIXIDY_POST_PROCESS_APPROVE=1 skips the prompt
+        # for trusted, repeated interactive use. This is informed-consent UX, not
+        # a security boundary (the config defining the rule can set the approval
+        # variable too); the point is to surface an unsandboxed postProcess
+        # command to a human switching to a config they have not vetted.
+        if [ "\''${NIXIDY_POST_PROCESS_APPROVE:-}" != "1" ] && [ -t 0 ]; then
+          printf 'Continue with post-processing? [y/N] '
+          read -r _nixidy_pp_reply
+          case "\$_nixidy_pp_reply" in
+            [yY] | [yY][eE][sS]) ;;
+            *)
+              echo "aborted; no changes written." >&2
+              exit 1
+              ;;
+          esac
+        fi
+      fi
+    '';
 
   mkApp =
     app:
@@ -338,6 +390,8 @@ in
             stagedSwitch = ''
               echo "switching manifests"
 
+              ${postProcessNotice}
+
               staging=\$(mktemp -d)
               trap 'rm -rf "\$staging"' EXIT
               cp -rL --no-preserve=mode "${config.build.environmentPackage}"/. "\$staging"/
@@ -423,6 +477,9 @@ in
 
           installPhase = ''
             mkdir -p $out
+            ${lib.optionalString (allFilePostProcesses != { }) ''
+              echo "warning: ${toString (lib.length (lib.attrNames allFilePostProcesses))} file(s) have postProcess rules that are NOT applied here — postProcess runs only on the switch/activation path. This declarativePackage contains the pre-postProcess manifests (e.g. an encrypt-secrets rule leaves the Secret unencrypted)." >&2
+            ''}
 
             # Write different stages of manifests to YAML files
             cat $manifestsPath | \
