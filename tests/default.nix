@@ -38,6 +38,7 @@
       ./object-transforms-assert.nix
       ./object-transforms-rewrite.nix
       ./object-transforms-post-process.nix
+      ./object-transforms-apply-parity.nix
       ./helm/no-values.nix
       ./helm/with-values.nix
       ./helm/transformer.nix

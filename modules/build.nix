@@ -59,6 +59,44 @@ let
   # object: <app.output.path>/<groupKey>.yaml.
   objPath = app: obj: "${app.output.path}/${groupKeyOf obj}.yaml";
 
+  # Label prefix and resource classifier shared by declarativePackage (for its
+  # selector labels) and applyFiles (for the apply path's per-file class).
+  labelPrefix = "apps.nixidy.dev";
+
+  classify =
+    obj:
+    if obj.kind == "CustomResourceDefinition" then
+      "crds"
+    else if obj.kind == "Namespace" then
+      "namespaces"
+    else
+      "manifests";
+
+  # Public apps deployed imperatively by `apply`: every app except the
+  # app-of-apps app and internal __-prefixed apps (matches declarativePackage).
+  applyApps = lib.filterAttrs (
+    n: _: n != config.nixidy.appOfApps.name && !(lib.hasPrefix "__" n)
+  ) config.applications;
+
+  # One entry per rendered resource file in environmentPackage that apply
+  # deploys. `path` addresses the file inside environmentPackage (mkApp layout).
+  applyFiles = lib.concatMap (
+    app:
+    lib.mapAttrsToList (
+      groupKey: objs:
+      let
+        firstObj = builtins.head objs;
+      in
+      {
+        path = "${app.output.path}/${groupKey}.yaml";
+        class = classify firstObj;
+        app = app.name;
+        rules = postProcessRulesFor app firstObj;
+        resource = firstObj;
+      }
+    ) (builtins.groupBy groupKeyOf (transformedObjects app))
+  ) (lib.attrValues applyApps);
+
   # Per-app post-process entries: one { path; resource; rules; } per
   # post-rewrite object with at least one matching post-process rule.
   # `postProcessRulesFor` is computed once per object here. `resource` is
@@ -312,6 +350,12 @@ in
         default = lib.mapAttrs (_: filePostProcesses) config.applications;
         description = "Internal: per-app output-path -> { resource; rules; } (for tests).";
       };
+      _applyFiles = mkOption {
+        internal = true;
+        readOnly = true;
+        type = types.listOf types.attrs;
+        default = applyFiles;
+      };
     };
   };
 
@@ -435,17 +479,6 @@ in
           apps = lib.filterAttrs (
             n: _: n != config.nixidy.appOfApps.name && !(lib.hasPrefix "__" n)
           ) config.applications;
-
-          labelPrefix = "apps.nixidy.dev";
-
-          classify =
-            obj:
-            if obj.kind == "CustomResourceDefinition" then
-              "crds"
-            else if obj.kind == "Namespace" then
-              "namespaces"
-            else
-              "manifests";
 
           labelObjects =
             app: objs:
