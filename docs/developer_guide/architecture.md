@@ -260,7 +260,7 @@ Creates output packages:
 
 - `environmentPackage`: All application manifests combined
 - `activationPackage`: For `nixidy switch` operations
-- `declarativePackage`: For `kubectl apply --prune`
+- `declarativePackage`: For `kubectl apply --prune`. Emits an `apply` script that consumes `environmentPackage` and runs `objectTransforms` `postProcess` rules at apply time; it no longer renders standalone manifest files.
 - `bootstrapPackage`: App-of-apps manifest
 
 #### `modules/templates.nix`

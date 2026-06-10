@@ -63,7 +63,7 @@ let
           Runtime stage producing final on-disk content.
           stdin  = store content for the matched file
           stdout = content written to disk
-          env    = $TARGET_PATH (absolute existing file path; may not exist)
+          env    = $TARGET_PATH (absolute existing file path; may not exist; switch only)
 
           stdin/stdout is the contract so stages compose as a pipe, but the
           command body is arbitrary shell. For a tool that needs a real file
@@ -76,11 +76,13 @@ let
           { resource, path, pkgs, lib }: <shell snippet>
           ```
           where `resource` is the post-rewrite object and `path` its on-disk
-          relative path (note: `$TARGET_PATH` is the absolute destination,
-          known only at activation). Use the function form to specialize the
-          command per object (e.g. choose a recipient key from
-          `resource.metadata.namespace`) instead of re-parsing the manifest on
-          stdin.
+          relative path. `path` is identical on the `switch` and `apply` paths,
+          so a `path`-using command resolves the same on both. `$TARGET_PATH`
+          (the absolute destination) is set only on `switch`/activation; on
+          `apply` there is no on-disk target and it is unset. Use the function
+          form to specialize the command per object (e.g. choose a recipient key
+          from `resource.metadata.namespace`) instead of re-parsing the manifest
+          on stdin.
         '';
       };
     };
@@ -148,12 +150,19 @@ let
             boundary — the configuration that defines the rule can also set the
             approval variable.
 
-            `postProcess` runs on the `switch`/activation path only. Building
-            `declarativePackage` (or `environmentPackage`) does NOT run it, so
-            those outputs contain the pre-`postProcess` manifests. For an
-            `encrypt-secrets` rule that means `declarativePackage` holds the
-            UNENCRYPTED Secret — keep real secret material out of nixidy
-            resources (use references), as the rendered values land in the
+            `nixidy apply` also runs `postProcess`: its `apply` script consumes
+            the same `environmentPackage` the switch path renders and streams
+            each resource through the chain before `kubectl apply`, so `switch`
+            and `apply` deploy the same manifests. The chain output must be a
+            valid cluster manifest — a transform whose result only a GitOps
+            controller can consume (e.g. a ksops / whole-document-encrypted
+            file) is switch-only; `kubectl apply` rejects it. The same
+            visibility/prompt applies on `apply`, but `NIXIDY_SKIP_POST_PROCESS`
+            is NOT honored there (no rendered target to fall back to) — the chain
+            always runs. The build outputs of `environmentPackage` /
+            `declarativePackage` still contain the pre-`postProcess` manifests
+            (the transform is runtime-only); keep real secret material out of
+            nixidy resources (use references), as rendered values land in the
             world-readable nix store regardless.
             :::
           '';
