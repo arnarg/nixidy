@@ -1280,24 +1280,32 @@ git<span class="w"> </span>init
 </code></pre></div>
 <details class="note">
 <summary>Using nixidy without flakes</summary>
-<p>If you prefer not to use flakes, you can use <a href="https://github.com/andir/npins">npins</a> or <a href="https://github.com/nmattia/niv">niv</a> for dependency management.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">npins</label><label for="__tabbed_1_2">niv</label></div>
+<p>If you prefer not to use flakes, you can use <a href="https://github.com/andir/npins">npins</a>, <a href="https://github.com/nmattia/niv">niv</a> or <a href="https://devenv.sh/">devenv</a> for dependency management.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">npins</label><label for="__tabbed_1_2">niv</label><label for="__tabbed_1_3">devenv</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>npins<span class="w"> </span>init<span class="w"> </span>--bare
 npins<span class="w"> </span>add<span class="w"> </span>github<span class="w"> </span>arnarg<span class="w"> </span>nixidy<span class="w"> </span>--branch<span class="w"> </span>main
+</code></pre></div>
+<p>Then create <code>default.nix</code>:</p>
+<div class="highlight"><span class="filename">default.nix</span><pre><span></span><code><span class="k">let</span>
+  <span class="ss">pins</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./npins</span><span class="p">;</span>
+  <span class="ss">nixidy</span> <span class="o">=</span> <span class="nb">import</span> pins<span class="o">.</span>nixidy <span class="p">{};</span>
+<span class="k">in</span>
+  nixidy<span class="o">.</span>lib<span class="o">.</span>mkEnvs <span class="p">{</span>
+    <span class="ss">envs</span> <span class="o">=</span> <span class="p">{</span>
+      dev<span class="o">.</span><span class="ss">modules</span> <span class="o">=</span> <span class="p">[</span><span class="l">./env/dev.nix</span><span class="p">];</span>
+    <span class="p">};</span>
+  <span class="p">}</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>niv<span class="w"> </span>init<span class="w"> </span>--no-nixpkgs
 niv<span class="w"> </span>add<span class="w"> </span>github<span class="w"> </span>arnarg/nixidy<span class="w"> </span>--branch<span class="w"> </span>main
 </code></pre></div>
-</div>
-</div>
-</div>
 <p>Then create <code>default.nix</code>:</p>
 <div class="highlight"><span class="filename">default.nix</span><pre><span></span><code><span class="k">let</span>
-  <span class="ss">sources</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./npins</span><span class="p">;</span>  <span class="c1"># or ./nix/sources.nix for niv</span>
+  <span class="ss">sources</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./nix/sources.nix</span><span class="p">;</span>
   <span class="ss">nixidy</span> <span class="o">=</span> <span class="nb">import</span> sources<span class="o">.</span>nixidy <span class="p">{};</span>
 <span class="k">in</span>
   nixidy<span class="o">.</span>lib<span class="o">.</span>mkEnvs <span class="p">{</span>
@@ -1306,9 +1314,39 @@ niv<span class="w"> </span>add<span class="w"> </span>github<span class="w"> </s
     <span class="p">};</span>
   <span class="p">}</span>
 </code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>devenv<span class="w"> </span>init
+devenv<span class="w"> </span>inputs<span class="w"> </span>add<span class="w"> </span>nixidy<span class="w"> </span>github:arnarg/nixidy
+</code></pre></div>
+<p>Then create <code>devenv.nix</code>:</p>
+<div class="highlight"><span class="filename">devenv.nix</span><pre><span></span><code><span class="p">{</span>
+ inputs<span class="p">,</span>
+ pkgs<span class="p">,</span>
+ <span class="o">...</span>
+<span class="p">}:</span> <span class="p">{</span>
+  <span class="ss">outputs</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ss">nixidyEnvs</span> <span class="o">=</span> inputs<span class="o">.</span>nixidy<span class="o">.</span>lib<span class="o">.</span>mkEnvs <span class="p">{</span>
+      <span class="k">inherit</span> pkgs<span class="p">;</span>
+
+      <span class="ss">envs</span> <span class="o">=</span> <span class="p">{</span>
+        dev<span class="o">.</span><span class="ss">modules</span> <span class="o">=</span> <span class="p">[</span> <span class="l">./env/dev.nix</span> <span class="p">];</span>
+      <span class="p">};</span>
+    <span class="p">};</span>
+  <span class="p">};</span>
+
+  <span class="ss">packages</span> <span class="o">=</span> <span class="p">[</span>
+    inputs<span class="o">.</span>nixidy<span class="o">.</span>packages<span class="o">.</span><span class="si">${</span>pkgs<span class="o">.</span>stdenv<span class="o">.</span>system<span class="si">}</span><span class="o">.</span>default
+  <span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">Command syntax</p>
 <p>The rest of this guide uses flake syntax (e.g., <code>nixidy build .#dev</code>). Without flakes, omit the <code>.#</code> prefix (e.g., <code>nixidy build dev</code>).</p>
+<p>nixidy cli will automatically use devenv if it detects <code>devenv.nix</code> and neither <code>flake.nix</code> or <code>default.nix</code> exists. To force it, use <code>--devenv</code> flag with every command (e.g. <code>nixidy build --devenv dev</code>).</p>
 </div>
 </details>
 <h2 id="step-3-create-your-environment-configuration">Step 3: Create Your Environment Configuration<a class="headerlink" href="#step-3-create-your-environment-configuration" title="Permanent link">#</a></h2>
