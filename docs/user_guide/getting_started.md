@@ -36,7 +36,7 @@ Create a `flake.nix` file in your project root:
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    nixidy.url = "github:arnarg/nixidy";
+    nixidy.url = "github:arnarg/nixidy/latest";
   };
 
   outputs = {
@@ -76,7 +76,7 @@ Create a `flake.nix` file in your project root:
 
         ```sh
         npins init --bare
-        npins add github arnarg nixidy --branch main
+        npins add github arnarg nixidy
         ```
 
         Then create `default.nix`:
@@ -118,7 +118,7 @@ Create a `flake.nix` file in your project root:
 
         ```sh
         devenv init
-        devenv inputs add nixidy github:arnarg/nixidy
+        devenv inputs add nixidy github:arnarg/nixidy/latest
         ```
 
         Then create `devenv.nix`:

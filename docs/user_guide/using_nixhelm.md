@@ -10,7 +10,7 @@ To use with nixidy, pass the nixhelm derivation attribute set to nixidy's `mkEnv
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nixidy = {
-    url = "github:arnarg/nixidy";
+    url = "github:arnarg/nixidy/latest";
     inputs.nixpkgs.follows = "nixpkgs";
   };
   inputs.nixhelm = {

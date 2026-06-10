@@ -58,7 +58,7 @@ As an example, to generate resource options for Cilium's `CiliumNetworkPolicy` a
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nixidy = {
-    url = "github:arnarg/nixidy";
+    url = "github:arnarg/nixidy/latest";
     inputs.nixpkgs.follows = "nixpkgs";
   };
   outputs = {
@@ -153,7 +153,7 @@ As an example, to generate resource options for cert-manager's `Certificate` CRD
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nixidy = {
-    url = "github:arnarg/nixidy";
+    url = "github:arnarg/nixidy/latest";
     inputs.nixpkgs.follows = "nixpkgs";
   };
   inputs.nixhelm = {

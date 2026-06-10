@@ -272,7 +272,7 @@ resources.ciliumNetworkPolicies.allow-dns.spec = {
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixidy.url = "github:arnarg/nixidy";
+    nixidy.url = "github:arnarg/nixidy/latest";
   };
 
   outputs = { nixpkgs, nixidy, ... }: {
