@@ -6,6 +6,9 @@
 let
   klib = kubelib.lib { inherit pkgs; };
 
+  crdSrc = import ./sources/crd.nix { inherit pkgs lib klib; };
+  chartSrc = import ./sources/chart.nix { inherit pkgs lib klib; };
+
   #########
   ## K8s ##
   #########
@@ -198,63 +201,6 @@ let
     else
       default;
 
-  # Run the CRD YAML through crd2jsonschema.py and read the resulting JSON
-  # schema back into Nix.
-  #
-  # The nix code generator is slightly modified from kubenix's generator. As
-  # it kind of depends on the jsonschema to be flattened with `$ref`s we first
-  # pre-process the CRD with a crude python script to flatten it before running
-  # the generator. See: crd2jsonschema.py
-  #
-  # This Python parse is the one unavoidable IFD; both the file generator
-  # (`fromCRD`) and the native module generator (`fromCRDModule`) share it.
-  crdSchema =
-    {
-      name,
-      src,
-      crdFiles,
-      namePrefix ? "",
-      attrNameOverrides ? { },
-      # Optional list of CRD `kind` names to generate. When empty (the
-      # default) every CustomResourceDefinition found in `crdFiles` is
-      # generated. Useful when `crdFiles` points at a multi-document stream
-      # (e.g. raw `helm template` output) containing more kinds than you want.
-      kindFilter ? [ ],
-    }:
-    let
-      options = pkgs.writeText "${name}-crd2jsonschema-options.json" (
-        builtins.toJSON {
-          # crd2jsonschema.py reads this under the JSON key `crds`.
-          crds = crdFiles;
-          inherit
-            namePrefix
-            attrNameOverrides
-            kindFilter
-            ;
-        }
-      );
-
-      pythonWithYaml = pkgs.python3.withPackages (ps: [ ps.pyyaml ]);
-    in
-    builtins.fromJSON (
-      builtins.readFile (
-        pkgs.stdenv.mkDerivation {
-          inherit src;
-
-          name = "${name}-jsonschema.json";
-
-          phases = [
-            "unpackPhase"
-            "installPhase"
-          ];
-
-          installPhase = ''
-            ${pythonWithYaml}/bin/python ${./crd2jsonschema.py} "${options}" > $out
-          '';
-        }
-      )
-    );
-
   fromCRD =
     {
       name,
@@ -276,7 +222,7 @@ let
         skipCoerceToList
         ;
 
-      schema = crdSchema {
+      schema = crdSrc.crdSchema {
         inherit
           name
           src
@@ -322,7 +268,7 @@ let
         specialMapKeys
         ;
 
-      schema = crdSchema {
+      schema = crdSrc.crdSchema {
         inherit
           name
           src
@@ -357,25 +303,16 @@ let
       crds ? null,
       kindFilter ? [ ],
     }:
-    let
-      files = renamedArg {
+    crdSrc.crdObjects {
+      inherit src kindFilter;
+      crdFiles = renamedArg {
         fn = "crdObjects";
         new = "crdFiles";
         newVal = crdFiles;
         oldVal = crds;
         default = throw "crdObjects: `crdFiles` is required";
       };
-
-      objects = lib.concatMap (f: klib.fromYAML (builtins.readFile "${src}/${f}")) files;
-
-      isWanted =
-        obj:
-        obj != null
-        && obj ? kind
-        && obj.kind == "CustomResourceDefinition"
-        && (kindFilter == [ ] || lib.any (x: obj.spec.names.kind == x) kindFilter);
-    in
-    lib.filter isWanted objects;
+    };
 
   fromChartCRD =
     {
@@ -405,36 +342,16 @@ let
         default = [ ];
       };
 
-      _chart = if chart != null then chart else klib.downloadHelmChart chartAttrs;
-
-      objects = klib.fromHelm {
+      src = chartSrc.mkChartCRDFileSrc {
         inherit
           name
+          chart
+          chartAttrs
           values
           extraOpts
           kubeVersion
           ;
-        includeCRDs = true;
-        chart = _chart;
-      };
-
-      isWanted =
-        obj:
-        obj ? kind
-        && obj.kind == "CustomResourceDefinition"
-        && (kindFilter' == [ ] || (lib.any (x: obj.spec.names.kind == x) kindFilter'));
-
-      filtered = lib.filter isWanted objects;
-
-      src = pkgs.stdenv.mkDerivation {
-        yamlText = pkgs.lib.strings.concatStringsSep "\n---\n" (map builtins.toJSON filtered);
-        passAsFile = "yamlText";
-        name = "toYAMLFile";
-        phases = [ "buildPhase" ];
-        buildPhase = ''
-          mkdir $out
-          ${pkgs.yq-go}/bin/yq -P -M $yamlTextPath > $out/crds.yaml
-        '';
+        kindFilter = kindFilter';
       };
     in
     fromCRD {
@@ -450,44 +367,6 @@ let
         "crds.yaml"
       ];
     };
-
-  # Template a chart's CRDs to a raw `crds.yaml` derivation (helm template
-  # --include-crds). Shared by the chart-based module/object accessors so the
-  # chart is templated once; calling both with identical args reuses this one
-  # derivation. Unlike `fromChartCRD`, the output is the raw helm YAML (no
-  # re-serialization), which the downstream accessors parse directly.
-  mkChartCRDsYaml =
-    {
-      name,
-      chart ? null,
-      chartAttrs ? { },
-      values ? { },
-      extraOpts ? [ ],
-      kubeVersion ? "v${pkgs.kubernetes.version}",
-    }:
-    let
-      _chart = if chart != null then chart else klib.downloadHelmChart chartAttrs;
-
-      templated = klib.buildHelmChart {
-        inherit
-          name
-          values
-          extraOpts
-          kubeVersion
-          ;
-        chart = _chart;
-        includeCRDs = true;
-      };
-    in
-    # `buildHelmChart` emits a single YAML *file*; copy (not symlink) it into a
-    # directory `$out/crds.yaml`. `crdObjects` reads this at eval time via
-    # `readFile "${src}/crds.yaml"`, and a `linkFarm` symlink would make that
-    # read follow into a separate derivation output not carried in the string's
-    # context — forbidden in pure eval. A real file keeps the read in-context.
-    pkgs.runCommand "chart-crds-${name}" { } ''
-      mkdir -p $out
-      cp ${templated} $out/crds.yaml
-    '';
 
   # Chart counterpart to `fromCRDModule`: template a chart's CRDs and return a
   # module value (resource type options). `kindFilter`, when non-empty, narrows
@@ -515,7 +394,7 @@ let
         attrNameOverrides
         skipCoerceToList
         ;
-      src = mkChartCRDsYaml {
+      src = chartSrc.mkChartCRDsYaml {
         inherit
           name
           chart
@@ -552,7 +431,7 @@ let
       kubeVersion ? "v${pkgs.kubernetes.version}",
     }:
     crdObjects {
-      src = mkChartCRDsYaml {
+      src = chartSrc.mkChartCRDsYaml {
         inherit
           name
           chart
