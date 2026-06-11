@@ -12,14 +12,16 @@ let
       annotations = if app.annotations != { } then app.annotations else null;
       labels = if app.labels != { } then app.labels else null;
       finalizers = lib.mkMerge [
-        (lib.mkIf (app.finalizer == "background") (
+        (lib.mkIf (app.argocd.finalizer == "background") (
           lib.singleton "resources-finalizer.argocd.argoproj.io/background"
         ))
-        (lib.mkIf (app.finalizer == "foreground") (lib.singleton "resources-finalizer.argocd.argoproj.io"))
+        (lib.mkIf (app.argocd.finalizer == "foreground") (
+          lib.singleton "resources-finalizer.argocd.argoproj.io"
+        ))
       ];
     };
     spec = {
-      inherit (app) project ignoreDifferences;
+      inherit (app.argocd) project ignoreDifferences;
 
       source = {
         repoURL = cfg.target.repository;
@@ -31,27 +33,27 @@ let
       };
       destination = lib.mkMerge [
         { inherit (app) namespace; }
-        (lib.mkIf (app.destination.name != null) {
-          inherit (app.destination) name;
+        (lib.mkIf (app.argocd.destination.name != null) {
+          inherit (app.argocd.destination) name;
         })
-        (lib.mkIf (app.destination.name == null) {
-          inherit (app.destination) server;
+        (lib.mkIf (app.argocd.destination.name == null) {
+          inherit (app.argocd.destination) server;
         })
       ];
       syncPolicy =
-        (lib.optionalAttrs app.syncPolicy.autoSync.enable {
+        (lib.optionalAttrs app.argocd.syncPolicy.autoSync.enable {
           automated = {
-            inherit (app.syncPolicy.autoSync) prune selfHeal;
+            inherit (app.argocd.syncPolicy.autoSync) prune selfHeal;
           };
         })
-        // (lib.optionalAttrs (lib.length app.syncPolicy.finalSyncOpts > 0) {
-          syncOptions = app.syncPolicy.finalSyncOpts;
+        // (lib.optionalAttrs (lib.length app.argocd.syncPolicy.finalSyncOpts > 0) {
+          syncOptions = app.argocd.syncPolicy.finalSyncOpts;
         })
-        // (lib.optionalAttrs (app.syncPolicy.managedNamespaceMetadata != null) {
-          inherit (app.syncPolicy) managedNamespaceMetadata;
+        // (lib.optionalAttrs (app.argocd.syncPolicy.managedNamespaceMetadata != null) {
+          inherit (app.argocd.syncPolicy) managedNamespaceMetadata;
         })
-        // (lib.optionalAttrs (app.syncPolicy.retry != null) {
-          inherit (app.syncPolicy) retry;
+        // (lib.optionalAttrs (app.argocd.syncPolicy.retry != null) {
+          inherit (app.argocd.syncPolicy) retry;
         });
     };
   };

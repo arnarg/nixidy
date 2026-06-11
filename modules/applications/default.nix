@@ -9,7 +9,6 @@
     ./helm.nix
     ./kustomize.nix
     ./yamls.nix
-    ./argocd.nix
     ./objects.nix
   ];
 
@@ -28,11 +27,6 @@
       type = types.bool;
       default = false;
       description = "Whether or not a namespace resource should be automatically created.";
-    };
-    project = mkOption {
-      type = types.str;
-      default = "default";
-      description = "ArgoCD project to make application a part of.";
     };
     annotations = mkOption {
       type = types.attrsOf types.str;

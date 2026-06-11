@@ -1,3 +1,7 @@
+# ArgoCD presentation backend: per-app options under `applications.<name>.argocd.*`.
+# Contributed to the applications submodule (via nixidy.presentation.perAppModules)
+# only when `nixidy.presentation.backend == "argocd"`. The old top-level paths
+# value-forward here via ./aliases.nix.
 {
   nixidyDefaults,
   lib,
@@ -24,7 +28,12 @@ let
     filtered;
 in
 {
-  options = with lib; {
+  options.argocd = with lib; {
+    project = mkOption {
+      type = types.str;
+      default = "default";
+      description = "ArgoCD project to make application a part of.";
+    };
     compareOptions = {
       serverSideDiff = mkOption {
         type = types.nullOr types.bool;
@@ -316,14 +325,17 @@ in
   };
 
   config = lib.mkMerge [
-    (lib.mkIf (config.syncPolicy.managedNamespaceMetadata != null) {
-      syncPolicy.syncOptions.createNamespace = lib.mkDefault true;
+    (lib.mkIf (config.argocd.syncPolicy.managedNamespaceMetadata != null) {
+      argocd.syncPolicy.syncOptions.createNamespace = lib.mkDefault true;
     })
 
     {
-      annotations = convertCmpOptionsAnnotation config.compareOptions;
+      # compareOptions surface as a standard k8s annotation on the application,
+      # so this one write crosses into the GENERIC `annotations` option (which
+      # mkApplication puts on the rendered ArgoCD Application's metadata).
+      annotations = convertCmpOptionsAnnotation config.argocd.compareOptions;
 
-      syncPolicy.finalSyncOpts = convertSyncOptionsList config.syncPolicy.syncOptions;
+      argocd.syncPolicy.finalSyncOpts = convertSyncOptionsList config.argocd.syncPolicy.syncOptions;
     }
   ];
 }

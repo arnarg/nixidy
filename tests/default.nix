@@ -25,6 +25,7 @@
       ./argo-finalizer-non-cascading.nix
       ./argo-syncpolicy-managed-namespace-metadata.nix
       ./argo-syncpolicy-retry.nix
+      ./presentation-argocd-aliases.nix
       ./yamls.nix
       ./extra-raw-yamls.nix
       ./override-name.nix
