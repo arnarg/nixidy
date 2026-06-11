@@ -22,7 +22,11 @@ in
       type =
         with types;
         attrsOf (submoduleWith {
-          modules = [ ./applications ] ++ config.nixidy.applicationImports;
+          modules = [
+            ./applications
+          ]
+          ++ config.nixidy.applicationImports
+          ++ config.nixidy.presentation.perAppModules;
           specialArgs.nixidyDefaults = config.nixidy.defaults;
         });
       default = { };
@@ -88,7 +92,6 @@ in
 
   config = lib.mkIf config.nixidy.baseImports {
     nixidy.applicationImports = [
-      ./generated/argocd.nix
       ./generated/k8s/v${config.nixidy.k8sVersion}.nix
     ];
   };
