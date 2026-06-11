@@ -27,7 +27,13 @@ in
           ]
           ++ config.nixidy.applicationImports
           ++ config.nixidy.presentation.perAppModules;
-          specialArgs.nixidyDefaults = config.nixidy.defaults;
+          specialArgs = {
+            # Generic defaults (helm/kustomize) consumed by helm.nix/kustomize.nix.
+            nixidyDefaults = config.nixidy.defaults;
+            # ArgoCD per-app defaults (finalizer/syncPolicy/destination), owned by
+            # the argocd backend, consumed by presentation/argocd/options.nix.
+            argocdDefaults = config.nixidy.presentation.argocd.defaults;
+          };
         });
       default = { };
       description = ''

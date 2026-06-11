@@ -20,5 +20,15 @@
       internal = true;
       description = "Per-application option modules contributed by the active presentation backend (threaded into the applications submodule).";
     };
+    bootstrapManifestFile = mkOption {
+      type = with types; nullOr str;
+      default = null;
+      internal = true;
+      description = ''
+        Filename (within `build.bootstrapPackage`) of the rendered bootstrap
+        manifest, set by the active presentation backend. Consumed by
+        `nixidy.bootstrapManifest.enable` to emit `bootstrap.yaml`.
+      '';
+    };
   };
 }

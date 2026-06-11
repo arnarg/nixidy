@@ -26,18 +26,6 @@
       };
     };
 
-    finalizer = mkOption {
-      type = types.enum [
-        "background"
-        "foreground"
-        "non-cascading"
-      ];
-      default = "non-cascading";
-      description = ''
-        Specify the default finalizer to apply to all ArgoCD application, by default.
-      '';
-    };
-
     kustomize.transformer = mkOption {
       type = with types; functionTo (listOf (attrsOf anything));
       default = res: res;
@@ -50,60 +38,6 @@
         This option applies to all kustomize applications in all nixidy applications unless
         explicitly specified there.
       '';
-    };
-
-    syncPolicy = {
-      autoSync = {
-        enable = mkOption {
-          type = types.bool;
-          default = false;
-          description = ''
-            Specifies if applications should automatically sync.
-
-            This is the default value for all applications if not explicitly set for the application.
-          '';
-        };
-        prune = mkOption {
-          type = types.bool;
-          default = false;
-          description = ''
-            Specifies if resources should be pruned during auto-syncing.
-
-            This is the default value for all applications if not explicitly set for the application.
-          '';
-        };
-        selfHeal = mkOption {
-          type = types.bool;
-          default = false;
-          description = ''
-            Specifies if partial app sync should be executed when resources are changed only in
-            target Kubernetes cluster and no git change detected.
-
-            This is the default value for all applications if not explicitly set for the application.
-          '';
-        };
-      };
-    };
-
-    destination = {
-      name = mkOption {
-        type = types.nullOr types.str;
-        default = null;
-        description = ''
-          The name of the cluster that ArgoCD should deploy all applications to.
-
-          This is the default value for all applications if not explicitly set for the application.
-        '';
-      };
-      server = mkOption {
-        type = types.nullOr types.str;
-        default = "https://kubernetes.default.svc";
-        description = ''
-          The Kubernetes server that ArgoCD should deploy all applications to.
-
-          This is the default value for all applications if not explicitly set for the application.
-        '';
-      };
     };
   };
 }

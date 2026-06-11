@@ -1,14 +1,20 @@
+# ArgoCD synthesis: the app-of-apps + bootstrap synthetic apps.
+#
+# Reads its config from `nixidy.presentation.argocd.*` (the relocated
+# `appOfApps`/`defaults` config) and writes the synthetic apps' argocd fields to
+# `applications.<name>.argocd.*` directly. Active only when the argocd backend is
+# selected (imported from ./default.nix's `backend == "argocd"` guard).
 { lib, config, ... }:
 let
   cfg = config.nixidy;
+  argocd = cfg.presentation.argocd;
+
+  helpers = import ../../applications/lib.nix lib;
 
   mkApplication = app: {
     metadata = {
       name =
-        if (cfg.appendNameWithEnv && cfg.appOfApps.name != app.name) then
-          "${app.name}-${cfg.env}"
-        else
-          app.name;
+        if (cfg.appendNameWithEnv && argocd.name != app.name) then "${app.name}-${cfg.env}" else app.name;
       annotations = if app.annotations != { } then app.annotations else null;
       labels = if app.labels != { } then app.labels else null;
       finalizers = lib.mkMerge [
@@ -57,65 +63,34 @@ let
         });
     };
   };
+
+  bootstrapApplication = mkApplication config.applications.${argocd.name};
 in
 {
-  options.nixidy.appOfApps = with lib; {
-    name = mkOption {
-      type = types.str;
-      default = "apps";
-      description = "Name of the application for bootstrapping all other applications (app of apps pattern).";
-    };
-    namespace = mkOption {
-      type = types.str;
-      default = "argocd";
-      description = "Destination namespace for generated Argo CD Applications in the app of apps applications.";
-    };
-    project = mkOption {
-      type = types.str;
-      default = "default";
-      description = "The project of the generated bootstrap app for appOfApps";
-    };
-    destination = {
-      name = mkOption {
-        type = types.nullOr types.str;
-        default = cfg.defaults.destination.name;
-        defaultText = literalExpression "config.nixidy.defaults.destination.name";
-        description = ''
-          The name of the cluster that ArgoCD should deploy the app of apps to.
-        '';
-      };
-      server = mkOption {
-        type = types.nullOr types.str;
-        default = cfg.defaults.destination.server;
-        defaultText = literalExpression "config.nixidy.defaults.destination.server";
-        description = ''
-          The Kubernetes server that ArgoCD should deploy the app of apps to.
-        '';
-      };
-    };
-  };
+  config = lib.mkIf (cfg.presentation.backend == "argocd") {
+    applications.${argocd.name} = {
+      inherit (argocd) namespace;
+      argocd = {
+        inherit (argocd) project destination;
 
-  config = {
-    applications.${cfg.appOfApps.name} = {
-      inherit (cfg.appOfApps) namespace project destination;
-
-      # App of apps autoSync should (probably) automatically
-      # be enabled
-      syncPolicy.autoSync =
-        let
-          # Lower priority than `mkDefault`,
-          # higher priority than `mkOptionDefault`.
-          mkLowerDefault = lib.mkOverride 1100;
-        in
-        {
-          enable = mkLowerDefault true;
-          prune = mkLowerDefault true;
-          selfHeal = mkLowerDefault true;
-        };
+        # App of apps autoSync should (probably) automatically
+        # be enabled
+        syncPolicy.autoSync =
+          let
+            # Lower priority than `mkDefault`,
+            # higher priority than `mkOptionDefault`.
+            mkLowerDefault = lib.mkOverride 1100;
+          in
+          {
+            enable = mkLowerDefault true;
+            prune = mkLowerDefault true;
+            selfHeal = mkLowerDefault true;
+          };
+      };
 
       resources.applications =
         let
-          appsWithoutAppsOfApps = lib.filter (n: n != cfg.appOfApps.name) cfg.publicApps;
+          appsWithoutAppsOfApps = lib.filter (n: n != argocd.name) cfg.publicApps;
         in
         builtins.listToAttrs (
           map (name: {
@@ -128,11 +103,23 @@ in
     # This application's resources are printed on
     # stdout when `nixidy bootstrap .#<env>` is run
     applications.__bootstrap = {
-      inherit (cfg.appOfApps) namespace project;
+      inherit (argocd) namespace;
+      argocd = { inherit (argocd) project; };
 
-      resources.applications.${cfg.appOfApps.name} =
-        mkApplication
-          config.applications.${cfg.appOfApps.name};
+      resources.applications.${argocd.name} = bootstrapApplication;
     };
+
+    # The argocd backend owns the bootstrap manifest filename: the `__bootstrap`
+    # app renders exactly one object — the app-of-apps `Application` — and
+    # `build/` names each rendered file `<Kind>-<name>.yaml` via `objectBaseName`.
+    # extra-files.nix reads this generic seam instead of hardcoding `Application-`.
+    # The app-of-apps app's name is never env-suffixed (mkApplication suffixes
+    # only when `app.name != argocd.name`), so this filename is stable.
+    nixidy.presentation.bootstrapManifestFile = "${
+      helpers.objectBaseName {
+        kind = "Application";
+        metadata.name = argocd.name;
+      }
+    }.yaml";
   };
 }
