@@ -7,6 +7,15 @@
 let
   inherit (config.nixidy) env;
 
+  layoutLib = import ./build/layout.nix { inherit lib; };
+  layout = lib.mapAttrs (
+    _: app:
+    layoutLib.mkAppFiles {
+      envRules = config.nixidy.objectTransforms;
+      objectBaseName = helpers.objectBaseName;
+    } app
+  ) config.applications;
+
   # Apply eval-time `rewrite` rules to a list of objects, in declaration order.
   # A rule whose predicate matches rewrites the object via `rewrite`; returning
   # null drops the object. Rules without `rewrite` (i.e. `postProcess`) are
@@ -412,6 +421,13 @@ in
         internal = true;
         description = "The package containing manifests meant to be deployed directly using `kubectl apply --prune`.";
       };
+      layout = mkOption {
+        internal = true;
+        readOnly = true;
+        type = types.attrsOf (types.listOf types.attrs);
+        default = layout;
+        description = "Internal: per-application [FileSpec] layout seam (for tests and emitters).";
+      };
       _transformedObjects = mkOption {
         internal = true;
         readOnly = true;
@@ -443,24 +459,25 @@ in
   };
 
   config = {
-    # Per-app: post-processed file paths must be unique. `listToAttrs` collapses
-    # colliding keys, so a count mismatch means two post-processed objects share
-    # an on-disk file (group-key collision); post-processing a multi-document
-    # file is undefined. Emitted as a single env-scope assertion naming the
-    # offender.
+    # A post-processed file must be single-object: for every FileSpec, having
+    # post-process `rules` implies its `rendered` group holds exactly one object.
+    # This strengthens the old group-key-collision check (it also rejects a
+    # non-head object post-processed in a multi-object group), guaranteeing the
+    # head-based FileSpec is exact and apply == activation by construction.
+    # Emitted as a single env-scope assertion naming the offending app + path.
     nixidy.assertions =
       let
-        colliding = lib.filter (
-          app: lib.length (postProcessEntriesFor app) != lib.length (lib.attrNames (filePostProcesses app))
-        ) (lib.attrValues config.applications);
+        bad = lib.filter (s: s.rules != [ ] && lib.length (s.source.rendered or [ ]) != 1) (
+          lib.concatLists (lib.attrValues config.build.layout)
+        );
       in
       [
         {
-          assertion = colliding == [ ];
+          assertion = bad == [ ];
           message =
-            "objectTransforms postProcess rules collide on a shared on-disk file in application(s): "
-            + lib.concatMapStringsSep ", " (app: "`${app.name}`") colliding
-            + " (group-key collision among post-processed objects); post-processing a multi-document file is undefined.";
+            "objectTransforms postProcess rule targets a multi-document file in application(s): "
+            + lib.concatMapStringsSep ", " (s: "`${s.app}` (${s.path})") bad
+            + "; post-processing a multi-document file is undefined.";
         }
       ];
 
