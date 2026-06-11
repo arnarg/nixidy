@@ -7,10 +7,10 @@
 let
   inherit (config.nixidy) env;
 
-  helpers = import ./applications/lib.nix lib;
+  helpers = import ../applications/lib.nix lib;
 
   # Pure layout core: per-app [FileSpec] seam.
-  layoutLib = import ./build/layout.nix { inherit lib; };
+  layoutLib = import ./layout.nix { inherit lib; };
   layout = lib.mapAttrs (
     _: app:
     layoutLib.mkAppFiles {
@@ -20,13 +20,13 @@ let
   ) config.applications;
 
   # FileSpec -> shell fragment.
-  render = import ./build/render.nix { inherit lib pkgs; };
+  render = import ./render.nix { inherit lib pkgs; };
 
   # Environment-side emitters (environment/activation/bootstrap/extras + mkApp).
-  emitEnv = import ./build/emit-environment.nix { inherit lib pkgs; };
+  emitEnv = import ./emit-environment.nix { inherit lib pkgs; };
 
   # Apply path + activation post-process emitters.
-  applyLib = import ./build/apply.nix { inherit lib pkgs; };
+  applyLib = import ./apply.nix { inherit lib pkgs; };
 
   # App-name subsets the emitters draw from.
   #   publicAppNames : every non-`__` app (includes the appOfApps app).

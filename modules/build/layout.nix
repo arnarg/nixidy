@@ -1,9 +1,8 @@
 { lib }:
-# `applyRewrites`, `transformedObjects` and `classify` are duplicated from
-# build.nix this task (Task 1, additive); build.nix is single-sourced onto this
-# module in Tasks 2-3, at which point the build.nix copies go away.
+# Pure layout core: turns each nixidy application into a list of FileSpec (one
+# per output file), the seam every build emitter consumes via `config.build.layout`.
 rec {
-  # Eval-time rewrite, env rules then app rules (was build.nix:14-38).
+  # Eval-time rewrite, env rules then app rules.
   applyRewrites =
     rules: objs:
     let
@@ -28,7 +27,7 @@ rec {
   transformedObjects =
     envRules: app: applyRewrites app.objectTransforms (applyRewrites envRules app.objects);
 
-  # File class for --prune selectors (was build.nix:74-81).
+  # File class for --prune selectors.
   classify =
     obj:
     if obj.kind == "CustomResourceDefinition" then
