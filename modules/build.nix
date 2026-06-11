@@ -331,56 +331,19 @@ let
 
   helpers = import ./applications/lib.nix lib;
 
+  render = import ./build/render.nix { inherit lib pkgs; };
+
   mkApp =
     app:
     let
-      grouped = builtins.groupBy groupKeyOf (transformedObjects app);
-
-      rawYamlFiles = map (source: {
-        filename = baseNameOf source;
-        inherit source;
-      }) app.extraRawYamls;
+      specs = config.build.layout.${app.name};
 
       writeManifests = ''
         set -e
         out=$1
 
       ''
-      + (lib.concatStringsSep "\n" (
-        lib.mapAttrsToList (
-          groupKey: objs:
-          let
-            filename = "${groupKey}.yaml";
-          in
-          if builtins.length objs == 1 then
-            let
-              obj = builtins.head objs;
-            in
-            ''
-              echo "Writing ${filename}"
-              cat <<'EOF' | ${pkgs.yq-go}/bin/yq -P > $out/${filename}
-              ${builtins.toJSON obj}
-              EOF
-            ''
-          else
-            let
-              sorted = lib.sort (a: b: (a.metadata.namespace or "") < (b.metadata.namespace or "")) objs;
-            in
-            ''
-              echo "Writing ${filename}"
-              cat <<'EOF' | ${pkgs.yq-go}/bin/yq '.[] | split_doc' -P > $out/${filename}
-              ${builtins.toJSON sorted}
-              EOF
-            ''
-        ) grouped
-      ))
-      + lib.optionalString (rawYamlFiles != [ ]) (
-        "\n"
-        + lib.concatMapStringsSep "\n" (f: ''
-          echo "Writing ${f.filename}"
-          cp ${f.source} "$out/${f.filename}"
-        '') rawYamlFiles
-      );
+      + lib.concatStringsSep "\n" (map (render.renderFile app.output.path) specs);
     in
     pkgs.stdenv.mkDerivation {
       inherit writeManifests;
