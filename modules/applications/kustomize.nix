@@ -106,37 +106,7 @@ in
   config =
     with lib;
     let
-      groupedObjects = mapAttrs (
-        _: release:
-        {
-          resources = [ ];
-          objects = [ ];
-        }
-        // (groupBy (
-          object:
-          let
-            gvk = helpers.getGVK object;
-          in
-          if config.types ? "${gvk.group}/${gvk.version}/${gvk.kind}" then "resources" else "objects"
-        ) release.objects)
-      ) config.kustomize.applications;
-
-      allResources = flatten (mapAttrsToList (_: groups: groups.resources) groupedObjects);
-      allObjects = flatten (mapAttrsToList (_: groups: groups.objects) groupedObjects);
+      allObjects = concatMap (app: app.objects) (attrValues config.kustomize.applications);
     in
-    {
-      resources = mkMerge (
-        map (
-          object:
-          let
-            gvk = helpers.getGVK object;
-          in
-          {
-            ${gvk.group}.${gvk.version}.${gvk.kind}.${object.metadata.name} = object;
-          }
-        ) allResources
-      );
-
-      objects = allObjects;
-    };
+    helpers.partitionObjects config.types allObjects;
 }

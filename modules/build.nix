@@ -37,14 +37,11 @@ let
   transformedObjects =
     app: applyRewrites app.objectTransforms (applyRewrites config.nixidy.objectTransforms app.objects);
 
-  # Sanitize a resource name the same way mkApp does when forming the
-  # on-disk group key / filename.
-  sanitize = n: builtins.replaceStrings [ "." ] [ "-" ] n;
-
   # The on-disk group key / filename stem for an object. mkApp groups objects
   # under this key; post-process rules resolve the matching path from the same
-  # helper so the two never drift.
-  groupKeyOf = obj: "${obj.kind}-${sanitize obj.metadata.name}";
+  # helper, and yamls.nix reuses it to detect raw-passthrough collisions, so the
+  # filename policy lives in exactly one place (applications/lib.nix).
+  groupKeyOf = helpers.objectBaseName;
 
   # All transform rules visible to an app: env rules first, then app rules
   # (chained in that order, matching `applyRewrites`).
@@ -322,6 +319,8 @@ let
         fi
       fi
     '';
+
+  helpers = import ./applications/lib.nix lib;
 
   mkApp =
     app:
