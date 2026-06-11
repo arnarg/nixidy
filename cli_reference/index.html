@@ -816,6 +816,7 @@
 <li><em><a href="#nixidy-build">build</a></em>: Build a nixidy environment.</li>
 <li><em><a href="#nixidy-diff">diff</a></em>: Diff environment manifests.</li>
 <li><em><a href="#nixidy-info">info</a></em>: Get info about a nixidy environment.</li>
+<li><em><a href="#nixidy-resources">resources</a></em>: Show information about resource types and their options.</li>
 <li><em><a href="#nixidy-switch">switch</a></em>: Build and switch to a nixidy environment.</li>
 </ul>
 <h2 id="nixidy-apply">nixidy apply<a class="headerlink" href="#nixidy-apply" title="Permanent link">#</a></h2>
@@ -896,6 +897,29 @@ nixidy diff .#prod --path ./manifests/prod
 <div class="highlight"><pre><span></span><code>  -f, --file PATH  Path to entrypoint nix file (only flake-less).  [default:
                    default.nix]
   --json           Output info in JSON format.
+  --devenv         Use devenv to build environments.
+  --help           Show this message and exit.
+</code></pre></div>
+<h2 id="nixidy-resources">nixidy resources<a class="headerlink" href="#nixidy-resources" title="Permanent link">#</a></h2>
+<p>Show information about resource types and their options.</p>
+<p>ENVIRONMENT is used to determine if flakes or flake-less nix should be used and which environment should be built.</p>
+<p>Without RESOURCE_PATH: list all available resource types.</p>
+<p>With RESOURCE_PATH (e.g. <code>deployments</code> or <code>deployments.spec</code>): show option details at that path.</p>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code># List all resource types.
+
+nixidy resources .#prod
+
+# List type information for a specific resource.
+
+nixidy resources .#prod deployments.spec.template.spec
+</code></pre></div>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code>nixidy resources [OPTIONS] ENVIRONMENT [RESOURCE_PATH]
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<div class="highlight"><pre><span></span><code>  -f, --file PATH  Path to entrypoint nix file (only flake-less).  [default:
+                   default.nix]
   --devenv         Use devenv to build environments.
   --help           Show this message and exit.
 </code></pre></div>
