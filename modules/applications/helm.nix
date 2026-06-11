@@ -116,37 +116,9 @@ in
   config =
     with lib;
     let
-      groupedObjects = mapAttrs (
-        _: release:
-        {
-          resources = [ ];
-          objects = [ ];
-        }
-        // (groupBy (
-          object:
-          let
-            gvk = helpers.getGVK object;
-          in
-          if config.types ? "${gvk.group}/${gvk.version}/${gvk.kind}" then "resources" else "objects"
-        ) (helpers.flattenListObjects release.objects))
-      ) config.helm.releases;
-
-      allResources = flatten (mapAttrsToList (_: groups: groups.resources) groupedObjects);
-      allObjects = flatten (mapAttrsToList (_: groups: groups.objects) groupedObjects);
-    in
-    {
-      resources = mkMerge (
-        map (
-          object:
-          let
-            gvk = helpers.getGVK object;
-          in
-          {
-            ${gvk.group}.${gvk.version}.${gvk.kind}.${object.metadata.name} = object;
-          }
-        ) allResources
+      allObjects = concatMap (release: helpers.flattenListObjects release.objects) (
+        attrValues config.helm.releases
       );
-
-      objects = allObjects;
-    };
+    in
+    helpers.partitionObjects config.types allObjects;
 }

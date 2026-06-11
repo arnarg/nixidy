@@ -48,39 +48,17 @@ in
   config =
     with lib;
     let
-      groupedObjects = {
-        resources = [ ];
-        objects = [ ];
-      }
-      // (groupBy (
-        object:
-        let
-          gvk = helpers.getGVK object;
-        in
-        if config.types ? "${gvk.group}/${gvk.version}/${gvk.kind}" then "resources" else "objects"
-      ) (concatMap kube.fromYAML config.yamls));
+      partitioned = helpers.partitionObjects config.types (concatMap kube.fromYAML config.yamls);
 
       rawBasenames = map baseNameOf config.extraRawYamls;
       duplicateRawBasenames = unique (filter (n: count (m: m == n) rawBasenames > 1) rawBasenames);
 
-      typedFilename = obj: "${obj.kind}-${replaceStrings [ "." ] [ "-" ] obj.metadata.name}.yaml";
+      typedFilename = obj: "${helpers.objectBaseName obj}.yaml";
       typedFilenames = map typedFilename config.objects;
       typedCollisions = filter (n: elem n typedFilenames) (unique rawBasenames);
     in
     {
-      inherit (groupedObjects) objects;
-
-      resources = mkMerge (
-        map (
-          object:
-          let
-            gvk = helpers.getGVK object;
-          in
-          {
-            ${gvk.group}.${gvk.version}.${gvk.kind}.${object.metadata.name} = object;
-          }
-        ) groupedObjects.resources
-      );
+      inherit (partitioned) objects resources;
 
       assertions = optionals (config.extraRawYamls != [ ]) [
         {

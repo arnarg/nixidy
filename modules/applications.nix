@@ -4,9 +4,17 @@
   ...
 }:
 let
-  versions = lib.mapAttrsToList (
-    version: _: builtins.concatStringsSep "." (lib.lists.sublist 0 2 (builtins.splitVersion version))
-  ) (import ../pkgs/generators/versions.nix);
+  # The selectable Kubernetes versions are exactly the generated resource
+  # modules present in ./generated/k8s (each `nixidy.k8sVersion` value `X.Y`
+  # imports `./generated/k8s/vX.Y.nix`). Deriving the enum from the artifacts on
+  # disk keeps it in sync with what can actually be imported, rather than
+  # reaching into the generator's `versions.nix` acquisition spec.
+  versions = lib.pipe ./generated/k8s [
+    builtins.readDir
+    builtins.attrNames
+    (builtins.filter (lib.hasSuffix ".nix"))
+    (map (n: lib.removeSuffix ".nix" (lib.removePrefix "v" n)))
+  ];
 in
 {
   options = with lib; {
