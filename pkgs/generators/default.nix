@@ -11,7 +11,7 @@ let
   #########
   fromSchema =
     name: schema:
-    import ./generator.nix {
+    import ./compile/generator.nix {
       inherit
         pkgs
         lib
@@ -268,7 +268,7 @@ let
       skipCoerceToList ? { },
       kindFilter ? [ ],
     }:
-    import ./generator.nix {
+    import ./compile/generator.nix {
       inherit
         pkgs
         lib
@@ -314,7 +314,7 @@ let
       specialMapKeys ? { },
       kindFilter ? [ ],
     }:
-    import ./module.nix {
+    import ./compile/module.nix {
       inherit
         lib
         name
