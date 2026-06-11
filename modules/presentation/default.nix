@@ -1,6 +1,9 @@
 { lib, ... }:
 {
-  imports = [ ./argocd ];
+  imports = [
+    ./argocd
+    ./flux
+  ];
 
   options.nixidy.presentation = with lib; {
     backend = mkOption {

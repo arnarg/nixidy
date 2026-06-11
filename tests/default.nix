@@ -26,6 +26,7 @@
       ./argo-syncpolicy-managed-namespace-metadata.nix
       ./argo-syncpolicy-retry.nix
       ./presentation-argocd-aliases.nix
+      ./presentation-flux.nix
       ./bootstrap-manifest.nix
       ./yamls.nix
       ./extra-raw-yamls.nix
