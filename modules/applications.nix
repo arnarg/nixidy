@@ -37,9 +37,11 @@ in
         });
       default = { };
       description = ''
-        An application is a single Argo CD application that will be rendered by nixidy.
+        An application is a single unit of resources that nixidy renders into its
+        own output directory.
 
-        The resources will be rendered into it's own directory and an Argo CD application created for it.
+        The active presentation backend (`nixidy.presentation.backend`) synthesizes
+        the controller object for it (an ArgoCD `Application`, a Flux `Kustomization`, ...).
       '';
       example = {
         nginx = {
