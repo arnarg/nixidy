@@ -1,6 +1,7 @@
 import subprocess
 import shutil
 import sys
+import click
 import json
 from abc import ABC, abstractmethod
 from typing import Optional
@@ -14,6 +15,17 @@ class NixCommandException(Exception):
 
 
 @dataclass
+class ResourceRoot:
+    attrName: str
+    group: str
+    kind: str
+    version: str
+
+    @classmethod
+    def from_list(cls, data: list[dict]) -> list["ResourceRoot"]:
+        return [cls(**item) for item in data]
+
+
 class NixidyEnvironmentInfo:
     repository: str
     branch: str
@@ -54,6 +66,16 @@ class NixidyBuilder(ABC):
     @abstractmethod
     def build_package(self, package: str) -> str:
         """Build a specific package. Returns the store path."""
+        ...
+
+    @abstractmethod
+    def resources_roots(self) -> list[ResourceRoot]:
+        """List all available resource type roots."""
+        ...
+
+    @abstractmethod
+    def explain_resource(self, attr_name: str, dot_path: str) -> dict | None:
+        """Explain a resource option at the given path."""
         ...
 
 
@@ -161,6 +183,18 @@ class NixBuilder(NixidyBuilder):
     def build_package(self, package: str) -> str:
         return self._build_package_raw(package, no_link=True, print_paths=True)
 
+    def resources_roots(self) -> list[ResourceRoot]:
+        attr = f"{self._attr_prefix}.resources.roots"
+        res = self._run(self._cmd("eval", [attr, "--json"]))
+        return ResourceRoot.from_list(json.loads(res.stdout))
+
+    def explain_resource(self, attr_name: str, dot_path: str) -> dict | None:
+        attr = f"{self._attr_prefix}.resources.explain"
+        apply = f'f: f "{attr_name}" "{dot_path}"'
+        res = self._run(self._cmd("eval", [attr, "--apply", apply, "--json"]))
+        data = json.loads(res.stdout)
+        return data if data is not None else None
+
 
 class DevenvBuilder(NixidyBuilder):
     """Builds environments using devenv."""
@@ -221,3 +255,15 @@ class DevenvBuilder(NixidyBuilder):
         attr = self._attr(package)
         res = self._run(["build", "--quiet", attr])
         return self._parse_build_output(res.stdout.decode("utf-8").strip())
+
+    def resources_roots(self) -> list[ResourceRoot]:
+        click.echo(
+            "Error: The 'explain' command is not supported with devenv.", err=True
+        )
+        sys.exit(1)
+
+    def explain_resource(self, attr_name: str, dot_path: str) -> dict | None:
+        click.echo(
+            "Error: The 'explain' command is not supported with devenv.", err=True
+        )
+        sys.exit(1)

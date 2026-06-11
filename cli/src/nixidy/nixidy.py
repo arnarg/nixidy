@@ -2,7 +2,7 @@ import sys
 import click
 import subprocess
 import os
-from nix.builder import NixBuilder, DevenvBuilder, NixCommandException
+from nix.builder import NixBuilder, DevenvBuilder, NixCommandException, ResourceRoot
 from nix.nixidy import Nixidy
 from typing import Optional
 
@@ -336,6 +336,115 @@ def diff(
     )
 
     sys.exit(diff.returncode)
+
+
+def _truncate(s: str, width: int) -> str:
+    if len(s) <= width:
+        return s
+    return s[: width - 1] + "…"
+
+
+def _print_roots(roots: list[ResourceRoot]):
+    attr_w = max(len(r.attrName) for r in roots) + 1
+    max_group = 30
+    max_kind = 30
+    header = (
+        f"{'RESOURCE':<{attr_w}}  "
+        f"{'VERSION':<10}  "
+        f"{_truncate('GROUP', max_group):<{max_group}}  "
+        f"{_truncate('KIND', max_kind):<{max_kind}}"
+    )
+    click.echo(click.style(header, bold=True))
+    for r in roots:
+        click.echo(
+            f"{r.attrName:<{attr_w}}  "
+            f"{r.version:<10}  "
+            f"{_truncate(r.group, max_group):<{max_group}}  "
+            f"{_truncate(r.kind, max_kind):<{max_kind}}"
+        )
+
+
+def _print_explain(attr_name: str, dot_path: str, data: dict):
+    description = data.get("description", "")
+    type_info = data.get("type", {})
+    type_name = type_info.get("description", "unspecified")
+
+    path = f"{attr_name}.{dot_path}".rstrip(".") if dot_path else attr_name
+    click.echo(f"{click.style(path, bold=True)} <{type_name}>\n")
+
+    if description:
+        click.echo("DESCRIPTION:")
+        click.echo(f"    {description.replace('\n', '\n    ')}\n")
+
+    children = data.get("children", {})
+    if not children:
+        return
+
+    click.echo("FIELDS:")
+    for name, child in children.items():
+        child_type = child.get("type", {}).get("description", "unspecified")
+        child_desc = child.get("description", "")
+        click.echo(f"  {name}  <{child_type}>")
+        if child_desc:
+            click.echo(f"    {child_desc.replace('\n', '\n    ')}")
+        click.echo("\n")
+
+
+@cli.command("resources")
+@click.argument("environment")
+@click.argument("resource_path", required=False, default=None)
+@click.option(
+    "--file",
+    "-f",
+    help="Path to entrypoint nix file (only flake-less).",
+    type=str,
+    default="default.nix",
+    show_default=True,
+    metavar="PATH",
+)
+@_devenv_option
+def resources(environment: str, resource_path: Optional[str], file: str, devenv: bool):
+    """Show information about resource types and their options.
+
+    ENVIRONMENT is used to determine if flakes or flake-less nix should be used and which environment should be built.
+
+    Without RESOURCE_PATH: list all available resource types.
+
+    With RESOURCE_PATH (e.g. `deployments` or `deployments.spec`): show option details at that path.
+
+    Examples:
+
+        # List all resource types.
+
+        nixidy resources .#prod
+
+        # List type information for a specific resource.
+
+        nixidy resources .#prod deployments.spec.template.spec
+    """
+    nix = _make_nixidy(file, environment, devenv)
+
+    if resource_path is None:
+        try:
+            roots = nix.resources_roots()
+        except NixCommandException as e:
+            sys.exit(e.returncode)
+        _print_roots(roots)
+    else:
+        attr_name, dot_path = (
+            resource_path.split(".", 1) if "." in resource_path else (resource_path, "")
+        )
+        try:
+            result = nix.explain_resource(attr_name, dot_path)
+        except NixCommandException as e:
+            sys.exit(e.returncode)
+        if result is None:
+            click.echo(
+                f"Error: resource '{attr_name}' or path '{dot_path}' not found.",
+                err=True,
+            )
+            sys.exit(1)
+        _print_explain(attr_name, dot_path, result)
 
 
 def main():

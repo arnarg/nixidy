@@ -49,14 +49,111 @@ let
       ) ret
     else
       ret;
+
+  checkedBuildOutputs = lib.throwIf (failed != [ ]) (formatFailed failed) (traceIfWarnings {
+    inherit (module.config.build)
+      environmentPackage
+      activationPackage
+      bootstrapPackage
+      declarativePackage
+      ;
+  });
+
+  # Get all available resource roots for the environment.
+  # Here we use the `__bootstrap` application to access
+  # them as it's guaranteed to exist.
+  resourceTypeRoots = map (t: {
+    inherit (t)
+      group
+      version
+      kind
+      attrName
+      ;
+  }) (builtins.attrValues module.config.applications.__bootstrap.types);
+
+  # Walks down into resource options by path which is a
+  # list of strings.
+  drillOption =
+    path: opt:
+    if path == [ ] then
+      opt
+    else
+      let
+        name = builtins.head path;
+        rest = builtins.tail path;
+        subOpts =
+          if opt ? type && lib.isFunction (opt.type.getSubOptions or null) then
+            opt.type.getSubOptions (opt.loc or [ ])
+          else
+            { };
+        child = subOpts.${name} or null;
+      in
+      if lib.isOption child then drillOption rest child else null;
+
+  getTypeInfo = type: {
+    name = type.name or "unspecified";
+    description = type.description or type.name or "unspecified";
+  };
+
+  # Producces a JSON serializable object for a single option.
+  walkOption =
+    path: opt:
+    let
+      description = opt.description or "";
+      typeInfo = getTypeInfo opt.type;
+      subOpts =
+        if opt ? type && lib.isFunction (opt.type.getSubOptions or null) then
+          let
+            so = opt.type.getSubOptions (opt.loc or path);
+          in
+          if lib.isAttrs so && so != { } then lib.filterAttrs (_: lib.isOption) so else null
+        else
+          null;
+    in
+    {
+      inherit description;
+      type = typeInfo;
+    }
+    // lib.optionalAttrs (subOpts != null) {
+      children = lib.mapAttrs (name: _: {
+        description = subOpts.${name}.description or "";
+        type = getTypeInfo subOpts.${name}.type;
+      }) (builtins.removeAttrs subOpts [ "_priority" ]);
+    };
+
+  # Takes an attrName for a resource root and a dot-path
+  # down into the resource and build a JSON serializable
+  # snapshot with description, type and children.
+  explainResource =
+    attrName: dotPath:
+    let
+      path = if dotPath == "" then [ ] else lib.splitString "." dotPath;
+      roots =
+        (module.options.applications.type.getSubOptions [
+          "applications"
+          "<name>"
+        ]).resources or { };
+      baseOpt = roots.${attrName} or null;
+      target = if lib.isOption baseOpt then drillOption path baseOpt else null;
+      displayPath = [
+        "resources"
+        attrName
+      ]
+      ++ path;
+    in
+    if target != null then walkOption displayPath target else null;
 in
-lib.throwIf (failed != [ ]) (formatFailed failed) (traceIfWarnings {
+{
   inherit (module) config;
-  inherit (module.config.build)
+  inherit (checkedBuildOutputs)
     environmentPackage
     activationPackage
     bootstrapPackage
     declarativePackage
     ;
   meta = { inherit (module.config.nixidy.target) repository branch; };
-})
+  resources = {
+    roots = resourceTypeRoots;
+    explain = explainResource;
+  };
+}

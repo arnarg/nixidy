@@ -3,7 +3,7 @@ import sys
 import glob
 import os
 from typing import Optional
-from nix.builder import DevenvBuilder, NixidyBuilder
+from nix.builder import DevenvBuilder, NixidyBuilder, ResourceRoot
 
 
 class Nixidy:
@@ -52,3 +52,9 @@ class Nixidy:
             stdout=sys.stdout,
             stderr=sys.stderr,
         )
+
+    def resources_roots(self) -> list[ResourceRoot]:
+        return self.builder.resources_roots()
+
+    def explain_resource(self, attr_name: str, dot_path: str) -> dict | None:
+        return self.builder.explain_resource(attr_name, dot_path)
