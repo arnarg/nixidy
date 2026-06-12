@@ -95,6 +95,12 @@ let
     description = type.description or type.name or "unspecified";
   };
 
+  roots =
+    (module.options.applications.type.getSubOptions [
+      "applications"
+      "<name>"
+    ]).resources or { };
+
   # Producces a JSON serializable object for a single option.
   walkOption =
     path: opt:
@@ -128,11 +134,6 @@ let
     attrName: dotPath:
     let
       path = if dotPath == "" then [ ] else lib.splitString "." dotPath;
-      roots =
-        (module.options.applications.type.getSubOptions [
-          "applications"
-          "<name>"
-        ]).resources or { };
       baseOpt = roots.${attrName} or null;
       target = if lib.isOption baseOpt then drillOption path baseOpt else null;
       displayPath = [
@@ -142,6 +143,32 @@ let
       ++ path;
     in
     if target != null then walkOption displayPath target else null;
+
+  # Recursively walks option sub-options building a nested
+  # attrset with description, type and children at each level.
+  # This is used by the devenv builder which can't use --apply.
+  walkOptionTree =
+    path: opt:
+    let
+      typeInfo = getTypeInfo opt.type;
+      subOpts =
+        if opt ? type && lib.isFunction (opt.type.getSubOptions or null) then
+          let
+            so = opt.type.getSubOptions (opt.loc or path);
+          in
+          if lib.isAttrs so && so != { } then lib.filterAttrs (_: lib.isOption) so else null
+        else
+          null;
+    in
+    {
+      description = opt.description or "";
+      type = typeInfo;
+    }
+    // lib.optionalAttrs (subOpts != null) {
+      children = lib.mapAttrs (childName: childOpt: walkOptionTree (path ++ [ childName ]) childOpt) (
+        builtins.removeAttrs subOpts [ "_priority" ]
+      );
+    };
 in
 {
   inherit (module) config;
@@ -155,5 +182,8 @@ in
   resources = {
     roots = resourceTypeRoots;
     explain = explainResource;
+    options = lib.mapAttrs (name: baseOpt: walkOptionTree [ "resources" name ] baseOpt) (
+      lib.filterAttrs (_: lib.isOption) roots
+    );
   };
 }

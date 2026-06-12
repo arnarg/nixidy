@@ -1,7 +1,6 @@
 import subprocess
 import shutil
 import sys
-import click
 import json
 from abc import ABC, abstractmethod
 from typing import Optional
@@ -257,13 +256,16 @@ class DevenvBuilder(NixidyBuilder):
         return self._parse_build_output(res.stdout.decode("utf-8").strip())
 
     def resources_roots(self) -> list[ResourceRoot]:
-        click.echo(
-            "Error: The 'explain' command is not supported with devenv.", err=True
-        )
-        sys.exit(1)
+        attr = self._attr("resources.roots")
+        res = self._run(["eval", "--quiet", attr])
+        data = json.loads(res.stdout)
+        return ResourceRoot.from_list(data[attr])
 
     def explain_resource(self, attr_name: str, dot_path: str) -> dict | None:
-        click.echo(
-            "Error: The 'explain' command is not supported with devenv.", err=True
-        )
-        sys.exit(1)
+        path = f"resources.options.{attr_name}"
+        if dot_path:
+            path += ".children." + ".children.".join(dot_path.split("."))
+        attr = self._attr(path)
+        res = self._run(["eval", "--quiet", attr])
+        data = json.loads(res.stdout)
+        return data.get(attr)
