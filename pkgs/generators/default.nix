@@ -6,171 +6,23 @@
 let
   klib = kubelib.lib { inherit pkgs; };
 
+  crdSrc = import ./sources/crd.nix { inherit pkgs lib klib; };
+  chartSrc = import ./sources/chart.nix { inherit pkgs lib klib; };
+  k8sSrc = import ./sources/k8s.nix { inherit pkgs lib; };
+
   #########
   ## K8s ##
   #########
-  fromSchema =
-    name: schema:
-    import ./generator.nix {
-      inherit
-        pkgs
-        lib
-        name
-        schema
-        ;
-
-      # The ports list in Container, EphemeralContainer
-      # and ServiceSpec should not enforce "protocol".
-      # See: https://github.com/arnarg/nixidy/issues/34
-      specialMapKeys = {
-        "io.k8s.api.core.v1.Container".ports = [ "containerPort" ];
-        "io.k8s.api.core.v1.EphemeralContainer".ports = [ "containerPort" ];
-        "io.k8s.api.core.v1.ServiceSpec".ports = [ "port" ];
-      };
-
-      definitionsOverlay = final: prev: {
-        "io.k8s.apimachinery.pkg.api.resource.Quantity" = {
-          inherit (prev."io.k8s.apimachinery.pkg.api.resource.Quantity") description;
-          oneOf = [
-            { type = "string"; }
-            { type = "number"; }
-          ];
-        };
-      };
-    };
-
-  genNamespaced =
-    core: aggregated:
-    let
-      core' =
-        let
-          data = builtins.fromJSON (builtins.readFile core);
-        in
-        {
-          core = {
-            ${data.groupVersion} = lib.mergeAttrsList (
-              lib.concatMap (
-                res:
-                lib.optional (res.singularName != "") {
-                  ${res.kind} = res.namespaced;
-                }
-              ) data.resources
-            );
-          };
-        };
-
-      aggregated' =
-        let
-          data = builtins.fromJSON (builtins.readFile aggregated);
-        in
-        lib.mergeAttrsList (
-          map (item: {
-            ${item.metadata.name} = lib.mergeAttrsList (
-              map (version: {
-                ${version.version} = lib.mergeAttrsList (
-                  map (res: {
-                    ${res.responseKind.kind} = res.scope == "Namespaced";
-                  }) version.resources
-                );
-              }) item.versions
-            );
-          }) data.items
-        );
-    in
-    core' // aggregated';
-
-  genRoots =
-    with lib;
-    swagger: namespaced:
-    let
-      refType = attr: head (tail (tail (splitString "/" attr."$ref")));
-
-      refDefinition = attr: head (tail (tail (splitString "/" attr."$ref")));
-
-      mapCharPairs =
-        f: s1: s2:
-        concatStrings (
-          imap0 (i: c1: f i c1 (if i >= stringLength s2 then "" else elemAt (stringToCharacters s2) i)) (
-            stringToCharacters s1
-          )
-        );
-
-      getAttrName =
-        resource: kind:
-        mapCharPairs (
-          i: c1: c2:
-          if lib.hasPrefix "API" kind && i == 0 then
-            "A"
-          else if i == 0 then
-            c1
-          else if c2 == "" || (lib.toLower c2) != c1 then
-            c1
-          else
-            c2
-        ) resource kind;
-    in
-    mapAttrs'
-      (
-        name: path:
-        let
-          ref = refType (head path.post.parameters).schema;
-          name' = last (splitString "/" name);
-          group' = path.post."x-kubernetes-group-version-kind".group;
-          group = if group' == "" then "core" else group';
-          version = path.post."x-kubernetes-group-version-kind".version;
-          kind = path.post."x-kubernetes-group-version-kind".kind;
-          attrName = getAttrName name' kind;
-        in
-        nameValuePair ref {
-          inherit
-            ref
-            attrName
-            group
-            version
-            kind
-            ;
-          inherit (swagger.definitions.${ref}) description;
-
-          name = name';
-          definition = refDefinition (head path.post.parameters).schema;
-          namespaced = attrByPath [ group version kind ] false namespaced;
-        }
-      )
-      (
-        filterAttrs (
-          _name: path: hasAttr "post" path && path.post."x-kubernetes-action" == "post"
-        ) swagger.paths
-      );
-
   k8s = pkgs.linkFarm "k8s-generated" (
-    builtins.attrValues (
-      builtins.mapAttrs (
-        version: conf:
-        let
-          short = builtins.concatStringsSep "." (lib.lists.sublist 0 2 (builtins.splitVersion version));
-
-          src = pkgs.fetchFromGitHub {
-            owner = "kubernetes";
-            repo = "kubernetes";
-            rev = "v${version}";
-            hash = conf.hash;
-          };
-
-          namespaced = genNamespaced "${src}/${conf.discovery.core}" "${src}/${conf.discovery.aggregated}";
-
-          swagger = builtins.fromJSON (builtins.readFile "${src}/${conf.spec}");
-
-          schema = {
-            inherit (swagger) definitions;
-            roots = genRoots swagger namespaced;
-          };
-        in
-        {
-          name = "v${short}.nix";
-          path = fromSchema "v${short}" schema;
-        }
-      ) (import ./versions.nix)
-    )
+    map (v: {
+      name = "v${v.short}.nix";
+      path = import ./compile/generator.nix {
+        inherit pkgs lib;
+        name = "v${v.short}";
+        schema = v.schema;
+        inherit (k8sSrc.k8sCompileOptions) specialMapKeys definitionsOverlay;
+      };
+    }) k8sSrc.perVersion
   );
 
   #########
@@ -198,63 +50,6 @@ let
     else
       default;
 
-  # Run the CRD YAML through crd2jsonschema.py and read the resulting JSON
-  # schema back into Nix.
-  #
-  # The nix code generator is slightly modified from kubenix's generator. As
-  # it kind of depends on the jsonschema to be flattened with `$ref`s we first
-  # pre-process the CRD with a crude python script to flatten it before running
-  # the generator. See: crd2jsonschema.py
-  #
-  # This Python parse is the one unavoidable IFD; both the file generator
-  # (`fromCRD`) and the native module generator (`fromCRDModule`) share it.
-  crdSchema =
-    {
-      name,
-      src,
-      crdFiles,
-      namePrefix ? "",
-      attrNameOverrides ? { },
-      # Optional list of CRD `kind` names to generate. When empty (the
-      # default) every CustomResourceDefinition found in `crdFiles` is
-      # generated. Useful when `crdFiles` points at a multi-document stream
-      # (e.g. raw `helm template` output) containing more kinds than you want.
-      kindFilter ? [ ],
-    }:
-    let
-      options = pkgs.writeText "${name}-crd2jsonschema-options.json" (
-        builtins.toJSON {
-          # crd2jsonschema.py reads this under the JSON key `crds`.
-          crds = crdFiles;
-          inherit
-            namePrefix
-            attrNameOverrides
-            kindFilter
-            ;
-        }
-      );
-
-      pythonWithYaml = pkgs.python3.withPackages (ps: [ ps.pyyaml ]);
-    in
-    builtins.fromJSON (
-      builtins.readFile (
-        pkgs.stdenv.mkDerivation {
-          inherit src;
-
-          name = "${name}-jsonschema.json";
-
-          phases = [
-            "unpackPhase"
-            "installPhase"
-          ];
-
-          installPhase = ''
-            ${pythonWithYaml}/bin/python ${./crd2jsonschema.py} "${options}" > $out
-          '';
-        }
-      )
-    );
-
   fromCRD =
     {
       name,
@@ -268,7 +63,7 @@ let
       skipCoerceToList ? { },
       kindFilter ? [ ],
     }:
-    import ./generator.nix {
+    import ./compile/generator.nix {
       inherit
         pkgs
         lib
@@ -276,7 +71,7 @@ let
         skipCoerceToList
         ;
 
-      schema = crdSchema {
+      schema = crdSrc.crdSchema {
         inherit
           name
           src
@@ -314,7 +109,7 @@ let
       specialMapKeys ? { },
       kindFilter ? [ ],
     }:
-    import ./module.nix {
+    import ./compile/module.nix {
       inherit
         lib
         name
@@ -322,7 +117,7 @@ let
         specialMapKeys
         ;
 
-      schema = crdSchema {
+      schema = crdSrc.crdSchema {
         inherit
           name
           src
@@ -357,25 +152,16 @@ let
       crds ? null,
       kindFilter ? [ ],
     }:
-    let
-      files = renamedArg {
+    crdSrc.crdObjects {
+      inherit src kindFilter;
+      crdFiles = renamedArg {
         fn = "crdObjects";
         new = "crdFiles";
         newVal = crdFiles;
         oldVal = crds;
         default = throw "crdObjects: `crdFiles` is required";
       };
-
-      objects = lib.concatMap (f: klib.fromYAML (builtins.readFile "${src}/${f}")) files;
-
-      isWanted =
-        obj:
-        obj != null
-        && obj ? kind
-        && obj.kind == "CustomResourceDefinition"
-        && (kindFilter == [ ] || lib.any (x: obj.spec.names.kind == x) kindFilter);
-    in
-    lib.filter isWanted objects;
+    };
 
   fromChartCRD =
     {
@@ -405,36 +191,16 @@ let
         default = [ ];
       };
 
-      _chart = if chart != null then chart else klib.downloadHelmChart chartAttrs;
-
-      objects = klib.fromHelm {
+      src = chartSrc.mkChartCRDFileSrc {
         inherit
           name
+          chart
+          chartAttrs
           values
           extraOpts
           kubeVersion
           ;
-        includeCRDs = true;
-        chart = _chart;
-      };
-
-      isWanted =
-        obj:
-        obj ? kind
-        && obj.kind == "CustomResourceDefinition"
-        && (kindFilter' == [ ] || (lib.any (x: obj.spec.names.kind == x) kindFilter'));
-
-      filtered = lib.filter isWanted objects;
-
-      src = pkgs.stdenv.mkDerivation {
-        yamlText = pkgs.lib.strings.concatStringsSep "\n---\n" (map builtins.toJSON filtered);
-        passAsFile = "yamlText";
-        name = "toYAMLFile";
-        phases = [ "buildPhase" ];
-        buildPhase = ''
-          mkdir $out
-          ${pkgs.yq-go}/bin/yq -P -M $yamlTextPath > $out/crds.yaml
-        '';
+        kindFilter = kindFilter';
       };
     in
     fromCRD {
@@ -450,44 +216,6 @@ let
         "crds.yaml"
       ];
     };
-
-  # Template a chart's CRDs to a raw `crds.yaml` derivation (helm template
-  # --include-crds). Shared by the chart-based module/object accessors so the
-  # chart is templated once; calling both with identical args reuses this one
-  # derivation. Unlike `fromChartCRD`, the output is the raw helm YAML (no
-  # re-serialization), which the downstream accessors parse directly.
-  mkChartCRDsYaml =
-    {
-      name,
-      chart ? null,
-      chartAttrs ? { },
-      values ? { },
-      extraOpts ? [ ],
-      kubeVersion ? "v${pkgs.kubernetes.version}",
-    }:
-    let
-      _chart = if chart != null then chart else klib.downloadHelmChart chartAttrs;
-
-      templated = klib.buildHelmChart {
-        inherit
-          name
-          values
-          extraOpts
-          kubeVersion
-          ;
-        chart = _chart;
-        includeCRDs = true;
-      };
-    in
-    # `buildHelmChart` emits a single YAML *file*; copy (not symlink) it into a
-    # directory `$out/crds.yaml`. `crdObjects` reads this at eval time via
-    # `readFile "${src}/crds.yaml"`, and a `linkFarm` symlink would make that
-    # read follow into a separate derivation output not carried in the string's
-    # context — forbidden in pure eval. A real file keeps the read in-context.
-    pkgs.runCommand "chart-crds-${name}" { } ''
-      mkdir -p $out
-      cp ${templated} $out/crds.yaml
-    '';
 
   # Chart counterpart to `fromCRDModule`: template a chart's CRDs and return a
   # module value (resource type options). `kindFilter`, when non-empty, narrows
@@ -515,7 +243,7 @@ let
         attrNameOverrides
         skipCoerceToList
         ;
-      src = mkChartCRDsYaml {
+      src = chartSrc.mkChartCRDsYaml {
         inherit
           name
           chart
@@ -552,7 +280,7 @@ let
       kubeVersion ? "v${pkgs.kubernetes.version}",
     }:
     crdObjects {
-      src = mkChartCRDsYaml {
+      src = chartSrc.mkChartCRDsYaml {
         inherit
           name
           chart

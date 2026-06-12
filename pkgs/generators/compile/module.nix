@@ -6,7 +6,7 @@
 # the source file ./generator.nix builds. The result slots straight into
 # `nixidy.applicationImports` (which already accepts `functionTo attrs`), so
 # there is no generated file and no import-from-derivation: only the Python
-# crd2jsonschema parse remains (shared via ./default.nix's `crdSchema`).
+# crd2jsonschema parse remains (shared via `sources/crd.nix`'s `crdSchema`).
 {
   name ? "crd",
   lib,
