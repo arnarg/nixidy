@@ -62,6 +62,19 @@
     }
     ```
 
+    Two optional fields are recognised by the update script:
+
+    - `versionConstraint`: a semver range (e.g. `">=4.7.0 <5.0.0"`) passed to
+      `helm show chart --version` so the updater resolves the latest matching
+      release instead of the absolute latest.
+    - `freeze`: when `true`, the update script skips this chart entirely.
+
+    Each chart derivation carries a `passthru.updateScript` that resolves the
+    latest upstream version (honouring `versionConstraint` and `freeze`) and
+    rewrites the chart's `default.nix` in place. Use
+    [mkChartsUpdateScript](#libhelmmkchartsupdatescript) to run every chart's
+    update script at once.
+
     Type:
       mkChartAttrs :: Path -> AttrSet
 

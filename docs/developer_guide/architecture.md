@@ -326,6 +326,7 @@ lib.extend (self: old: {
 | `buildHelmChart` | Templates chart with values |
 | `getChartValues` | Parses chart's default values.yaml |
 | `mkChartAttrs` | Creates chart attrset from directory structure |
+| `mkChartsUpdateScript` | Builds a script that runs every chart's `updateScript` |
 
 ### Kube Functions (`lib/kube.nix`)
 

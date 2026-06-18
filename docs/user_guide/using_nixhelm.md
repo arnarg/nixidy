@@ -138,3 +138,80 @@ And then in your nixidy modules you pass that `./charts` folder to `nixidy.chart
   };
 }
 ```
+
+## Updating Charts
+
+Each chart produced by `mkChartAttrs` carries an `updateScript` in its `passthru` that resolves the latest upstream version, recomputes the hash, and rewrites the chart's `default.nix` in place.
+
+To update all charts at once, wrap the chart tree with `mkChartsUpdateScript` and expose it as a flake app:
+
+```nix title="flake.nix"
+{
+  outputs = { self, nixpkgs, flake-utils, nixidy, ... }:
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = import nixpkgs { inherit system; };
+        inherit (pkgs) lib;
+      in {
+        apps.updateCharts = {
+          type = "app";
+          program = lib.getExe (nixidy.packages.${system}.mkChartsUpdateScript
+            (nixidy.packages.${system}.mkChartAttrs ./charts));
+        };
+      });
+}
+```
+
+Then run:
+
+```sh
+nix run .#updateCharts
+```
+
+The script runs every chart's update script sequentially, continues past individual failures, and exits non-zero if any chart failed to update.
+
+??? note "Using nixidy without flakes"
+
+    Create a small derivation file and build it:
+
+    ```nix title="update-charts.nix"
+    let
+      sources = import ./npins;
+      nixidy = import sources.nixidy {};
+    in
+      nixidy.mkChartsUpdateScript (nixidy.mkChartAttrs ./charts)
+    ```
+
+    ```sh
+    nix-build update-charts.nix && ./result/bin/update-all-charts
+    ```
+
+### Optional fields
+
+Two optional fields can be set in a chart's `default.nix` to control update behaviour:
+
+`versionConstraint`
+:   A semver range (e.g. `">=4.7.0 <5.0.0"`) passed to `helm show chart --version`. The updater resolves the latest version matching the constraint instead of the absolute latest.
+
+`freeze`
+:   When `true`, the updater skips this chart entirely. Useful for charts you want to pin manually.
+
+```nix title="./charts/argoproj/argo-cd/default.nix"
+{
+  repo = "https://argoproj.github.io/argo-helm/";
+  chart = "argo-cd";
+  version = "7.7.0";
+  chartHash = "sha256-...";
+  versionConstraint = ">=7.0.0 <8.0.0";
+}
+```
+
+### Store path resolution
+
+The update script edits files in your working tree. When `mkChartAttrs` is given a path inside your repository, the script automatically maps the store path back to the corresponding working-tree relative path.
+
+If the charts directory was copied into the store as a standalone entry, the working-tree path cannot be inferred. In that case set `CHARTS_DIR` at runtime:
+
+```sh
+CHARTS_DIR=./charts nix run .#updateCharts
+```
