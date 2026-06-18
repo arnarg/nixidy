@@ -70,7 +70,7 @@ let
   mlib = import ./lib { inherit pkgs kubelib; };
 in
 {
-  inherit (mlib.helm) mkChartAttrs;
+  inherit (mlib.helm) mkChartAttrs mkChartsUpdateScript;
 
   # Wrap the lib functions to use the pkgs imported above
   # without having the user needing to pass it in.

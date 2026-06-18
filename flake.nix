@@ -32,7 +32,7 @@
       in
       {
         packages = {
-          inherit (mlib.helm) mkChartAttrs;
+          inherit (mlib.helm) mkChartAttrs mkChartsUpdateScript;
 
           default = self.packages.${system}.cli;
           cli = pkgs.callPackage ./cli { };
