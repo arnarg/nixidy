@@ -22,14 +22,26 @@ in
       type =
         with types;
         attrsOf (submoduleWith {
-          modules = [ ./applications ] ++ config.nixidy.applicationImports;
-          specialArgs.nixidyDefaults = config.nixidy.defaults;
+          modules = [
+            ./applications
+          ]
+          ++ config.nixidy.applicationImports
+          ++ config.nixidy.presentation.perAppModules;
+          specialArgs = {
+            # Generic defaults (helm/kustomize) consumed by helm.nix/kustomize.nix.
+            nixidyDefaults = config.nixidy.defaults;
+            # ArgoCD per-app defaults (finalizer/syncPolicy/destination), owned by
+            # the argocd backend, consumed by presentation/argocd/options.nix.
+            argocdDefaults = config.nixidy.presentation.argocd.defaults;
+          };
         });
       default = { };
       description = ''
-        An application is a single Argo CD application that will be rendered by nixidy.
+        An application is a single unit of resources that nixidy renders into its
+        own output directory.
 
-        The resources will be rendered into it's own directory and an Argo CD application created for it.
+        The active presentation backend (`nixidy.presentation.backend`) synthesizes
+        the controller object for it (an ArgoCD `Application`, a Flux `Kustomization`, ...).
       '';
       example = {
         nginx = {
@@ -88,7 +100,6 @@ in
 
   config = lib.mkIf config.nixidy.baseImports {
     nixidy.applicationImports = [
-      ./generated/argocd.nix
       ./generated/k8s/v${config.nixidy.k8sVersion}.nix
     ];
   };

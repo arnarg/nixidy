@@ -5,7 +5,6 @@ in
 {
   imports = [
     ./defaults.nix
-    ./app-of-apps.nix
     ./extra-files.nix
   ];
 

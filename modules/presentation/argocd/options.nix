@@ -1,5 +1,13 @@
+# ArgoCD presentation backend: per-app options under `applications.<name>.argocd.*`.
+# Contributed to the applications submodule (via nixidy.presentation.perAppModules)
+# only when `nixidy.presentation.backend == "argocd"`. The old top-level paths
+# value-forward here via ./aliases.nix.
+#
+# Per-app defaults (finalizer/syncPolicy/destination) are read from
+# `argocdDefaults` (= the top-level `config.nixidy.presentation.argocd.defaults`),
+# threaded in as the `argocdDefaults` specialArg from applications.nix.
 {
-  nixidyDefaults,
+  argocdDefaults,
   lib,
   config,
   ...
@@ -24,7 +32,12 @@ let
     filtered;
 in
 {
-  options = with lib; {
+  options.argocd = with lib; {
+    project = mkOption {
+      type = types.str;
+      default = "default";
+      description = "ArgoCD project to make application a part of.";
+    };
     compareOptions = {
       serverSideDiff = mkOption {
         type = types.nullOr types.bool;
@@ -51,8 +64,8 @@ in
         "foreground"
         "non-cascading"
       ];
-      default = nixidyDefaults.finalizer;
-      defaultText = literalExpression "config.nixidy.defaults.finalizer";
+      default = argocdDefaults.finalizer;
+      defaultText = literalExpression "config.nixidy.presentation.argocd.defaults.finalizer";
       description = ''
         Specify the finalizer to apply to the ArgoCD application.
       '';
@@ -61,24 +74,24 @@ in
       autoSync = {
         enable = mkOption {
           type = types.bool;
-          default = nixidyDefaults.syncPolicy.autoSync.enable;
-          defaultText = literalExpression "config.nixidy.defaults.syncPolicy.autoSync.enable";
+          default = argocdDefaults.syncPolicy.autoSync.enable;
+          defaultText = literalExpression "config.nixidy.presentation.argocd.defaults.syncPolicy.autoSync.enable";
           description = ''
             Specifies if application should automatically sync.
           '';
         };
         prune = mkOption {
           type = types.bool;
-          default = nixidyDefaults.syncPolicy.autoSync.prune;
-          defaultText = literalExpression "config.nixidy.defaults.syncPolicy.autoSync.prune";
+          default = argocdDefaults.syncPolicy.autoSync.prune;
+          defaultText = literalExpression "config.nixidy.presentation.argocd.defaults.syncPolicy.autoSync.prune";
           description = ''
             Specifies if resources should be pruned during auto-syncing.
           '';
         };
         selfHeal = mkOption {
           type = types.bool;
-          default = nixidyDefaults.syncPolicy.autoSync.selfHeal;
-          defaultText = literalExpression "config.nixidy.defaults.syncPolicy.autoSync.selfHeal";
+          default = argocdDefaults.syncPolicy.autoSync.selfHeal;
+          defaultText = literalExpression "config.nixidy.presentation.argocd.defaults.syncPolicy.autoSync.selfHeal";
           description = ''
             Specifies if partial app sync should be executed when resources are changed only in
             target Kubernetes cluster and no git change detected.
@@ -244,16 +257,16 @@ in
     destination = {
       name = mkOption {
         type = types.nullOr types.str;
-        default = nixidyDefaults.destination.name;
-        defaultText = literalExpression "config.nixidy.defaults.destination.name";
+        default = argocdDefaults.destination.name;
+        defaultText = literalExpression "config.nixidy.presentation.argocd.defaults.destination.name";
         description = ''
           The name of the cluster that ArgoCD should deploy all applications to.
         '';
       };
       server = mkOption {
         type = types.nullOr types.str;
-        default = nixidyDefaults.destination.server;
-        defaultText = literalExpression "config.nixidy.defaults.destination.server";
+        default = argocdDefaults.destination.server;
+        defaultText = literalExpression "config.nixidy.presentation.argocd.defaults.destination.server";
         description = ''
           The Kubernetes server that ArgoCD should deploy the application to.
         '';
@@ -316,14 +329,17 @@ in
   };
 
   config = lib.mkMerge [
-    (lib.mkIf (config.syncPolicy.managedNamespaceMetadata != null) {
-      syncPolicy.syncOptions.createNamespace = lib.mkDefault true;
+    (lib.mkIf (config.argocd.syncPolicy.managedNamespaceMetadata != null) {
+      argocd.syncPolicy.syncOptions.createNamespace = lib.mkDefault true;
     })
 
     {
-      annotations = convertCmpOptionsAnnotation config.compareOptions;
+      # compareOptions surface as a standard k8s annotation on the application,
+      # so this one write crosses into the GENERIC `annotations` option (which
+      # mkApplication puts on the rendered ArgoCD Application's metadata).
+      annotations = convertCmpOptionsAnnotation config.argocd.compareOptions;
 
-      syncPolicy.finalSyncOpts = convertSyncOptionsList config.syncPolicy.syncOptions;
+      argocd.syncPolicy.finalSyncOpts = convertSyncOptionsList config.argocd.syncPolicy.syncOptions;
     }
   ];
 }

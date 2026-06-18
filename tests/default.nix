@@ -25,6 +25,9 @@
       ./argo-finalizer-non-cascading.nix
       ./argo-syncpolicy-managed-namespace-metadata.nix
       ./argo-syncpolicy-retry.nix
+      ./presentation-argocd-aliases.nix
+      ./presentation-flux.nix
+      ./bootstrap-manifest.nix
       ./yamls.nix
       ./extra-raw-yamls.nix
       ./override-name.nix
@@ -39,6 +42,8 @@
       ./object-transforms-rewrite.nix
       ./object-transforms-post-process.nix
       ./object-transforms-apply-parity.nix
+      ./layout-filespec.nix
+      ./layout-postprocess-multidoc-assert.nix
       ./helm/no-values.nix
       ./helm/with-values.nix
       ./helm/transformer.nix

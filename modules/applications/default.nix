@@ -9,7 +9,6 @@
     ./helm.nix
     ./kustomize.nix
     ./yamls.nix
-    ./argocd.nix
     ./objects.nix
   ];
 
@@ -29,20 +28,15 @@
       default = false;
       description = "Whether or not a namespace resource should be automatically created.";
     };
-    project = mkOption {
-      type = types.str;
-      default = "default";
-      description = "ArgoCD project to make application a part of.";
-    };
     annotations = mkOption {
       type = types.attrsOf types.str;
       default = { };
-      description = "Annotations to add to the rendered ArgoCD application.";
+      description = "Annotations to add to the controller object the presentation backend synthesizes for this application (e.g. the ArgoCD `Application`).";
     };
     labels = mkOption {
       type = types.attrsOf types.str;
       default = { };
-      description = "Labels to add to the rendered ArgoCD application.";
+      description = "Labels to add to the controller object the presentation backend synthesizes for this application (e.g. the ArgoCD `Application`).";
     };
     output = {
       path = mkOption {
