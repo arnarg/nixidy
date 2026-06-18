@@ -560,6 +560,39 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#updating-charts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating Charts
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Updating Charts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#optional-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optional fields
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#store-path-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Store path resolution
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -839,6 +872,39 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#updating-charts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating Charts
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Updating Charts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#optional-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optional fields
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#store-path-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Store path resolution
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -980,6 +1046,61 @@
     <span class="p">};</span>
   <span class="p">};</span>
 <span class="p">}</span>
+</code></pre></div>
+<h2 id="updating-charts">Updating Charts<a class="headerlink" href="#updating-charts" title="Permanent link">#</a></h2>
+<p>Each chart produced by <code>mkChartAttrs</code> carries an <code>updateScript</code> in its <code>passthru</code> that resolves the latest upstream version, recomputes the hash, and rewrites the chart's <code>default.nix</code> in place.</p>
+<p>To update all charts at once, wrap the chart tree with <code>mkChartsUpdateScript</code> and expose it as a flake app:</p>
+<div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
+  <span class="ss">outputs</span> <span class="o">=</span> <span class="p">{</span> self<span class="p">,</span> nixpkgs<span class="p">,</span> flake-utils<span class="p">,</span> nixidy<span class="p">,</span> <span class="o">...</span> <span class="p">}:</span>
+    flake-utils<span class="o">.</span>lib<span class="o">.</span>eachDefaultSystem <span class="p">(</span>system<span class="p">:</span>
+      <span class="k">let</span>
+        <span class="ss">pkgs</span> <span class="o">=</span> <span class="nb">import</span> nixpkgs <span class="p">{</span> <span class="k">inherit</span> system<span class="p">;</span> <span class="p">};</span>
+        <span class="k">inherit</span> <span class="p">(</span>pkgs<span class="p">)</span> lib<span class="p">;</span>
+      <span class="k">in</span> <span class="p">{</span>
+        apps<span class="o">.</span><span class="ss">updateCharts</span> <span class="o">=</span> <span class="p">{</span>
+          <span class="ss">type</span> <span class="o">=</span> <span class="s2">&quot;app&quot;</span><span class="p">;</span>
+          <span class="ss">program</span> <span class="o">=</span> lib<span class="o">.</span>getExe <span class="p">(</span>nixidy<span class="o">.</span>packages<span class="o">.</span><span class="si">${</span>system<span class="si">}</span><span class="o">.</span>mkChartsUpdateScript
+            <span class="p">(</span>nixidy<span class="o">.</span>packages<span class="o">.</span><span class="si">${</span>system<span class="si">}</span><span class="o">.</span>mkChartAttrs <span class="l">./charts</span><span class="p">));</span>
+        <span class="p">};</span>
+      <span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Then run:</p>
+<div class="highlight"><pre><span></span><code>nix<span class="w"> </span>run<span class="w"> </span>.#updateCharts
+</code></pre></div>
+<p>The script runs every chart's update script sequentially, continues past individual failures, and exits non-zero if any chart failed to update.</p>
+<details class="note">
+<summary>Using nixidy without flakes</summary>
+<p>Create a small derivation file and build it:</p>
+<div class="highlight"><span class="filename">update-charts.nix</span><pre><span></span><code><span class="k">let</span>
+  <span class="ss">sources</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./npins</span><span class="p">;</span>
+  <span class="ss">nixidy</span> <span class="o">=</span> <span class="nb">import</span> sources<span class="o">.</span>nixidy <span class="p">{};</span>
+<span class="k">in</span>
+  nixidy<span class="o">.</span>mkChartsUpdateScript <span class="p">(</span>nixidy<span class="o">.</span>mkChartAttrs <span class="l">./charts</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>nix-build<span class="w"> </span>update-charts.nix<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./result/bin/update-all-charts
+</code></pre></div>
+</details>
+<h3 id="optional-fields">Optional fields<a class="headerlink" href="#optional-fields" title="Permanent link">#</a></h3>
+<p>Two optional fields can be set in a chart's <code>default.nix</code> to control update behaviour:</p>
+<dl>
+<dt><code>versionConstraint</code></dt>
+<dd>A semver range (e.g. <code>"&gt;=4.7.0 &lt;5.0.0"</code>) passed to <code>helm show chart --version</code>. The updater resolves the latest version matching the constraint instead of the absolute latest.</dd>
+<dt><code>freeze</code></dt>
+<dd>When <code>true</code>, the updater skips this chart entirely. Useful for charts you want to pin manually.</dd>
+</dl>
+<div class="highlight"><span class="filename">./charts/argoproj/argo-cd/default.nix</span><pre><span></span><code><span class="p">{</span>
+  <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;https://argoproj.github.io/argo-helm/&quot;</span><span class="p">;</span>
+  <span class="ss">chart</span> <span class="o">=</span> <span class="s2">&quot;argo-cd&quot;</span><span class="p">;</span>
+  <span class="ss">version</span> <span class="o">=</span> <span class="s2">&quot;7.7.0&quot;</span><span class="p">;</span>
+  <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">&quot;sha256-...&quot;</span><span class="p">;</span>
+  <span class="ss">versionConstraint</span> <span class="o">=</span> <span class="s2">&quot;&gt;=7.0.0 &lt;8.0.0&quot;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="store-path-resolution">Store path resolution<a class="headerlink" href="#store-path-resolution" title="Permanent link">#</a></h3>
+<p>The update script edits files in your working tree. When <code>mkChartAttrs</code> is given a path inside your repository, the script automatically maps the store path back to the corresponding working-tree relative path.</p>
+<p>If the charts directory was copied into the store as a standalone entry, the working-tree path cannot be inferred. In that case set <code>CHARTS_DIR</code> at runtime:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">CHARTS_DIR</span><span class="o">=</span>./charts<span class="w"> </span>nix<span class="w"> </span>run<span class="w"> </span>.#updateCharts
 </code></pre></div>
 
 

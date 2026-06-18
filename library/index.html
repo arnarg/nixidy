@@ -793,6 +793,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#libhelmmkchartsupdatescript" class="md-nav__link">
+    <span class="md-ellipsis">
+      lib.helm.mkChartsUpdateScript
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#libkustomizebuildkustomization" class="md-nav__link">
     <span class="md-ellipsis">
       lib.kustomize.buildKustomization
@@ -930,6 +939,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#libhelmmkchartsupdatescript" class="md-nav__link">
+    <span class="md-ellipsis">
+      lib.helm.mkChartsUpdateScript
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#libkustomizebuildkustomization" class="md-nav__link">
     <span class="md-ellipsis">
       lib.kustomize.buildKustomization
@@ -1032,8 +1050,20 @@ with the output.</p>
   <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">&quot;sha256-EU2qaZglUU3vxa41l1p/2yBscksIhYMr8kSgH8t0vL8=&quot;</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>Two optional fields are recognised by the update script:</p>
+<ul>
+<li><code>versionConstraint</code>: a semver range (e.g. <code>"&gt;=4.7.0 &lt;5.0.0"</code>) passed to
+  <code>helm show chart --version</code> so the updater resolves the latest matching
+  release instead of the absolute latest.</li>
+<li><code>freeze</code>: when <code>true</code>, the update script skips this chart entirely.</li>
+</ul>
+<p>Each chart derivation carries a <code>passthru.updateScript</code> that resolves the
+latest upstream version (honouring <code>versionConstraint</code> and <code>freeze</code>) and
+rewrites the chart's <code>default.nix</code> in place. Use
+<a href="#libhelmmkchartsupdatescript">mkChartsUpdateScript</a> to run every chart's
+update script at once.</p>
 <dl>
-<dt><code>dir</code></dt>
+<dt><code>rootDir</code></dt>
 <dd>
 <p>Path to a directory containing the correct directory structure described above.</p>
 </dd>
@@ -1050,6 +1080,21 @@ with the output.</p>
     <span class="p">};</span>
   <span class="p">};</span>
 <span class="p">}</span>
+</code></pre></div>
+<h2 id="libhelmmkchartsupdatescript">lib.helm.mkChartsUpdateScript<a class="headerlink" href="#libhelmmkchartsupdatescript" title="Permanent link">#</a></h2>
+<p><strong>Type</strong>: <code>mkChartsUpdateScript :: AttrSet -&gt; Derivation</code></p>
+<p>Build a single shell script that runs every chart's <code>updateScript</code>
+sequentially. The script keeps going when an individual chart fails and
+exits non-zero at the end if any chart failed.</p>
+<dl>
+<dt><code>tree</code></dt>
+<dd>
+<p>Tree of helm chart derivations, as produced by <a href="#libhelmmkchartattrs">lib.helm.mkChartAttrs</a>.</p>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code>mkChartsUpdateScript <span class="p">(</span>mkChartAttrs <span class="l">./charts</span><span class="p">)</span>
+<span class="o">=&gt;</span> <span class="o">&lt;</span><span class="nb">derivation</span> update-all-charts<span class="o">&gt;</span>
 </code></pre></div>
 <h2 id="libkustomizebuildkustomization">lib.kustomize.buildKustomization<a class="headerlink" href="#libkustomizebuildkustomization" title="Permanent link">#</a></h2>
 <p><strong>Type</strong>: <code>buildKustomization :: AttrSet -&gt; Derivation</code></p>
