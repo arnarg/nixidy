@@ -136,12 +136,22 @@ let
     if f.rules == [ ] then labeled else "${labeled} | ${chainOf f.path f.resource f.rules}";
 
   applyClass =
-    class: pruneAllowlist:
+    class:
+    {
+      pruneAllowlist ? null,
+      prune ? true,
+      serverSide ? false,
+      forceConflicts ? false,
+    }:
     let
       files = lib.filter (f: f.class == class) applyFiles;
       allowlistFlag = lib.optionalString (
         pruneAllowlist != null
       ) ''--prune-allowlist "${pruneAllowlist}"'';
+      pruneFlags = lib.optionalString prune ''--prune --selector "${labelPrefix}/${class}=${env}" ${allowlistFlag}'';
+      serverSideFlags = lib.optionalString serverSide (
+        "--server-side" + lib.optionalString forceConflicts " --force-conflicts"
+      );
       stream =
         if files == [ ] then
           "printf -- '---\\n'"
@@ -153,7 +163,7 @@ let
       {
         ${stream}
       } | ${pkgs.kubectl}/bin/kubectl apply -f - \
-        --prune --selector "${labelPrefix}/${class}=${env}" ${allowlistFlag}
+        ${pruneFlags} ${serverSideFlags}
     '';
 
   # The generated `apply` script body (consumes environmentPackage, runs
@@ -166,9 +176,13 @@ let
 
     ${applyPostProcessNotice}
 
-    ${applyClass "crds" "apiextensions.k8s.io/v1/CustomResourceDefinition"}
-    ${applyClass "namespaces" "core/v1/Namespace"}
-    ${applyClass "manifests" null}
+    ${applyClass "crds" {
+      serverSide = true;
+      forceConflicts = true;
+      prune = false;
+    }}
+    ${applyClass "namespaces" { pruneAllowlist = "core/v1/Namespace"; }}
+    ${applyClass "manifests" { }}
   '';
 
   # Per-app post-process entries: one { path; resource; rules; } per

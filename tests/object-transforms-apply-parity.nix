@@ -105,6 +105,8 @@ in
           lib.hasInfix "set -eo pipefail" s
           && lib.hasInfix "kubectl apply -f -" s
           && lib.hasInfix ''--prune --selector "apps.nixidy.dev/manifests='' s
+          && lib.hasInfix "--server-side --force-conflicts" s
+          && !(lib.hasInfix ''--prune --selector "apps.nixidy.dev/crds='' s)
           && lib.hasInfix "SopsSecret-x-y.yaml" s
           && !(lib.hasInfix "crds.yml" s)
           && !(lib.hasInfix "namespaces.yml" s)
