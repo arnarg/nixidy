@@ -161,15 +161,20 @@ Core nixidy configuration:
     target.repository = mkOption { ... };      # Git repository URL
     target.branch = mkOption { ... };          # Target branch
     target.rootPath = mkOption { ... };        # Root path for manifests
-    defaults = { ... };                        # Default settings
-    appOfApps = { ... };                       # Bootstrap app config
+    defaults = { ... };                        # Default helm/kustomize settings
+    presentation.backend = mkOption { ... };   # GitOps backend key (argocd, flux, or a user backend)
+    presentation.argocd = { ... };             # ArgoCD backend config (app-of-apps + defaults)
     charts = mkOption { ... };                 # Helm chart sources
   };
 }
 ```
 
+> The old `nixidy.appOfApps.*` and the ArgoCD parts of `nixidy.defaults.*` still
+> work as deprecated aliases; their canonical home is now `nixidy.presentation.argocd`.
+> See `modules/presentation/` for the pluggable backend registry.
+
 Also handles:
-- App-of-apps pattern generation
+- App-of-apps generation (via the ArgoCD presentation backend)
 - Chart attribute set building
 - Public apps list management
 

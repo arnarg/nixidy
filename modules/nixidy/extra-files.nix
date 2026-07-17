@@ -60,7 +60,11 @@
   };
 
   config = lib.mkIf config.nixidy.bootstrapManifest.enable {
+    # The bootstrap manifest's filename is backend-specific (e.g. ArgoCD's
+    # `Application-<name>.yaml`), so the active presentation backend owns it via
+    # `nixidy.presentation.bootstrapManifestFile`; this generic module only
+    # mounts whatever file the backend names.
     nixidy.extraFiles."bootstrap.yaml".source =
-      "${config.build.bootstrapPackage}/Application-${config.nixidy.appOfApps.name}.yaml";
+      "${config.build.bootstrapPackage}/${config.nixidy.presentation.bootstrapManifestFile}";
   };
 }

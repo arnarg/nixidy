@@ -29,10 +29,14 @@ let
   applyLib = import ./apply.nix { inherit lib pkgs; };
 
   # App-name subsets the emitters draw from.
-  #   publicAppNames : every non-`__` app (includes the appOfApps app).
-  #   applyAppNames  : publicApps minus the appOfApps app (the declarative set).
+  #   publicAppNames : every non-`__` app (includes the app-of-apps app).
+  #   applyAppNames  : publicApps minus the app-of-apps app (the declarative set).
+  # NOTE: excluding the app-of-apps app by name is ArgoCD-presentation knowledge
+  # leaking into generic build/ — generalizing it (the backend declaring which
+  # synthetic apps are bootstrap roots) is a deferred cleanup. Until then, read
+  # the canonical (non-deprecated) backend option.
   publicAppNames = config.nixidy.publicApps;
-  applyAppNames = lib.filter (n: n != config.nixidy.appOfApps.name) publicAppNames;
+  applyAppNames = lib.filter (n: n != config.nixidy.presentation.argocd.name) publicAppNames;
 
   # Apply emitter result (declarative package + apply script + apply files) and
   # the activation post-process fragments shared with `activationPackage`.
