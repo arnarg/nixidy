@@ -25,6 +25,11 @@
       ./argo-finalizer-non-cascading.nix
       ./argo-syncpolicy-managed-namespace-metadata.nix
       ./argo-syncpolicy-retry.nix
+      ./presentation-argocd-aliases.nix
+      ./presentation-flux.nix
+      ./presentation-backend-dispatch.nix
+      ./presentation-user-backend.nix
+      ./bootstrap-manifest.nix
       ./yamls.nix
       ./extra-raw-yamls.nix
       ./override-name.nix
@@ -52,6 +57,8 @@
       ./kustomize/overlay.nix
       ./kustomize/resource-override.nix
       ./kustomize/flatten-lists.nix
-    ];
+    ]
+    # Two present-unit cases (argocd + flux) exported as a list of modules.
+    ++ import ./presentation-present-unit.nix;
   };
 }
