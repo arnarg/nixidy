@@ -258,7 +258,7 @@ let
 in
 pkgs.runCommand "k8s-${name}-gen.nix"
   {
-    buildInputs = [ pkgs.nixfmt-rfc-style ];
+    buildInputs = [ pkgs.nixfmt ];
   }
   ''
     cat << 'GENERATED' > ./raw.nix
