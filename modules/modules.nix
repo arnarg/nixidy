@@ -1,5 +1,6 @@
 [
   ./applications.nix
   ./nixidy
-  ./build.nix
+  ./presentation
+  ./build
 ]
