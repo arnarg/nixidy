@@ -1859,10 +1859,12 @@ resources<span class="o">.</span>ingresses<span class="o">.</span><span class="s
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Key responsibilities:
-- Creates application submodules
-- Manages Kubernetes version selection (<code>nixidy.k8sVersion</code>)
-- Imports generated resource options</p>
+<p>Key responsibilities:</p>
+<ul>
+<li>Creates application submodules</li>
+<li>Manages Kubernetes version selection (<code>nixidy.k8sVersion</code>)</li>
+<li>Imports generated resource options</li>
+</ul>
 <h4 id="modulesnixidy"><code>modules/nixidy/</code><a class="headerlink" href="#modulesnixidy" title="Permanent link">#</a></h4>
 <p>Core nixidy configuration, split across several files. <code>default.nix</code> defines the
 main options and imports the rest:</p>
@@ -1886,10 +1888,12 @@ main options and imports the rest:</p>
 <li><code>extra-files.nix</code>: extra files (<code>nixidy.extraFiles</code>) rendered into the output</li>
 <li><code>transforms.nix</code>: the <code>objectTransforms</code> rule type, matcher, and assertions</li>
 </ul>
-<p>Also handled here:
-- Chart attribute set building (from <code>nixidy.chartsDir</code>)
-- Public apps list management
-- Global assertions and warnings</p>
+<p>Also handled here:</p>
+<ul>
+<li>Chart attribute set building (from <code>nixidy.chartsDir</code>)</li>
+<li>Public apps list management</li>
+<li>Global assertions and warnings</li>
+</ul>
 <h4 id="modulesapplicationsdefaultnix"><code>modules/applications/default.nix</code><a class="headerlink" href="#modulesapplicationsdefaultnix" title="Permanent link">#</a></h4>
 <p>Defines individual application options:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
@@ -1912,10 +1916,12 @@ main options and imports the rest:</p>
 <li><code>modules/applications/objects.nix</code>: the resource type registry (<code>types</code>),
   typed <code>resources</code>, and the internal final <code>objects</code> list</li>
 </ul>
-<p>Key responsibilities:
-- Application metadata and settings
-- Resource type registration
-- Final object list generation</p>
+<p>Key responsibilities:</p>
+<ul>
+<li>Application metadata and settings</li>
+<li>Resource type registration</li>
+<li>Final object list generation</li>
+</ul>
 <h4 id="modulesapplicationshelmnix"><code>modules/applications/helm.nix</code><a class="headerlink" href="#modulesapplicationshelmnix" title="Permanent link">#</a></h4>
 <p>Helm chart integration:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
@@ -1930,13 +1936,15 @@ main options and imports the rest:</p>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Processing flow:
-1. <code>helm.buildHelmChart</code> templates the chart
-2. <code>builtins.readFile</code> reads output
-3. <code>kube.fromYAML</code> parses to attribute sets
-4. <code>transformer</code> function applied
-5. <code>partitionObjects</code> (from <code>lib.nix</code>) groups objects by GVK
-6. Added to <code>resources</code> or <code>objects</code></p>
+<p>Processing flow:</p>
+<ol>
+<li><code>helm.buildHelmChart</code> templates the chart</li>
+<li><code>builtins.readFile</code> reads output</li>
+<li><code>kube.fromYAML</code> parses to attribute sets</li>
+<li><code>transformer</code> function applied</li>
+<li><code>partitionObjects</code> (from <code>lib.nix</code>) groups objects by GVK</li>
+<li>Added to <code>resources</code> or <code>objects</code></li>
+</ol>
 <h4 id="modulesapplicationskustomizenix"><code>modules/applications/kustomize.nix</code><a class="headerlink" href="#modulesapplicationskustomizenix" title="Permanent link">#</a></h4>
 <p>Kustomize integration (similar pattern to Helm):</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
@@ -2093,9 +2101,11 @@ main options and imports the rest:</p>
 </table>
 <h2 id="code-generators">Code Generators<a class="headerlink" href="#code-generators" title="Permanent link">#</a></h2>
 <h3 id="overview-pkgsgenerators">Overview (<code>pkgs/generators/</code>)<a class="headerlink" href="#overview-pkgsgenerators" title="Permanent link">#</a></h3>
-<p>Nixidy generates typed Nix options from:
-1. Kubernetes OpenAPI schemas
-2. Custom Resource Definitions (CRDs)</p>
+<p>Nixidy generates typed Nix options from:</p>
+<ol>
+<li>Kubernetes OpenAPI schemas</li>
+<li>Custom Resource Definitions (CRDs)</li>
+</ol>
 <h3 id="kubernetes-schema-generation">Kubernetes Schema Generation<a class="headerlink" href="#kubernetes-schema-generation" title="Permanent link">#</a></h3>
 <p><code>pkgs/generators/default.nix</code> wires everything together and acquisition lives in <code>pkgs/generators/sources/</code>:</p>
 <ol>
@@ -2167,11 +2177,13 @@ fromChartCRD <span class="p">{</span>
 <p>The overloaded <code>crds</code> argument was split: source-based accessors now take <code>crdFiles</code> (the list of YAML files) and chart-based accessors take <code>kindFilter</code> (the kind filter). <code>crds</code> remains as a deprecated alias on every accessor (resolved by the shared <code>renamedArg</code> helper, which warns and points at the new name).</p>
 </div>
 <h3 id="crd-processing-crd2jsonschemapy">CRD Processing (<code>crd2jsonschema.py</code>)<a class="headerlink" href="#crd-processing-crd2jsonschemapy" title="Permanent link">#</a></h3>
-<p>Python script that:
-1. Reads CRD YAML files
-2. Extracts OpenAPI v3 schemas
-3. Flattens <code>$ref</code> references
-4. Outputs JSON schema for the shared walk (<code>compile/walk.nix</code>)</p>
+<p>Python script that:</p>
+<ol>
+<li>Reads CRD YAML files</li>
+<li>Extracts OpenAPI v3 schemas</li>
+<li>Flattens <code>$ref</code> references</li>
+<li>Outputs JSON schema for the shared walk (<code>compile/walk.nix</code>)</li>
+</ol>
 <h2 id="testing-framework">Testing Framework<a class="headerlink" href="#testing-framework" title="Permanent link">#</a></h2>
 <h3 id="module-tests-tests">Module Tests (<code>tests/</code>)<a class="headerlink" href="#module-tests-tests" title="Permanent link">#</a></h3>
 <p>Located in <code>tests/</code>, using nixidy's testing framework.</p>
@@ -2320,9 +2332,9 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
 <h2 id="adding-new-features">Adding New Features<a class="headerlink" href="#adding-new-features" title="Permanent link">#</a></h2>
 <h3 id="adding-a-new-application-option">Adding a New Application Option<a class="headerlink" href="#adding-a-new-application-option" title="Permanent link">#</a></h3>
 <ol>
-<li><strong>Define the option</strong> in <code>modules/applications/default.nix</code>:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<li>
+<p><strong>Define the option</strong> in <code>modules/applications/default.nix</code>:
+  <div class="highlight"><pre><span></span><code><span class="p">{</span>
   <span class="ss">options</span> <span class="o">=</span> <span class="p">{</span>
     <span class="ss">myNewOption</span> <span class="o">=</span> mkOption <span class="p">{</span>
       <span class="ss">type</span> <span class="o">=</span> types<span class="o">.</span>bool<span class="p">;</span>
@@ -2331,20 +2343,20 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
     <span class="p">};</span>
   <span class="p">};</span>
 <span class="p">}</span>
-</code></pre></div>
-<ol>
-<li><strong>Use the option</strong> in config:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Use the option</strong> in config:
+  <div class="highlight"><pre><span></span><code><span class="p">{</span>
   <span class="ss">config</span> <span class="o">=</span> lib<span class="o">.</span>mkIf config<span class="o">.</span>myNewOption <span class="p">{</span>
     <span class="c1"># Configuration when option is enabled</span>
   <span class="p">};</span>
 <span class="p">}</span>
-</code></pre></div>
-<ol>
-<li><strong>Write tests</strong> in <code>tests/</code>:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><span class="c1"># tests/my-new-option.nix</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Write tests</strong> in <code>tests/</code>:
+  <div class="highlight"><pre><span></span><code><span class="c1"># tests/my-new-option.nix</span>
 <span class="p">{</span>
   applications<span class="o">.</span><span class="ss">test1</span> <span class="o">=</span> <span class="p">{</span>
     <span class="ss">myNewOption</span> <span class="o">=</span> <span class="no">true</span><span class="p">;</span>
@@ -2357,8 +2369,8 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
     <span class="ss">assertions</span> <span class="o">=</span> <span class="p">[</span> <span class="o">...</span> <span class="p">];</span>
   <span class="p">};</span>
 <span class="p">}</span>
-</code></pre></div>
-<ol>
+</code></pre></div></p>
+</li>
 <li>
 <p><strong>Register test</strong> in <code>tests/default.nix</code></p>
 </li>
@@ -2368,9 +2380,9 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
 </ol>
 <h3 id="adding-a-new-library-function">Adding a New Library Function<a class="headerlink" href="#adding-a-new-library-function" title="Permanent link">#</a></h3>
 <ol>
-<li><strong>Add function</strong> to appropriate file in <code>lib/</code>:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><span class="c1"># lib/kube.nix</span>
+<li>
+<p><strong>Add function</strong> to appropriate file in <code>lib/</code>:
+  <div class="highlight"><pre><span></span><code><span class="c1"># lib/kube.nix</span>
 <span class="p">{</span>
   <span class="ss">myNewFunction</span> <span class="o">=</span>
     <span class="c1"># Parameter description</span>
@@ -2378,11 +2390,11 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
     <span class="c1"># Implementation</span>
     <span class="o">...</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre></div>
-<ol>
-<li><strong>Add documentation</strong> as comments:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><span class="cm">/*</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Add documentation</strong> as comments:
+  <div class="highlight"><pre><span></span><code><span class="cm">/*</span>
 <span class="cm">  Description of function.</span>
 
 <span class="cm">  Type:</span>
@@ -2393,11 +2405,11 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
 <span class="cm">    =&gt; &quot;output&quot;</span>
 <span class="cm">*/</span>
 <span class="ss">myNewFunction</span> <span class="o">=</span> <span class="o">...</span><span class="p">;</span>
-</code></pre></div>
-<ol>
-<li><strong>Write tests</strong> in <code>lib/tests.nix</code>:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Write tests</strong> in <code>lib/tests.nix</code>:
+  <div class="highlight"><pre><span></span><code><span class="p">{</span>
   <span class="ss">kube</span> <span class="o">=</span> <span class="p">{</span>
     <span class="ss">myNewFunction</span> <span class="o">=</span> <span class="p">{</span>
       <span class="ss">testBasicCase</span> <span class="o">=</span> <span class="p">{</span>
@@ -2407,13 +2419,15 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
     <span class="p">};</span>
   <span class="p">};</span>
 <span class="p">}</span>
-</code></pre></div>
+</code></pre></div></p>
+</li>
+</ol>
 <h3 id="adding-a-new-resource-processor">Adding a New Resource Processor<a class="headerlink" href="#adding-a-new-resource-processor" title="Permanent link">#</a></h3>
 <p>Similar to Helm/Kustomize, create a new module:</p>
 <ol>
-<li><strong>Create module</strong> <code>modules/applications/myprocessor.nix</code>:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<li>
+<p><strong>Create module</strong> <code>modules/applications/myprocessor.nix</code>:
+  <div class="highlight"><pre><span></span><code><span class="p">{</span>
   nixidyDefaults<span class="p">,</span>
   lib<span class="p">,</span>
   config<span class="p">,</span>
@@ -2433,11 +2447,11 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
     <span class="ss">objects</span> <span class="o">=</span> <span class="p">[</span> <span class="o">...</span> <span class="p">];</span>
   <span class="p">};</span>
 <span class="p">}</span>
-</code></pre></div>
-<ol>
-<li><strong>Import</strong> in <code>modules/applications/default.nix</code>:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Import</strong> in <code>modules/applications/default.nix</code>:
+  <div class="highlight"><pre><span></span><code><span class="p">{</span>
   <span class="ss">imports</span> <span class="o">=</span> <span class="p">[</span>
     <span class="l">./helm.nix</span>
     <span class="l">./kustomize.nix</span>
@@ -2447,13 +2461,15 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
     <span class="l">./myprocessor.nix</span>  <span class="c1"># Add here</span>
   <span class="p">];</span>
 <span class="p">}</span>
-</code></pre></div>
+</code></pre></div></p>
+</li>
+</ol>
 <h2 id="common-tasks">Common Tasks<a class="headerlink" href="#common-tasks" title="Permanent link">#</a></h2>
 <h3 id="updating-kubernetes-versions">Updating Kubernetes Versions<a class="headerlink" href="#updating-kubernetes-versions" title="Permanent link">#</a></h3>
 <ol>
-<li>Edit <code>pkgs/generators/sources/versions.nix</code>:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<li>
+<p>Edit <code>pkgs/generators/sources/versions.nix</code>:
+  <div class="highlight"><pre><span></span><code><span class="p">{</span>
   <span class="s2">&quot;1.37.0&quot;</span> <span class="o">=</span> <span class="p">{</span>
     <span class="ss">hash</span> <span class="o">=</span> <span class="s2">&quot;sha256-...&quot;</span><span class="p">;</span>
     <span class="ss">spec</span> <span class="o">=</span> <span class="s2">&quot;api/openapi-spec/swagger.json&quot;</span><span class="p">;</span>
@@ -2463,22 +2479,24 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
     <span class="p">};</span>
   <span class="p">};</span>
 <span class="p">}</span>
-</code></pre></div>
-<ol>
-<li>Regenerate:</li>
-</ol>
-<div class="highlight"><pre><span></span><code>nix<span class="w"> </span>run<span class="w"> </span>.#generate
-</code></pre></div>
-<ol>
-<li>Update default version in <code>modules/applications.nix</code> if needed (the
+</code></pre></div></p>
+</li>
+<li>
+<p>Regenerate:
+  <div class="highlight"><pre><span></span><code>nix<span class="w"> </span>run<span class="w"> </span>.#generate
+</code></pre></div></p>
+</li>
+<li>
+<p>Update default version in <code>modules/applications.nix</code> if needed (the
    <code>nixidy.k8sVersion</code> enum is derived automatically from the generated files
-   in <code>modules/generated/k8s/</code>)</li>
+   in <code>modules/generated/k8s/</code>)</p>
+</li>
 </ol>
 <h3 id="adding-a-new-sync-option">Adding a New Sync Option<a class="headerlink" href="#adding-a-new-sync-option" title="Permanent link">#</a></h3>
 <ol>
-<li>Add option in <code>modules/applications/argocd.nix</code> under <code>syncPolicy.syncOptions</code>:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<li>
+<p>Add option in <code>modules/applications/argocd.nix</code> under <code>syncPolicy.syncOptions</code>:
+  <div class="highlight"><pre><span></span><code><span class="p">{</span>
   syncPolicy<span class="o">.</span>syncOptions<span class="o">.</span><span class="ss">myOption</span> <span class="o">=</span> mkOption <span class="p">{</span>
     <span class="ss">type</span> <span class="o">=</span> types<span class="o">.</span>bool<span class="p">;</span>
     <span class="ss">default</span> <span class="o">=</span> <span class="no">false</span><span class="p">;</span>
@@ -2486,8 +2504,8 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
     <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;Description&quot;</span><span class="p">;</span>
   <span class="p">};</span>
 <span class="p">}</span>
-</code></pre></div>
-<ol>
+</code></pre></div></p>
+</li>
 <li>
 <p>The <code>apply</code> function converts to ArgoCD sync option format</p>
 </li>
