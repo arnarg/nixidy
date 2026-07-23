@@ -19,10 +19,13 @@ This guide provides a comprehensive overview of the nixidy codebase to help new 
 
 ```
 nixidy/
+├── actions/                # GitHub Actions (build, switch)
 ├── cli/                    # Python-based CLI tool
 ├── docs/                   # Documentation (MkDocs)
+│   ├── developer_guide/    # Contributor-facing documentation
 │   └── user_guide/         # User-facing documentation
 ├── lib/                    # Nix function library
+│   ├── helpers/            # Helper scripts (e.g. update-chart.sh)
 │   ├── default.nix         # Library entry point
 │   ├── helm.nix            # Helm-related functions
 │   ├── kube.nix            # Kubernetes utility functions
@@ -31,35 +34,47 @@ nixidy/
 ├── modules/                # NixOS-style modules
 │   ├── applications/       # Application submodule
 │   │   ├── default.nix     # Application options and config
+│   │   ├── argocd.nix      # ArgoCD options (syncPolicy, destination, ...)
 │   │   ├── helm.nix        # Helm release processing
 │   │   ├── kustomize.nix   # Kustomize processing
 │   │   ├── lib.nix         # Application helper functions
+│   │   ├── objects.nix     # Resource type registry and final object list
 │   │   └── yamls.nix       # Raw YAML processing
 │   ├── generated/          # Auto-generated resource options
 │   │   ├── argocd.nix      # ArgoCD CRD options
 │   │   └── k8s/            # Kubernetes resource options by version
+│   ├── nixidy/             # Core nixidy configuration
+│   │   ├── default.nix     # Core options (env, target, charts, ...)
+│   │   ├── app-of-apps.nix # App-of-apps pattern generation
+│   │   ├── defaults.nix    # Default settings (`nixidy.defaults`)
+│   │   ├── extra-files.nix # Extra files configuration
+│   │   └── transforms.nix  # objectTransforms rule engine
 │   ├── testing/            # Testing framework modules
 │   │   ├── default.nix     # Test suite configuration
 │   │   └── eval.nix        # Test evaluation logic
 │   ├── applications.nix    # Main applications option
 │   ├── build.nix           # Build output packages
 │   ├── default.nix         # Module entry point
-│   ├── extra-files.nix     # Extra files configuration
 │   ├── modules.nix         # Module list
-│   ├── nixidy.nix          # Core nixidy options
 │   └── templates.nix       # Template system
-├── nixidy/                 # Legacy bash CLI (deprecated)
 ├── pkgs/                   # Nix packages and generators
 │   └── generators/         # CRD and K8s schema generators
-│       ├── crd2jsonschema.py   # CRD to JSON schema converter
-│       ├── default.nix         # Generator entry point (accessors)
-│       ├── walk.nix            # Shared schema traversal (backend-parameterized)
-│       ├── backend-text.nix    # Text backend — emits Nix source
-│       ├── backend-value.nix   # Value backend — live module values
-│       ├── generator.nix       # File assembler (text backend → .nix file)
-│       ├── module.nix          # Module assembler (value backend → module value)
-│       ├── runtime.nix         # Runtime helpers as values (for module.nix)
-│       └── versions.nix        # Kubernetes versions config
+│       ├── compile/            # Schema → options compilation
+│       │   ├── walk.nix            # Shared schema traversal (backend-parameterized)
+│       │   ├── backend-text.nix    # Text backend: emits Nix source
+│       │   ├── backend-value.nix   # Value backend: live module values
+│       │   ├── generator.nix       # File assembler (text backend → .nix file)
+│       │   ├── module.nix          # Module assembler (value backend → module value)
+│       │   └── runtime.nix         # Runtime helpers as values (for module.nix)
+│       ├── sources/            # Schema acquisition
+│       │   ├── versions.nix        # Kubernetes versions config
+│       │   ├── k8s.nix             # Kubernetes OpenAPI spec acquisition
+│       │   ├── crd.nix             # CRD file acquisition
+│       │   └── chart.nix           # Helm chart CRD acquisition
+│       ├── crd2jsonschema.py       # CRD to JSON schema converter
+│       ├── default.nix             # Generator entry point (accessors)
+│       ├── equiv-test.nix          # Accessor equivalence checks
+│       └── test_crd2jsonschema.py  # crd2jsonschema unit tests
 ├── tests/                  # Module unit tests
 │   ├── helm/               # Helm-specific tests
 │   ├── kustomize/          # Kustomize-specific tests
@@ -75,6 +90,7 @@ nixidy/
 Nixidy is built on top of the NixOS module system. If you're unfamiliar with it, read the [NixOS Module System documentation](https://nixos.org/manual/nixos/stable/#sec-writing-modules) first.
 
 Key concepts:
+
 - **Options**: Define the configuration interface with types, defaults, and descriptions
 - **Config**: Contains the actual configuration values after module evaluation
 - **Imports**: Modules can import other modules to extend functionality
@@ -150,9 +166,10 @@ Key responsibilities:
 - Manages Kubernetes version selection (`nixidy.k8sVersion`)
 - Imports generated resource options
 
-#### `modules/nixidy.nix`
+#### `modules/nixidy/`
 
-Core nixidy configuration:
+Core nixidy configuration, split across several files. `default.nix` defines the
+main options and imports the rest:
 
 ```nix
 {
@@ -161,17 +178,25 @@ Core nixidy configuration:
     target.repository = mkOption { ... };      # Git repository URL
     target.branch = mkOption { ... };          # Target branch
     target.rootPath = mkOption { ... };        # Root path for manifests
-    defaults = { ... };                        # Default settings
-    appOfApps = { ... };                       # Bootstrap app config
+    build.revision = mkOption { ... };         # Revision written to `.revision`
+    objectTransforms = mkOption { ... };       # Env-wide transform rules
     charts = mkOption { ... };                 # Helm chart sources
+    chartsDir = mkOption { ... };              # Directory to build charts from
   };
 }
 ```
 
-Also handles:
-- App-of-apps pattern generation
-- Chart attribute set building
+The directory also contains:
+
+- `defaults.nix`: default settings (`nixidy.defaults`, e.g. default transformers)
+- `app-of-apps.nix`: bootstrap app-of-apps pattern generation
+- `extra-files.nix`: extra files (`nixidy.extraFiles`) rendered into the output
+- `transforms.nix`: the `objectTransforms` rule type, matcher, and assertions
+
+Also handled here:
+- Chart attribute set building (from `nixidy.chartsDir`)
 - Public apps list management
+- Global assertions and warnings
 
 #### `modules/applications/default.nix`
 
@@ -183,17 +208,24 @@ Defines individual application options:
     name = mkOption { ... };
     namespace = mkOption { ... };
     createNamespace = mkOption { ... };
-    syncPolicy = { ... };
-    destination = { ... };
-    resources = { ... };  # Typed Kubernetes resources
-    objects = mkOption { ... };  # Internal: final resource list
+    project = mkOption { ... };
+    annotations = mkOption { ... };
+    labels = mkOption { ... };
+    objectTransforms = mkOption { ... };  # App-scoped transform rules
+    assertions = mkOption { ... };        # Build-time assertions
   };
 }
 ```
 
+Related options live in sibling modules:
+
+- `modules/applications/argocd.nix`: ArgoCD-specific options (`syncPolicy`,
+  `destination`, `compareOptions`, `finalizer`)
+- `modules/applications/objects.nix`: the resource type registry (`types`),
+  typed `resources`, and the internal final `objects` list
+
 Key responsibilities:
 - Application metadata and settings
-- Sync policy configuration
 - Resource type registration
 - Final object list generation
 
@@ -220,7 +252,7 @@ Processing flow:
 2. `builtins.readFile` reads output
 3. `kube.fromYAML` parses to attribute sets
 4. `transformer` function applied
-5. Objects grouped by GVK
+5. `partitionObjects` (from `lib.nix`) groups objects by GVK
 6. Added to `resources` or `objects`
 
 #### `modules/applications/kustomize.nix`
@@ -251,6 +283,9 @@ Raw YAML manifest support:
     type = listOf str;
     description = "List of YAML manifest strings";
   };
+
+  # Also: extraRawYamls that are YAML files copied verbatim into
+  # the output directory (not parsed into Nix, so they can't be patched)
 }
 ```
 
@@ -259,6 +294,7 @@ Raw YAML manifest support:
 Creates output packages:
 
 - `environmentPackage`: All application manifests combined
+- `extrasPackage`: Extra files from `nixidy.extraFiles`
 - `activationPackage`: For `nixidy switch` operations
 - `declarativePackage`: For `kubectl apply --prune`. Emits an `apply` script that consumes `environmentPackage` and runs `objectTransforms` `postProcess` rules at apply time; it no longer renders standalone manifest files.
 - `bootstrapPackage`: App-of-apps manifest
@@ -301,6 +337,15 @@ applications.myapp.templates.webApp.frontend = {
 
   # Flatten *List objects (e.g., ConfigMapList → [ConfigMap, ...])
   flattenListObjects = ...;
+
+  # Split a flat object list into typed `resources` (registered GVKs) and
+  # untyped `objects`. This is the single intake path shared by the helm,
+  # kustomize, and yamls modules
+  partitionObjects = ...;
+
+  # Manifest filename stem for an object: `<Kind>-<dashed-name>`.
+  # Used by both `build.nix` and `yamls.nix` so they always agree
+  objectBaseName = ...;
 }
 ```
 
@@ -352,35 +397,36 @@ Nixidy generates typed Nix options from:
 
 ### Kubernetes Schema Generation
 
-`pkgs/generators/default.nix` handles K8s schema generation:
+`pkgs/generators/default.nix` wires everything together and acquisition lives in `pkgs/generators/sources/`:
 
-1. Fetches Kubernetes source for each version in `versions.nix`
-2. Extracts OpenAPI swagger spec
+1. `sources/versions.nix` lists the Kubernetes versions and their source hashes
+2. `sources/k8s.nix` fetches the Kubernetes source for each version and extracts
+   the OpenAPI swagger spec
 3. Generates namespaced resource info
-4. Produces Nix options via `generator.nix`
+4. Produces Nix options via `compile/generator.nix`
 
 Output: `modules/generated/k8s/v1.XX.nix`
 
 ### Shared schema walk and backends
 
-The schema-to-options logic lives in one place, `walk.nix`, parameterized over a *backend* so the same traversal can produce either Nix **source text** or live module **values**:
+The schema-to-options logic lives in one place, `compile/walk.nix`, parameterized over a *backend* so the same traversal can produce either Nix **source text** or live module **values**:
 
-- `walk.nix` — the single traversal of the (JSON) schema. All type/coercion branch logic (int-or-string, `additionalProperties`→`attrsOf`, coerce-by-name lists, patch-merge-key, `skipCoerceToList`, `specialMapKeys`, nested submodules, etc.) lives here, expressed against an abstract backend `b`.
-- `backend-text.nix` — emits Nix **source**. Used by the file generators; it also inlines the runtime helpers (see below) as source so committed standalone files stay self-contained.
-- `backend-value.nix` — produces live module **values** using `runtime.nix`.
-- `generator.nix` — thin assembler over the text backend (renders + `nixfmt` + writes a `.nix` file).
-- `module.nix` — thin assembler over the value backend (returns a module function).
-- `runtime.nix` — the per-generated-module runtime helpers (`coercedTo`, `mergeValuesByKey`, `submoduleForDefinition`, …) as **values**, imported by the value backend. The text backend inlines source-form equivalents of these same helpers. Only the *walk* is single-sourced; the helpers must exist in both forms because live values can't be serialized back to source and committed files can't reference nixidy internals.
+- `compile/walk.nix` - the single traversal of the (JSON) schema. All type/coercion branch logic (int-or-string, `additionalProperties`→`attrsOf`, coerce-by-name lists, patch-merge-key, `skipCoerceToList`, `specialMapKeys`, nested submodules, etc.) lives here, expressed against an abstract backend `b`.
+- `compile/backend-text.nix` - emits Nix **source**. Used by the file generators; it also inlines the runtime helpers (see below) as source so committed standalone files stay self-contained.
+- `compile/backend-value.nix` - produces live module **values** using `runtime.nix`.
+- `compile/generator.nix` - thin assembler over the text backend (renders + `nixfmt` + writes a `.nix` file).
+- `compile/module.nix` - thin assembler over the value backend (returns a module function).
+- `compile/runtime.nix` - the per-generated-module runtime helpers (`coercedTo`, `mergeValuesByKey`, `submoduleForDefinition`, …) as **values**, imported by the value backend. The text backend inlines source-form equivalents of these same helpers. Only the *walk* is single-sourced; the helpers must exist in both forms because live values can't be serialized back to source and committed files can't reference nixidy internals.
 
 ### CRD Generation
 
 CRD accessors form a matrix over output shape × source, all built on the shared walk:
 
-| | source files (`src`) | Helm chart |
+| output | source files (`src`) | Helm chart |
 | --- | --- | --- |
-| → generated file | `fromCRD` | `fromChartCRD` |
-| → module value | `fromCRDModule` | `fromChartCRDModule` |
-| → raw objects | `crdObjects` | `crdObjectsFromChart` |
+| generated file | `fromCRD` | `fromChartCRD` |
+| module value | `fromCRDModule` | `fromChartCRDModule` |
+| raw objects | `crdObjects` | `crdObjectsFromChart` |
 
 ```nix
 fromCRD {
@@ -412,7 +458,7 @@ Python script that:
 1. Reads CRD YAML files
 2. Extracts OpenAPI v3 schemas
 3. Flattens `$ref` references
-4. Outputs JSON schema for the shared walk (`walk.nix`)
+4. Outputs JSON schema for the shared walk (`compile/walk.nix`)
 
 ## Testing Framework
 
@@ -529,6 +575,12 @@ nix run .#libTests
 
 # Run module tests
 nix run .#moduleTests
+
+# Run crd2jsonschema unit tests
+nix run .#crd2jsonschemaTest
+
+# Assert CRD file/module/objects accessors agree with each other
+nix run .#crdAccessorTest
 
 # Generate Kubernetes modules
 nix run .#generate
@@ -713,6 +765,8 @@ in
     ./helm.nix
     ./kustomize.nix
     ./yamls.nix
+    ./argocd.nix
+    ./objects.nix
     ./myprocessor.nix  # Add here
   ];
 }
@@ -722,15 +776,15 @@ in
 
 ### Updating Kubernetes Versions
 
-1. Edit `pkgs/generators/versions.nix`:
+1. Edit `pkgs/generators/sources/versions.nix`:
 
 ```nix
 {
-  "1.34.0" = {
+  "1.37.0" = {
     hash = "sha256-...";
     spec = "api/openapi-spec/swagger.json";
     discovery = {
-      core = "api/discovery/core_v1.json";
+      core = "api/discovery/api__v1.json";
       aggregated = "api/discovery/aggregated_v2.json";
     };
   };
@@ -743,11 +797,13 @@ in
 nix run .#generate
 ```
 
-3. Update default version in `modules/applications.nix` if needed
+3. Update default version in `modules/applications.nix` if needed (the
+   `nixidy.k8sVersion` enum is derived automatically from the generated files
+   in `modules/generated/k8s/`)
 
 ### Adding a New Sync Option
 
-1. Add option in `modules/applications/default.nix` under `syncPolicy.syncOptions`:
+1. Add option in `modules/applications/argocd.nix` under `syncPolicy.syncOptions`:
 
 ```nix
 {
@@ -790,7 +846,7 @@ Or use `lib.debug.traceValSeqN`:
 
 ### Nix
 
-- **Format**: Use `nix fmt` (nixfmt-rfc-style)
+- **Format**: Use `nix fmt` (nixfmt)
 - **Sorting**: Keep attribute sets alphabetically sorted
 - **Inherit**: Use `inherit` where possible to reduce verbosity
 - **Imports**: Group imports logically
@@ -852,12 +908,12 @@ Key files for different tasks:
 | Task | Files |
 |------|-------|
 | Add application option | `modules/applications/default.nix` |
-| Add nixidy option | `modules/nixidy.nix` |
+| Add nixidy option | `modules/nixidy/` |
 | Add library function | `lib/*.nix` |
 | Add resource processor | `modules/applications/` |
 | Add template feature | `modules/templates.nix` |
 | Modify build output | `modules/build.nix` |
-| Add K8s version | `pkgs/generators/versions.nix` |
+| Add K8s version | `pkgs/generators/sources/versions.nix` |
 | Write module test | `tests/*.nix`, `tests/default.nix` |
 | Write library test | `lib/tests.nix` |
 

@@ -147,15 +147,6 @@
             program = self.moduleTests.${system}.reportScript.outPath;
           };
 
-          # Run shellcheck on nixidy cli
-          cliTest = {
-            type = "app";
-            program =
-              (pkgs.writeShellScript "cli-shellcheck-test" ''
-                ${pkgs.shellcheck}/bin/shellcheck ${self.packages.${system}.default}/bin/nixidy
-              '').outPath;
-          };
-
           # Run tests for crd2jsonschema
           crd2jsonschemaTest = {
             type = "app";
