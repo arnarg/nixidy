@@ -1739,10 +1739,13 @@
 </ul>
 <h2 id="project-structure">Project Structure<a class="headerlink" href="#project-structure" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code>nixidy/
+├── actions/                # GitHub Actions (build, switch)
 ├── cli/                    # Python-based CLI tool
 ├── docs/                   # Documentation (MkDocs)
+│   ├── developer_guide/    # Contributor-facing documentation
 │   └── user_guide/         # User-facing documentation
 ├── lib/                    # Nix function library
+│   ├── helpers/            # Helper scripts (e.g. update-chart.sh)
 │   ├── default.nix         # Library entry point
 │   ├── helm.nix            # Helm-related functions
 │   ├── kube.nix            # Kubernetes utility functions
@@ -1751,35 +1754,47 @@
 ├── modules/                # NixOS-style modules
 │   ├── applications/       # Application submodule
 │   │   ├── default.nix     # Application options and config
+│   │   ├── argocd.nix      # ArgoCD options (syncPolicy, destination, ...)
 │   │   ├── helm.nix        # Helm release processing
 │   │   ├── kustomize.nix   # Kustomize processing
 │   │   ├── lib.nix         # Application helper functions
+│   │   ├── objects.nix     # Resource type registry and final object list
 │   │   └── yamls.nix       # Raw YAML processing
 │   ├── generated/          # Auto-generated resource options
 │   │   ├── argocd.nix      # ArgoCD CRD options
 │   │   └── k8s/            # Kubernetes resource options by version
+│   ├── nixidy/             # Core nixidy configuration
+│   │   ├── default.nix     # Core options (env, target, charts, ...)
+│   │   ├── app-of-apps.nix # App-of-apps pattern generation
+│   │   ├── defaults.nix    # Default settings (`nixidy.defaults`)
+│   │   ├── extra-files.nix # Extra files configuration
+│   │   └── transforms.nix  # objectTransforms rule engine
 │   ├── testing/            # Testing framework modules
 │   │   ├── default.nix     # Test suite configuration
 │   │   └── eval.nix        # Test evaluation logic
 │   ├── applications.nix    # Main applications option
 │   ├── build.nix           # Build output packages
 │   ├── default.nix         # Module entry point
-│   ├── extra-files.nix     # Extra files configuration
 │   ├── modules.nix         # Module list
-│   ├── nixidy.nix          # Core nixidy options
 │   └── templates.nix       # Template system
-├── nixidy/                 # Legacy bash CLI (deprecated)
 ├── pkgs/                   # Nix packages and generators
 │   └── generators/         # CRD and K8s schema generators
-│       ├── crd2jsonschema.py   # CRD to JSON schema converter
-│       ├── default.nix         # Generator entry point (accessors)
-│       ├── walk.nix            # Shared schema traversal (backend-parameterized)
-│       ├── backend-text.nix    # Text backend — emits Nix source
-│       ├── backend-value.nix   # Value backend — live module values
-│       ├── generator.nix       # File assembler (text backend → .nix file)
-│       ├── module.nix          # Module assembler (value backend → module value)
-│       ├── runtime.nix         # Runtime helpers as values (for module.nix)
-│       └── versions.nix        # Kubernetes versions config
+│       ├── compile/            # Schema → options compilation
+│       │   ├── walk.nix            # Shared schema traversal (backend-parameterized)
+│       │   ├── backend-text.nix    # Text backend: emits Nix source
+│       │   ├── backend-value.nix   # Value backend: live module values
+│       │   ├── generator.nix       # File assembler (text backend → .nix file)
+│       │   ├── module.nix          # Module assembler (value backend → module value)
+│       │   └── runtime.nix         # Runtime helpers as values (for module.nix)
+│       ├── sources/            # Schema acquisition
+│       │   ├── versions.nix        # Kubernetes versions config
+│       │   ├── k8s.nix             # Kubernetes OpenAPI spec acquisition
+│       │   ├── crd.nix             # CRD file acquisition
+│       │   └── chart.nix           # Helm chart CRD acquisition
+│       ├── crd2jsonschema.py       # CRD to JSON schema converter
+│       ├── default.nix             # Generator entry point (accessors)
+│       ├── equiv-test.nix          # Accessor equivalence checks
+│       └── test_crd2jsonschema.py  # crd2jsonschema unit tests
 ├── tests/                  # Module unit tests
 │   ├── helm/               # Helm-specific tests
 │   ├── kustomize/          # Kustomize-specific tests
@@ -1846,24 +1861,33 @@ resources<span class="o">.</span>ingresses<span class="o">.</span><span class="s
 - Creates application submodules
 - Manages Kubernetes version selection (<code>nixidy.k8sVersion</code>)
 - Imports generated resource options</p>
-<h4 id="modulesnixidynix"><code>modules/nixidy.nix</code><a class="headerlink" href="#modulesnixidynix" title="Permanent link">#</a></h4>
-<p>Core nixidy configuration:</p>
+<h4 id="modulesnixidy"><code>modules/nixidy/</code><a class="headerlink" href="#modulesnixidy" title="Permanent link">#</a></h4>
+<p>Core nixidy configuration, split across several files. <code>default.nix</code> defines the
+main options and imports the rest:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
   options<span class="o">.</span><span class="ss">nixidy</span> <span class="o">=</span> <span class="p">{</span>
     <span class="ss">env</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>                    <span class="c1"># Environment name</span>
     target<span class="o">.</span><span class="ss">repository</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>      <span class="c1"># Git repository URL</span>
     target<span class="o">.</span><span class="ss">branch</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>          <span class="c1"># Target branch</span>
     target<span class="o">.</span><span class="ss">rootPath</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>        <span class="c1"># Root path for manifests</span>
-    <span class="ss">defaults</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>                        <span class="c1"># Default settings</span>
-    <span class="ss">appOfApps</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>                       <span class="c1"># Bootstrap app config</span>
+    build<span class="o">.</span><span class="ss">revision</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>         <span class="c1"># Revision written to `.revision`</span>
+    <span class="ss">objectTransforms</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>       <span class="c1"># Env-wide transform rules</span>
     <span class="ss">charts</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>                 <span class="c1"># Helm chart sources</span>
+    <span class="ss">chartsDir</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>              <span class="c1"># Directory to build charts from</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Also handles:
-- App-of-apps pattern generation
-- Chart attribute set building
-- Public apps list management</p>
+<p>The directory also contains:</p>
+<ul>
+<li><code>defaults.nix</code>: default settings (<code>nixidy.defaults</code>, e.g. default transformers)</li>
+<li><code>app-of-apps.nix</code>: bootstrap app-of-apps pattern generation</li>
+<li><code>extra-files.nix</code>: extra files (<code>nixidy.extraFiles</code>) rendered into the output</li>
+<li><code>transforms.nix</code>: the <code>objectTransforms</code> rule type, matcher, and assertions</li>
+</ul>
+<p>Also handled here:
+- Chart attribute set building (from <code>nixidy.chartsDir</code>)
+- Public apps list management
+- Global assertions and warnings</p>
 <h4 id="modulesapplicationsdefaultnix"><code>modules/applications/default.nix</code><a class="headerlink" href="#modulesapplicationsdefaultnix" title="Permanent link">#</a></h4>
 <p>Defines individual application options:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
@@ -1871,16 +1895,23 @@ resources<span class="o">.</span>ingresses<span class="o">.</span><span class="s
     <span class="ss">name</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
     <span class="ss">namespace</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
     <span class="ss">createNamespace</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
-    <span class="ss">syncPolicy</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
-    <span class="ss">destination</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
-    <span class="ss">resources</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>  <span class="c1"># Typed Kubernetes resources</span>
-    <span class="ss">objects</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>  <span class="c1"># Internal: final resource list</span>
+    <span class="ss">project</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
+    <span class="ss">annotations</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
+    <span class="ss">labels</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
+    <span class="ss">objectTransforms</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>  <span class="c1"># App-scoped transform rules</span>
+    <span class="ss">assertions</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>        <span class="c1"># Build-time assertions</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>Related options live in sibling modules:</p>
+<ul>
+<li><code>modules/applications/argocd.nix</code>: ArgoCD-specific options (<code>syncPolicy</code>,
+  <code>destination</code>, <code>compareOptions</code>, <code>finalizer</code>)</li>
+<li><code>modules/applications/objects.nix</code>: the resource type registry (<code>types</code>),
+  typed <code>resources</code>, and the internal final <code>objects</code> list</li>
+</ul>
 <p>Key responsibilities:
 - Application metadata and settings
-- Sync policy configuration
 - Resource type registration
 - Final object list generation</p>
 <h4 id="modulesapplicationshelmnix"><code>modules/applications/helm.nix</code><a class="headerlink" href="#modulesapplicationshelmnix" title="Permanent link">#</a></h4>
@@ -1902,7 +1933,7 @@ resources<span class="o">.</span>ingresses<span class="o">.</span><span class="s
 2. <code>builtins.readFile</code> reads output
 3. <code>kube.fromYAML</code> parses to attribute sets
 4. <code>transformer</code> function applied
-5. Objects grouped by GVK
+5. <code>partitionObjects</code> (from <code>lib.nix</code>) groups objects by GVK
 6. Added to <code>resources</code> or <code>objects</code></p>
 <h4 id="modulesapplicationskustomizenix"><code>modules/applications/kustomize.nix</code><a class="headerlink" href="#modulesapplicationskustomizenix" title="Permanent link">#</a></h4>
 <p>Kustomize integration (similar pattern to Helm):</p>
@@ -1925,12 +1956,16 @@ resources<span class="o">.</span>ingresses<span class="o">.</span><span class="s
     <span class="ss">type</span> <span class="o">=</span> listOf str<span class="p">;</span>
     <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;List of YAML manifest strings&quot;</span><span class="p">;</span>
   <span class="p">};</span>
+
+  <span class="c1"># Also: extraRawYamls that are YAML files copied verbatim into</span>
+  <span class="c1"># the output directory (not parsed into Nix, so they can&#39;t be patched)</span>
 <span class="p">}</span>
 </code></pre></div>
 <h4 id="modulesbuildnix"><code>modules/build.nix</code><a class="headerlink" href="#modulesbuildnix" title="Permanent link">#</a></h4>
 <p>Creates output packages:</p>
 <ul>
 <li><code>environmentPackage</code>: All application manifests combined</li>
+<li><code>extrasPackage</code>: Extra files from <code>nixidy.extraFiles</code></li>
 <li><code>activationPackage</code>: For <code>nixidy switch</code> operations</li>
 <li><code>declarativePackage</code>: For <code>kubectl apply --prune</code>. Emits an <code>apply</code> script that consumes <code>environmentPackage</code> and runs <code>objectTransforms</code> <code>postProcess</code> rules at apply time; it no longer renders standalone manifest files.</li>
 <li><code>bootstrapPackage</code>: App-of-apps manifest</li>
@@ -1965,6 +2000,15 @@ resources<span class="o">.</span>ingresses<span class="o">.</span><span class="s
 
   <span class="c1"># Flatten *List objects (e.g., ConfigMapList → [ConfigMap, ...])</span>
   <span class="ss">flattenListObjects</span> <span class="o">=</span> <span class="o">...</span><span class="p">;</span>
+
+  <span class="c1"># Split a flat object list into typed `resources` (registered GVKs) and</span>
+  <span class="c1"># untyped `objects`. This is the single intake path shared by the helm,</span>
+  <span class="c1"># kustomize, and yamls modules</span>
+  <span class="ss">partitionObjects</span> <span class="o">=</span> <span class="o">...</span><span class="p">;</span>
+
+  <span class="c1"># Manifest filename stem for an object: `&lt;Kind&gt;-&lt;dashed-name&gt;`.</span>
+  <span class="c1"># Used by both `build.nix` and `yamls.nix` so they always agree</span>
+  <span class="ss">objectBaseName</span> <span class="o">=</span> <span class="o">...</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
 <h2 id="library-functions">Library Functions<a class="headerlink" href="#library-functions" title="Permanent link">#</a></h2>
@@ -2051,47 +2095,48 @@ resources<span class="o">.</span>ingresses<span class="o">.</span><span class="s
 1. Kubernetes OpenAPI schemas
 2. Custom Resource Definitions (CRDs)</p>
 <h3 id="kubernetes-schema-generation">Kubernetes Schema Generation<a class="headerlink" href="#kubernetes-schema-generation" title="Permanent link">#</a></h3>
-<p><code>pkgs/generators/default.nix</code> handles K8s schema generation:</p>
+<p><code>pkgs/generators/default.nix</code> wires everything together and acquisition lives in <code>pkgs/generators/sources/</code>:</p>
 <ol>
-<li>Fetches Kubernetes source for each version in <code>versions.nix</code></li>
-<li>Extracts OpenAPI swagger spec</li>
+<li><code>sources/versions.nix</code> lists the Kubernetes versions and their source hashes</li>
+<li><code>sources/k8s.nix</code> fetches the Kubernetes source for each version and extracts
+   the OpenAPI swagger spec</li>
 <li>Generates namespaced resource info</li>
-<li>Produces Nix options via <code>generator.nix</code></li>
+<li>Produces Nix options via <code>compile/generator.nix</code></li>
 </ol>
 <p>Output: <code>modules/generated/k8s/v1.XX.nix</code></p>
 <h3 id="shared-schema-walk-and-backends">Shared schema walk and backends<a class="headerlink" href="#shared-schema-walk-and-backends" title="Permanent link">#</a></h3>
-<p>The schema-to-options logic lives in one place, <code>walk.nix</code>, parameterized over a <em>backend</em> so the same traversal can produce either Nix <strong>source text</strong> or live module <strong>values</strong>:</p>
+<p>The schema-to-options logic lives in one place, <code>compile/walk.nix</code>, parameterized over a <em>backend</em> so the same traversal can produce either Nix <strong>source text</strong> or live module <strong>values</strong>:</p>
 <ul>
-<li><code>walk.nix</code> — the single traversal of the (JSON) schema. All type/coercion branch logic (int-or-string, <code>additionalProperties</code>→<code>attrsOf</code>, coerce-by-name lists, patch-merge-key, <code>skipCoerceToList</code>, <code>specialMapKeys</code>, nested submodules, etc.) lives here, expressed against an abstract backend <code>b</code>.</li>
-<li><code>backend-text.nix</code> — emits Nix <strong>source</strong>. Used by the file generators; it also inlines the runtime helpers (see below) as source so committed standalone files stay self-contained.</li>
-<li><code>backend-value.nix</code> — produces live module <strong>values</strong> using <code>runtime.nix</code>.</li>
-<li><code>generator.nix</code> — thin assembler over the text backend (renders + <code>nixfmt</code> + writes a <code>.nix</code> file).</li>
-<li><code>module.nix</code> — thin assembler over the value backend (returns a module function).</li>
-<li><code>runtime.nix</code> — the per-generated-module runtime helpers (<code>coercedTo</code>, <code>mergeValuesByKey</code>, <code>submoduleForDefinition</code>, …) as <strong>values</strong>, imported by the value backend. The text backend inlines source-form equivalents of these same helpers. Only the <em>walk</em> is single-sourced; the helpers must exist in both forms because live values can't be serialized back to source and committed files can't reference nixidy internals.</li>
+<li><code>compile/walk.nix</code> - the single traversal of the (JSON) schema. All type/coercion branch logic (int-or-string, <code>additionalProperties</code>→<code>attrsOf</code>, coerce-by-name lists, patch-merge-key, <code>skipCoerceToList</code>, <code>specialMapKeys</code>, nested submodules, etc.) lives here, expressed against an abstract backend <code>b</code>.</li>
+<li><code>compile/backend-text.nix</code> - emits Nix <strong>source</strong>. Used by the file generators; it also inlines the runtime helpers (see below) as source so committed standalone files stay self-contained.</li>
+<li><code>compile/backend-value.nix</code> - produces live module <strong>values</strong> using <code>runtime.nix</code>.</li>
+<li><code>compile/generator.nix</code> - thin assembler over the text backend (renders + <code>nixfmt</code> + writes a <code>.nix</code> file).</li>
+<li><code>compile/module.nix</code> - thin assembler over the value backend (returns a module function).</li>
+<li><code>compile/runtime.nix</code> - the per-generated-module runtime helpers (<code>coercedTo</code>, <code>mergeValuesByKey</code>, <code>submoduleForDefinition</code>, …) as <strong>values</strong>, imported by the value backend. The text backend inlines source-form equivalents of these same helpers. Only the <em>walk</em> is single-sourced; the helpers must exist in both forms because live values can't be serialized back to source and committed files can't reference nixidy internals.</li>
 </ul>
 <h3 id="crd-generation">CRD Generation<a class="headerlink" href="#crd-generation" title="Permanent link">#</a></h3>
 <p>CRD accessors form a matrix over output shape × source, all built on the shared walk:</p>
 <table>
 <thead>
 <tr>
-<th></th>
+<th>output</th>
 <th>source files (<code>src</code>)</th>
 <th>Helm chart</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>→ generated file</td>
+<td>generated file</td>
 <td><code>fromCRD</code></td>
 <td><code>fromChartCRD</code></td>
 </tr>
 <tr>
-<td>→ module value</td>
+<td>module value</td>
 <td><code>fromCRDModule</code></td>
 <td><code>fromChartCRDModule</code></td>
 </tr>
 <tr>
-<td>→ raw objects</td>
+<td>raw objects</td>
 <td><code>crdObjects</code></td>
 <td><code>crdObjectsFromChart</code></td>
 </tr>
@@ -2124,7 +2169,7 @@ fromChartCRD <span class="p">{</span>
 1. Reads CRD YAML files
 2. Extracts OpenAPI v3 schemas
 3. Flattens <code>$ref</code> references
-4. Outputs JSON schema for the shared walk (<code>walk.nix</code>)</p>
+4. Outputs JSON schema for the shared walk (<code>compile/walk.nix</code>)</p>
 <h2 id="testing-framework">Testing Framework<a class="headerlink" href="#testing-framework" title="Permanent link">#</a></h2>
 <h3 id="module-tests-tests">Module Tests (<code>tests/</code>)<a class="headerlink" href="#module-tests-tests" title="Permanent link">#</a></h3>
 <p>Located in <code>tests/</code>, using nixidy's testing framework.</p>
@@ -2221,6 +2266,12 @@ nix<span class="w"> </span>run<span class="w"> </span>.#libTests
 
 <span class="c1"># Run module tests</span>
 nix<span class="w"> </span>run<span class="w"> </span>.#moduleTests
+
+<span class="c1"># Run crd2jsonschema unit tests</span>
+nix<span class="w"> </span>run<span class="w"> </span>.#crd2jsonschemaTest
+
+<span class="c1"># Assert CRD file/module/objects accessors agree with each other</span>
+nix<span class="w"> </span>run<span class="w"> </span>.#crdAccessorTest
 
 <span class="c1"># Generate Kubernetes modules</span>
 nix<span class="w"> </span>run<span class="w"> </span>.#generate
@@ -2389,6 +2440,8 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
     <span class="l">./helm.nix</span>
     <span class="l">./kustomize.nix</span>
     <span class="l">./yamls.nix</span>
+    <span class="l">./argocd.nix</span>
+    <span class="l">./objects.nix</span>
     <span class="l">./myprocessor.nix</span>  <span class="c1"># Add here</span>
   <span class="p">];</span>
 <span class="p">}</span>
@@ -2396,14 +2449,14 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
 <h2 id="common-tasks">Common Tasks<a class="headerlink" href="#common-tasks" title="Permanent link">#</a></h2>
 <h3 id="updating-kubernetes-versions">Updating Kubernetes Versions<a class="headerlink" href="#updating-kubernetes-versions" title="Permanent link">#</a></h3>
 <ol>
-<li>Edit <code>pkgs/generators/versions.nix</code>:</li>
+<li>Edit <code>pkgs/generators/sources/versions.nix</code>:</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-  <span class="s2">&quot;1.34.0&quot;</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s2">&quot;1.37.0&quot;</span> <span class="o">=</span> <span class="p">{</span>
     <span class="ss">hash</span> <span class="o">=</span> <span class="s2">&quot;sha256-...&quot;</span><span class="p">;</span>
     <span class="ss">spec</span> <span class="o">=</span> <span class="s2">&quot;api/openapi-spec/swagger.json&quot;</span><span class="p">;</span>
     <span class="ss">discovery</span> <span class="o">=</span> <span class="p">{</span>
-      <span class="ss">core</span> <span class="o">=</span> <span class="s2">&quot;api/discovery/core_v1.json&quot;</span><span class="p">;</span>
+      <span class="ss">core</span> <span class="o">=</span> <span class="s2">&quot;api/discovery/api__v1.json&quot;</span><span class="p">;</span>
       <span class="ss">aggregated</span> <span class="o">=</span> <span class="s2">&quot;api/discovery/aggregated_v2.json&quot;</span><span class="p">;</span>
     <span class="p">};</span>
   <span class="p">};</span>
@@ -2415,11 +2468,13 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
 <div class="highlight"><pre><span></span><code>nix<span class="w"> </span>run<span class="w"> </span>.#generate
 </code></pre></div>
 <ol>
-<li>Update default version in <code>modules/applications.nix</code> if needed</li>
+<li>Update default version in <code>modules/applications.nix</code> if needed (the
+   <code>nixidy.k8sVersion</code> enum is derived automatically from the generated files
+   in <code>modules/generated/k8s/</code>)</li>
 </ol>
 <h3 id="adding-a-new-sync-option">Adding a New Sync Option<a class="headerlink" href="#adding-a-new-sync-option" title="Permanent link">#</a></h3>
 <ol>
-<li>Add option in <code>modules/applications/default.nix</code> under <code>syncPolicy.syncOptions</code>:</li>
+<li>Add option in <code>modules/applications/argocd.nix</code> under <code>syncPolicy.syncOptions</code>:</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
   syncPolicy<span class="o">.</span>syncOptions<span class="o">.</span><span class="ss">myOption</span> <span class="o">=</span> mkOption <span class="p">{</span>
@@ -2456,7 +2511,7 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
 <h2 id="code-style">Code Style<a class="headerlink" href="#code-style" title="Permanent link">#</a></h2>
 <h3 id="nix">Nix<a class="headerlink" href="#nix" title="Permanent link">#</a></h3>
 <ul>
-<li><strong>Format</strong>: Use <code>nix fmt</code> (nixfmt-rfc-style)</li>
+<li><strong>Format</strong>: Use <code>nix fmt</code> (nixfmt)</li>
 <li><strong>Sorting</strong>: Keep attribute sets alphabetically sorted</li>
 <li><strong>Inherit</strong>: Use <code>inherit</code> where possible to reduce verbosity</li>
 <li><strong>Imports</strong>: Group imports logically</li>
@@ -2525,7 +2580,7 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
 </tr>
 <tr>
 <td>Add nixidy option</td>
-<td><code>modules/nixidy.nix</code></td>
+<td><code>modules/nixidy/</code></td>
 </tr>
 <tr>
 <td>Add library function</td>
@@ -2545,7 +2600,7 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
 </tr>
 <tr>
 <td>Add K8s version</td>
-<td><code>pkgs/generators/versions.nix</code></td>
+<td><code>pkgs/generators/sources/versions.nix</code></td>
 </tr>
 <tr>
 <td>Write module test</td>
