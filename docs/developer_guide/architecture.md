@@ -162,6 +162,7 @@ Defines the top-level `applications` option:
 ```
 
 Key responsibilities:
+
 - Creates application submodules
 - Manages Kubernetes version selection (`nixidy.k8sVersion`)
 - Imports generated resource options
@@ -194,6 +195,7 @@ The directory also contains:
 - `transforms.nix`: the `objectTransforms` rule type, matcher, and assertions
 
 Also handled here:
+
 - Chart attribute set building (from `nixidy.chartsDir`)
 - Public apps list management
 - Global assertions and warnings
@@ -225,6 +227,7 @@ Related options live in sibling modules:
   typed `resources`, and the internal final `objects` list
 
 Key responsibilities:
+
 - Application metadata and settings
 - Resource type registration
 - Final object list generation
@@ -248,6 +251,7 @@ Helm chart integration:
 ```
 
 Processing flow:
+
 1. `helm.buildHelmChart` templates the chart
 2. `builtins.readFile` reads output
 3. `kube.fromYAML` parses to attribute sets
@@ -392,6 +396,7 @@ lib.extend (self: old: {
 ### Overview (`pkgs/generators/`)
 
 Nixidy generates typed Nix options from:
+
 1. Kubernetes OpenAPI schemas
 2. Custom Resource Definitions (CRDs)
 
@@ -455,6 +460,7 @@ The `*Module` variants take the same arguments and return a module value (no fil
 ### CRD Processing (`crd2jsonschema.py`)
 
 Python script that:
+
 1. Reads CRD YAML files
 2. Extracts OpenAPI v3 schemas
 3. Flattens `$ref` references
@@ -637,46 +643,43 @@ cat result/test/Deployment-nginx.yaml
 ### Adding a New Application Option
 
 1. **Define the option** in `modules/applications/default.nix`:
-
-```nix
-{
-  options = {
-    myNewOption = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Description of the option.";
+  ```nix
+  {
+    options = {
+      myNewOption = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Description of the option.";
+      };
     };
-  };
-}
-```
+  }
+  ```
 
 2. **Use the option** in config:
-
-```nix
-{
-  config = lib.mkIf config.myNewOption {
-    # Configuration when option is enabled
-  };
-}
-```
+  ```nix
+  {
+    config = lib.mkIf config.myNewOption {
+      # Configuration when option is enabled
+    };
+  }
+  ```
 
 3. **Write tests** in `tests/`:
-
-```nix
-# tests/my-new-option.nix
-{
-  applications.test1 = {
-    myNewOption = true;
-    # ...
-  };
-
-  test = {
-    name = "my new option";
-    description = "Test the new option";
-    assertions = [ ... ];
-  };
-}
-```
+  ```nix
+  # tests/my-new-option.nix
+  {
+    applications.test1 = {
+      myNewOption = true;
+      # ...
+    };
+  
+    test = {
+      name = "my new option";
+      description = "Test the new option";
+      assertions = [ ... ];
+    };
+  }
+  ```
 
 4. **Register test** in `tests/default.nix`
 
@@ -685,117 +688,110 @@ cat result/test/Deployment-nginx.yaml
 ### Adding a New Library Function
 
 1. **Add function** to appropriate file in `lib/`:
-
-```nix
-# lib/kube.nix
-{
-  myNewFunction =
-    # Parameter description
-    param:
-    # Implementation
-    ...;
-}
-```
+  ```nix
+  # lib/kube.nix
+  {
+    myNewFunction =
+      # Parameter description
+      param:
+      # Implementation
+      ...;
+  }
+  ```
 
 2. **Add documentation** as comments:
-
-```nix
-/*
-  Description of function.
-
-  Type:
-    myNewFunction :: ParamType -> ReturnType
-
-  Example:
-    myNewFunction "input"
-    => "output"
-*/
-myNewFunction = ...;
-```
+  ```nix
+  /*
+    Description of function.
+  
+    Type:
+      myNewFunction :: ParamType -> ReturnType
+  
+    Example:
+      myNewFunction "input"
+      => "output"
+  */
+  myNewFunction = ...;
+  ```
 
 3. **Write tests** in `lib/tests.nix`:
-
-```nix
-{
-  kube = {
-    myNewFunction = {
-      testBasicCase = {
-        expr = lib.kube.myNewFunction "input";
-        expected = "output";
+  ```nix
+  {
+    kube = {
+      myNewFunction = {
+        testBasicCase = {
+          expr = lib.kube.myNewFunction "input";
+          expected = "output";
+        };
       };
     };
-  };
-}
-```
+  }
+  ```
 
 ### Adding a New Resource Processor
 
 Similar to Helm/Kustomize, create a new module:
 
 1. **Create module** `modules/applications/myprocessor.nix`:
-
-```nix
-{
-  nixidyDefaults,
-  lib,
-  config,
-  ...
-}:
-let
-  helpers = import ./lib.nix lib;
-in
-{
-  options.myProcessor = mkOption {
-    type = with types; attrsOf (submodule { ... });
-  };
-
-  config = {
-    # Process inputs and add to resources/objects
-    resources = mkMerge [ ... ];
-    objects = [ ... ];
-  };
-}
-```
+  ```nix
+  {
+    nixidyDefaults,
+    lib,
+    config,
+    ...
+  }:
+  let
+    helpers = import ./lib.nix lib;
+  in
+  {
+    options.myProcessor = mkOption {
+      type = with types; attrsOf (submodule { ... });
+    };
+  
+    config = {
+      # Process inputs and add to resources/objects
+      resources = mkMerge [ ... ];
+      objects = [ ... ];
+    };
+  }
+  ```
 
 2. **Import** in `modules/applications/default.nix`:
-
-```nix
-{
-  imports = [
-    ./helm.nix
-    ./kustomize.nix
-    ./yamls.nix
-    ./argocd.nix
-    ./objects.nix
-    ./myprocessor.nix  # Add here
-  ];
-}
-```
+  ```nix
+  {
+    imports = [
+      ./helm.nix
+      ./kustomize.nix
+      ./yamls.nix
+      ./argocd.nix
+      ./objects.nix
+      ./myprocessor.nix  # Add here
+    ];
+  }
+  ```
 
 ## Common Tasks
 
 ### Updating Kubernetes Versions
 
 1. Edit `pkgs/generators/sources/versions.nix`:
-
-```nix
-{
-  "1.37.0" = {
-    hash = "sha256-...";
-    spec = "api/openapi-spec/swagger.json";
-    discovery = {
-      core = "api/discovery/api__v1.json";
-      aggregated = "api/discovery/aggregated_v2.json";
+  ```nix
+  {
+    "1.37.0" = {
+      hash = "sha256-...";
+      spec = "api/openapi-spec/swagger.json";
+      discovery = {
+        core = "api/discovery/api__v1.json";
+        aggregated = "api/discovery/aggregated_v2.json";
+      };
     };
-  };
-}
-```
+  }
+  ```
 
 2. Regenerate:
-
-```sh
-nix run .#generate
-```
+  ```sh
+  nix run .#generate
+  ```
 
 3. Update default version in `modules/applications.nix` if needed (the
    `nixidy.k8sVersion` enum is derived automatically from the generated files
@@ -804,17 +800,16 @@ nix run .#generate
 ### Adding a New Sync Option
 
 1. Add option in `modules/applications/argocd.nix` under `syncPolicy.syncOptions`:
-
-```nix
-{
-  syncPolicy.syncOptions.myOption = mkOption {
-    type = types.bool;
-    default = false;
-    apply = val: if val then "MyOption=true" else null;
-    description = "Description";
-  };
-}
-```
+  ```nix
+  {
+    syncPolicy.syncOptions.myOption = mkOption {
+      type = types.bool;
+      default = false;
+      apply = val: if val then "MyOption=true" else null;
+      description = "Description";
+    };
+  }
+  ```
 
 2. The `apply` function converts to ArgoCD sync option format
 
