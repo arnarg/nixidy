@@ -1805,11 +1805,13 @@
 <h2 id="core-concepts">Core Concepts<a class="headerlink" href="#core-concepts" title="Permanent link">#</a></h2>
 <h3 id="1-nixos-module-system">1. NixOS Module System<a class="headerlink" href="#1-nixos-module-system" title="Permanent link">#</a></h3>
 <p>Nixidy is built on top of the NixOS module system. If you're unfamiliar with it, read the <a href="https://nixos.org/manual/nixos/stable/#sec-writing-modules">NixOS Module System documentation</a> first.</p>
-<p>Key concepts:
-- <strong>Options</strong>: Define the configuration interface with types, defaults, and descriptions
-- <strong>Config</strong>: Contains the actual configuration values after module evaluation
-- <strong>Imports</strong>: Modules can import other modules to extend functionality
-- <strong>Special Args</strong>: Additional arguments passed to all modules (<code>lib</code>, <code>pkgs</code>, <code>config</code>, etc.)</p>
+<p>Key concepts:</p>
+<ul>
+<li><strong>Options</strong>: Define the configuration interface with types, defaults, and descriptions</li>
+<li><strong>Config</strong>: Contains the actual configuration values after module evaluation</li>
+<li><strong>Imports</strong>: Modules can import other modules to extend functionality</li>
+<li><strong>Special Args</strong>: Additional arguments passed to all modules (<code>lib</code>, <code>pkgs</code>, <code>config</code>, etc.)</li>
+</ul>
 <h3 id="2-application-lifecycle">2. Application Lifecycle<a class="headerlink" href="#2-application-lifecycle" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>User Config → Module Evaluation → Resource Processing → Manifest Generation → Output
 </code></pre></div>
