@@ -4,29 +4,44 @@ import subprocess
 import os
 from nix.builder import NixBuilder, DevenvBuilder, NixCommandException, ResourceRoot
 from nix.nixidy import Nixidy
+from nixidy.config import load_config
 from typing import Optional
 
 _devenv_warning_printed = False
 
 
-def _make_nixidy(file: str, environment: str, devenv: bool) -> Nixidy:
+def _make_nixidy(
+    file: Optional[str], environment: str, devenv: Optional[bool]
+) -> Nixidy:
     global _devenv_warning_printed
 
+    config = load_config()
+    file = file or config.file or "default.nix"
+
     auto_devenv = (
-        not devenv
+        devenv is None
+        and config.devenv is None
         and "#" not in environment
         and os.path.exists("devenv.nix")
         and not os.path.exists("flake.nix")
         and not os.path.exists(file)
     )
 
-    if devenv or auto_devenv:
-        if auto_devenv and not _devenv_warning_printed:
+    if devenv is not None:
+        use_devenv = devenv
+    elif config.devenv is not None:
+        use_devenv = config.devenv
+    else:
+        use_devenv = auto_devenv
+
+    if use_devenv:
+        if devenv is None and not _devenv_warning_printed:
+            if config.devenv:
+                message = "Using devenv mode per .nixidy.json."
+            else:
+                message = "Auto-detected devenv.nix, using devenv mode."
             click.echo(
-                click.style(
-                    "Auto-detected devenv.nix, using devenv mode.",
-                    fg="yellow",
-                ),
+                click.style(message, fg="yellow"),
                 err=True,
             )
             _devenv_warning_printed = True
@@ -40,9 +55,19 @@ def _make_nixidy(file: str, environment: str, devenv: bool) -> Nixidy:
 
 
 _devenv_option = click.option(
-    "--devenv",
-    is_flag=True,
-    help="Use devenv to build environments.",
+    "--devenv/--no-devenv",
+    "devenv",
+    default=None,
+    help="Use devenv to build environments (overrides .nixidy.json and auto-detection).",
+)
+
+_file_option = click.option(
+    "--file",
+    "-f",
+    help="Path to entrypoint nix file (only flake-less). [default: default.nix or 'file' from .nixidy.json]",
+    type=str,
+    default=None,
+    metavar="PATH",
 )
 
 
@@ -54,23 +79,17 @@ def cli():
 @cli.command("info")
 @click.argument("environment")
 @click.option(
-    "--file",
-    "-f",
-    help="Path to entrypoint nix file (only flake-less).",
-    type=str,
-    default="default.nix",
-    show_default=True,
-    metavar="PATH",
-)
-@click.option(
     "--json",
     "print_json",
     help="Output info in JSON format.",
     type=bool,
     is_flag=True,
 )
+@_file_option
 @_devenv_option
-def info(environment: str, file: str, print_json: bool, devenv: bool):
+def info(
+    environment: str, file: Optional[str], print_json: bool, devenv: Optional[bool]
+):
     """Get info about a nixidy environment.
 
     ENVIRONMENT is used to determine if flakes or flake-less nix should be used and which environment should be built.
@@ -94,15 +113,6 @@ def info(environment: str, file: str, print_json: bool, devenv: bool):
 @cli.command("build")
 @click.argument("environment")
 @click.option(
-    "--file",
-    "-f",
-    help="Path to entrypoint nix file (only flake-less).",
-    type=str,
-    default="default.nix",
-    show_default=True,
-    metavar="PATH",
-)
-@click.option(
     "--no-link",
     "no_link",
     help="Don't create a result symlink.",
@@ -123,14 +133,15 @@ def info(environment: str, file: str, print_json: bool, devenv: bool):
     type=bool,
     is_flag=True,
 )
+@_file_option
 @_devenv_option
 def build(
     environment: str,
-    file: str,
+    file: Optional[str],
     no_link: bool,
     out_link: Optional[str],
     print_paths: bool,
-    devenv: bool,
+    devenv: Optional[bool],
 ):
     """Build a nixidy environment.
 
@@ -151,17 +162,9 @@ def build(
 
 @cli.command("switch")
 @click.argument("environment")
-@click.option(
-    "--file",
-    "-f",
-    help="Path to entrypoint nix file (only flake-less).",
-    type=str,
-    default="default.nix",
-    show_default=True,
-    metavar="PATH",
-)
+@_file_option
 @_devenv_option
-def switch(environment: str, file: str, devenv: bool):
+def switch(environment: str, file: Optional[str], devenv: Optional[bool]):
     """Build and switch to a nixidy environment.
 
     ENVIRONMENT is used to determine if flakes or flake-less nix should be used and which environment should be built.
@@ -178,17 +181,9 @@ def switch(environment: str, file: str, devenv: bool):
 
 @cli.command("bootstrap")
 @click.argument("environment")
-@click.option(
-    "--file",
-    "-f",
-    help="Path to entrypoint nix file (only flake-less).",
-    type=str,
-    default="default.nix",
-    show_default=True,
-    metavar="PATH",
-)
+@_file_option
 @_devenv_option
-def bootstrap(environment: str, file: str, devenv: bool):
+def bootstrap(environment: str, file: Optional[str], devenv: Optional[bool]):
     """Output a manifest to bootstrap appOfApps.
 
     ENVIRONMENT is used to determine if flakes or flake-less nix should be used and which environment should be built.
@@ -207,17 +202,9 @@ def bootstrap(environment: str, file: str, devenv: bool):
 
 @cli.command("apply")
 @click.argument("environment")
-@click.option(
-    "--file",
-    "-f",
-    help="Path to entrypoint nix file (only flake-less).",
-    type=str,
-    default="default.nix",
-    show_default=True,
-    metavar="PATH",
-)
+@_file_option
 @_devenv_option
-def apply(environment: str, file: str, devenv: bool):
+def apply(environment: str, file: Optional[str], devenv: Optional[bool]):
     """Build and apply declarative manifests to Kubernetes.
 
     ENVIRONMENT is used to determine if flakes or flake-less nix should be used and which environment should be built.
@@ -235,15 +222,6 @@ def apply(environment: str, file: str, devenv: bool):
 @cli.command("diff")
 @click.argument("environment")
 @click.option(
-    "--file",
-    "-f",
-    help="Path to entrypoint nix file (only flake-less).",
-    type=str,
-    default="default.nix",
-    show_default=True,
-    metavar="PATH",
-)
-@click.option(
     "--path",
     "-p",
     help="Path to previously built environment to compare to.",
@@ -257,13 +235,14 @@ def apply(environment: str, file: str, devenv: bool):
     type=str,
     metavar="ENV",
 )
+@_file_option
 @_devenv_option
 def diff(
     environment: str,
-    file: str,
+    file: Optional[str],
     path: Optional[str],
     env: Optional[str],
-    devenv: bool,
+    devenv: Optional[bool],
 ):
     """Diff environment manifests.
 
@@ -393,17 +372,14 @@ def _print_explain(attr_name: str, dot_path: str, data: dict):
 @cli.command("resources")
 @click.argument("environment")
 @click.argument("resource_path", required=False, default=None)
-@click.option(
-    "--file",
-    "-f",
-    help="Path to entrypoint nix file (only flake-less).",
-    type=str,
-    default="default.nix",
-    show_default=True,
-    metavar="PATH",
-)
+@_file_option
 @_devenv_option
-def resources(environment: str, resource_path: Optional[str], file: str, devenv: bool):
+def resources(
+    environment: str,
+    resource_path: Optional[str],
+    file: Optional[str],
+    devenv: Optional[bool],
+):
     """Show information about resource types and their options.
 
     ENVIRONMENT is used to determine if flakes or flake-less nix should be used and which environment should be built.

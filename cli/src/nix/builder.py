@@ -25,6 +25,7 @@ class ResourceRoot:
         return [cls(**item) for item in data]
 
 
+@dataclass
 class NixidyEnvironmentInfo:
     repository: str
     branch: str
