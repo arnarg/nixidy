@@ -827,10 +827,11 @@
 <div class="highlight"><pre><span></span><code>nixidy apply [OPTIONS] ENVIRONMENT
 </code></pre></div>
 <p><strong>Options:</strong></p>
-<div class="highlight"><pre><span></span><code>  -f, --file PATH  Path to entrypoint nix file (only flake-less).  [default:
-                   default.nix]
-  --devenv         Use devenv to build environments.
-  --help           Show this message and exit.
+<div class="highlight"><pre><span></span><code>  -f, --file PATH         Path to entrypoint nix file (only flake-less).
+                          [default: default.nix or &#39;file&#39; from .nixidy.json]
+  --devenv / --no-devenv  Use devenv to build environments (overrides
+                          .nixidy.json and auto-detection).
+  --help                  Show this message and exit.
 </code></pre></div>
 <h2 id="nixidy-bootstrap">nixidy bootstrap<a class="headerlink" href="#nixidy-bootstrap" title="Permanent link">#</a></h2>
 <p>Output a manifest to bootstrap appOfApps.</p>
@@ -840,10 +841,11 @@
 <div class="highlight"><pre><span></span><code>nixidy bootstrap [OPTIONS] ENVIRONMENT
 </code></pre></div>
 <p><strong>Options:</strong></p>
-<div class="highlight"><pre><span></span><code>  -f, --file PATH  Path to entrypoint nix file (only flake-less).  [default:
-                   default.nix]
-  --devenv         Use devenv to build environments.
-  --help           Show this message and exit.
+<div class="highlight"><pre><span></span><code>  -f, --file PATH         Path to entrypoint nix file (only flake-less).
+                          [default: default.nix or &#39;file&#39; from .nixidy.json]
+  --devenv / --no-devenv  Use devenv to build environments (overrides
+                          .nixidy.json and auto-detection).
+  --help                  Show this message and exit.
 </code></pre></div>
 <h2 id="nixidy-build">nixidy build<a class="headerlink" href="#nixidy-build" title="Permanent link">#</a></h2>
 <p>Build a nixidy environment.</p>
@@ -853,13 +855,14 @@
 <div class="highlight"><pre><span></span><code>nixidy build [OPTIONS] ENVIRONMENT
 </code></pre></div>
 <p><strong>Options:</strong></p>
-<div class="highlight"><pre><span></span><code>  -f, --file PATH    Path to entrypoint nix file (only flake-less).  [default:
-                     default.nix]
-  --no-link          Don&#39;t create a result symlink.
-  --out-link PATH    Create a custom result symlink.
-  --print-out-paths  Print the resulting output paths.
-  --devenv           Use devenv to build environments.
-  --help             Show this message and exit.
+<div class="highlight"><pre><span></span><code>  --no-link               Don&#39;t create a result symlink.
+  --out-link PATH         Create a custom result symlink.
+  --print-out-paths       Print the resulting output paths.
+  -f, --file PATH         Path to entrypoint nix file (only flake-less).
+                          [default: default.nix or &#39;file&#39; from .nixidy.json]
+  --devenv / --no-devenv  Use devenv to build environments (overrides
+                          .nixidy.json and auto-detection).
+  --help                  Show this message and exit.
 </code></pre></div>
 <h2 id="nixidy-diff">nixidy diff<a class="headerlink" href="#nixidy-diff" title="Permanent link">#</a></h2>
 <p>Diff environment manifests.</p>
@@ -879,12 +882,13 @@ nixidy diff .#prod --path ./manifests/prod
 <div class="highlight"><pre><span></span><code>nixidy diff [OPTIONS] ENVIRONMENT
 </code></pre></div>
 <p><strong>Options:</strong></p>
-<div class="highlight"><pre><span></span><code>  -f, --file PATH  Path to entrypoint nix file (only flake-less).  [default:
-                   default.nix]
-  -p, --path PATH  Path to previously built environment to compare to.
-  -e, --env ENV    Another environment to build and compare to.
-  --devenv         Use devenv to build environments.
-  --help           Show this message and exit.
+<div class="highlight"><pre><span></span><code>  -p, --path PATH         Path to previously built environment to compare to.
+  -e, --env ENV           Another environment to build and compare to.
+  -f, --file PATH         Path to entrypoint nix file (only flake-less).
+                          [default: default.nix or &#39;file&#39; from .nixidy.json]
+  --devenv / --no-devenv  Use devenv to build environments (overrides
+                          .nixidy.json and auto-detection).
+  --help                  Show this message and exit.
 </code></pre></div>
 <h2 id="nixidy-info">nixidy info<a class="headerlink" href="#nixidy-info" title="Permanent link">#</a></h2>
 <p>Get info about a nixidy environment.</p>
@@ -894,11 +898,12 @@ nixidy diff .#prod --path ./manifests/prod
 <div class="highlight"><pre><span></span><code>nixidy info [OPTIONS] ENVIRONMENT
 </code></pre></div>
 <p><strong>Options:</strong></p>
-<div class="highlight"><pre><span></span><code>  -f, --file PATH  Path to entrypoint nix file (only flake-less).  [default:
-                   default.nix]
-  --json           Output info in JSON format.
-  --devenv         Use devenv to build environments.
-  --help           Show this message and exit.
+<div class="highlight"><pre><span></span><code>  --json                  Output info in JSON format.
+  -f, --file PATH         Path to entrypoint nix file (only flake-less).
+                          [default: default.nix or &#39;file&#39; from .nixidy.json]
+  --devenv / --no-devenv  Use devenv to build environments (overrides
+                          .nixidy.json and auto-detection).
+  --help                  Show this message and exit.
 </code></pre></div>
 <h2 id="nixidy-resources">nixidy resources<a class="headerlink" href="#nixidy-resources" title="Permanent link">#</a></h2>
 <p>Show information about resource types and their options.</p>
@@ -918,10 +923,11 @@ nixidy resources .#prod deployments.spec.template.spec
 <div class="highlight"><pre><span></span><code>nixidy resources [OPTIONS] ENVIRONMENT [RESOURCE_PATH]
 </code></pre></div>
 <p><strong>Options:</strong></p>
-<div class="highlight"><pre><span></span><code>  -f, --file PATH  Path to entrypoint nix file (only flake-less).  [default:
-                   default.nix]
-  --devenv         Use devenv to build environments.
-  --help           Show this message and exit.
+<div class="highlight"><pre><span></span><code>  -f, --file PATH         Path to entrypoint nix file (only flake-less).
+                          [default: default.nix or &#39;file&#39; from .nixidy.json]
+  --devenv / --no-devenv  Use devenv to build environments (overrides
+                          .nixidy.json and auto-detection).
+  --help                  Show this message and exit.
 </code></pre></div>
 <h2 id="nixidy-switch">nixidy switch<a class="headerlink" href="#nixidy-switch" title="Permanent link">#</a></h2>
 <p>Build and switch to a nixidy environment.</p>
@@ -931,10 +937,11 @@ nixidy resources .#prod deployments.spec.template.spec
 <div class="highlight"><pre><span></span><code>nixidy switch [OPTIONS] ENVIRONMENT
 </code></pre></div>
 <p><strong>Options:</strong></p>
-<div class="highlight"><pre><span></span><code>  -f, --file PATH  Path to entrypoint nix file (only flake-less).  [default:
-                   default.nix]
-  --devenv         Use devenv to build environments.
-  --help           Show this message and exit.
+<div class="highlight"><pre><span></span><code>  -f, --file PATH         Path to entrypoint nix file (only flake-less).
+                          [default: default.nix or &#39;file&#39; from .nixidy.json]
+  --devenv / --no-devenv  Use devenv to build environments (overrides
+                          .nixidy.json and auto-detection).
+  --help                  Show this message and exit.
 </code></pre></div>
 
 
