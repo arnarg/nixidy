@@ -64,7 +64,7 @@ lib: with lib; rec {
     };
 
   # The filename stem for an object's rendered manifest: `<Kind>-<name>` with
-  # dots in the name replaced by dashes. `build.nix` groups objects by this stem
+  # dots in the name replaced by dashes. `build/layout.nix` groups objects by this stem
   # (one YAML file per stem) and `yamls.nix` appends `.yaml` to detect collisions
   # with raw passthrough files; both MUST agree, so the policy lives here.
   #

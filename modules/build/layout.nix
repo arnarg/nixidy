@@ -56,7 +56,7 @@ rec {
         let
           sorted = lib.sort (a: b: (a.metadata.namespace or "") < (b.metadata.namespace or "")) objs;
           matched = lib.filter (o: postProcessRulesFor o != [ ]) objs;
-          # The strengthened assertion (build.nix) guarantees a post-processed
+          # The strengthened assertion (default.nix) guarantees a post-processed
           # group is single-object, so this matched-head == the group head; we
           # carry the matched object so `resource` is the rule's actual target.
           resource = if matched == [ ] then null else builtins.head matched;

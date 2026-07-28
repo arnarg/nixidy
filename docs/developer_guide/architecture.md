@@ -52,8 +52,13 @@ nixidy/
 │   ├── testing/            # Testing framework modules
 │   │   ├── default.nix     # Test suite configuration
 │   │   └── eval.nix        # Test evaluation logic
+│   ├── build/              # Build output packages
+│   │   ├── default.nix     # Option surface, layout wiring, assertions
+│   │   ├── layout.nix      # Pure per-application [FileSpec] core
+│   │   ├── render.nix      # FileSpec -> shell fragment
+│   │   ├── emit-environment.nix  # environment/activation/bootstrap/extras
+│   │   └── apply.nix       # Apply path + activation post-process
 │   ├── applications.nix    # Main applications option
-│   ├── build.nix           # Build output packages
 │   ├── default.nix         # Module entry point
 │   ├── modules.nix         # Module list
 │   └── templates.nix       # Template system
@@ -293,7 +298,7 @@ Raw YAML manifest support:
 }
 ```
 
-#### `modules/build.nix`
+#### `modules/build/`
 
 Creates output packages:
 
@@ -302,6 +307,19 @@ Creates output packages:
 - `activationPackage`: For `nixidy switch` operations
 - `declarativePackage`: For `kubectl apply --prune`. Emits an `apply` script that consumes `environmentPackage` and runs `objectTransforms` `postProcess` rules at apply time; it no longer renders standalone manifest files.
 - `bootstrapPackage`: App-of-apps manifest
+
+Everything is derived from one seam: `layout.nix` turns each application into a
+list of FileSpec (one per output file), exposed as the internal
+`config.build.layout`, keyed by the `config.applications` attribute name. The
+emitters consume that list and never re-derive file paths:
+
+| File | Responsibility |
+|------|----------------|
+| `layout.nix` | Pure core: eval-time `rewrite` transforms, object grouping, file classification, per-app `[FileSpec]` |
+| `render.nix` | One FileSpec to the shell fragment that writes it |
+| `emit-environment.nix` | `environmentPackage`, `activationPackage`, `bootstrapPackage`, `extrasPackage` |
+| `apply.nix` | `declarativePackage`'s `apply` script and the shared activation `postProcess` fragments |
+| `default.nix` | Option surface, `layout` wiring, environment-scope assertions |
 
 #### `modules/templates.nix`
 
@@ -907,7 +925,7 @@ Key files for different tasks:
 | Add library function | `lib/*.nix` |
 | Add resource processor | `modules/applications/` |
 | Add template feature | `modules/templates.nix` |
-| Modify build output | `modules/build.nix` |
+| Modify build output | `modules/build/` |
 | Add K8s version | `pkgs/generators/sources/versions.nix` |
 | Write module test | `tests/*.nix`, `tests/default.nix` |
 | Write library test | `lib/tests.nix` |
