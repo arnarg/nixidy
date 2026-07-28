@@ -11,17 +11,21 @@
 # this lib never touches `chainOf` directly. The direct-vs-staged switch keys
 # off `postProcess.anyRules` (= any FileSpec across all apps has `rules != []`),
 # preserving the old `allFilePostProcesses == {}` test.
+#
+# Seam note: these emitters never index `layout` themselves. `app.name` is
+# user-overridable (`applications.<key>.name`) while `layout` is keyed by the
+# `config.applications` attr key, so any lookup here could diverge from the key
+# that produced the FileSpecs. Callers pair key -> specs once, where the key is
+# in scope, and hand `renderApp` the already-selected `specs`.
 let
   # Per-app render derivation: fold `render.renderFile` over the app's FileSpecs.
   renderApp =
     {
-      layout,
+      specs,
       renderFile,
     }:
     app:
     let
-      specs = layout.${app.name};
-
       writeManifests = ''
         set -e
         out=$1
@@ -56,31 +60,35 @@ in
     );
 
   # The `__bootstrap` app's render derivation (the appOfApps manifest).
+  # `specs` is that app's FileSpec list (`layout.__bootstrap`).
   mkBootstrap =
     {
-      layout,
+      specs,
       renderFile,
       bootstrapApp,
     }:
-    renderApp { inherit layout renderFile; } bootstrapApp;
+    renderApp { inherit specs renderFile; } bootstrapApp;
 
   # linkFarm of all public apps' render derivations mounted at each
   # `app.output.path`, joined with `extrasPackage` via `symlinkJoin`. The app
-  # subset is `publicApps` (all non-`__` apps — includes the appOfApps app).
+  # subset is `publicApps` (all non-`__` apps — includes the appOfApps app),
+  # each entry a `{ app; specs; }` pair built by the caller from one attr key.
   mkEnvironment =
     {
       env,
-      layout,
       renderFile,
       publicApps,
       extrasPackage,
     }:
     let
       joined = pkgs.linkFarm "nixidy-apps-joined-${env}" (
-        map (app: {
-          name = app.output.path;
-          path = renderApp { inherit layout renderFile; } app;
-        }) publicApps
+        map (
+          { app, specs }:
+          {
+            name = app.output.path;
+            path = renderApp { inherit specs renderFile; } app;
+          }
+        ) publicApps
       );
     in
     pkgs.symlinkJoin {

@@ -136,7 +136,7 @@ in
 
     build = {
       bootstrapPackage = emitEnv.mkBootstrap {
-        inherit layout;
+        specs = layout.__bootstrap;
         renderFile = render.renderFile;
         bootstrapApp = config.applications.__bootstrap;
       };
@@ -147,9 +147,14 @@ in
       };
 
       environmentPackage = emitEnv.mkEnvironment {
-        inherit env layout;
+        inherit env;
         renderFile = render.renderFile;
-        publicApps = map (name: config.applications.${name}) publicAppNames;
+        # Pair each app with its FileSpecs from the same attr key: `app.name` is
+        # overridable and is not the `layout` key.
+        publicApps = map (name: {
+          app = config.applications.${name};
+          specs = layout.${name};
+        }) publicAppNames;
         extrasPackage = config.build.extrasPackage;
       };
 
