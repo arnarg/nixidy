@@ -34,6 +34,29 @@ in
 
         expected = "test1override";
       }
+
+      {
+        description = "Layout is keyed by the attr key, not the override name.";
+
+        expression = builtins.attrNames (
+          builtins.intersectAttrs {
+            test1 = null;
+            test1override = null;
+          } config.build.layout
+        );
+
+        expected = [ "test1" ];
+      }
+
+      {
+        description = "Environment package renders an app whose name is overridden.";
+
+        # Forcing drvPath instantiates every app's render derivation, which is
+        # the path that looked the layout up by the (overridable) app name.
+        expression = builtins.isString config.build.environmentPackage.drvPath;
+
+        expected = true;
+      }
     ];
   };
 }
