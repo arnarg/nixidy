@@ -1772,8 +1772,13 @@
 │   ├── testing/            # Testing framework modules
 │   │   ├── default.nix     # Test suite configuration
 │   │   └── eval.nix        # Test evaluation logic
+│   ├── build/              # Build output packages
+│   │   ├── default.nix     # Option surface, layout wiring, assertions
+│   │   ├── layout.nix      # Pure per-application [FileSpec] core
+│   │   ├── render.nix      # FileSpec -&gt; shell fragment
+│   │   ├── emit-environment.nix  # environment/activation/bootstrap/extras
+│   │   └── apply.nix       # Apply path + activation post-process
 │   ├── applications.nix    # Main applications option
-│   ├── build.nix           # Build output packages
 │   ├── default.nix         # Module entry point
 │   ├── modules.nix         # Module list
 │   └── templates.nix       # Template system
@@ -1971,7 +1976,7 @@ main options and imports the rest:</p>
   <span class="c1"># the output directory (not parsed into Nix, so they can&#39;t be patched)</span>
 <span class="p">}</span>
 </code></pre></div>
-<h4 id="modulesbuildnix"><code>modules/build.nix</code><a class="headerlink" href="#modulesbuildnix" title="Permanent link">#</a></h4>
+<h4 id="modulesbuild"><code>modules/build/</code><a class="headerlink" href="#modulesbuild" title="Permanent link">#</a></h4>
 <p>Creates output packages:</p>
 <ul>
 <li><code>environmentPackage</code>: All application manifests combined</li>
@@ -1980,6 +1985,40 @@ main options and imports the rest:</p>
 <li><code>declarativePackage</code>: For <code>kubectl apply --prune</code>. Emits an <code>apply</code> script that consumes <code>environmentPackage</code> and runs <code>objectTransforms</code> <code>postProcess</code> rules at apply time; it no longer renders standalone manifest files.</li>
 <li><code>bootstrapPackage</code>: App-of-apps manifest</li>
 </ul>
+<p>Everything is derived from one seam: <code>layout.nix</code> turns each application into a
+list of FileSpec (one per output file), exposed as the internal
+<code>config.build.layout</code>, keyed by the <code>config.applications</code> attribute name. The
+emitters consume that list and never re-derive file paths:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>layout.nix</code></td>
+<td>Pure core: eval-time <code>rewrite</code> transforms, object grouping, file classification, per-app <code>[FileSpec]</code></td>
+</tr>
+<tr>
+<td><code>render.nix</code></td>
+<td>One FileSpec to the shell fragment that writes it</td>
+</tr>
+<tr>
+<td><code>emit-environment.nix</code></td>
+<td><code>environmentPackage</code>, <code>activationPackage</code>, <code>bootstrapPackage</code>, <code>extrasPackage</code></td>
+</tr>
+<tr>
+<td><code>apply.nix</code></td>
+<td><code>declarativePackage</code>'s <code>apply</code> script and the shared activation <code>postProcess</code> fragments</td>
+</tr>
+<tr>
+<td><code>default.nix</code></td>
+<td>Option surface, <code>layout</code> wiring, environment-scope assertions</td>
+</tr>
+</tbody>
+</table>
 <h4 id="modulestemplatesnix"><code>modules/templates.nix</code><a class="headerlink" href="#modulestemplatesnix" title="Permanent link">#</a></h4>
 <p>Template system for reusable patterns:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
@@ -2616,7 +2655,7 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
 </tr>
 <tr>
 <td>Modify build output</td>
-<td><code>modules/build.nix</code></td>
+<td><code>modules/build/</code></td>
 </tr>
 <tr>
 <td>Add K8s version</td>
