@@ -83,6 +83,58 @@ rec {
           wrapped = finalType;
         };
       };
+
+    # Numeric bounds.
+    withMinimum =
+      min: base:
+      lib.types.addCheck base (x: x >= min)
+      // {
+        description = "${base.description} (minimum ${toString min})";
+      };
+    withMaximum =
+      max: base:
+      lib.types.addCheck base (x: x <= max)
+      // {
+        description = "${base.description} (maximum ${toString max})";
+      };
+    withExclusiveMinimum =
+      min: base:
+      lib.types.addCheck base (x: x > min)
+      // {
+        description = "${base.description} (exclusive minimum ${toString min})";
+      };
+    withExclusiveMaximum =
+      max: base:
+      lib.types.addCheck base (x: x < max)
+      // {
+        description = "${base.description} (exclusive maximum ${toString max})";
+      };
+    withMultipleOf =
+      m: base:
+      lib.types.addCheck base (x: mod x m == 0)
+      // {
+        description = "${base.description} (multiple of ${toString m})";
+      };
+
+    # String constraints.
+    withMinLength =
+      n: base:
+      lib.types.addCheck base (x: stringLength x >= n)
+      // {
+        description = "${base.description} (min length ${toString n})";
+      };
+    withMaxLength =
+      n: base:
+      lib.types.addCheck base (x: stringLength x <= n)
+      // {
+        description = "${base.description} (max length ${toString n})";
+      };
+    withPattern =
+      p: base:
+      lib.types.addCheck base (x: builtins.match p x != null)
+      // {
+        description = "${base.description} (matching `${p}`)";
+      };
   };
 
   mkOptionDefault = mkOverride 1001;

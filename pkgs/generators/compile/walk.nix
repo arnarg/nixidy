@@ -25,7 +25,8 @@ let
 
   hasTypeMapping =
     def:
-    (def ? oneOf && any hasTypeMapping def.oneOf)
+    (def ? enum && all (v: isBool v || isString v || isInt v || isFloat v) def.enum)
+    || (def ? oneOf && any hasTypeMapping def.oneOf)
     || (
       def ? type
       && elem def.type [
@@ -36,6 +37,35 @@ let
         "any"
       ]
     );
+
+  # Fold the JsonSchema validation keywords a def carries over its base type.
+  # Each step is a backend combinator application, so this works for both the
+  # text backend (source strings) and the value backend (live types).
+  withValidation =
+    b: base: def:
+    let
+      steps = filter (s: s != null) [
+        (if def ? minimum then b.types.withMinimum def.minimum else null)
+        (if def ? maximum then b.types.withMaximum def.maximum else null)
+        (
+          if def ? exclusiveMinimum && !(isBool def.exclusiveMinimum) then
+            b.types.withExclusiveMinimum def.exclusiveMinimum
+          else
+            null
+        )
+        (
+          if def ? exclusiveMaximum && !(isBool def.exclusiveMaximum) then
+            b.types.withExclusiveMaximum def.exclusiveMaximum
+          else
+            null
+        )
+        (if def ? multipleOf then b.types.withMultipleOf def.multipleOf else null)
+        (if def ? minLength then b.types.withMinLength def.minLength else null)
+        (if def ? maxLength then b.types.withMaxLength def.maxLength else null)
+        (if def ? pattern then b.types.withPattern def.pattern else null)
+      ];
+    in
+    foldl' (t: f: f t) base steps;
 
   compareVersions =
     ver1: ver2:
@@ -80,18 +110,22 @@ in
 
       mapType =
         def:
-        if def ? oneOf then
+        # enum short-circuits: the values are self-describing scalars and map
+        # straight onto Nix's native `types.enum`.
+        if def ? enum then
+          b.types.enum def.enum
+        else if def ? oneOf then
           b.types.oneOf (map mapType (filter hasTypeMapping def.oneOf))
         else if def ? type then
           if def.type == "string" then
             if def ? format && def.format == "int-or-string" then
               b.types.either b.types.int b.types.str
             else
-              b.types.str
+              withValidation b b.types.str def
           else if def.type == "integer" then
-            b.types.int
+            withValidation b b.types.int def
           else if def.type == "number" then
-            b.types.either b.types.int b.types.float
+            withValidation b (b.types.either b.types.int b.types.float) def
           else if def.type == "boolean" then
             b.types.bool
           else if def.type == "object" then

@@ -48,6 +48,21 @@ let
                       type: string
                     replicas:
                       type: integer
+                      minimum: 1
+                      maximum: 10
+                    cpuShares:
+                      type: integer
+                      multipleOf: 2
+                    mode:
+                      type: string
+                      enum:
+                        - fast
+                        - slow
+                    hostname:
+                      type: string
+                      minLength: 1
+                      maxLength: 63
+                      pattern: ^[a-z0-9-]+$
                     targetPort:
                       x-kubernetes-int-or-string: true
                     labels:
@@ -204,6 +219,9 @@ let
             resources."stable.example.com"."v1"."FooBar".myfoo.spec = {
               image = "nginx";
               replicas = 2;
+              cpuShares = 4;
+              mode = "fast";
+              hostname = "my-host";
               targetPort = 8080;
               labels.app = "demo";
               ports.http.port = 8080;
@@ -255,9 +273,37 @@ let
       ];
     }).config.applications.test.resources."stable.example.com"."v1"."FooBar".myfoo.spec.ports;
 
+  # Render a FooBar with one spec field set to an out-of-bounds value, then
+  # deep-force it. The override is part of the module *config*, so a working
+  # validator turns the render into a type error, which `tryEval` reports as
+  # `success == false` → we return `true` (rejected).
+  rejects =
+    override:
+    let
+      rendered =
+        (mkEnv {
+          inherit pkgs;
+          modules = [
+            {
+              nixidy.target = {
+                repository = "x";
+                branch = "main";
+              };
+              nixidy.applicationImports = [ nativeMod ];
+              applications.test = {
+                namespace = "default";
+                resources."stable.example.com"."v1"."FooBar".myfoo.spec = override;
+              };
+            }
+          ];
+        }).config.applications.test.resources."stable.example.com"."v1"."FooBar".myfoo;
+
+      result = builtins.tryEval (lib.deepSeq rendered.spec rendered.spec);
+    in
+    !result.success;
+
   checks = {
     "fromCRDModule == fromCRD (file)" = render nativeMod == render fileMod;
-
     "fromChartCRDModule == fromCRDModule" = render chartMod == render nativeMod;
 
     "crdObjects returns the CRD" =
@@ -321,6 +367,16 @@ let
       lib.hasInfix "1.31" (ann "v1.31.0")
       && lib.hasInfix "1.40" (ann "v1.40.0")
       && ann "v1.31.0" != ann "v1.40.0";
+
+    # Validators reject out-of-bounds values. `tryEval` catches the type error
+    # thrown by the failing `addCheck`; a rejected value yields success=false.
+    # Rendering goes through the value backend (fromCRDModule), so these checks
+    # pin the *runtime* rejection while the parity check above pins the types.
+    "validator rejects integer below minimum" = rejects { replicas = 0; };
+    "validator rejects integer above maximum" = rejects { replicas = 11; };
+    "validator rejects non-multipleOf integer" = rejects { cpuShares = 3; };
+    "validator rejects value outside enum" = rejects { mode = "medium"; };
+    "validator rejects string violating pattern" = rejects { hostname = "Bad_Host"; };
   };
 
   failed = lib.attrNames (lib.filterAttrs (_: ok: !ok) checks);

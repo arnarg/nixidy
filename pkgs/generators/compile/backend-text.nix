@@ -41,6 +41,20 @@ in
     loaOf = type: "(types.loaOf ${type})";
     # `walk` pre-maps the alternatives, so this receives rendered type strings.
     oneOf = ts: "(types.oneOf [${concatStringsSep " " ts}])";
+
+    # Validators: take the scalar bound(s) and an already-rendered base type
+    # string, and render the application as source. The names resolve to the
+    # helpers generator.nix inlines into the generated file's `let` block.
+    withMinimum = min: base: "(types.withMinimum ${toNixString min} ${base})";
+    withMaximum = max: base: "(types.withMaximum ${toNixString max} ${base})";
+    withExclusiveMinimum = min: base: "(types.withExclusiveMinimum ${toNixString min} ${base})";
+    withExclusiveMaximum = max: base: "(types.withExclusiveMaximum ${toNixString max} ${base})";
+    withMultipleOf = m: base: "(types.withMultipleOf ${toNixString m} ${base})";
+    withMinLength = n: base: "(types.withMinLength ${toString n} ${base})";
+    withMaxLength = n: base: "(types.withMaxLength ${toString n} ${base})";
+    withPattern = p: base: "(types.withPattern ${escapeNixStr (builtins.toJSON p)} ${base})";
+    # enum values are self-describing scalars; emit as a literal list.
+    enum = vals: "(types.enum [${concatStringsSep " " (map toNixString vals)}])";
   };
 
   mkOption =
