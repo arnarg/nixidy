@@ -131,10 +131,96 @@ rec {
       };
     withPattern =
       p: base:
-      lib.types.addCheck base (x: builtins.match p x != null)
-      // {
-        description = "${base.description} (matching `${p}`)";
-      };
+      let
+        # `builtins.match` compiles its pattern as a POSIX ERE, but JSON Schema
+        # `pattern`s are ECMAScript. The two dialects diverge in many places, and
+        # an unsupported construct makes `builtins.match` throw an *uncatchable*
+        # error at compile time (`builtins.tryEval` does not rescue it) — for every
+        # value, aborting evaluation of the whole environment. Since the throw
+        # cannot be caught, we must decide *statically* whether a pattern is safe,
+        # and we do so conservatively: translate the class escapes POSIX ERE lacks
+        # (`\d`, `\s`, `\w` and their negations, plus `\/`) for the simple case,
+        # then apply the check ONLY for patterns we can be sure compile, skipping
+        # (returning the base `str`) otherwise. The API server validates the real
+        # pattern regardless, so skipping only forgoes a redundant client check.
+        #
+        # We skip when the original pattern contains any of:
+        #   - a character class `[…]` — POSIX bracket expressions have their own
+        #     sub-syntax (`[[:class:]]`, `[.coll.]`, `[=eq=]`) and rules that
+        #     diverge from ECMAScript, and `replaceStrings`-based escape
+        #     translation is context-blind (it would corrupt an escape *inside* a
+        #     class), so classes are out of scope;
+        #   - a brace `{` — POSIX interval vs. ECMAScript literal-brace divergence;
+        #   - a `(?…)` group — POSIX ERE has no such groups;
+        #   - an unsupported backslash-escape — one that survives peeling off every
+        #     escape POSIX ERE accepts (e.g. `\b`, `\-`, `\:`).
+        # This is a coverage/robustness trade: it validates only the class-free
+        # subset, but never crashes and never mis-validates a valid value. Anything
+        # more (classes, intervals) is left to the API server.
+        posixPattern =
+          builtins.replaceStrings
+            [
+              "\\d"
+              "\\D"
+              "\\s"
+              "\\S"
+              "\\w"
+              "\\W"
+              "\\/"
+            ]
+            [
+              "[0-9]"
+              "[^0-9]"
+              "[[:space:]]"
+              "[^[:space:]]"
+              "[0-9A-Za-z_]"
+              "[^0-9A-Za-z_]"
+              "/"
+            ]
+            p;
+        peeled =
+          builtins.replaceStrings
+            [
+              "\\\\"
+              "\\."
+              "\\("
+              "\\)"
+              "\\["
+              "\\{"
+              "\\*"
+              "\\+"
+              "\\?"
+              "\\|"
+              "\\^"
+              "\\$"
+            ]
+            [
+              ""
+              ""
+              ""
+              ""
+              ""
+              ""
+              ""
+              ""
+              ""
+              ""
+              ""
+              ""
+            ]
+            posixPattern;
+        posixCompilable =
+          builtins.match ".*[[{].*" p == null
+          && builtins.match ".*\\(\\?.*" p == null
+          && builtins.match ".*\\\\.*" peeled == null;
+      in
+      if !posixCompilable then
+        base
+      else
+        lib.types.addCheck base (x: builtins.match posixPattern x != null)
+        // {
+          description = "${base.description} (matching `${p}`)";
+        };
   };
 
   mkOptionDefault = mkOverride 1001;

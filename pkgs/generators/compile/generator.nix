@@ -139,10 +139,40 @@ let
           };
         withPattern =
           p: base:
-          lib.types.addCheck base (x: builtins.match p x != null)
-          // {
-            description = "''${base.description} (matching `''${p}`)";
-          };
+          # builtins.match compiles POSIX ERE, but JSON Schema patterns are
+          # ECMAScript, and an unsupported construct makes it throw an uncatchable
+          # error at compile time (tryEval won't rescue it), aborting evaluation.
+          # Since the throw can't be caught we decide statically and conservatively:
+          # translate the class escapes POSIX lacks (`\d`, `\s`, `\w`, negations,
+          # and `\/`) for the simple case, then apply the check ONLY for patterns we
+          # can be sure compile, skipping otherwise. The API server validates the
+          # real pattern regardless. Skip when the original pattern contains a
+          # character class `[…]` (POSIX bracket sub-syntax diverges from ECMAScript
+          # and replaceStrings translation is context-blind inside a class), a brace
+          # `{` (interval divergence), a `(?…)` group, or an unsupported escape (one
+          # that survives peeling off every escape POSIX accepts). Validates only the
+          # class-free subset, but never crashes and never mis-validates.
+          let
+            posixPattern = builtins.replaceStrings
+              [ "\\d" "\\D" "\\s" "\\S" "\\w" "\\W" "\\/" ]
+              [ "[0-9]" "[^0-9]" "[[:space:]]" "[^[:space:]]" "[0-9A-Za-z_]" "[^0-9A-Za-z_]" "/" ]
+              p;
+            peeled = builtins.replaceStrings
+              [ "\\\\" "\\." "\\(" "\\)" "\\[" "\\{" "\\*" "\\+" "\\?" "\\|" "\\^" "\\$" ]
+              [ "" "" "" "" "" "" "" "" "" "" "" "" ]
+              posixPattern;
+            posixCompilable =
+              builtins.match ".*[[{].*" p == null
+              && builtins.match ".*\\(\\?.*" p == null
+              && builtins.match ".*\\\\.*" peeled == null;
+          in
+          if !posixCompilable then
+            base
+          else
+            lib.types.addCheck base (x: builtins.match posixPattern x != null)
+            // {
+              description = "''${base.description} (matching `''${p}`)";
+            };
       };
 
       mkOptionDefault = mkOverride 1001;
