@@ -52,7 +52,6 @@ in
     withMultipleOf = m: base: "(types.withMultipleOf ${toNixString m} ${base})";
     withMinLength = n: base: "(types.withMinLength ${toString n} ${base})";
     withMaxLength = n: base: "(types.withMaxLength ${toString n} ${base})";
-    withPattern = p: base: "(types.withPattern ${escapeNixStr (builtins.toJSON p)} ${base})";
     # enum values are self-describing scalars; emit as a literal list.
     enum = vals: "(types.enum [${concatStringsSep " " (map toNixString vals)}])";
   };

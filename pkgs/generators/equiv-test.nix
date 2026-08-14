@@ -62,7 +62,6 @@ let
                       type: string
                       minLength: 1
                       maxLength: 63
-                      pattern: ^[a-z0-9-]+$
                     targetPort:
                       x-kubernetes-int-or-string: true
                     labels:
@@ -376,7 +375,6 @@ let
     "validator rejects integer above maximum" = rejects { replicas = 11; };
     "validator rejects non-multipleOf integer" = rejects { cpuShares = 3; };
     "validator rejects value outside enum" = rejects { mode = "medium"; };
-    "validator rejects string violating pattern" = rejects { hostname = "Bad_Host"; };
   };
 
   failed = lib.attrNames (lib.filterAttrs (_: ok: !ok) checks);

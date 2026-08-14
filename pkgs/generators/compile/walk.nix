@@ -62,7 +62,6 @@ let
         (if def ? multipleOf then b.types.withMultipleOf def.multipleOf else null)
         (if def ? minLength then b.types.withMinLength def.minLength else null)
         (if def ? maxLength then b.types.withMaxLength def.maxLength else null)
-        (if def ? pattern then b.types.withPattern def.pattern else null)
       ];
     in
     foldl' (t: f: f t) base steps;

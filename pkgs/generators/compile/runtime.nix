@@ -129,12 +129,6 @@ rec {
       // {
         description = "${base.description} (max length ${toString n})";
       };
-    withPattern =
-      p: base:
-      lib.types.addCheck base (x: builtins.match p x != null)
-      // {
-        description = "${base.description} (matching `${p}`)";
-      };
   };
 
   mkOptionDefault = mkOverride 1001;
