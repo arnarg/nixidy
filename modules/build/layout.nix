@@ -15,8 +15,22 @@ rec {
           o: r:
           if o == null then
             null
-          else if r.predicate o then
-            r.rewrite o
+          else if r.predicate o then let
+            rewriteAttr = attr: f: obj:
+              if builtins.hasAttr attr obj then
+                let
+                  value = f (builtins.getAttr attr obj);
+                in
+                if value == null then builtins.removeAttrs obj [ attr ]
+                else obj // { ${attr} = value; }
+              else obj;
+            rewriteList = f: objs: builtins.filter (v: v != null) (builtins.map f objs);
+            rewrite = list: obj:
+              if builtins.isList obj then rewriteList (rewrite list) obj
+              else if list != [] then rewriteAttr (builtins.head list) (rewrite (builtins.tail list)) obj
+              else if r.part.predicate obj then r.rewrite obj
+              else obj;
+          in rewrite r.part.path o
           else
             o
         ) obj rewrites;

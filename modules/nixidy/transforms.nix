@@ -47,6 +47,22 @@ let
     && hasAll (m.labels or { }) (sel.labels or { })
     && hasAll (m.annotations or { }) (sel.annotations or { });
 
+  partSelectorToPredicate = sel: res:
+    let
+      matchAttr = res: { name, value }:
+        let
+          resValue = res.${name} or null;
+        in
+        if (value == null) != (resValue == null) then false
+        else if builtins.isAttrs resValue then matchAttrs value resValue
+        else if builtins.isList resValue then builtins.any (matchAttrs value) resValue
+        else if builtins.isList value then builtins.any (s: s == resValue) value
+        else value == resValue;
+      matchAttrs = sel: res:
+        if builtins.isList sel then builtins.any (s: matchAttrs s res) sel
+        else lib.all (matchAttr res) (lib.attrsToList sel);
+    in matchAttrs sel res;
+
   # Runtime post-process stage. A bare string is the common case (one command,
   # no extra PATH) and coerces to `{ command = <string>; runtimeInputs = []; }`,
   # matching the `files` library's `onChange` ergonomics.
@@ -88,6 +104,47 @@ let
     };
   };
 
+  partType = types.submodule (
+    { config, ...}: {
+      options = {
+        path = mkOption {
+          type = (types.listOf types.str);
+          default = [];
+          description = ''
+            Path to a part of the resource you want the rewrite to apply to.
+
+            If a path element is a list, the rewrite is applied to each element of that list.
+            That is, in a Pod, `[ "spec" "containers" "env" ]` would apply the rewrite to
+            each `env` entry inside each `containers` entry.
+          '';
+        };
+        match = mkOption {
+          type = types.oneOf [(types.functionTo types.bool) types.attrs (types.listOf types.attrs) ];
+          default = _: true;
+          description = ''
+            Apply rewrite only to parts that match this predicate.
+
+            The predicate can either be a function `part -> bool` or an attrset—in such case it will match when it's a subset of the part.
+            This also looks for any matching item in an array, so that e. g. in a Pod, `spec.containers.envFrom.secretRef.name = "foo";`
+            will match any pod with a container that has an envFrom with `secretRef.name == "foo"`.
+
+            Attribute checks are ANDed, but you can OR matches by providing an array, such as: `secretRef.name = [ "foo" "bar" ];`.
+
+            By default, all parts match.
+          '';
+        };
+        predicate = mkOption {
+          internal = true;
+          readOnly = true;
+          type = types.functionTo types.bool;
+          default =
+            if lib.isFunction config.match then config.match
+            else partSelectorToPredicate config.match;
+        };
+      };
+    }
+  );
+
   ruleType = types.submodule (
     { config, ... }:
     {
@@ -120,6 +177,14 @@ let
             Predicates run against the resource as seen at this point in the
             pipeline, i.e. AFTER earlier rules' `rewrite`s. A rule that renames
             a kind must be matched by its NEW kind in later rules.
+          '';
+        };
+
+        part = mkOption {
+          type = partType;
+          default = {};
+          description = ''
+            Apply the rewrite to a part of the resource.
           '';
         };
         rewrite = mkOption {
@@ -189,5 +254,5 @@ let
     }) rules;
 in
 {
-  inherit ruleType selectorToPredicate mkXorAssertions;
+  inherit ruleType partType selectorToPredicate partSelectorToPredicate mkXorAssertions;
 }
