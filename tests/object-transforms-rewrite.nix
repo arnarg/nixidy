@@ -9,24 +9,27 @@ in
 {
   applications.test1 = {
     namespace = "test";
-    resources.secrets."a-b".stringData.x = "y";
-    resources.configMaps.cm.data.FOO = "bar";
-    resources.deployments.test = {
-      metadata.labels = {
-        foo = "foo";
-        bar = "bar";
-      };
-      spec = {
-        selector = {};
-        template.spec.containers = {
-          c1 = {};
-          c2.env = {
-            a = { value = "a"; };
-            b = { value = "b"; };
+    resources = {
+      secrets."a-b".stringData.x = "y";
+      configMaps.cm.data.FOO = "bar";
+      deployments.test = {
+        metadata.labels = {
+          foo = "foo";
+          bar = "bar";
+        };
+        spec = {
+          selector = {};
+          template.spec.containers = {
+            c1 = {};
+            c2.env = {
+              a = { value = "a"; };
+              b = { value = "b"; };
+            };
           };
         };
       };
     };
+
     objectTransforms = [
       {
         match.kind = "SopsSecret";
@@ -105,7 +108,7 @@ in
       {
         description = "tty was added to all containers in deployment";
         expression = objs;
-        assertion = os: lib.all (c: c.tty == true) (lib.head (lib.filter (o: o.kind == "Deployment") os)).spec.template.spec.containers;
+        assertion = os: lib.all (c: c.tty) (lib.head (lib.filter (o: o.kind == "Deployment") os)).spec.template.spec.containers;
       }
       {
         description = "only one env was rewritten";
