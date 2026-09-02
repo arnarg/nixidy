@@ -188,7 +188,7 @@ let
           '';
         };
         rewrite = mkOption {
-          type = types.nullOr (types.functionTo (types.nullOr (types.attrsOf types.anything)));
+          type = types.nullOr (types.functionTo (types.nullOr types.anything));
           default = null;
           description = ''
             Eval-time transform `resource -> resource`. Returning `null` drops
