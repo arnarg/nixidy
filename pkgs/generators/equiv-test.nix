@@ -50,6 +50,22 @@ let
                       type: integer
                       minimum: 1
                       maximum: 10
+                    priority:
+                      type: integer
+                      minimum: -1000
+                      maximum: -1
+                    temperature:
+                      type: number
+                      minimum: -10.5
+                      maximum: -0.5
+                    exclusivePriority:
+                      type: integer
+                      exclusiveMinimum: -1000
+                      exclusiveMaximum: -1
+                    exclusiveTemperature:
+                      type: number
+                      exclusiveMinimum: -10.5
+                      exclusiveMaximum: -0.5
                     cpuShares:
                       type: integer
                       multipleOf: 2
@@ -203,7 +219,7 @@ let
   # (k8s core + argocd) provide ObjectMeta; the base doesn't define FooBar, so
   # any difference is isolated to this resource.
   render =
-    crdMod:
+    crdMod: override:
     (mkEnv {
       inherit pkgs;
       modules = [
@@ -218,6 +234,10 @@ let
             resources."stable.example.com"."v1"."FooBar".myfoo.spec = {
               image = "nginx";
               replicas = 2;
+              priority = -1000;
+              temperature = -10.5;
+              exclusivePriority = -999;
+              exclusiveTemperature = -10.0;
               cpuShares = 4;
               mode = "fast";
               hostname = "my-host";
@@ -235,7 +255,8 @@ let
                 cpu = "100m";
                 memory = "128Mi";
               };
-            };
+            }
+            // override;
           };
         }
       ];
@@ -277,33 +298,51 @@ let
   # validator turns the render into a type error, which `tryEval` reports as
   # `success == false` → we return `true` (rejected).
   rejects =
-    override:
+    crdMod: override:
     let
-      rendered =
-        (mkEnv {
-          inherit pkgs;
-          modules = [
-            {
-              nixidy.target = {
-                repository = "x";
-                branch = "main";
-              };
-              nixidy.applicationImports = [ nativeMod ];
-              applications.test = {
-                namespace = "default";
-                resources."stable.example.com"."v1"."FooBar".myfoo.spec = override;
-              };
-            }
-          ];
-        }).config.applications.test.resources."stable.example.com"."v1"."FooBar".myfoo;
-
+      rendered = render crdMod override;
       result = builtins.tryEval (lib.deepSeq rendered.spec rendered.spec);
     in
     !result.success;
 
+  validatorChecks =
+    lib.concatMapAttrs
+      (backend: crdMod: {
+        "${backend}: accepts negative inclusive upper bounds" =
+          let
+            spec =
+              (render crdMod {
+                priority = -1;
+                temperature = -0.5;
+              }).spec;
+          in
+          spec.priority == -1 && spec.temperature == -0.5;
+
+        "${backend}: rejects integer below negative minimum" = rejects crdMod { priority = -1001; };
+        "${backend}: rejects integer above negative maximum" = rejects crdMod { priority = 0; };
+        "${backend}: rejects float below negative minimum" = rejects crdMod { temperature = -11.0; };
+        "${backend}: rejects float above negative maximum" = rejects crdMod { temperature = 0.0; };
+        "${backend}: rejects integer at negative exclusive minimum" = rejects crdMod {
+          exclusivePriority = -1000;
+        };
+        "${backend}: rejects integer at negative exclusive maximum" = rejects crdMod {
+          exclusivePriority = -1;
+        };
+        "${backend}: rejects float at negative exclusive minimum" = rejects crdMod {
+          exclusiveTemperature = -10.5;
+        };
+        "${backend}: rejects float at negative exclusive maximum" = rejects crdMod {
+          exclusiveTemperature = -0.5;
+        };
+      })
+      {
+        file = fileMod;
+        native = nativeMod;
+      };
+
   checks = {
-    "fromCRDModule == fromCRD (file)" = render nativeMod == render fileMod;
-    "fromChartCRDModule == fromCRDModule" = render chartMod == render nativeMod;
+    "fromCRDModule == fromCRD (file)" = render nativeMod { } == render fileMod { };
+    "fromChartCRDModule == fromCRDModule" = render chartMod { } == render nativeMod { };
 
     "crdObjects returns the CRD" =
       lib.length srcObjs == 1 && (lib.head srcObjs).spec.names.kind == "FooBar";
@@ -371,11 +410,12 @@ let
     # thrown by the failing `addCheck`; a rejected value yields success=false.
     # Rendering goes through the value backend (fromCRDModule), so these checks
     # pin the *runtime* rejection while the parity check above pins the types.
-    "validator rejects integer below minimum" = rejects { replicas = 0; };
-    "validator rejects integer above maximum" = rejects { replicas = 11; };
-    "validator rejects non-multipleOf integer" = rejects { cpuShares = 3; };
-    "validator rejects value outside enum" = rejects { mode = "medium"; };
-  };
+    "validator rejects integer below minimum" = rejects nativeMod { replicas = 0; };
+    "validator rejects integer above maximum" = rejects nativeMod { replicas = 11; };
+    "validator rejects non-multipleOf integer" = rejects nativeMod { cpuShares = 3; };
+    "validator rejects value outside enum" = rejects nativeMod { mode = "medium"; };
+  }
+  // validatorChecks;
 
   failed = lib.attrNames (lib.filterAttrs (_: ok: !ok) checks);
 in
