@@ -19,6 +19,9 @@ let
       ''"${escapeNixStr value}"''
     else if value == null then
       "null"
+    # Unary negation needs parentheses in function arguments and list elements.
+    else if (isInt value || isFloat value) && value < 0 then
+      "(${builtins.toString value})"
     else
       builtins.toString value;
 
