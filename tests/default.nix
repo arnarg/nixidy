@@ -35,6 +35,7 @@
       ./templates.nix
       ./assertions.nix
       ./object-transforms-matcher.nix
+      ./object-transforms-part-matcher.nix
       ./object-transforms-assert.nix
       ./object-transforms-rewrite.nix
       ./object-transforms-post-process.nix
