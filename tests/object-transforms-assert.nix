@@ -9,32 +9,37 @@ let
   mentionsXor = a: !a.assertion && lib.hasInfix "exactly one" a.message;
 in
 {
-  applications.good = {
-    namespace = "test";
-    objectTransforms = [
-      {
-        rewrite = res: res;
-      }
-    ];
+  applications = {
+    good = {
+      namespace = "test";
+      objectTransforms.foo = {
+        replace = res: res;
+      };
+    };
+
+    bad = {
+      namespace = "test";
+      objectTransforms.double-action = {
+        replace = res: res;
+        update = { };
+      };
+    };
+
+    bad-nested-transform = {
+      namespace = "test";
+      objectTransforms.outer = {
+        transforms.inner = {
+          replace = res: res;
+          update = { };
+        };
+      };
+    };
   };
 
-  applications.bad = {
-    namespace = "test";
-    objectTransforms = [
-      {
-        name = "double-action";
-        rewrite = res: res;
-        postProcess.command = "cat";
-      }
-    ];
+  nixidy.objectTransforms.foo = {
+    replace = res: res;
+    transforms.foo.update = { };
   };
-
-  nixidy.objectTransforms = [
-    {
-      rewrite = res: res;
-      postProcess.command = "cat";
-    }
-  ];
 
   test = {
     name = "objectTransforms XOR assertion";
@@ -49,6 +54,11 @@ in
         description = "bad app has a failing XOR assertion";
         expression = apps.bad.assertions;
         assertion = as: lib.any mentionsXor as;
+      }
+      {
+        description = "A bad nested transform has a failing XOR assertion";
+        expression = apps.bad-nested-transform.assertions;
+        assertion = as: lib.any (a: !a.assertion && lib.hasInfix "outer.inner" a.message) as;
       }
       {
         description = "the failing message names the offending rule";

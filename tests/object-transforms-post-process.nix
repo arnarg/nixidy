@@ -19,37 +19,33 @@ in
     resources.configMaps.cm.data.FOO = "bar";
   };
 
-  nixidy.objectTransforms = [
-    {
-      # Eval-time rewrite: Secret -> SopsSecret (so postProcess sees the new kind).
-      name = "secret-to-sopssecret";
-      match.kind = "Secret";
-      rewrite =
-        s:
-        s
-        // {
-          kind = "SopsSecret";
-          apiVersion = "isindir.github.com/v1alpha3";
-        };
-    }
-    {
+  nixidy.objectTransforms.secret-to-sopssecret = {
+    # Eval-time rewrite: Secret -> SopsSecret (so postProcess sees the new kind).
+    match.kind = "Secret";
+    update = {
+      kind = "SopsSecret";
+      apiVersion = "isindir.github.com/v1alpha3";
+    };
+  };
+
+  nixidy.postProcessors = {
+    passthrough = {
       # String shortcut: coerces to { command = "cat"; runtimeInputs = []; }.
-      name = "passthrough";
       match.kind = "SopsSecret";
-      postProcess = "cat";
-    }
-    {
+      command = "cat";
+    };
+    two = {
       # Function-form command: resolved at eval time against the matched object.
       match.kind = "SopsSecret";
-      postProcess.command =
+      command =
         {
           resource,
           path,
           ...
         }:
         "cat # ns=${resource.metadata.namespace} path=${path}";
-    }
-  ];
+    };
+  };
 
   test = {
     name = "objectTransforms postProcess";
@@ -78,7 +74,7 @@ in
           let
             strRule = lib.head (lib.filter (rule: rule.name == "passthrough") e.rules);
           in
-          strRule.postProcess.command == "cat" && strRule.postProcess.runtimeInputs == [ ];
+          strRule.command == "cat" && strRule.runtimeInputs == [ ];
       }
       {
         description = "a function-form postProcess command resolves against the matched resource and path";
@@ -86,8 +82,8 @@ in
         assertion =
           e:
           let
-            fnRule = lib.head (lib.filter (rule: lib.isFunction rule.postProcess.command) e.rules);
-            resolved = fnRule.postProcess.command {
+            fnRule = lib.head (lib.filter (rule: lib.isFunction rule.command) e.rules);
+            resolved = fnRule.command {
               resource = e.resource;
               path = sopsKey;
               pkgs = { };

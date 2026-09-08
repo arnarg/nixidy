@@ -28,30 +28,25 @@ in
     extraRawYamls = [ rawYaml ];
   };
 
-  nixidy.objectTransforms = [
-    {
-      # Eval-time rewrite: Secret -> SopsSecret (so postProcess sees the new kind).
-      name = "secret-to-sopssecret";
-      match.kind = "Secret";
-      rewrite =
-        s:
-        s
-        // {
-          kind = "SopsSecret";
-          apiVersion = "isindir.github.com/v1alpha3";
-        };
-    }
-    {
-      # Function-form command: resolved at eval time against the matched object.
-      match.kind = "SopsSecret";
-      postProcess.command =
-        {
-          resource,
-          ...
-        }:
-        "cat # ns=${resource.metadata.namespace}";
-    }
-  ];
+  nixidy.objectTransforms.secret-to-sopssecret = {
+    # Eval-time rewrite: Secret -> SopsSecret (so postProcess sees the new kind).
+    match.kind = "Secret";
+    update = {
+      kind = "SopsSecret";
+      apiVersion = "isindir.github.com/v1alpha3";
+    };
+  };
+
+  nixidy.postProcessors.foo = {
+    # Function-form command: resolved at eval time against the matched object.
+    match.kind = "SopsSecret";
+    command =
+      {
+        resource,
+        ...
+      }:
+      "cat # ns=${resource.metadata.namespace}";
+  };
 
   test = {
     name = "objectTransforms apply parity";
@@ -87,7 +82,7 @@ in
             switchEntry = config.build._filePostProcesses.${e.app}.${e.path};
             resolve =
               entry:
-              (builtins.head entry.rules).postProcess.command {
+              (builtins.head entry.rules).command {
                 resource = entry.resource;
                 path = e.path;
                 pkgs = { };

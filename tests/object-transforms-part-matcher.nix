@@ -1,6 +1,6 @@
 { lib, ... }:
 let
-  inherit (import ../modules/nixidy/transforms.nix { inherit lib; }) partSelectorToPredicate;
+  inherit (import ../modules/nixidy/transforms.nix { inherit lib; }) selectorToPredicate;
   res = {
     kind = "Pod";
     apiVersion = "v1";
@@ -13,11 +13,11 @@ let
       };
     };
     spec.containers = [
-      { envFrom = [{ secretRef.name = "a"; }]; }
-      { envFrom = [{ secretRef.name = "b"; }]; }
+      { envFrom = [ { secretRef.name = "a"; } ]; }
+      { envFrom = [ { secretRef.name = "b"; } ]; }
     ];
   };
-  p = sel: partSelectorToPredicate sel res;
+  p = sel: selectorToPredicate sel res;
 in
 {
   test = {
@@ -82,14 +82,20 @@ in
       {
         description = "match any value in a list";
         expression = p {
-          spec.containers.envFrom.secretRef.name = [ "a" "c" ];
+          spec.containers.envFrom.secretRef.name = [
+            "a"
+            "c"
+          ];
         };
         expected = true;
       }
       {
         description = "false when no items match";
         expression = p {
-          spec.containers.envFrom.secretRef.name = [ "c" "d" ];
+          spec.containers.envFrom.secretRef.name = [
+            "c"
+            "d"
+          ];
         };
         expected = false;
       }
