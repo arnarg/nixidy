@@ -186,6 +186,7 @@ main options and imports the rest:
     target.rootPath = mkOption { ... };        # Root path for manifests
     build.revision = mkOption { ... };         # Revision written to `.revision`
     objectTransforms = mkOption { ... };       # Env-wide transform rules
+    postProcessors = mkOption { ... };         # Env-wide runtime post-process rules
     charts = mkOption { ... };                 # Helm chart sources
     chartsDir = mkOption { ... };              # Directory to build charts from
   };
@@ -197,7 +198,7 @@ The directory also contains:
 - `defaults.nix`: default settings (`nixidy.defaults`, e.g. default transformers)
 - `app-of-apps.nix`: bootstrap app-of-apps pattern generation
 - `extra-files.nix`: extra files (`nixidy.extraFiles`) rendered into the output
-- `transforms.nix`: the `objectTransforms` rule type, matcher, and assertions
+- `transforms.nix`: the `objectTransforms` and `postProcessors` rule types, matcher, and assertions
 
 Also handled here:
 
@@ -219,6 +220,7 @@ Defines individual application options:
     annotations = mkOption { ... };
     labels = mkOption { ... };
     objectTransforms = mkOption { ... };  # App-scoped transform rules
+    postProcessors = mkOption { ... };    # App-scoped runtime post-process rules
     assertions = mkOption { ... };        # Build-time assertions
   };
 }
@@ -305,7 +307,7 @@ Creates output packages:
 - `environmentPackage`: All application manifests combined
 - `extrasPackage`: Extra files from `nixidy.extraFiles`
 - `activationPackage`: For `nixidy switch` operations
-- `declarativePackage`: For `kubectl apply --prune`. Emits an `apply` script that consumes `environmentPackage` and runs `objectTransforms` `postProcess` rules at apply time; it no longer renders standalone manifest files.
+- `declarativePackage`: For `kubectl apply --prune`. Emits an `apply` script that consumes `environmentPackage` and runs `nixidy.postProcessors` rules at apply time; it no longer renders standalone manifest files.
 - `bootstrapPackage`: App-of-apps manifest
 
 Everything is derived from one seam: `layout.nix` turns each application into a
@@ -315,10 +317,10 @@ emitters consume that list and never re-derive file paths:
 
 | File | Responsibility |
 |------|----------------|
-| `layout.nix` | Pure core: eval-time `rewrite` transforms, object grouping, file classification, per-app `[FileSpec]` |
+| `layout.nix` | Pure core: eval-time `replace`/`update` transforms, object grouping, file classification, per-app `[FileSpec]` |
 | `render.nix` | One FileSpec to the shell fragment that writes it |
 | `emit-environment.nix` | `environmentPackage`, `activationPackage`, `bootstrapPackage`, `extrasPackage` |
-| `apply.nix` | `declarativePackage`'s `apply` script and the shared activation `postProcess` fragments |
+| `apply.nix` | `declarativePackage`'s `apply` script and the shared activation post-process fragments |
 | `default.nix` | Option surface, `layout` wiring, environment-scope assertions |
 
 #### `modules/templates.nix`
