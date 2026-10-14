@@ -500,6 +500,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../../user_guide/postprocessing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Post-processing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../user_guide/using_nixhelm/" class="md-nav__link">
         
   
@@ -1881,6 +1904,7 @@ main options and imports the rest:</p>
     target<span class="o">.</span><span class="ss">rootPath</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>        <span class="c1"># Root path for manifests</span>
     build<span class="o">.</span><span class="ss">revision</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>         <span class="c1"># Revision written to `.revision`</span>
     <span class="ss">objectTransforms</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>       <span class="c1"># Env-wide transform rules</span>
+    <span class="ss">postProcessors</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>         <span class="c1"># Env-wide runtime post-process rules</span>
     <span class="ss">charts</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>                 <span class="c1"># Helm chart sources</span>
     <span class="ss">chartsDir</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>              <span class="c1"># Directory to build charts from</span>
   <span class="p">};</span>
@@ -1891,7 +1915,7 @@ main options and imports the rest:</p>
 <li><code>defaults.nix</code>: default settings (<code>nixidy.defaults</code>, e.g. default transformers)</li>
 <li><code>app-of-apps.nix</code>: bootstrap app-of-apps pattern generation</li>
 <li><code>extra-files.nix</code>: extra files (<code>nixidy.extraFiles</code>) rendered into the output</li>
-<li><code>transforms.nix</code>: the <code>objectTransforms</code> rule type, matcher, and assertions</li>
+<li><code>transforms.nix</code>: the <code>objectTransforms</code> and <code>postProcessors</code> rule types, matcher, and assertions</li>
 </ul>
 <p>Also handled here:</p>
 <ul>
@@ -1910,6 +1934,7 @@ main options and imports the rest:</p>
     <span class="ss">annotations</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
     <span class="ss">labels</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
     <span class="ss">objectTransforms</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>  <span class="c1"># App-scoped transform rules</span>
+    <span class="ss">postProcessors</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>    <span class="c1"># App-scoped runtime post-process rules</span>
     <span class="ss">assertions</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>        <span class="c1"># Build-time assertions</span>
   <span class="p">};</span>
 <span class="p">}</span>
@@ -1982,7 +2007,7 @@ main options and imports the rest:</p>
 <li><code>environmentPackage</code>: All application manifests combined</li>
 <li><code>extrasPackage</code>: Extra files from <code>nixidy.extraFiles</code></li>
 <li><code>activationPackage</code>: For <code>nixidy switch</code> operations</li>
-<li><code>declarativePackage</code>: For <code>kubectl apply --prune</code>. Emits an <code>apply</code> script that consumes <code>environmentPackage</code> and runs <code>objectTransforms</code> <code>postProcess</code> rules at apply time; it no longer renders standalone manifest files.</li>
+<li><code>declarativePackage</code>: For <code>kubectl apply --prune</code>. Emits an <code>apply</code> script that consumes <code>environmentPackage</code> and runs <code>nixidy.postProcessors</code> rules at apply time; it no longer renders standalone manifest files.</li>
 <li><code>bootstrapPackage</code>: App-of-apps manifest</li>
 </ul>
 <p>Everything is derived from one seam: <code>layout.nix</code> turns each application into a
@@ -1999,7 +2024,7 @@ emitters consume that list and never re-derive file paths:</p>
 <tbody>
 <tr>
 <td><code>layout.nix</code></td>
-<td>Pure core: eval-time <code>rewrite</code> transforms, object grouping, file classification, per-app <code>[FileSpec]</code></td>
+<td>Pure core: eval-time <code>replace</code>/<code>update</code> transforms, object grouping, file classification, per-app <code>[FileSpec]</code></td>
 </tr>
 <tr>
 <td><code>render.nix</code></td>
@@ -2011,7 +2036,7 @@ emitters consume that list and never re-derive file paths:</p>
 </tr>
 <tr>
 <td><code>apply.nix</code></td>
-<td><code>declarativePackage</code>'s <code>apply</code> script and the shared activation <code>postProcess</code> fragments</td>
+<td><code>declarativePackage</code>'s <code>apply</code> script and the shared activation post-process fragments</td>
 </tr>
 <tr>
 <td><code>default.nix</code></td>
