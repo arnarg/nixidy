@@ -202,7 +202,7 @@ let
           '';
         };
         transforms = mkOption {
-          type = types.nullOr (types.attrsOf objectTransformType);
+          type = types.nullOr nestedTransformsType;
           default = null;
           description = ''
             An attrset of sub-transforms. `transform.<name>.path` starts at the object matched by `path`.
@@ -225,6 +225,19 @@ let
       };
     }
   );
+
+  # The self-reference back into `objectTransformType` is fine for regular
+  # evaluation, but option documentation generation walks the option tree via
+  # `type.getSubOptions` and would recurse forever through it. Hide the
+  # sub-options of nested transforms from introspection to break that cycle;
+  # nested transforms take the exact same options, which the `transforms`
+  # description refers to. `substSubModules` must keep returning this type
+  # because the module system calls it when fixing up option types, which
+  # would otherwise rebuild the type without the hidden sub-options.
+  nestedTransformsType = types.attrsOf objectTransformType // {
+    getSubOptions = _: { };
+    substSubModules = _: nestedTransformsType;
+  };
 
   mkObjectTransformsOption =
     description:

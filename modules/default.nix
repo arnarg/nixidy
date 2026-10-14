@@ -12,7 +12,7 @@ let
   nixidyModules = import ./modules.nix;
 
   module = lib.evalModules {
-    modules = modules ++ [ ./templates.nix ] ++ nixidyModules;
+    modules = modules ++ nixidyModules;
     specialArgs = {
       inherit pkgs;
       lib = if builtins.isFunction libOverlay then extendedLib.extend libOverlay else extendedLib;
