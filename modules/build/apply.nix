@@ -23,13 +23,13 @@ rec {
   # notice (prints it), so what is shown is exactly what runs.
   resolveCommand =
     path: resource: r:
-    if lib.isFunction r.postProcess.command then
-      r.postProcess.command {
+    if lib.isFunction r.command then
+      r.command {
         inherit resource path pkgs;
         inherit (pkgs) lib;
       }
     else
-      r.postProcess.command;
+      r.command;
 
   # Build the `cmd1 | cmd2 | …` chain of writeShellApplication store paths for a
   # group's postProcess rules. `cmdPath` keys the script names and is the on-disk
@@ -44,7 +44,7 @@ rec {
           name = "nixidy-post-process-${
             builtins.replaceStrings [ "/" "." ] [ "-" "-" ] cmdPath
           }-${toString i}";
-          runtimeInputs = r.postProcess.runtimeInputs;
+          runtimeInputs = r.runtimeInputs;
           # Verbatim command body; invoked by store path (no `sh -c` requote).
           text = resolveCommand cmdPath resource r;
         };

@@ -1,6 +1,9 @@
 { lib, ... }:
 let
-  inherit (import ../modules/nixidy/transforms.nix { inherit lib; }) selectorToPredicate ruleType;
+  inherit (import ../modules/nixidy/transforms.nix { inherit lib; })
+    selectorToPredicate
+    mkObjectTransformsOption
+    ;
   res = {
     kind = "Secret";
     apiVersion = "v1";
@@ -19,11 +22,11 @@ let
     (lib.evalModules {
       modules = [
         {
-          options.rule = lib.mkOption { type = ruleType; };
-          config.rule = { inherit match; };
+          options.rule = mkObjectTransformsOption "";
+          config.rule.foo = { inherit match; };
         }
       ];
-    }).config.rule.predicate;
+    }).config.rule.foo.predicate;
 in
 {
   test = {
@@ -48,7 +51,7 @@ in
       {
         description = "label subset matches";
         expression = p {
-          labels = {
+          metadata.labels = {
             "app.kubernetes.io/name" = "x";
           };
         };
@@ -57,7 +60,7 @@ in
       {
         description = "label value mismatch";
         expression = p {
-          labels = {
+          metadata.labels = {
             "app.kubernetes.io/name" = "z";
           };
         };
@@ -66,8 +69,10 @@ in
       {
         description = "ns + name AND";
         expression = p {
-          namespace = "argocd";
-          name = "argocd-secret";
+          metadata = {
+            namespace = "argocd";
+            name = "argocd-secret";
+          };
         };
         expected = true;
       }

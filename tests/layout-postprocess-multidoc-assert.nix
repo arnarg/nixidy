@@ -17,12 +17,10 @@
           namespace: zeta
       ''
     ];
-    objectTransforms = [
-      {
-        match.namespace = "alpha";
-        postProcess = "cat";
-      } # matches only the alpha doc
-    ];
+    postProcessors.foo = {
+      match.metadata.namespace = "alpha";
+      command = "cat";
+    }; # matches only the alpha doc
   };
 
   test = {

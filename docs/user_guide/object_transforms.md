@@ -1,18 +1,18 @@
 # Object Transforms
 
-Object transforms are a declarative rule engine for modifying rendered Kubernetes objects across your whole environment. A rule matches objects and either **rewrites** them while nixidy is still evaluating, or **post-processes** their rendered file content when the environment is applied. They are useful for cluster-wide policy (injecting labels or annotations, rewriting a kind, dropping resources) and for runtime content stages (such as piping a manifest through an external encryptor before it is written).
+Object transforms are a declarative rule engine for modifying rendered Kubernetes objects across your whole environment. A rule matches objects (or parts of them) and replaces or updates them. They are useful for cluster-wide policy (injecting labels or annotations, rewriting a kind, dropping resources). For runtime stages that post-process a rendered file, such as encrypting secrets on write, see [Post-processing](postprocessing.md).
 
 Rules can be set environment-wide in `#!nix nixidy.objectTransforms`, or per application in `#!nix applications.<name>.objectTransforms`:
 
 ```nix
 {
-  nixidy.objectTransforms = [
+  nixidy.objectTransforms = {
     # applied to every application's objects
-  ];
+  };
 
-  applications.my-app.objectTransforms = [
+  applications.my-app.objectTransforms = {
     # applied only to my-app's objects
-  ];
+  };
 }
 ```
 
@@ -20,18 +20,40 @@ Where [Transformers](transformers.md) act on a single Helm release or Kustomize 
 
 ## A rule
 
-Each rule selects objects with `match` and sets exactly one of `rewrite` or `postProcess`:
+Each rule selects objects with `match` and sets exactly one of `update`, `replace` or `transforms`:
 
 ```nix
 {
-  name = "encrypt-secrets";   # optional; shown in assertion messages and the post-process log
-  match.kind = "Secret";      # predicate or selector; omit to match every object
+  nixidy.objectTransforms.encrypt-secrets = {
+    match.kind = "ExternalSecret";      # predicate or selector; omit to match every object
 
-  # exactly one of the following:
-  rewrite = resource: resource;                 # evaluation-time transform
-  postProcess = "<command>";                    # activation-time stdin -> stdout filter
+    # exactly one of the following:
+    # 1. You can either update a part of the object
+    update.spec.secretStoreRef = { kind = "ClusterSecretStore"; name = "foo"; };
+    # 2. Or update it based on the old value
+    update = old: { metadata.name = "secret-${old.metadata.name}"; };
+    # 3. Or replace it entirely
+    replace = { metadata = { … }; spec = { … }; };  # replace the whole object
+    # 4. Or replace it based on the old value
+    replace = old: old // { metadata = old.metadata // { name = "secret-${old.metadata.name}"; }; }
+    # 5. Or run a nested transform.
+    transforms = { … };
+  }
 }
 ```
+
+## Accessing resource parts
+
+Object transforms can act on whole resources, but you can also apply a transform to a part of a resource, such as:
+
+```nix
+{
+    path = [ "spec" "template" "spec" "containers" "imagePullPolicy" ];
+    replace = "Always";
+}
+```
+
+Path segments iterate over lists and simply do not match if a field is missing, so the above rule will be executed for every container under `spec.template.spec.containers`, regardless of the resource's kind.
 
 ## Matching resources
 
@@ -42,34 +64,36 @@ Each rule selects objects with `match` and sets exactly one of `rewrite` or `pos
   # selector form
   match = {
     kind = "Secret";
-    namespace = "default";
-    labels."app.kubernetes.io/managed-by" = "nixidy";
+    metadata.namespace = [ "foo" "bar" ];
+    metadata.labels."app.kubernetes.io/managed-by" = "nixidy";
   };
 
   # equivalent predicate form
   match =
     resource:
     resource.kind == "Secret"
-    && (resource.metadata.namespace or null) == "default"
+    && ((resource.metadata.namespace or null) == "foo" || (resource.metadata.namespace or null) == "bar")
     && (resource.metadata.labels."app.kubernetes.io/managed-by" or null) == "nixidy";
 }
 ```
 
-Selector fields are ANDed together. `kind`, `apiVersion`, `namespace` and `name` match by exact equality, where a `#!nix null` field is a wildcard. `labels` and `annotations` are **subset** matches and the object may carry extra keys. The default matches _every_ object in scope, so omitting `match` applies the rule cluster-wide.
+Selector fields are ANDed together. If you provide a list as a value, at least one item of that list must match. Selectors behave in the same way as `path`s—they search in lists for a matching value, and only the specified part of an attrset must match (so in the above example, the `managed-by` label must match, but other labels may also be present).
+The default matches _every_ object in scope, so omitting `match` applies the rule cluster-wide.
 
 !!! note
-    A rule's predicate runs against the object _as seen at that point in the pipeline_, i.e. after earlier rules' `rewrite`s. A rule that renames a kind must be matched by its **new** kind in any later rule.
+    A rule's predicate runs against the object _as seen at that point in the pipeline_, i.e. after earlier transforms. A rule that renames a kind must be matched by its **new** kind in any later rule.
 
-## Rewriting objects
+## Replacing and updating objects
 
-`rewrite` is an evaluation-time function `resource -> resource`. Returning `#!nix null` drops the object entirely. Because it runs during evaluation, the result feeds every output consistently. Both `nixidy switch` and `nixidy apply` see the rewritten object.
+`replace` is a function `resource -> resource`. Returning `#!nix null` drops the object entirely. Because it runs during evaluation, the result feeds every output consistently. Both `nixidy switch` and `nixidy apply` see the rewritten object.
+If the provided value isn't a function, it's coerced to one, so `replace = { … };` is coerced to `replace = _: { … };` for your convenience.
 
 ```nix
 {
-  nixidy.objectTransforms = [
+  nixidy.objectTransforms = {
     # Add a managed-by label to every object in the environment.
-    {
-      rewrite =
+    foo = {
+      replace =
         resource:
         resource
         // {
@@ -79,86 +103,55 @@ Selector fields are ANDed together. `kind`, `apiVersion`, `namespace` and `name`
             };
           };
         };
-    }
+    };
 
     # Drop every HorizontalPodAutoscaler.
-    {
+    bar = {
       match.kind = "HorizontalPodAutoscaler";
-      rewrite = _: null;
-    }
-  ];
+      replace = null;
+    };
+  };
 }
-```
+``` 
 
-## Post-processing rendered files
-
-`postProcess` attaches a stage that runs when the environment is applied, _after_ the object has been rendered to its file. It is a **stdin → stdout filter**: the rendered manifest is fed in on stdin and whatever it writes to stdout becomes the final content.
-
-A bare string is the common case, a single command with no extra packages on its `PATH`:
+`update = f` is applied as `replace = old: recursiveUpdate old (f old)`, so that you can easily do the above `foo` transform as:
 
 ```nix
 {
-  match.kind = "ConfigMap";
-  postProcess = "yq -P 'sort_keys(..)'";
-}
-```
-
-The full form adds `runtimeInputs` (packages placed on the command's `PATH`) and accepts a function resolved at evaluation time against the matched object, which lets you specialise the command per object without re-parsing the manifest:
-
-```nix
-{
-  match.kind = "SopsSecret";
-  postProcess = {
-    runtimeInputs = [ pkgs.sops ];
-    command =
-      { resource, ... }:
-      "sops --encrypt --input-type yaml --output-type yaml /dev/stdin";
+  nixidy.objectTransforms = {
+    foo = {
+      update.metadata.labels."app.kubernetes.io/managed-by" = "nixidy";
+    };
   };
 }
 ```
 
-The command body is arbitrary shell, so a tool that needs a real file path (`sops -i`, `yq -i`) can capture stdin to a temporary file and emit it back:
+Non-function value is coerced to a function in the same way as in `replace`, so it desugars to `replace = old: recursiveUpdate old ((_: { metadata.labels."app.kubernetes.io/managed-by" = "nixidy"; }) old)`.
+
+## Nested transforms
+
+Sometimes it's useful to find some resources, and then transform parts of them. For example:
 
 ```nix
 {
-  postProcess = ''
-    f=$(mktemp)
-    cat > "$f"
-    sops --encrypt --in-place "$f"
-    cat "$f"
-  '';
+  match = {
+    metadata.labels."app.kubernetes.io/name" = "some-app";
+  };
+  transforms = {
+    metadata = {
+        path = [ "metadata" "labels" ];
+        update."app.kubernetes.io/managed-by" = "nixidy";
+    };
+    template = {
+        path = [ "spec" "template" "metadata" "labels" ];
+        update."app.kubernetes.io/managed-by" = "nixidy";
+    };
+  };
 }
 ```
 
-!!! info
-    `postProcess` runs **outside** the evaluation sandbox on purpose, so it can reach things a `rewrite` cannot such as the network, a hardware key, or host tools. That is the whole reason it is a separate stage and not a `rewrite`. `$TARGET_PATH` (the absolute destination path) is available at runtime on `switch`.
-
-### Visibility and safety
-
-Because `postProcess` commands run with the privileges of whoever runs `nixidy switch`, applying a configuration you have not vetted is arbitrary code execution. To make this visible, `nixidy switch` prints every command it is about to run, resolved against its matched object, and when attached to a terminal, pauses for confirmation:
-
-```sh
-post-processing 1 manifest file(s); the following commands run outside any sandbox. Review them before continuing:
-  myapp/SopsSecret-db.yaml:
-    encrypt-secrets: sops --encrypt --input-type yaml --output-type yaml /dev/stdin
-Continue with post-processing? [y/N]
-```
-
-A piped, CI or pre-commit run is non-interactive and proceeds without prompting, so automation never blocks. Two environment variables tune the behaviour:
-
-- `NIXIDY_POST_PROCESS_APPROVE=1` skips the prompt for trusted, repeated interactive use.
-- `NIXIDY_SKIP_POST_PROCESS=1` reuses the already-rendered target files without running anything. This can be useful in an environment that lacks the post-process toolchain or secrets (for example, CI re-rendering manifests).
-
-!!! warning
-    These are visibility aids, **not** a security boundary and a configuration that defines a `postProcess` rule can also set the approval variable. The point is to surface arbitrary execution to a human, not to sandbox it.
-
-## Applying directly
-
-[`nixidy apply`](direct_apply.md) runs `postProcess` too, so applying directly deploys the same manifests as `nixidy switch`. Each object is streamed through its post-process command and piped to `kubectl apply`. The same notice and confirmation prompt run before anything is applied, and `NIXIDY_POST_PROCESS_APPROVE=1` skips it.
-
-!!! warning
-    A `postProcess` command's output must be a valid Kubernetes manifest for `nixidy apply` to deploy it. A transform whose result only a GitOps controller can consume (for example a ksops, fully-encrypted file) is `switch`-only and `kubectl apply` will reject it. `NIXIDY_SKIP_POST_PROCESS` is not honoured on `apply`, since there is no rendered target to fall back to; the command always runs. `$TARGET_PATH` is set only on `switch`.
+The `transforms` attrset is exactly the same as `objectTransforms`, it just looks inside whatever the outer transform matches instead of the whole set of resources. You can nest such transforms multiple times.
 
 ## Ordering and scoping
 
-Environment rules run first, then the matched application's rules, in declaration order within each. A rule must set exactly one of `rewrite` or `postProcess`; setting both, or neither, fails evaluation with an assertion that names the offending rule.
+Environment rules run first, then the matched application's rules, in the alphabetical order of their attribute names within each. Nested transforms likewise run in attribute-name order during evaluation of the outer transform.

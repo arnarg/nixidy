@@ -14,7 +14,8 @@ let
   layout = lib.mapAttrs (
     _: app:
     layoutLib.mkAppFiles {
-      envRules = config.nixidy.objectTransforms;
+      envObjectTransforms = config.nixidy.objectTransforms;
+      envPostProcessors = config.nixidy.postProcessors;
       objectBaseName = helpers.objectBaseName;
     } app
   ) config.applications;
