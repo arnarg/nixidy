@@ -179,7 +179,13 @@ let
           '';
         };
         replace = mkOption {
-          type = types.nullOr (types.coercedTo types.anything (v: _: v) (types.functionTo types.anything));
+          # `anything` also accepts functions, so it must exclude them here or a
+          # function would be wrapped and applied as a plain value.
+          type = types.nullOr (
+            types.coercedTo (types.addCheck types.anything (v: !lib.isFunction v)) (v: _: v) (
+              types.functionTo types.anything
+            )
+          );
           default = null;
           description = ''
             Replaces the object with either:
