@@ -89,6 +89,17 @@ in
       match.kind = "ConfigMap";
       replace = null;
     };
+    three = {
+      match.kind = "SopsSecret";
+      replace =
+        old:
+        old
+        // {
+          metadata = old.metadata // {
+            name = "replaced-${old.metadata.name}";
+          };
+        };
+    };
   };
 
   test = {
@@ -106,9 +117,9 @@ in
         assertion = os: lib.length (lib.filter (o: o.kind == "ConfigMap") os) == 0;
       }
       {
-        description = "rewritten SopsSecret retains its metadata.name";
+        description = "a function replace is applied to the old object";
         expression = lib.head (lib.filter (o: o.kind == "SopsSecret") objs);
-        assertion = o: o.metadata.name == "a-b";
+        assertion = o: o.metadata.name == "replaced-a-b";
       }
       {
         description = "env rules apply before app rules";
