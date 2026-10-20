@@ -1,9 +1,14 @@
+import shutil
 import sys
+import tarfile
+from pathlib import Path
+
 import click
 import subprocess
 import os
 from nix.builder import NixBuilder, DevenvBuilder, NixCommandException, ResourceRoot
 from nix.nixidy import Nixidy
+from nixidy import git as git_mod
 from nixidy.config import load_config
 from typing import Optional
 
@@ -224,7 +229,7 @@ def apply(environment: str, file: Optional[str], devenv: Optional[bool]):
 @click.option(
     "--path",
     "-p",
-    help="Path to previously built environment to compare to.",
+    help="Path to previously built environment to compare to. With --branch, the path to the rendered manifests root on the branch, relative to the repository root.",
     type=str,
     metavar="PATH",
 )
@@ -235,6 +240,20 @@ def apply(environment: str, file: Optional[str], devenv: Optional[bool]):
     type=str,
     metavar="ENV",
 )
+@click.option(
+    "--branch",
+    "-b",
+    help="Branch to compare against rendered manifests committed to git. Requires --path.",
+    type=str,
+    metavar="BRANCH",
+)
+@click.option(
+    "--remote",
+    help="Git remote to fetch the branch from (only with --branch).",
+    type=str,
+    default="origin",
+    metavar="REMOTE",
+)
 @_file_option
 @_devenv_option
 def diff(
@@ -242,15 +261,19 @@ def diff(
     file: Optional[str],
     path: Optional[str],
     env: Optional[str],
+    branch: Optional[str],
+    remote: str,
     devenv: Optional[bool],
 ):
     """Diff environment manifests.
 
-    ENVIRONMENT is the environment to build and compare with either `--path` or `--env`.
+    ENVIRONMENT is the environment to build and compare with either `--path`, `--env` or `--branch`.
 
     Use `--path` to compare with a previously built environment at a specific path.
 
     Use `--env` to build and compare with another environment.
+
+    Use `--branch` (with `--path`) to fetch rendered manifests from a branch on a git remote and compare with those.
 
     Examples:
 
@@ -261,23 +284,23 @@ def diff(
         # Compare prod with previously built manifests in ./manifests/prod
 
         nixidy diff .#prod --path ./manifests/prod
-    """
-    # Check that only one of `path` or `env` is defined.
-    if path and env:
-        click.echo("Only one of --path or --env can be specified.")
-        sys.exit(1)
-    elif not path and not env:
-        click.echo("Either --path or --env must be specified.")
-        sys.exit(1)
 
-    # If `path` is defined, check that it exists.
-    if path:
+        # Compare prod with the rendered manifests committed on branch env/prod.
+
+        nixidy diff .#prod --branch env/prod --path manifests
+    """
+    _validate_diff_options(path, env, branch, remote)
+
+    tmp_dir = None
+    if branch:
+        # `path` refers to the manifests root on the branch, not a local dir.
+        tmp_dir = _resolve_branch_root(branch, path, remote)
+        a = str(tmp_dir / git_mod.normalize_root(path))
+    elif path:
         if not os.path.exists(path):
-            click.echo(f"Path '{path}' does not exist.")
+            click.echo(f"Path '{path}' does not exist.", err=True)
             sys.exit(1)
         a = path
-
-    # If `env` is defined, create an instance of Nixidy and build the environment.
     elif env:
         nix_old = _make_nixidy(file, env, devenv)
         try:
@@ -286,13 +309,94 @@ def diff(
             sys.exit(e.returncode)
 
     # Build new environment
-    nix = _make_nixidy(file, environment, devenv)
-
     try:
+        nix = _make_nixidy(file, environment, devenv)
         b = nix.build(no_link=True, print_paths=True)
+        _run_diff(a, b)
     except NixCommandException as e:
         sys.exit(e.returncode)
+    finally:
+        if tmp_dir is not None:
+            shutil.rmtree(tmp_dir, ignore_errors=True)
 
+
+def _validate_diff_options(
+    path: Optional[str],
+    env: Optional[str],
+    branch: Optional[str],
+    remote: str,
+) -> None:
+    """Check that only one of `path`, `env` or `branch` is defined.
+
+    `branch` is combined with `path`, which then refers to the manifest root
+    on the branch rather than a local directory.
+    """
+    if (path and env) or (branch and env):
+        click.echo(
+            "Only one of --path, --env or --branch can be specified.", err=True
+        )
+        sys.exit(1)
+    elif not path and not env and not branch:
+        click.echo(
+            "Either --path, --env or --branch must be specified.", err=True
+        )
+        sys.exit(1)
+    elif remote != "origin" and not branch:
+        click.echo("--remote can only be used with --branch.", err=True)
+        sys.exit(1)
+    elif branch and not path:
+        click.echo("--path is required with --branch.", err=True)
+        sys.exit(1)
+
+
+def _resolve_branch_root(
+    branch: str, path: str, remote: str
+) -> Path:
+    """Fetch `branch` from `remote` and extract the manifests root to a temp dir.
+
+    Returns the temp dir, which the caller is responsible for removing.
+    """
+    git_mod._require_git()
+
+    # Allow passing a remote-tracking ref like `origin/env/dev`.
+    if branch.startswith(f"{remote}/"):
+        branch = branch.removeprefix(f"{remote}/")
+
+    # Git rejects a bare `.` in tree paths, but it is
+    # a valid root referring to the top of the tree, so normalize it.
+    root = git_mod.normalize_root(path)
+
+    try:
+        repo = git_mod.repo_root()
+    except subprocess.CalledProcessError:
+        click.echo("error: not inside a git repository.", err=True)
+        sys.exit(1)
+
+    if not git_mod.remote_exists(repo, remote):
+        click.echo(f"error: git remote '{remote}' does not exist", err=True)
+        sys.exit(1)
+
+    fetch_status = git_mod.fetch(repo, remote, branch)
+    if fetch_status != 0:
+        sys.exit(fetch_status)
+
+    if not git_mod.object_exists(repo, f"FETCH_HEAD:{root}"):
+        click.echo(
+            f"error: path '{path}' does not exist on '{remote}/{branch}'",
+            err=True,
+        )
+        sys.exit(1)
+
+    try:
+        tmp_dir = git_mod.extract_root(repo, root)
+    except (RuntimeError, tarfile.TarError) as e:
+        click.echo(f"error: failed to extract manifests from branch: {e}", err=True)
+        sys.exit(1)
+
+    return tmp_dir
+
+
+def _run_diff(a: str, b: str) -> None:
     # Compare current to new env
     diff_cmd = ["diff", "--recursive", "-u", a, b]
     diff = subprocess.run(diff_cmd, check=False, capture_output=True, text=True)
