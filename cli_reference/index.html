@@ -889,9 +889,10 @@
 </code></pre></div>
 <h2 id="nixidy-diff">nixidy diff<a class="headerlink" href="#nixidy-diff" title="Permanent link">#</a></h2>
 <p>Diff environment manifests.</p>
-<p>ENVIRONMENT is the environment to build and compare with either <code>--path</code> or <code>--env</code>.</p>
+<p>ENVIRONMENT is the environment to build and compare with either <code>--path</code>, <code>--env</code> or <code>--branch</code>.</p>
 <p>Use <code>--path</code> to compare with a previously built environment at a specific path.</p>
 <p>Use <code>--env</code> to build and compare with another environment.</p>
+<p>Use <code>--branch</code> (with <code>--path</code>) to fetch rendered manifests from a branch on a git remote and compare with those.</p>
 <p>Examples:</p>
 <div class="highlight"><pre><span></span><code># Compare prod with staging environment.
 
@@ -900,13 +901,23 @@ nixidy diff .#prod --env .#staging
 # Compare prod with previously built manifests in ./manifests/prod
 
 nixidy diff .#prod --path ./manifests/prod
+
+# Compare prod with the rendered manifests committed on branch env/prod.
+
+nixidy diff .#prod --branch env/prod --path manifests
 </code></pre></div>
 <p><strong>Usage:</strong></p>
 <div class="highlight"><pre><span></span><code>nixidy diff [OPTIONS] ENVIRONMENT
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <div class="highlight"><pre><span></span><code>  -p, --path PATH         Path to previously built environment to compare to.
+                          With --branch, the path to the rendered manifests
+                          root on the branch, relative to the repository root.
   -e, --env ENV           Another environment to build and compare to.
+  -b, --branch BRANCH     Branch to compare against rendered manifests
+                          committed to git. Requires --path.
+  --remote REMOTE         Git remote to fetch the branch from (only with
+                          --branch).
   -f, --file PATH         Path to entrypoint nix file (only flake-less).
                           [default: default.nix or &#39;file&#39; from .nixidy.json]
   --devenv / --no-devenv  Use devenv to build environments (overrides
