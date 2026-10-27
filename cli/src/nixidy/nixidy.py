@@ -356,8 +356,6 @@ def _resolve_branch_root(
 
     Returns the temp dir, which the caller is responsible for removing.
     """
-    git_mod._require_git()
-
     # Allow passing a remote-tracking ref like `origin/env/dev`.
     if branch.startswith(f"{remote}/"):
         branch = branch.removeprefix(f"{remote}/")

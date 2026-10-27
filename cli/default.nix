@@ -4,6 +4,7 @@
   makeWrapper,
   diffutils,
   diff-so-fancy,
+  gitMinimal,
 }:
 let
   pyproject = lib.importTOML ./pyproject.toml;
@@ -33,6 +34,7 @@ python3Packages.buildPythonApplication {
         lib.makeBinPath [
           diffutils
           diff-so-fancy
+          gitMinimal
         ]
       }
   '';

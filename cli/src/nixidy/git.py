@@ -10,15 +10,6 @@ from pathlib import Path
 GIT = shutil.which("git") or "git"
 
 
-def _require_git() -> None:
-    if not shutil.which("git"):
-        print(
-            "error: git is required to diff against a branch but was not found in PATH",
-            file=sys.stderr,
-        )
-        raise SystemExit(1)
-
-
 def normalize_root(root: str) -> str:
     """Normalize a manifest root path for use as a git tree path.
 
