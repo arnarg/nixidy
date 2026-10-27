@@ -333,7 +333,7 @@ def _validate_diff_options(
     """
     if (path and env) or (branch and env):
         click.echo(
-            "Only one of --path, --env or --branch can be specified.", err=True
+            "--env cannot be combined with --path or --branch.", err=True
         )
         sys.exit(1)
     elif not path and not env and not branch:
