@@ -2,7 +2,6 @@
 
 import shutil
 import subprocess
-import sys
 import tarfile
 import tempfile
 from pathlib import Path
@@ -54,23 +53,20 @@ def object_exists(repo: Path, object_name: str) -> bool:
     return result.returncode == 0
 
 
-def fetch(repo: Path, remote: str, branch: str) -> int:
-    result = subprocess.run(
+def fetch(repo: Path, remote: str, branch: str) -> str:
+    """Fetch `branch` from `remote` and return the resolved commit SHA."""
+    subprocess.run(
         [GIT, "-C", str(repo), "fetch", "--quiet", "--depth=1", remote, branch],
+        check=True,
         stdout=subprocess.DEVNULL,
-        stderr=subprocess.PIPE,
-        text=True,
-        check=False,
     )
-    if result.returncode != 0 and result.stderr:
-        print(result.stderr, file=sys.stderr)
-    return result.returncode
+    return git_output(repo, "rev-parse", "FETCH_HEAD^{commit}")
 
 
-def extract_root(repo: Path, root: str) -> Path:
-    """Extract FETCH_HEAD:<root> into a temporary directory and return its path."""
+def extract_root(repo: Path, commit: str, root: str) -> Path:
+    """Extract `<commit>:<root>` into a temporary directory and return its path."""
     tmp_dir = Path(tempfile.mkdtemp(prefix="nixidy-branch-diff-"))
-    args = [GIT, "-C", str(repo), "archive", "FETCH_HEAD"]
+    args = [GIT, "-C", str(repo), "archive", commit]
     if root:
         args.extend(["--", root])
     archive = subprocess.Popen(args, stdout=subprocess.PIPE)

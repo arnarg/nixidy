@@ -374,11 +374,13 @@ def _resolve_branch_root(
         click.echo(f"error: git remote '{remote}' does not exist", err=True)
         sys.exit(1)
 
-    fetch_status = git_mod.fetch(repo, remote, branch)
-    if fetch_status != 0:
-        sys.exit(fetch_status)
+    try:
+        commit = git_mod.fetch(repo, remote, branch)
+    except subprocess.CalledProcessError:
+        # git already printed the reason to stderr.
+        sys.exit(1)
 
-    if not git_mod.object_exists(repo, f"FETCH_HEAD:{root}"):
+    if not git_mod.object_exists(repo, f"{commit}:{root}"):
         click.echo(
             f"error: path '{path}' does not exist on '{remote}/{branch}'",
             err=True,
@@ -386,7 +388,7 @@ def _resolve_branch_root(
         sys.exit(1)
 
     try:
-        tmp_dir = git_mod.extract_root(repo, root)
+        tmp_dir = git_mod.extract_root(repo, commit, root)
     except (RuntimeError, tarfile.TarError) as e:
         click.echo(f"error: failed to extract manifests from branch: {e}", err=True)
         sys.exit(1)
