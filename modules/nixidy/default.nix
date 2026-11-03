@@ -7,6 +7,7 @@ in
     ./defaults.nix
     ./app-of-apps.nix
     ./extra-files.nix
+    ./validation.nix
   ];
 
   options.nixidy =
