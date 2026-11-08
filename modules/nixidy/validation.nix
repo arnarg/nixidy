@@ -36,7 +36,7 @@ in
   options.nixidy.validation = with lib; {
     enable = mkOption {
       type = types.bool;
-      default = true;
+      default = false;
       description = "Whether to enable build-time cross-resource reference validation.";
     };
     exclusions = mkOption {

@@ -13,6 +13,8 @@ let
     if f == [ ] then "" else (builtins.head f).message;
 in
 {
+  nixidy.validation.enable = true;
+
   nixidy.validation.exclusions = [
     {
       app = "excl";
