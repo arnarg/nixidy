@@ -276,9 +276,9 @@ in
         assertion = m: lib.hasInfix "foi" m;
       }
       {
-        description = "repeated secret refs are deduplicated to one line";
+        description = "repeated secret refs are reported once per reference site";
         expression = message;
-        assertion = m: lib.hasInfix "gone" m && (lib.length (lib.splitString "gone" m) - 1) == 1;
+        assertion = m: lib.hasInfix "gone" m && (lib.length (lib.splitString "gone" m) - 1) == 3;
       }
       {
         description = "internal app definitions do not satisfy public refs";
@@ -319,9 +319,9 @@ in
           !(lib.hasInfix "other.missing" m) && !(lib.hasInfix "dyn-other" m) && !(lib.hasInfix "tmpl-cm" m);
       }
       {
-        description = "message groups by app (miss section present)";
+        description = "message carries the per-application prefix";
         expression = message;
-        assertion = m: lib.hasInfix "in application `miss`" m;
+        assertion = m: lib.hasInfix "application `miss`: Deployment `ns-a/web` references ConfigMap" m;
       }
       {
         description = "same-namespace ref on a different destination cluster still fails";
@@ -336,7 +336,7 @@ in
       {
         description = "ephemeralContainers references are checked";
         expression = message;
-        assertion = m: lib.hasInfix "eph-cm" m && lib.hasInfix "Pod/p1" m;
+        assertion = m: lib.hasInfix "eph-cm" m && lib.hasInfix "Pod `ns-eph/p1`" m;
       }
       {
         description = "exclusion scoped by attribute key applies even when app name is overridden";
