@@ -7,7 +7,7 @@
   ...
 }:
 let
-  cfg = config.nixidy.validation;
+  cfg = config.nixidy.validation.references;
 
   appsObjs = map (
     key:
@@ -22,7 +22,7 @@ let
 
   unresolved = lib.validation.checkReferences {
     inherit appsObjs;
-    ignore = cfg.exclusions;
+    ignore = cfg.ignore;
   };
 
   lines = map (
@@ -33,13 +33,13 @@ let
   message = if unresolved == [ ] then null else lib.concatStringsSep "\n" lines;
 in
 {
-  options.nixidy.validation = with lib; {
+  options.nixidy.validation.references = with lib; {
     enable = mkOption {
       type = types.bool;
       default = false;
       description = "Whether to enable build-time cross-resource reference validation.";
     };
-    exclusions = mkOption {
+    ignore = mkOption {
       type = types.listOf (
         types.submodule {
           options = {
@@ -66,7 +66,7 @@ in
         }
       );
       default = [ ];
-      description = "Rules excluding specific unresolved resource references from failing validation.";
+      description = "Rules ignoring specific unresolved resource references from failing validation.";
     };
   };
 
