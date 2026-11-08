@@ -39,6 +39,14 @@ in
       default = false;
       description = "Whether to enable build-time cross-resource reference validation.";
     };
+    severity = mkOption {
+      type = types.enum [
+        "error"
+        "warning"
+      ];
+      default = "error";
+      description = ''Whether unresolved references fail the build as an assertion (`"error"`) or print a build warning (`"warning"`).'';
+    };
     ignore = mkOption {
       type = types.listOf (
         types.submodule {
@@ -70,15 +78,21 @@ in
     };
   };
 
-  config.nixidy.assertions = lib.mkIf cfg.enable (
-    if unresolved == [ ] then
-      [ ]
-    else
-      [
+  config = lib.mkIf cfg.enable {
+    nixidy = {
+      assertions = lib.optionals (cfg.severity == "error" && message != null) [
         {
           assertion = false;
           message = message;
         }
-      ]
-  );
+      ];
+
+      warnings = lib.optionals (cfg.severity == "warning" && message != null) [
+        {
+          when = true;
+          message = message;
+        }
+      ];
+    };
+  };
 }
