@@ -1004,26 +1004,29 @@ in
       testVolumeClaimTemplatesDefinePvc = {
         expr = lib.validation.checkReferences {
           appsObjs = [
-            (app {
-              name = "a";
-              namespace = "ns";
-            } // {
-              objects = [
-                {
-                  kind = "StatefulSet";
-                  metadata.name = "sts";
-                  spec = {
-                    volumeClaimTemplates = [ { metadata.name = "sts-data"; } ];
-                    template.spec.volumes = [ { persistentVolumeClaim.claimName = "sts-data"; } ];
-                  };
-                }
-                {
-                  kind = "Deployment";
-                  metadata.name = "d";
-                  spec.template.spec.volumes = [ { persistentVolumeClaim.claimName = "other-pvc"; } ];
-                }
-              ];
-            })
+            (
+              app {
+                name = "a";
+                namespace = "ns";
+              }
+              // {
+                objects = [
+                  {
+                    kind = "StatefulSet";
+                    metadata.name = "sts";
+                    spec = {
+                      volumeClaimTemplates = [ { metadata.name = "sts-data"; } ];
+                      template.spec.volumes = [ { persistentVolumeClaim.claimName = "sts-data"; } ];
+                    };
+                  }
+                  {
+                    kind = "Deployment";
+                    metadata.name = "d";
+                    spec.template.spec.volumes = [ { persistentVolumeClaim.claimName = "other-pvc"; } ];
+                  }
+                ];
+              }
+            )
           ];
         };
         expected = [
@@ -1044,21 +1047,24 @@ in
       testIgnorePvcAndServiceAccountKinds = {
         expr = lib.validation.checkReferences {
           appsObjs = [
-            (app {
-              name = "a";
-              namespace = "ns";
-            } // {
-              objects = [
-                {
-                  kind = "Deployment";
-                  metadata.name = "d";
-                  spec.template.spec = {
-                    serviceAccountName = "ignored-sa";
-                    volumes = [ { persistentVolumeClaim.claimName = "ignored-pvc"; } ];
-                  };
-                }
-              ];
-            })
+            (
+              app {
+                name = "a";
+                namespace = "ns";
+              }
+              // {
+                objects = [
+                  {
+                    kind = "Deployment";
+                    metadata.name = "d";
+                    spec.template.spec = {
+                      serviceAccountName = "ignored-sa";
+                      volumes = [ { persistentVolumeClaim.claimName = "ignored-pvc"; } ];
+                    };
+                  }
+                ];
+              }
+            )
           ];
           ignore = [
             {
@@ -1074,6 +1080,122 @@ in
           ];
         };
         expected = [ ];
+      };
+
+      testGeneratorsResolveReferences = {
+        expr = lib.validation.checkReferences {
+          appsObjs = [
+            (
+              app {
+                name = "a";
+                namespace = "ns";
+              }
+              // {
+                objects = [
+                  {
+                    kind = "Certificate";
+                    metadata.name = "cert1";
+                    spec.secretName = "tls";
+                  }
+                  {
+                    kind = "ExternalSecret";
+                    metadata.name = "db-creds";
+                  }
+                  {
+                    kind = "Deployment";
+                    metadata.name = "d";
+                    spec.template.spec.containers = [
+                      {
+                        env = [
+                          {
+                            name = "A";
+                            valueFrom.secretKeyRef = {
+                              name = "tls";
+                              key = "K";
+                            };
+                          }
+                          {
+                            name = "B";
+                            valueFrom.secretKeyRef = {
+                              name = "db-creds";
+                              key = "K";
+                            };
+                          }
+                        ];
+                      }
+                    ];
+                  }
+                ];
+              }
+            )
+          ];
+          generators = [
+            {
+              kind = "Certificate";
+              generates = "Secret";
+              namePath = [
+                "spec"
+                "secretName"
+              ];
+            }
+            {
+              kind = "ExternalSecret";
+              generates = "Secret";
+              namePath = [ ];
+            }
+          ];
+        };
+        expected = [ ];
+      };
+
+      testGeneratorsReportUnmatchedRefs = {
+        expr = lib.validation.checkReferences {
+          appsObjs = [
+            (
+              app {
+                name = "a";
+                namespace = "ns";
+              }
+              // {
+                objects = [
+                  {
+                    kind = "Certificate";
+                    metadata.name = "cert1";
+                    spec.secretName = "tls";
+                  }
+                  {
+                    kind = "Deployment";
+                    metadata.name = "d";
+                    spec.template.spec.volumes = [ { secret.secretName = "other"; } ];
+                  }
+                ];
+              }
+            )
+          ];
+          generators = [
+            {
+              kind = "Certificate";
+              generates = "Secret";
+              namePath = [
+                "spec"
+                "secretName"
+              ];
+            }
+          ];
+        };
+        expected = [
+          {
+            app = "a";
+            appKey = "a";
+            workloadKind = "Deployment";
+            workloadName = "d";
+            kind = "Secret";
+            name = "other";
+            path = "spec.template.spec.volumes[0].secret.secretName";
+            ns = "ns";
+            cluster = "";
+          }
+        ];
       };
 
       testIgnoreRules = {

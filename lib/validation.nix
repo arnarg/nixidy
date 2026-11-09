@@ -27,8 +27,7 @@ let
     }
   ];
 
-  isSystemRef =
-    r: lib.any (s: s.kind == r.kind && s.name == r.name) systemRefs;
+  isSystemRef = r: lib.any (s: s.kind == r.kind && s.name == r.name) systemRefs;
 
   # Tolerate missing/non-list fields where k8s expects a list.
   orList = v: if builtins.isList v then v else [ ];
@@ -152,8 +151,7 @@ let
                     ]
                   )
                 )
-                (namedRef "PersistentVolumeClaim"
-                  "${prefix}.volumes[${toString i}].persistentVolumeClaim.claimName"
+                (namedRef "PersistentVolumeClaim" "${prefix}.volumes[${toString i}].persistentVolumeClaim.claimName"
                   (pick v [
                     "persistentVolumeClaim"
                     "claimName"
@@ -232,13 +230,39 @@ let
       ++ pullRefs
       ++ containerRefs "ephemeralContainers" (orList (pick ps [ "ephemeralContainers" ]))
       ++ [
-        (namedRef "ServiceAccount" "${prefix}.serviceAccountName"
-          (pick ps [ "serviceAccountName" ])
-          null
-        )
+        (namedRef "ServiceAccount" "${prefix}.serviceAccountName" (pick ps [ "serviceAccountName" ]) null)
       ]
     );
 
+  # Definitions implicitly created by a CRD object (e.g. a cert-manager
+  # Certificate generating a Secret): for each generator rule matching the
+  # object's kind, yield the generated resource's name.
+  generatedDefinitions =
+    generators: obj:
+    lib.concatMap (
+      g:
+      if (g.kind or null) != (obj.kind or "") then
+        [ ]
+      else
+        let
+          picked = if (g.namePath or [ ]) == [ ] then null else pick obj g.namePath;
+          fallback =
+            let
+              n = obj.metadata.name or null;
+            in
+            if n == null then "" else n;
+          name = if picked != null && builtins.isString picked && picked != "" then picked else fallback;
+        in
+        lib.optionals (name != "" && (g.generates or null) != null) [
+          {
+            kind = g.generates;
+            inherit name;
+          }
+        ]
+    ) generators;
+
+  # Unresolved-reference candidates for a single workload object; optional
+  # references are skipped (they may legitimately not exist).
   objectRefs =
     app: obj:
     let
@@ -287,6 +311,7 @@ in
     podSpecOf
     refsFromPodSpec
     objectRefs
+    generatedDefinitions
     ;
 
   globMatches = pat: value: (builtins.match (globToRegex pat) value) != null;
@@ -308,6 +333,7 @@ in
     {
       appsObjs,
       ignore ? [ ],
+      generators ? [ ],
     }:
     let
       # Resource kinds that only count as defined when explicitly declared.
@@ -344,24 +370,35 @@ in
                 ];
                 # volumeClaimTemplates define PVCs at runtime; count as defs.
                 volumeClaimTemplates = lib.optionals (kind == "StatefulSet") (
-                  map (t: {
-                    cluster = app.cluster;
-                    kind = "PersistentVolumeClaim";
-                    name =
-                      let
-                        n = t.metadata.name or null;
-                      in
-                      if n == null then "" else n;
-                    inherit ns;
-                  }) (orList (
-                    pick obj [
-                      "spec"
-                      "volumeClaimTemplates"
-                    ]
-                  ))
+                  map
+                    (t: {
+                      cluster = app.cluster;
+                      kind = "PersistentVolumeClaim";
+                      name =
+                        let
+                          n = t.metadata.name or null;
+                        in
+                        if n == null then "" else n;
+                      inherit ns;
+                    })
+                    (
+                      orList (
+                        pick obj [
+                          "spec"
+                          "volumeClaimTemplates"
+                        ]
+                      )
+                    )
                 );
               in
-              direct ++ volumeClaimTemplates
+              direct
+              ++ volumeClaimTemplates
+              ++ map (d: {
+                cluster = app.cluster;
+                kind = d.kind;
+                inherit (d) name;
+                inherit ns;
+              }) (generatedDefinitions generators obj)
             ) app.objects
           ) appsObjs
         )

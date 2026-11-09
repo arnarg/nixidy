@@ -37,6 +37,7 @@
       ./reference-validation.nix
       ./reference-validation-disabled.nix
       ./reference-validation-warning.nix
+      ./reference-validation-generators.nix
       ./object-transforms-matcher.nix
       ./object-transforms-part-matcher.nix
       ./object-transforms-assert.nix
