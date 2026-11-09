@@ -61,6 +61,8 @@ in
                 types.enum [
                   "ConfigMap"
                   "Secret"
+                  "PersistentVolumeClaim"
+                  "ServiceAccount"
                 ]
               );
               default = null;

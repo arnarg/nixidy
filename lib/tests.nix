@@ -532,6 +532,36 @@ in
         ];
       };
 
+      testPvcVolumeAndServiceAccount = {
+        expr = lib.validation.refsFromPodSpec "spec" {
+          volumes = [ { persistentVolumeClaim.claimName = "data"; } ];
+          serviceAccountName = "my-sa";
+          containers = [ { } ];
+        };
+        expected = [
+          {
+            kind = "PersistentVolumeClaim";
+            name = "data";
+            optional = false;
+            path = "spec.volumes[0].persistentVolumeClaim.claimName";
+          }
+          {
+            kind = "ServiceAccount";
+            name = "my-sa";
+            optional = false;
+            path = "spec.serviceAccountName";
+          }
+        ];
+      };
+
+      testDefaultServiceAccountSkipped = {
+        expr = lib.validation.refsFromPodSpec "spec" {
+          serviceAccountName = "default";
+          containers = [ { } ];
+        };
+        expected = [ ];
+      };
+
       testSystemNamesSkipped = {
         expr = lib.validation.refsFromPodSpec "spec" {
           volumes = [ { configMap.name = "kube-root-ca.crt"; } ];
@@ -935,22 +965,25 @@ in
       testNullDefinitionNameDoesNotCrashOrSatisfy = {
         expr = lib.validation.checkReferences {
           appsObjs = [
-            (app {
-              name = "a";
-              namespace = "ns";
-            } // {
-              objects = [
-                {
-                  kind = "Secret";
-                  metadata.name = null;
-                }
-                {
-                  kind = "Deployment";
-                  metadata.name = "d";
-                  spec.template.spec.volumes = [ { secret.secretName = "s"; } ];
-                }
-              ];
-            })
+            (
+              app {
+                name = "a";
+                namespace = "ns";
+              }
+              // {
+                objects = [
+                  {
+                    kind = "Secret";
+                    metadata.name = null;
+                  }
+                  {
+                    kind = "Deployment";
+                    metadata.name = "d";
+                    spec.template.spec.volumes = [ { secret.secretName = "s"; } ];
+                  }
+                ];
+              }
+            )
           ];
         };
         expected = [
@@ -966,6 +999,81 @@ in
             cluster = "";
           }
         ];
+      };
+
+      testVolumeClaimTemplatesDefinePvc = {
+        expr = lib.validation.checkReferences {
+          appsObjs = [
+            (app {
+              name = "a";
+              namespace = "ns";
+            } // {
+              objects = [
+                {
+                  kind = "StatefulSet";
+                  metadata.name = "sts";
+                  spec = {
+                    volumeClaimTemplates = [ { metadata.name = "sts-data"; } ];
+                    template.spec.volumes = [ { persistentVolumeClaim.claimName = "sts-data"; } ];
+                  };
+                }
+                {
+                  kind = "Deployment";
+                  metadata.name = "d";
+                  spec.template.spec.volumes = [ { persistentVolumeClaim.claimName = "other-pvc"; } ];
+                }
+              ];
+            })
+          ];
+        };
+        expected = [
+          {
+            app = "a";
+            appKey = "a";
+            workloadKind = "Deployment";
+            workloadName = "d";
+            kind = "PersistentVolumeClaim";
+            name = "other-pvc";
+            path = "spec.template.spec.volumes[0].persistentVolumeClaim.claimName";
+            ns = "ns";
+            cluster = "";
+          }
+        ];
+      };
+
+      testIgnorePvcAndServiceAccountKinds = {
+        expr = lib.validation.checkReferences {
+          appsObjs = [
+            (app {
+              name = "a";
+              namespace = "ns";
+            } // {
+              objects = [
+                {
+                  kind = "Deployment";
+                  metadata.name = "d";
+                  spec.template.spec = {
+                    serviceAccountName = "ignored-sa";
+                    volumes = [ { persistentVolumeClaim.claimName = "ignored-pvc"; } ];
+                  };
+                }
+              ];
+            })
+          ];
+          ignore = [
+            {
+              app = null;
+              kind = "ServiceAccount";
+              name = "ignored-sa";
+            }
+            {
+              app = null;
+              kind = "PersistentVolumeClaim";
+              name = "*";
+            }
+          ];
+        };
+        expected = [ ];
       };
 
       testIgnoreRules = {
