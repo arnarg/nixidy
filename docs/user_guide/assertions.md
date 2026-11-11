@@ -267,5 +267,5 @@ registered here are not checked.
 Each ignore rule takes an optional `app` (application name or the
 application's attribute key; `null` matches any), an optional `kind`
 (`"ConfigMap"`, `"Secret"`, `"PersistentVolumeClaim"` or
-`"ServiceAccount"`; `null` matches either), and a required `name` glob
+`"ServiceAccount"`; `null` matches any), and a required `name` glob
 pattern (`*` wildcards; everything else is matched literally).
