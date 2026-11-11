@@ -610,7 +610,7 @@ in
       };
 
       testCronJobPrefix = {
-        expr = lib.validation.objectRefs (app { }) {
+        expr = lib.validation.objectRefs lib.validation.defaultWorkloads (app { }) {
           kind = "CronJob";
           metadata.name = "job";
           spec.jobTemplate.spec.template.spec.containers = [
@@ -645,7 +645,7 @@ in
 
     objectRefs = {
       testNullMetadataNameFallsBackToGenerateName = {
-        expr = lib.validation.objectRefs (app { }) {
+        expr = lib.validation.objectRefs lib.validation.defaultWorkloads (app { }) {
           kind = "Pod";
           metadata = {
             name = null;
@@ -681,7 +681,7 @@ in
       };
 
       testNullMetadataNameFallsBackToUnnamed = {
-        expr = lib.validation.objectRefs (app { }) {
+        expr = lib.validation.objectRefs lib.validation.defaultWorkloads (app { }) {
           kind = "Pod";
           metadata = {
             name = null;
@@ -717,7 +717,7 @@ in
       };
 
       testNonWorkloadKindIgnored = {
-        expr = lib.validation.objectRefs (app { }) {
+        expr = lib.validation.objectRefs lib.validation.defaultWorkloads (app { }) {
           kind = "Service";
           metadata.name = "svc";
         };
@@ -725,7 +725,7 @@ in
       };
 
       testOptionalSkipped = {
-        expr = lib.validation.objectRefs (app { }) {
+        expr = lib.validation.objectRefs lib.validation.defaultWorkloads (app { }) {
           kind = "Deployment";
           metadata.name = "web";
           spec.template.spec.containers = [
@@ -747,7 +747,7 @@ in
       };
 
       testMultipleRefsToSameSecretNotDeduplicated = {
-        expr = lib.validation.objectRefs (app { }) {
+        expr = lib.validation.objectRefs lib.validation.defaultWorkloads (app { }) {
           kind = "Deployment";
           metadata.name = "web";
           spec.template.spec.containers = [
@@ -799,7 +799,7 @@ in
 
       testPodPathAndMetadata = {
         expr =
-          lib.validation.objectRefs
+          lib.validation.objectRefs lib.validation.defaultWorkloads
             (app {
               name = "web";
               namespace = "demo";
@@ -1270,6 +1270,79 @@ in
               kind = null;
               name = "s";
             }
+          ];
+        };
+        expected = [ ];
+      };
+
+      # A user-registered CRD workload kind is walked at its podSpecPath.
+      testCustomWorkloadKindWalked = {
+        expr = lib.validation.checkReferences {
+          appsObjs = [
+            (
+              app {
+                name = "a";
+                namespace = "ns";
+              }
+              // {
+                objects = [
+                  {
+                    kind = "Rollout";
+                    metadata.name = "r";
+                    spec.template.spec = {
+                      volumes = [ { configMap.name = "missing-cm"; } ];
+                      containers = [ ];
+                    };
+                  }
+                ];
+              }
+            )
+          ];
+          workloads = lib.validation.defaultWorkloads // {
+            Rollout.podSpecPath = [
+              "spec"
+              "template"
+              "spec"
+            ];
+          };
+        };
+        expected = [
+          {
+            app = "a";
+            appKey = "a";
+            workloadKind = "Rollout";
+            workloadName = "r";
+            kind = "ConfigMap";
+            name = "missing-cm";
+            path = "spec.template.spec.volumes[0].configMap.name";
+            ns = "ns";
+            cluster = "";
+          }
+        ];
+      };
+
+      # Kinds not registered in `workloads` are not walked.
+      testUnregisteredWorkloadKindSkipped = {
+        expr = lib.validation.checkReferences {
+          appsObjs = [
+            (
+              app {
+                name = "a";
+                namespace = "ns";
+              }
+              // {
+                objects = [
+                  {
+                    kind = "Rollout";
+                    metadata.name = "r";
+                    spec.template.spec = {
+                      volumes = [ { configMap.name = "missing-cm"; } ];
+                      containers = [ ];
+                    };
+                  }
+                ];
+              }
+            )
           ];
         };
         expected = [ ];

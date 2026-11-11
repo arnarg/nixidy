@@ -4,16 +4,44 @@
 # unit-tested in isolation (see lib/tests.nix).
 { lib, ... }:
 let
-  # Workload kinds whose pod specs we walk for references.
-  workloadKinds = [
-    "Pod"
-    "Deployment"
-    "StatefulSet"
-    "DaemonSet"
-    "ReplicaSet"
-    "Job"
-    "CronJob"
-  ];
+  # Built-in workload kinds (objects containing a pod spec) and where
+  # their pod spec lives. Users extend this table with their own CRDs
+  # (e.g. `Rollout`) via `nixidy.validation.references.workloads`.
+  defaultWorkloads = {
+    Pod.podSpecPath = [ "spec" ];
+    Deployment.podSpecPath = [
+      "spec"
+      "template"
+      "spec"
+    ];
+    StatefulSet.podSpecPath = [
+      "spec"
+      "template"
+      "spec"
+    ];
+    DaemonSet.podSpecPath = [
+      "spec"
+      "template"
+      "spec"
+    ];
+    ReplicaSet.podSpecPath = [
+      "spec"
+      "template"
+      "spec"
+    ];
+    Job.podSpecPath = [
+      "spec"
+      "template"
+      "spec"
+    ];
+    CronJob.podSpecPath = [
+      "spec"
+      "jobTemplate"
+      "spec"
+      "template"
+      "spec"
+    ];
+  };
 
   # Resources the cluster auto-creates in every namespace; never unresolved.
   systemRefs = [
@@ -71,18 +99,11 @@ let
     if ns == null || ns == "" then app.namespace else ns;
 
   # Path (inside the object) where the pod spec lives for each workload kind.
-  podSpecPrefix =
-    kind:
-    if kind == "Pod" then
-      "spec"
-    else if kind == "CronJob" then
-      "spec.jobTemplate.spec.template.spec"
-    else
-      "spec.template.spec";
+  podSpecPrefix = workloads: kind: lib.concatStringsSep "." (workloads.${kind}.podSpecPath or [ ]);
 
   # The pod spec of a workload object, or { } when absent.
   podSpecOf =
-    kind: obj:
+    workloads: kind: obj:
     let
       walk =
         obj: path:
@@ -90,7 +111,7 @@ let
           a: p: if a != null && builtins.isAttrs a && a ? ${p} then a.${p} else { }
         ) obj path;
     in
-    walk obj (lib.splitString "." (podSpecPrefix kind));
+    walk obj (workloads.${kind}.podSpecPath or [ ]);
 
   # All references reachable from one pod spec, each tagged with its
   # manifest field path (built from PREFIX).
@@ -262,18 +283,19 @@ let
     ) generators;
 
   # Unresolved-reference candidates for a single workload object; optional
-  # references are skipped (they may legitimately not exist).
+  # references are skipped (they may legitimately not exist). Objects whose
+  # kind is not registered in WORKLOADS are not walked.
   objectRefs =
-    app: obj:
+    workloads: app: obj:
     let
       kind = obj.kind or "";
     in
-    if !lib.elem kind workloadKinds then
+    if !(workloads ? ${kind}) then
       [ ]
     else
       let
-        prefix = podSpecPrefix kind;
-        ps = podSpecOf kind obj;
+        prefix = podSpecPrefix workloads kind;
+        ps = podSpecOf workloads kind obj;
         ns = effectiveNamespace app obj;
         workloadName =
           let
@@ -304,7 +326,7 @@ let
 in
 {
   inherit
-    workloadKinds
+    defaultWorkloads
     systemRefs
     globToRegex
     effectiveNamespace
@@ -328,12 +350,14 @@ in
 
   # Check all references in appsObjs against the definitions of every app
   # in the same environment, honouring ignore rules; returns the unresolved
-  # references that remain.
+  # references that remain. Only object kinds registered in WORKLOADS are
+  # walked for pod-spec references.
   checkReferences =
     {
       appsObjs,
       ignore ? [ ],
       generators ? [ ],
+      workloads ? defaultWorkloads,
     }:
     let
       # Resource kinds that only count as defined when explicitly declared.
@@ -404,7 +428,7 @@ in
         )
       );
 
-      allRefs = lib.concatMap (app: lib.concatMap (objectRefs app) app.objects) appsObjs;
+      allRefs = lib.concatMap (app: lib.concatMap (objectRefs workloads app) app.objects) appsObjs;
 
       # A reference is unresolved when nothing defines its
       # cluster|kind|name|ns combination.

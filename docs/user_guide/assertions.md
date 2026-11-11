@@ -142,7 +142,7 @@ warnings instead and keep building.
 
 ### What is checked
 
-Workload kinds checked:
+Workload kinds checked (built-in):
 
 - `Pod`
 - `Deployment`
@@ -209,6 +209,26 @@ Add rules for other operators:
 User rules are appended to the built-ins. `namePath` is optional; when
 unset (or the path does not resolve to a string) the generated
 resource is assumed to be named after the generator object itself.
+
+### Custom workload kinds
+
+The set of walked kinds is user-extensible, so CRDs containing pod
+templates (e.g. Argo Rollouts, KEDA `ScaledJob`) can be checked too:
+
+```nix
+{
+  nixidy.validation.references.workloads.Rollout.podSpecPath = [
+    "spec"
+    "template"
+    "spec"
+  ];
+}
+```
+
+`workloads` is an attribute set keyed by resource kind. User entries
+are *merged* with the built-in kinds. `podSpecPath` is the attribute
+path to the pod spec within objects of that kind. Objects of kinds not
+registered here are not checked.
 
 ### Limitations
 

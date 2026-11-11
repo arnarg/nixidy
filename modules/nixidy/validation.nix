@@ -23,6 +23,7 @@ let
     inherit appsObjs;
     ignore = cfg.ignore;
     generators = cfg.generators;
+    workloads = cfg.workloads;
   };
 
   # One line per unresolved reference
@@ -76,6 +77,27 @@ in
       default = [ ];
       description = "Rules excluding specific unresolved resource references from failing validation.";
     };
+    workloads = mkOption {
+      type = types.attrsOf (
+        types.submodule {
+          options.podSpecPath = mkOption {
+            type = types.listOf types.str;
+            description = "Attribute path to the pod spec within objects of this kind.";
+          };
+        }
+      );
+      default = { };
+      description = ''
+        Workload kinds (objects containing a pod spec) that are walked for
+        resource references. Ships with the built-in pod-spec kinds (Pod,
+        Deployment, StatefulSet, DaemonSet, ReplicaSet, Job, CronJob);
+        extend it with your own CRDs, e.g.:
+
+        `workloads.Rollout.podSpecPath = [ "spec" "template" "spec" ];`
+
+        Objects of kinds not registered here are not checked.
+      '';
+    };
     generators = mkOption {
       type = types.listOf (
         types.submodule {
@@ -112,56 +134,63 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable {
-    nixidy.validation.references.generators = [
-      {
-        kind = "Certificate";
-        generates = "Secret";
-        namePath = [
-          "spec"
-          "secretName"
-        ];
-      }
-      {
-        kind = "ExternalSecret";
-        generates = "Secret";
-        namePath = [
-          "spec"
-          "target"
-          "name"
-        ];
-      }
-      {
-        kind = "SealedSecret";
-        generates = "Secret";
-        namePath = [
-          "spec"
-          "template"
-          "metadata"
-          "name"
-        ];
-      }
-      {
-        kind = "OnePasswordItem";
-        generates = "Secret";
-        namePath = [ ];
-      }
-    ];
+  config = lib.mkMerge [
+    {
+      # Seed the built-in workload kinds regardless of `enable`, so the
+      # workloads table is always fully populated.
+      nixidy.validation.references.workloads = lib.validation.defaultWorkloads;
+    }
+    (lib.mkIf cfg.enable {
+      nixidy.validation.references.generators = [
+        {
+          kind = "Certificate";
+          generates = "Secret";
+          namePath = [
+            "spec"
+            "secretName"
+          ];
+        }
+        {
+          kind = "ExternalSecret";
+          generates = "Secret";
+          namePath = [
+            "spec"
+            "target"
+            "name"
+          ];
+        }
+        {
+          kind = "SealedSecret";
+          generates = "Secret";
+          namePath = [
+            "spec"
+            "template"
+            "metadata"
+            "name"
+          ];
+        }
+        {
+          kind = "OnePasswordItem";
+          generates = "Secret";
+          namePath = [ ];
+        }
+      ];
 
-    nixidy = {
-      assertions = lib.optionals (cfg.severity == "error") (
-        map (m: {
-          assertion = false;
-          message = line m;
-        }) unresolved
-      );
+      nixidy = {
+        assertions = lib.optionals (cfg.severity == "error") (
+          map (m: {
+            assertion = false;
+            message = line m;
+          }) unresolved
+        );
 
-      warnings = lib.optionals (cfg.severity == "warning") (
-        map (m: {
-          when = true;
-          message = line m;
-        }) unresolved
-      );
-    };
-  };
+        warnings = lib.optionals (cfg.severity == "warning") (
+          map (m: {
+            when = true;
+            message = line m;
+          }) unresolved
+        );
+      };
+    })
+  ];
 }
