@@ -241,6 +241,14 @@ registered here are not checked.
   not visible as definitions.
 - `postProcessors` run after evaluation on the rendered files, so
   resources they add or modify are not visible to the validation.
+- Clusters are keyed by `destination.name` when set, otherwise by
+  `destination.server`. Applications that target the same cluster
+  through different keys (e.g. one sets `destination.name =
+  "in-cluster"` while another keeps the default `destination.server =
+  "https://kubernetes.default.svc"`) cannot see each other's
+  definitions, which can surface false positives. Keep the destination
+  key consistent across applications sharing resources, or add
+  `ignore` rules for the affected references.
 
 ### Ignoring references
 
