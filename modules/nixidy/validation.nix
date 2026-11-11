@@ -92,22 +92,31 @@ in
       '';
     };
     generators = mkOption {
-      type = types.attrsOf (
-        types.attrsOf (
-          types.submodule {
-            options.namePath = mkOption {
-              type = types.listOf types.str;
-              default = [ ];
-              description = "Attribute path to the generated resource's name (falls back to `metadata.name` when unset or empty).";
-            };
+      type = types.submodule {
+        options = genAttrs lib.validation.definitionKinds (
+          kind:
+          mkOption {
+            type = types.attrsOf (
+              types.submodule {
+                options.namePath = mkOption {
+                  type = types.listOf types.str;
+                  default = [ ];
+                  description = "Attribute path to the generated resource's name (falls back to `metadata.name` when unset or empty).";
+                };
+              }
+            );
+            default = { };
+            description = "CRD kinds that generate a `${kind}` in-cluster, keyed by generator kind.";
           }
-        )
-      );
+        );
+      };
       default = { };
       description = ''
         Rules describing CRDs that generate resources in-cluster (e.g. cert-manager
         `Certificate` generating a `Secret`), keyed by generated kind and then
-        generator CRD kind. References to the generated resource resolve against
+        generator CRD kind. Only the supported reference kinds
+        (${concatMapStringsSep ", " (k: "`${k}`") lib.validation.definitionKinds})
+        are accepted as generated kinds. References to the generated resource resolve against
         these rules. nixidy ships with built-in rules for cert-manager
         `Certificate`, `ExternalSecret`, `SealedSecret` and `OnePasswordItem`
         generating `Secret`s; user rules are merged with the built-ins, e.g.:
