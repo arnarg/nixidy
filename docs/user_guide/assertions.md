@@ -249,6 +249,10 @@ registered here are not checked.
   definitions, which can surface false positives. Keep the destination
   key consistent across applications sharing resources, or add
   `ignore` rules for the affected references.
+- Only applications in `config.nixidy.publicApps` are considered —
+  applications whose attribute name starts with `__` (like nixidy's
+  internal `__bootstrap` app-of-apps application) are neither checked
+  nor treated as sources of definitions.
 
 ### Ignoring references
 
