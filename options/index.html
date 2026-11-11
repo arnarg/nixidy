@@ -1863,9 +1863,72 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#nixidyvalidationreferencesgeneratorsnamenamenamepath" class="md-nav__link">
+  <a href="#nixidyvalidationreferencesgeneratorsconfigmap" class="md-nav__link">
     <span class="md-ellipsis">
-      nixidy.validation.references.generators.&lt;name&gt;.&lt;name&gt;.namePath
+      nixidy.validation.references.generators.ConfigMap
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidyvalidationreferencesgeneratorsconfigmapnamenamepath" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.validation.references.generators.ConfigMap.&lt;name&gt;.namePath
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidyvalidationreferencesgeneratorspersistentvolumeclaim" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.validation.references.generators.PersistentVolumeClaim
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidyvalidationreferencesgeneratorspersistentvolumeclaimnamenamepath" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.validation.references.generators.PersistentVolumeClaim.&lt;name&gt;.namePath
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidyvalidationreferencesgeneratorssecret" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.validation.references.generators.Secret
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidyvalidationreferencesgeneratorssecretnamenamepath" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.validation.references.generators.Secret.&lt;name&gt;.namePath
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidyvalidationreferencesgeneratorsserviceaccount" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.validation.references.generators.ServiceAccount
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidyvalidationreferencesgeneratorsserviceaccountnamenamepath" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.validation.references.generators.ServiceAccount.&lt;name&gt;.namePath
     </span>
   </a>
   
@@ -3093,9 +3156,72 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#nixidyvalidationreferencesgeneratorsnamenamenamepath" class="md-nav__link">
+  <a href="#nixidyvalidationreferencesgeneratorsconfigmap" class="md-nav__link">
     <span class="md-ellipsis">
-      nixidy.validation.references.generators.&lt;name&gt;.&lt;name&gt;.namePath
+      nixidy.validation.references.generators.ConfigMap
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidyvalidationreferencesgeneratorsconfigmapnamenamepath" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.validation.references.generators.ConfigMap.&lt;name&gt;.namePath
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidyvalidationreferencesgeneratorspersistentvolumeclaim" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.validation.references.generators.PersistentVolumeClaim
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidyvalidationreferencesgeneratorspersistentvolumeclaimnamenamepath" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.validation.references.generators.PersistentVolumeClaim.&lt;name&gt;.namePath
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidyvalidationreferencesgeneratorssecret" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.validation.references.generators.Secret
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidyvalidationreferencesgeneratorssecretnamenamepath" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.validation.references.generators.Secret.&lt;name&gt;.namePath
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidyvalidationreferencesgeneratorsserviceaccount" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.validation.references.generators.ServiceAccount
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nixidyvalidationreferencesgeneratorsserviceaccountnamenamepath" class="md-nav__link">
+    <span class="md-ellipsis">
+      nixidy.validation.references.generators.ServiceAccount.&lt;name&gt;.namePath
     </span>
   </a>
   
@@ -4704,20 +4830,92 @@ boolean</p>
 <h2 id="nixidyvalidationreferencesgenerators">nixidy.validation.references.generators<a class="headerlink" href="#nixidyvalidationreferencesgenerators" title="Permanent link">#</a></h2>
 <p>Rules describing CRDs that generate resources in-cluster (e.g. cert-manager
 <code>Certificate</code> generating a <code>Secret</code>), keyed by generated kind and then
-generator CRD kind. References to the generated resource resolve against
+generator CRD kind. Only the supported reference kinds
+(<code>ConfigMap</code>, <code>Secret</code>, <code>PersistentVolumeClaim</code>, <code>ServiceAccount</code>)
+are accepted as generated kinds. References to the generated resource resolve against
 these rules. nixidy ships with built-in rules for cert-manager
 <code>Certificate</code>, <code>ExternalSecret</code>, <code>SealedSecret</code> and <code>OnePasswordItem</code>
 generating <code>Secret</code>s; user rules are merged with the built-ins, e.g.:</p>
 <p><code>generators.Secret.MyThing.namePath = [ "spec" "secret" ];</code></p>
 <p><strong><em>Type:</em></strong>
-attribute set of attribute set of (submodule)</p>
+submodule</p>
 <p><strong><em>Default:</em></strong>
 <code class="highlight"><span class="p">{</span> <span class="p">}</span></code></p>
 <p><strong><em>Declared by:</em></strong></p>
 <ul>
 <li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy/validation.nix">&lt;nixidy/modules/nixidy/validation.nix&gt;</a></li>
 </ul>
-<h2 id="nixidyvalidationreferencesgeneratorsnamenamenamepath">nixidy.validation.references.generators.&lt;name&gt;.&lt;name&gt;.namePath<a class="headerlink" href="#nixidyvalidationreferencesgeneratorsnamenamenamepath" title="Permanent link">#</a></h2>
+<h2 id="nixidyvalidationreferencesgeneratorsconfigmap">nixidy.validation.references.generators.ConfigMap<a class="headerlink" href="#nixidyvalidationreferencesgeneratorsconfigmap" title="Permanent link">#</a></h2>
+<p>CRD kinds that generate a <code>ConfigMap</code> in-cluster, keyed by generator kind.</p>
+<p><strong><em>Type:</em></strong>
+attribute set of (submodule)</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="p">{</span> <span class="p">}</span></code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy/validation.nix">&lt;nixidy/modules/nixidy/validation.nix&gt;</a></li>
+</ul>
+<h2 id="nixidyvalidationreferencesgeneratorsconfigmapnamenamepath">nixidy.validation.references.generators.ConfigMap.&lt;name&gt;.namePath<a class="headerlink" href="#nixidyvalidationreferencesgeneratorsconfigmapnamenamepath" title="Permanent link">#</a></h2>
+<p>Attribute path to the generated resource's name (falls back to <code>metadata.name</code> when unset or empty).</p>
+<p><strong><em>Type:</em></strong>
+list of string</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="p">[</span> <span class="p">]</span></code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy/validation.nix">&lt;nixidy/modules/nixidy/validation.nix&gt;</a></li>
+</ul>
+<h2 id="nixidyvalidationreferencesgeneratorspersistentvolumeclaim">nixidy.validation.references.generators.PersistentVolumeClaim<a class="headerlink" href="#nixidyvalidationreferencesgeneratorspersistentvolumeclaim" title="Permanent link">#</a></h2>
+<p>CRD kinds that generate a <code>PersistentVolumeClaim</code> in-cluster, keyed by generator kind.</p>
+<p><strong><em>Type:</em></strong>
+attribute set of (submodule)</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="p">{</span> <span class="p">}</span></code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy/validation.nix">&lt;nixidy/modules/nixidy/validation.nix&gt;</a></li>
+</ul>
+<h2 id="nixidyvalidationreferencesgeneratorspersistentvolumeclaimnamenamepath">nixidy.validation.references.generators.PersistentVolumeClaim.&lt;name&gt;.namePath<a class="headerlink" href="#nixidyvalidationreferencesgeneratorspersistentvolumeclaimnamenamepath" title="Permanent link">#</a></h2>
+<p>Attribute path to the generated resource's name (falls back to <code>metadata.name</code> when unset or empty).</p>
+<p><strong><em>Type:</em></strong>
+list of string</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="p">[</span> <span class="p">]</span></code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy/validation.nix">&lt;nixidy/modules/nixidy/validation.nix&gt;</a></li>
+</ul>
+<h2 id="nixidyvalidationreferencesgeneratorssecret">nixidy.validation.references.generators.Secret<a class="headerlink" href="#nixidyvalidationreferencesgeneratorssecret" title="Permanent link">#</a></h2>
+<p>CRD kinds that generate a <code>Secret</code> in-cluster, keyed by generator kind.</p>
+<p><strong><em>Type:</em></strong>
+attribute set of (submodule)</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="p">{</span> <span class="p">}</span></code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy/validation.nix">&lt;nixidy/modules/nixidy/validation.nix&gt;</a></li>
+</ul>
+<h2 id="nixidyvalidationreferencesgeneratorssecretnamenamepath">nixidy.validation.references.generators.Secret.&lt;name&gt;.namePath<a class="headerlink" href="#nixidyvalidationreferencesgeneratorssecretnamenamepath" title="Permanent link">#</a></h2>
+<p>Attribute path to the generated resource's name (falls back to <code>metadata.name</code> when unset or empty).</p>
+<p><strong><em>Type:</em></strong>
+list of string</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="p">[</span> <span class="p">]</span></code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy/validation.nix">&lt;nixidy/modules/nixidy/validation.nix&gt;</a></li>
+</ul>
+<h2 id="nixidyvalidationreferencesgeneratorsserviceaccount">nixidy.validation.references.generators.ServiceAccount<a class="headerlink" href="#nixidyvalidationreferencesgeneratorsserviceaccount" title="Permanent link">#</a></h2>
+<p>CRD kinds that generate a <code>ServiceAccount</code> in-cluster, keyed by generator kind.</p>
+<p><strong><em>Type:</em></strong>
+attribute set of (submodule)</p>
+<p><strong><em>Default:</em></strong>
+<code class="highlight"><span class="p">{</span> <span class="p">}</span></code></p>
+<p><strong><em>Declared by:</em></strong></p>
+<ul>
+<li><a href="https://github.com/arnarg/nixidy/blob/main/modules/nixidy/validation.nix">&lt;nixidy/modules/nixidy/validation.nix&gt;</a></li>
+</ul>
+<h2 id="nixidyvalidationreferencesgeneratorsserviceaccountnamenamepath">nixidy.validation.references.generators.ServiceAccount.&lt;name&gt;.namePath<a class="headerlink" href="#nixidyvalidationreferencesgeneratorsserviceaccountnamenamepath" title="Permanent link">#</a></h2>
 <p>Attribute path to the generated resource's name (falls back to <code>metadata.name</code> when unset or empty).</p>
 <p><strong><em>Type:</em></strong>
 list of string</p>
