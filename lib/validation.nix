@@ -90,6 +90,8 @@ let
   # fnmatch-style glob (`*`) translated to a regex; `.` stays literal.
   globToRegex = pat: lib.concatMapStringsSep ".*" lib.escapeRegex (lib.splitString "*" pat);
 
+  globMatches = pat: value: (builtins.match (globToRegex pat) value) != null;
+
   # Objects without an explicit namespace land in the app's namespace.
   effectiveNamespace =
     app: obj:
@@ -368,14 +370,13 @@ in
     definitionKinds
     systemRefs
     globToRegex
+    globMatches
     effectiveNamespace
     podSpecOf
     refsFromPodSpec
     objectRefs
     generatedDefinitions
     ;
-
-  globMatches = pat: value: (builtins.match (globToRegex pat) value) != null;
 
   # Cluster identity an app targets: destination name if set, else server.
   clusterOf =
@@ -472,7 +473,7 @@ in
           e:
           (e.app == null || e.app == r.app || e.app == r.appKey)
           && (e.kind == null || e.kind == r.kind)
-          && (builtins.match (globToRegex e.name) r.name) != null
+          && globMatches e.name r.name
         ) ignore;
     in
     lib.filter (r: !(isExcluded r)) missing;
