@@ -34,6 +34,12 @@
       ./suffix-env-to-app-name.nix
       ./templates.nix
       ./assertions.nix
+      ./reference-validation.nix
+      ./reference-validation-disabled.nix
+      ./reference-validation-warning.nix
+      ./reference-validation-generators.nix
+      ./reference-validation-workloads.nix
+      ./reference-validation-destination.nix
       ./object-transforms-matcher.nix
       ./object-transforms-part-matcher.nix
       ./object-transforms-assert.nix

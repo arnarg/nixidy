@@ -18,5 +18,6 @@ lib.extend (
     kustomize = import ./kustomize.nix params;
     helm = import ./helm.nix params;
     kube = import ./kube.nix params;
+    validation = import ./validation.nix params;
   }
 )
