@@ -103,17 +103,21 @@ let
   # Path (inside the object) where the pod spec lives for each workload kind.
   podSpecPrefix = workloads: kind: lib.concatStringsSep "." (workloads.${kind}.podSpecPath or [ ]);
 
+  # metadata.name as a string; a missing name counts as the empty string.
+  nameOf =
+    obj:
+    let
+      n = obj.metadata.name or null;
+    in
+    if n == null then "" else n;
+
   # The pod spec of a workload object, or { } when absent.
   podSpecOf =
     workloads: kind: obj:
     let
-      walk =
-        obj: path:
-        builtins.foldl' (
-          a: p: if a != null && builtins.isAttrs a && a ? ${p} then a.${p} else { }
-        ) obj path;
+      ps = pick obj (workloads.${kind}.podSpecPath or [ ]);
     in
-    walk obj (workloads.${kind}.podSpecPath or [ ]);
+    if builtins.isAttrs ps then ps else { };
 
   # All references reachable from one pod spec, each tagged with its
   # manifest field path (built from PREFIX).
@@ -302,11 +306,7 @@ let
         let
           g = generators.${generatedKind}.${generatorKind};
           picked = if (g.namePath or [ ]) == [ ] then null else pick obj g.namePath;
-          fallback =
-            let
-              n = obj.metadata.name or null;
-            in
-            if n == null then "" else n;
+          fallback = nameOf obj;
           name = if picked != null && builtins.isString picked && picked != "" then picked else fallback;
         in
         if generatorKind != (obj.kind or "") then
@@ -416,11 +416,7 @@ in
                   {
                     cluster = app.cluster;
                     inherit kind;
-                    name =
-                      let
-                        n = obj.metadata.name or null;
-                      in
-                      if n == null then "" else n;
+                    name = nameOf obj;
                     inherit ns;
                   }
                 ];
@@ -430,11 +426,7 @@ in
                     (t: {
                       cluster = app.cluster;
                       kind = "PersistentVolumeClaim";
-                      name =
-                        let
-                          n = t.metadata.name or null;
-                        in
-                        if n == null then "" else n;
+                      name = nameOf t;
                       inherit ns;
                     })
                     (
