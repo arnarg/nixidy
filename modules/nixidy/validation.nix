@@ -12,7 +12,7 @@ let
       name = config.applications.${key}.name;
       namespace = config.applications.${key}.namespace;
       cluster = lib.validation.clusterOf config.applications.${key};
-      objects = (config.build._transformedObjects or { }).${key} or [ ];
+      objects = config.build._transformedObjects.${key} or [ ];
     }
     // {
       inherit key;
