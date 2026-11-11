@@ -6,11 +6,7 @@
 let
   failing = lib.filter (a: !a.assertion) config.nixidy.assertions;
 
-  message =
-    let
-      f = failing;
-    in
-    if f == [ ] then "" else (builtins.head f).message;
+  messages = map (a: a.message) failing;
 in
 {
   nixidy.validation.references.enable = true;
@@ -270,82 +266,88 @@ in
     description = "Check that workload ConfigMap/Secret references resolve against environment definitions";
     assertions = [
       {
-        description = "exactly one failing validation assertion";
+        description = "one failing validation assertion per unresolved reference";
         expression = failing;
-        assertion = f: builtins.length f == 1;
+        assertion = f: builtins.length f == 11;
       }
       {
-        description = "message contains the missing ConfigMap foi";
-        expression = message;
-        assertion = m: lib.hasInfix "foi" m;
+        description = "a message contains the missing ConfigMap foi";
+        expression = messages;
+        assertion = ms: lib.any (m: lib.hasInfix "foi" m) ms;
       }
       {
         description = "repeated secret refs are reported once per reference site";
-        expression = message;
-        assertion = m: lib.hasInfix "gone" m && (lib.length (lib.splitString "gone" m) - 1) == 3;
+        expression = messages;
+        assertion = ms: lib.length (lib.filter (m: lib.hasInfix "gone" m) ms) == 3;
       }
       {
         description = "internal app definitions do not satisfy public refs";
-        expression = message;
-        assertion = m: lib.hasInfix "internal-cm" m;
+        expression = messages;
+        assertion = ms: lib.any (m: lib.hasInfix "internal-cm" m) ms;
       }
       {
         description = "cronjob reference checked";
-        expression = message;
-        assertion = m: lib.hasInfix "cron-cm" m;
+        expression = messages;
+        assertion = ms: lib.any (m: lib.hasInfix "cron-cm" m) ms;
       }
       {
         description = "pod reference checked";
-        expression = message;
-        assertion = m: lib.hasInfix "pod-secret" m;
+        expression = messages;
+        assertion = ms: lib.any (m: lib.hasInfix "pod-secret" m) ms;
       }
       {
         description = "app-scoped exclusion does not leak to other apps";
-        expression = message;
-        assertion = m: lib.hasInfix "excl2" m && lib.hasInfix "leak-secret" m;
+        expression = messages;
+        assertion = ms: lib.any (m: lib.hasInfix "excl2" m && lib.hasInfix "leak-secret" m) ms;
       }
       {
         description = "non-excluded ref in exclusion app still fails";
-        expression = message;
-        assertion = m: lib.hasInfix "still-missing" m;
+        expression = messages;
+        assertion = ms: lib.any (m: lib.hasInfix "still-missing" m) ms;
       }
       {
-        description = "valid refs do not appear in the message";
-        expression = message;
+        description = "valid refs do not appear in any message";
+        expression = messages;
         assertion =
-          m: !(lib.hasInfix "ok-cm" m) && !(lib.hasInfix "yaml-cm" m) && !(lib.hasInfix "shared-cm" m);
+          ms:
+          lib.all (
+            m: !(lib.hasInfix "ok-cm" m) && !(lib.hasInfix "yaml-cm" m) && !(lib.hasInfix "shared-cm" m)
+          ) ms;
       }
       {
-        description = "excluded refs do not appear in the message";
-        expression = message;
+        description = "excluded refs do not appear in any message";
+        expression = messages;
         assertion =
-          m:
-          !(lib.hasInfix "other.missing" m) && !(lib.hasInfix "dyn-other" m) && !(lib.hasInfix "tmpl-cm" m);
+          ms:
+          lib.all (
+            m: !(lib.hasInfix "other.missing" m) && !(lib.hasInfix "dyn-other" m) && !(lib.hasInfix "tmpl-cm" m)
+          ) ms;
       }
       {
-        description = "message carries the per-application prefix";
-        expression = message;
-        assertion = m: lib.hasInfix "application `miss`: Deployment `ns-a/web` references ConfigMap" m;
+        description = "messages carry the per-application prefix";
+        expression = messages;
+        assertion =
+          ms: lib.any (m: lib.hasInfix "application `miss`: Deployment `ns-a/web` references ConfigMap" m) ms;
       }
       {
         description = "same-namespace ref on a different destination cluster still fails";
-        expression = message;
-        assertion = m: lib.hasInfix "clusterA-cm" m && lib.hasInfix "mcA" m;
+        expression = messages;
+        assertion = ms: lib.any (m: lib.hasInfix "clusterA-cm" m && lib.hasInfix "mcA" m) ms;
       }
       {
         description = "same-namespace definition on another cluster does not leak (no cross-cluster resolution)";
-        expression = message;
-        assertion = m: !(lib.hasInfix "mcB" m);
+        expression = messages;
+        assertion = ms: lib.all (m: !(lib.hasInfix "mcB" m)) ms;
       }
       {
         description = "ephemeralContainers references are checked";
-        expression = message;
-        assertion = m: lib.hasInfix "eph-cm" m && lib.hasInfix "Pod `ns-eph/p1`" m;
+        expression = messages;
+        assertion = ms: lib.any (m: lib.hasInfix "eph-cm" m && lib.hasInfix "Pod `ns-eph/p1`" m) ms;
       }
       {
         description = "exclusion scoped by attribute key applies even when app name is overridden";
-        expression = message;
-        assertion = m: !(lib.hasInfix "ovr-secret" m);
+        expression = messages;
+        assertion = ms: lib.all (m: !(lib.hasInfix "ovr-secret" m)) ms;
       }
     ];
   };

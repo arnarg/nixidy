@@ -25,12 +25,10 @@ let
     generators = cfg.generators;
   };
 
-  lines = map (
+  # One line per unresolved reference
+  line =
     m:
-    "application `${m.app}`: ${m.workloadKind} `${m.ns}/${m.workloadName}` references ${m.kind} `${m.name}` (${m.path}) which is not defined in any application"
-  ) unresolved;
-
-  message = if unresolved == [ ] then null else lib.concatStringsSep "\n" lines;
+    "application `${m.app}`: ${m.workloadKind} `${m.ns}/${m.workloadName}` references ${m.kind} `${m.name}` (${m.path}) which is not defined in any application";
 in
 {
   options.nixidy.validation.references = with lib; {
@@ -151,19 +149,19 @@ in
     ];
 
     nixidy = {
-      assertions = lib.optionals (cfg.severity == "error" && message != null) [
-        {
+      assertions = lib.optionals (cfg.severity == "error") (
+        map (m: {
           assertion = false;
-          inherit message;
-        }
-      ];
+          message = line m;
+        }) unresolved
+      );
 
-      warnings = lib.optionals (cfg.severity == "warning" && message != null) [
-        {
+      warnings = lib.optionals (cfg.severity == "warning") (
+        map (m: {
           when = true;
-          inherit message;
-        }
-      ];
+          message = line m;
+        }) unresolved
+      );
     };
   };
 }

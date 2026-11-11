@@ -6,11 +6,7 @@
 let
   failing = lib.filter (a: !a.assertion) config.nixidy.assertions;
 
-  message =
-    let
-      f = failing;
-    in
-    if f == [ ] then "" else (builtins.head f).message;
+  messages = map (a: a.message) failing;
 in
 {
   nixidy.validation.references = {
@@ -200,36 +196,46 @@ in
     description = "Check PVC/ServiceAccount references and CRD generator rules";
     assertions = [
       {
-        description = "exactly one failing validation assertion";
+        description = "one failing validation assertion per unresolved reference";
         expression = failing;
-        assertion = f: builtins.length f == 1;
+        assertion = f: builtins.length f == 2;
       }
       {
         description = "missing ServiceAccount reported with its path";
-        expression = message;
-        assertion = m: lib.hasInfix "ServiceAccount `missing-sa` (spec.template.spec.serviceAccountName)" m;
+        expression = messages;
+        assertion =
+          ms:
+          lib.any (
+            m: lib.hasInfix "ServiceAccount `missing-sa` (spec.template.spec.serviceAccountName)" m
+          ) ms;
       }
       {
         description = "missing PVC reported with its path";
-        expression = message;
+        expression = messages;
         assertion =
-          m:
-          lib.hasInfix "PersistentVolumeClaim `other-pvc` (spec.template.spec.volumes[0].persistentVolumeClaim.claimName)" m;
+          ms:
+          lib.any (
+            m:
+            lib.hasInfix "PersistentVolumeClaim `other-pvc` (spec.template.spec.volumes[0].persistentVolumeClaim.claimName)" m
+          ) ms;
       }
       {
         description = "generator-generated Secrets resolve";
-        expression = message;
+        expression = messages;
         assertion =
-          m:
-          !(lib.hasInfix "tls-secret" m)
-          && !(lib.hasInfix "db-creds" m)
-          && !(lib.hasInfix "gen-secret" m)
-          && !(lib.hasInfix "sts-data" m);
+          ms:
+          lib.all (
+            m:
+            !(lib.hasInfix "tls-secret" m)
+            && !(lib.hasInfix "db-creds" m)
+            && !(lib.hasInfix "gen-secret" m)
+            && !(lib.hasInfix "sts-data" m)
+          ) ms;
       }
       {
         description = "built-in default ServiceAccount and ignore rules do not fail";
-        expression = message;
-        assertion = m: !(lib.hasInfix "ignored-pvc" m) && !(lib.hasInfix "ignored-sa" m);
+        expression = messages;
+        assertion = ms: lib.all (m: !(lib.hasInfix "ignored-pvc" m) && !(lib.hasInfix "ignored-sa" m)) ms;
       }
     ];
   };
