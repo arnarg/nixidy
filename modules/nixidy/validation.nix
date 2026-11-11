@@ -56,14 +56,7 @@ in
               description = "Application name (or application attribute key) to scope the exclusion to (null matches any application).";
             };
             kind = mkOption {
-              type = types.nullOr (
-                types.enum [
-                  "ConfigMap"
-                  "Secret"
-                  "PersistentVolumeClaim"
-                  "ServiceAccount"
-                ]
-              );
+              type = types.nullOr (types.enum lib.validation.definitionKinds);
               default = null;
               description = "Referenced resource kind to exclude (null matches any supported kind).";
             };
