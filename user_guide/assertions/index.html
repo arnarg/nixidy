@@ -713,6 +713,75 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#built-in-reference-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Built-in reference validation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Built-in reference validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enabling-and-severity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enabling and severity
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-is-checked" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is checked
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generated-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Generated resources
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-workload-kinds" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom workload kinds
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limitations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ignoring-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ignoring references
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1030,6 +1099,75 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#built-in-reference-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Built-in reference validation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Built-in reference validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enabling-and-severity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enabling and severity
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-is-checked" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is checked
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generated-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Generated resources
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-workload-kinds" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom workload kinds
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limitations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ignoring-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ignoring references
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1134,6 +1272,163 @@
 <li>Use <strong>assertions</strong> when the configuration is <em>invalid</em> and should not be built. For example, missing required resources, conflicting settings, or values that would produce broken manifests.</li>
 <li>Use <strong>warnings</strong> when the configuration is technically valid but may indicate a mistake or something the user should be aware of. For example, deprecated options, unusual configurations, or migration reminders.</li>
 </ul>
+<h2 id="built-in-reference-validation">Built-in reference validation<a class="headerlink" href="#built-in-reference-validation" title="Permanent link">#</a></h2>
+<p>On top of your own assertions, nixidy can validate that every
+ConfigMap or Secret <strong>reference</strong> made by a workload resolves to a
+ConfigMap or Secret <strong>defined</strong> in the same environment. A typo in a
+referenced name is caught at build time instead of failing when the
+pod first schedules in the cluster:</p>
+<div class="highlight"><pre><span></span><code>error: failed assertions:
+- assertion(global): application `my-app`: Deployment `my-app/web` references ConfigMap `foi` (spec.template.spec.volumes[0].configMap.name) which is not defined in any application
+</code></pre></div>
+<h3 id="enabling-and-severity">Enabling and severity<a class="headerlink" href="#enabling-and-severity" title="Permanent link">#</a></h3>
+<p>The validation is opt-in:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+  nixidy<span class="o">.</span>validation<span class="o">.</span>references<span class="o">.</span><span class="ss">enable</span> <span class="o">=</span> <span class="no">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>By default unresolved references <em>fail the build</em> (an assertion). Set
+<code>nixidy.validation.references.severity = "warning";</code> to print them as
+warnings instead and keep building.</p>
+<h3 id="what-is-checked">What is checked<a class="headerlink" href="#what-is-checked" title="Permanent link">#</a></h3>
+<p>Workload kinds checked (built-in):</p>
+<ul>
+<li><code>Pod</code></li>
+<li><code>Deployment</code></li>
+<li><code>StatefulSet</code></li>
+<li><code>DaemonSet</code></li>
+<li><code>ReplicaSet</code></li>
+<li><code>Job</code></li>
+<li><code>CronJob</code></li>
+</ul>
+<p>The references checked are:</p>
+<ul>
+<li>volumes (<code>configMap.name</code>, <code>secret.secretName</code>,
+  <code>persistentVolumeClaim.claimName</code>, projected volume sources)</li>
+<li><code>envFrom</code> (<code>configMapRef</code>/<code>secretRef</code>),</li>
+<li><code>env[].valueFrom</code> (<code>configMapKeyRef</code>/<code>secretKeyRef</code>),</li>
+<li><code>serviceAccountName</code></li>
+<li><code>imagePullSecrets</code></li>
+</ul>
+<p>from <code>containers</code>, <code>initContainers</code> and <code>ephemeralContainers</code> alike.
+References marked <code>optional: true</code> are skipped, as are references to
+Kubernetes' auto-created resources (<code>kube-root-ca.crt</code> ConfigMap and
+the <code>default</code> ServiceAccount).</p>
+<p>Each failure reports the exact manifest field path of the broken
+reference, so multiple references to the same missing resource
+(e.g. several <code>env</code> vars pulling keys from one missing Secret) each
+get their own line pointing at the offending field.</p>
+<p>Definitions are indexed across the whole environment, so a workload in
+one application may reference a resource defined in another
+application as long as the namespaces match and the applications
+target the <em>same cluster</em> (same <code>destination.name</code>, falling back to
+<code>destination.server</code>). Objects rendered from Helm charts, Kustomize,
+and <code>yamls</code> all count as definitions, as do a <code>StatefulSet</code>'s
+<code>volumeClaimTemplates</code> (counted as <code>PersistentVolumeClaim</code> definitions
+in the StatefulSet's namespace).</p>
+<h3 id="generated-resources">Generated resources<a class="headerlink" href="#generated-resources" title="Permanent link">#</a></h3>
+<p>Resources that are generated <em>in-cluster</em> by CRDs would otherwise be
+flagged as missing. nixidy therefore ships with built-in rules mapping
+well-known generator CRDs to the resources they create - a reference
+to the generated resource resolves if the CRD object is defined
+anywhere in the environment:</p>
+<table>
+<thead>
+<tr>
+<th>CRD kind</th>
+<th>Generated kind</th>
+<th>Name taken from</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Certificate</code></td>
+<td><code>Secret</code></td>
+<td><code>spec.secretName</code></td>
+</tr>
+<tr>
+<td><code>ExternalSecret</code></td>
+<td><code>Secret</code></td>
+<td><code>spec.target.name</code>, else the object's own name</td>
+</tr>
+<tr>
+<td><code>SealedSecret</code></td>
+<td><code>Secret</code></td>
+<td><code>spec.template.metadata.name</code>, else the object's own name</td>
+</tr>
+<tr>
+<td><code>OnePasswordItem</code></td>
+<td><code>Secret</code></td>
+<td>the object's own name</td>
+</tr>
+</tbody>
+</table>
+<p>Add rules for other operators:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+  <span class="c1"># Objects of kind &quot;MyThing&quot; generate a Secret named after spec.secret</span>
+  nixidy<span class="o">.</span>validation<span class="o">.</span>references<span class="o">.</span>generators<span class="o">.</span>Secret<span class="o">.</span>MyThing<span class="o">.</span><span class="ss">namePath</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;spec&quot;</span>
+    <span class="s2">&quot;secret&quot;</span>
+  <span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>generators</code> is an attribute set keyed by the generated kind and then
+the generator CRD kind; user rules are merged with the built-ins, so
+individual built-in rules can be overridden (e.g. adjust a built-in
+<code>namePath</code>) without redefining the rest. <code>namePath</code> is optional; when
+unset (or the path does not resolve to a string) the generated
+resource is assumed to be named after the generator object itself.</p>
+<h3 id="custom-workload-kinds">Custom workload kinds<a class="headerlink" href="#custom-workload-kinds" title="Permanent link">#</a></h3>
+<p>The set of walked kinds is user-extensible, so CRDs containing pod
+templates (e.g. Argo Rollouts, KEDA <code>ScaledJob</code>) can be checked too:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+  nixidy<span class="o">.</span>validation<span class="o">.</span>references<span class="o">.</span>workloads<span class="o">.</span>Rollout<span class="o">.</span><span class="ss">podSpecPath</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;spec&quot;</span>
+    <span class="s2">&quot;template&quot;</span>
+    <span class="s2">&quot;spec&quot;</span>
+  <span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>workloads</code> is an attribute set keyed by resource kind. User entries
+are <em>merged</em> with the built-in kinds. <code>podSpecPath</code> is the attribute
+path to the pod spec within objects of that kind. Objects of kinds not
+registered here are not checked.</p>
+<h3 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">#</a></h3>
+<ul>
+<li><code>extraRawYamls</code> are copied verbatim and never parsed, so references
+  inside them are not checked, and resources defined only in them are
+  not visible as definitions.</li>
+<li><code>postProcessors</code> run after evaluation on the rendered files, so
+  resources they add or modify are not visible to the validation.</li>
+<li>Clusters are keyed by <code>destination.name</code> when set, otherwise by
+  <code>destination.server</code>. Applications that target the same cluster
+  through different keys (e.g. one sets <code>destination.name =
+  "in-cluster"</code> while another keeps the default <code>destination.server =
+  "https://kubernetes.default.svc"</code>) cannot see each other's
+  definitions, which can surface false positives. Keep the destination
+  key consistent across applications sharing resources, or add
+  <code>ignore</code> rules for the affected references.</li>
+<li>Only applications in <code>config.nixidy.publicApps</code> are considered —
+  applications whose attribute name starts with <code>__</code> (like nixidy's
+  internal <code>__bootstrap</code> app-of-apps application) are neither checked
+  nor treated as sources of definitions.</li>
+</ul>
+<h3 id="ignoring-references">Ignoring references<a class="headerlink" href="#ignoring-references" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+  nixidy<span class="o">.</span>validation<span class="o">.</span>references<span class="o">.</span><span class="ss">ignore</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># Matches any application</span>
+    <span class="p">{</span> <span class="ss">kind</span> <span class="o">=</span> <span class="s2">&quot;Secret&quot;</span><span class="p">;</span> <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;cluster-wide-pull-secret&quot;</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="c1"># Scoped to one application, glob on the name</span>
+    <span class="p">{</span> <span class="ss">app</span> <span class="o">=</span> <span class="s2">&quot;my-app&quot;</span><span class="p">;</span> <span class="ss">kind</span> <span class="o">=</span> <span class="s2">&quot;Secret&quot;</span><span class="p">;</span> <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;dyn-*&quot;</span><span class="p">;</span> <span class="p">}</span>
+  <span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Each ignore rule takes an optional <code>app</code> (application name or the
+application's attribute key; <code>null</code> matches any), an optional <code>kind</code>
+(<code>"ConfigMap"</code>, <code>"Secret"</code>, <code>"PersistentVolumeClaim"</code> or
+<code>"ServiceAccount"</code>; <code>null</code> matches any), and a required <code>name</code> glob
+pattern (<code>*</code> wildcards; everything else is matched literally).</p>
 
 
 
