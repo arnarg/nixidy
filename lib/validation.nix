@@ -255,17 +255,42 @@ let
       ]
     );
 
+  # Built-in generator rules mapping CRD kinds to the resources they
+  # generate in-cluster, keyed by generated kind then generator kind.
+  # Users extend this table via `nixidy.validation.references.generators`.
+  defaultGenerators = {
+    Secret = {
+      Certificate.namePath = [
+        "spec"
+        "secretName"
+      ];
+      ExternalSecret.namePath = [
+        "spec"
+        "target"
+        "name"
+      ];
+      SealedSecret.namePath = [
+        "spec"
+        "template"
+        "metadata"
+        "name"
+      ];
+      OnePasswordItem = { };
+    };
+  };
+
   # Definitions implicitly created by a CRD object (e.g. a cert-manager
-  # Certificate generating a Secret): for each generator rule matching the
-  # object's kind, yield the generated resource's name.
+  # Certificate generating a Secret): GENERATORS maps generated kind ->
+  # generator kind -> { namePath; }; for each rule whose generator kind
+  # matches the object's kind, yield the generated resource's name.
   generatedDefinitions =
     generators: obj:
     lib.concatMap (
-      g:
-      if (g.kind or null) != (obj.kind or "") then
-        [ ]
-      else
+      generatedKind:
+      lib.concatMap (
+        generatorKind:
         let
+          g = generators.${generatedKind}.${generatorKind};
           picked = if (g.namePath or [ ]) == [ ] then null else pick obj g.namePath;
           fallback =
             let
@@ -274,13 +299,17 @@ let
             if n == null then "" else n;
           name = if picked != null && builtins.isString picked && picked != "" then picked else fallback;
         in
-        lib.optionals (name != "" && (g.generates or null) != null) [
-          {
-            kind = g.generates;
-            inherit name;
-          }
-        ]
-    ) generators;
+        if generatorKind != (obj.kind or "") then
+          [ ]
+        else
+          lib.optionals (name != "") [
+            {
+              kind = generatedKind;
+              inherit name;
+            }
+          ]
+      ) (lib.attrNames generators.${generatedKind})
+    ) (lib.attrNames generators);
 
   # Unresolved-reference candidates for a single workload object; optional
   # references are skipped (they may legitimately not exist). Objects whose
@@ -327,6 +356,7 @@ in
 {
   inherit
     defaultWorkloads
+    defaultGenerators
     systemRefs
     globToRegex
     effectiveNamespace
@@ -356,7 +386,7 @@ in
     {
       appsObjs,
       ignore ? [ ],
-      generators ? [ ],
+      generators ? defaultGenerators,
       workloads ? defaultWorkloads,
     }:
     let

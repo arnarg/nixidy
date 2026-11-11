@@ -199,14 +199,18 @@ Add rules for other operators:
 
 ```nix
 {
-  nixidy.validation.references.generators = [
-    # Objects of kind "MyThing" generate a Secret named after spec.secret
-    { kind = "MyThing"; generates = "Secret"; namePath = [ "spec" "secret" ]; }
+  # Objects of kind "MyThing" generate a Secret named after spec.secret
+  nixidy.validation.references.generators.Secret.MyThing.namePath = [
+    "spec"
+    "secret"
   ];
 }
 ```
 
-User rules are appended to the built-ins. `namePath` is optional; when
+`generators` is an attribute set keyed by the generated kind and then
+the generator CRD kind; user rules are merged with the built-ins, so
+individual built-in rules can be overridden (e.g. adjust a built-in
+`namePath`) without redefining the rest. `namePath` is optional; when
 unset (or the path does not resolve to a string) the generated
 resource is assumed to be named after the generator object itself.
 

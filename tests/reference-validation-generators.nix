@@ -26,15 +26,9 @@ in
     ];
 
     # User-extensible generator rule; merged with the built-ins.
-    generators = [
-      {
-        kind = "MyThing";
-        generates = "Secret";
-        namePath = [
-          "spec"
-          "secret"
-        ];
-      }
+    generators.Secret.MyThing.namePath = [
+      "spec"
+      "secret"
     ];
   };
 

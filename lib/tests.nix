@@ -1129,21 +1129,15 @@ in
               }
             )
           ];
-          generators = [
-            {
-              kind = "Certificate";
-              generates = "Secret";
-              namePath = [
+          generators = {
+            Secret = {
+              Certificate.namePath = [
                 "spec"
                 "secretName"
               ];
-            }
-            {
-              kind = "ExternalSecret";
-              generates = "Secret";
-              namePath = [ ];
-            }
-          ];
+              ExternalSecret.namePath = [ ];
+            };
+          };
         };
         expected = [ ];
       };
@@ -1172,16 +1166,12 @@ in
               }
             )
           ];
-          generators = [
-            {
-              kind = "Certificate";
-              generates = "Secret";
-              namePath = [
-                "spec"
-                "secretName"
-              ];
-            }
-          ];
+          generators = {
+            Secret.Certificate.namePath = [
+              "spec"
+              "secretName"
+            ];
+          };
         };
         expected = [
           {
