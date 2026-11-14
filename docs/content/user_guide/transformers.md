@@ -1,11 +1,17 @@
-# Transformers
+---
+title: "Transformers"
+nav:
+  section: user-guide
+  order: 70
+---
 
 Nixidy supports adding a transformers to Helm releases and Kustomize applications. A transformer is only a function that takes in a list of Kubernetes manifests in attribute sets and returns the same (`[AttrSet] -> [AttrSet]`). It is called _after_ the manifests have been rendered and parsed into nix but _before_ they're transformed into the nixidy form (`<group>.<version>.<kind>.<name>`) and can be used to modify the resources.
 
 Transformers can be set globally in `#!nix nixidy.defaults.helm.transformer` for Helm releases and `#!nix nixidy.defaults.kustomize.transformer` for kustomize applications.
 
-!!! tip
-    Transformers act on a single Helm release or Kustomize application. To match and modify objects across _all_ applications in an environment, see [Object Transforms](object_transforms.md); to add a runtime stage, for things like encrypting secrets on write, see [Post-processing](postprocessing.md).
+/// tip
+Transformers act on a single Helm release or Kustomize application. To match and modify objects across _all_ applications in an environment, see [Object Transforms](./object_transforms.md); to add a runtime stage, for things like encrypting secrets on write, see [Post-processing](./postprocessing.md).
+///
 
 ## Remove Version Specific Labels
 

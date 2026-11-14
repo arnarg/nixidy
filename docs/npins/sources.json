@@ -1,21 +1,5 @@
 {
   "pins": {
-    "ixx": {
-      "type": "GitRelease",
-      "repository": {
-        "type": "GitHub",
-        "owner": "nuschtos",
-        "repo": "ixx"
-      },
-      "pre_releases": false,
-      "version_upper_bound": null,
-      "release_prefix": null,
-      "submodules": false,
-      "version": "v0.1.1",
-      "revision": "babfe85a876162c4acc9ab6fb4483df88fa1f281",
-      "url": "https://api.github.com/repos/nuschtos/ixx/tarball/v0.1.1",
-      "hash": "02f6apdj2zxvm27j2c3gqgcs90qwyaj5viwh7b11a7yfml9hik8h"
-    },
     "nixpkgs": {
       "type": "Git",
       "repository": {
@@ -25,23 +9,23 @@
       },
       "branch": "nixos-unstable",
       "submodules": false,
-      "revision": "fbcf476f790d8a217c3eab4e12033dc4a0f6d23c",
-      "url": "https://github.com/nixos/nixpkgs/archive/fbcf476f790d8a217c3eab4e12033dc4a0f6d23c.tar.gz",
-      "hash": "0ah1hwz0gg9xn5bl1f4d25a2443k7r5vmk1ikmw9539nmgwbgly0"
+      "revision": "d4f25a3e562008648d45bcf2d70bcc7422cad84e",
+      "url": "https://github.com/nixos/nixpkgs/archive/d4f25a3e562008648d45bcf2d70bcc7422cad84e.tar.gz",
+      "hash": "sha256-x9sADJvoVG0L6RejZB+/BB4YiGZFBZrfTlhF4uBq1tQ="
     },
-    "search": {
+    "nixtml": {
       "type": "Git",
       "repository": {
         "type": "GitHub",
-        "owner": "nuschtos",
-        "repo": "search"
+        "owner": "arnarg",
+        "repo": "nixtml"
       },
       "branch": "main",
       "submodules": false,
-      "revision": "6f3efef888b92e6520f10eae15b86ff537e1d2ea",
-      "url": "https://github.com/nuschtos/search/archive/6f3efef888b92e6520f10eae15b86ff537e1d2ea.tar.gz",
-      "hash": "0dlfi0hbqg5fjmslvnd86i2fly92p60dhcl31qzrxc0fcpn8w8ss"
+      "revision": "468cbd528d6fa46b51c4789c1978567dad00408d",
+      "url": "https://github.com/arnarg/nixtml/archive/468cbd528d6fa46b51c4789c1978567dad00408d.tar.gz",
+      "hash": "sha256-4lV9cPIFk1/Z3E/Z1n1Rh+bMrA46cfyP842jwKJzWQU="
     }
   },
-  "version": 5
+  "version": 7
 }

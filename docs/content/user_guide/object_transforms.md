@@ -1,6 +1,11 @@
-# Object Transforms
+---
+title: "Object Transforms"
+nav:
+  section: user-guide
+  order: 80
+---
 
-Object transforms are a declarative rule engine for modifying rendered Kubernetes objects across your whole environment. A rule matches objects (or parts of them) and replaces or updates them. They are useful for cluster-wide policy (injecting labels or annotations, rewriting a kind, dropping resources). For runtime stages that post-process a rendered file, such as encrypting secrets on write, see [Post-processing](postprocessing.md).
+Object transforms are a declarative rule engine for modifying rendered Kubernetes objects across your whole environment. A rule matches objects (or parts of them) and replaces or updates them. They are useful for cluster-wide policy (injecting labels or annotations, rewriting a kind, dropping resources). For runtime stages that post-process a rendered file, such as encrypting secrets on write, see [Post-processing](./postprocessing.md).
 
 Rules can be set environment-wide in `#!nix nixidy.objectTransforms`, or per application in `#!nix applications.<name>.objectTransforms`:
 
@@ -16,7 +21,7 @@ Rules can be set environment-wide in `#!nix nixidy.objectTransforms`, or per app
 }
 ```
 
-Where [Transformers](transformers.md) act on a single Helm release or Kustomize application, object transforms are matched against objects from _all_ applications, so they are a good fit for policy you want to apply consistently across an environment.
+Where [Transformers](./transformers.md) act on a single Helm release or Kustomize application, object transforms are matched against objects from _all_ applications, so they are a good fit for policy you want to apply consistently across an environment.
 
 ## A rule
 
@@ -80,8 +85,9 @@ Path segments iterate over lists and simply do not match if a field is missing, 
 Selector fields are ANDed together. If you provide a list as a value, at least one item of that list must match. Selectors behave in the same way as `path`s—they search in lists for a matching value, and only the specified part of an attrset must match (so in the above example, the `managed-by` label must match, but other labels may also be present).
 The default matches _every_ object in scope, so omitting `match` applies the rule cluster-wide.
 
-!!! note
-    A rule's predicate runs against the object _as seen at that point in the pipeline_, i.e. after earlier transforms. A rule that renames a kind must be matched by its **new** kind in any later rule.
+/// note
+A rule's predicate runs against the object _as seen at that point in the pipeline_, i.e. after earlier transforms. A rule that renames a kind must be matched by its **new** kind in any later rule.
+///
 
 ## Replacing and updating objects
 

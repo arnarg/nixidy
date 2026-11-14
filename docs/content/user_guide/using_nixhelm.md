@@ -1,4 +1,9 @@
-# Using nixhelm
+---
+title: "Using nixhelm"
+nav:
+  section: user-guide
+  order: 100
+---
 
 [nixhelm](https://github.com/farcaller/nixhelm) is a collection of Helm Charts that can be used with [nix-kube-generators](https://github.com/farcaller/nixhelm) and as a result also nixidy. The charts are automatically updated to the most recent version by CI regularly.
 
@@ -38,45 +43,46 @@ To use with nixidy, pass the nixhelm derivation attribute set to nixidy's `mkEnv
 }
 ```
 
-??? note "Using nixidy without flakes"
+/// details | Using nixidy without flakes
+    type: note
+If you prefer not to use flakes, the following can be written to `default.nix` instead.
 
-    If you prefer not to use flakes, the following can be written to `default.nix` instead.
+```nix title="default.nix"
+let
+  # With npins
+  sources = import ./npins;
+  # With niv
+  # sources = import ./nix/sources.nix;
 
-    ```nix title="default.nix"
-    let
-      # With npins
-      sources = import ./npins;
-      # With niv
-      # sources = import ./nix/sources.nix;
+  # nixhelm added with:
+  #   npins: `npins add github farcaller nixhelm --branch master`
+  #   niv: `niv add github farcaller/nixhelm --branch master`
+  nixhelm = sources.nixhelm;
 
-      # nixhelm added with:
-      #   npins: `npins add github farcaller nixhelm --branch master`
-      #   niv: `niv add github farcaller/nixhelm --branch master`
-      nixhelm = sources.nixhelm;
+  # Import nixidy
+  nixidy = import sources.nixidy {};
+in
+  nixidy.lib.mkEnvs {
+    # These modules get passed to every env.
+    modules = [
+      ({lib, ...}: {
+        # nixhelm is a flake so we can't just import it
+        # like we do in flakes (as an input).
+        # Thankfully the directory structure in nixhelm
+        # is compatible with the one expected by
+        # `lib.helm.mkChartAttrs`.
+        nixidy.charts = lib.helm.mkChartAttrs "${nixhelm}/charts";
+      })
+    ];
 
-      # Import nixidy
-      nixidy = import sources.nixidy {};
-    in
-      nixidy.lib.mkEnvs {
-        # These modules get passed to every env.
-        modules = [
-          ({lib, ...}: {
-            # nixhelm is a flake so we can't just import it
-            # like we do in flakes (as an input).
-            # Thankfully the directory structure in nixhelm
-            # is compatible with the one expected by
-            # `lib.helm.mkChartAttrs`.
-            nixidy.charts = lib.helm.mkChartAttrs "${nixhelm}/charts";
-          })
-        ];
-
-        # This declares the available nixidy envs.
-        envs = {
-          # Currently we only have the one dev env.
-          dev.modules = [./env/dev.nix];
-        };
-      }
-    ```
+    # This declares the available nixidy envs.
+    envs = {
+      # Currently we only have the one dev env.
+      dev.modules = [./env/dev.nix];
+    };
+  }
+```
+///
 
 And then the argument `charts` will be passed to every module in nixidy.
 
@@ -170,31 +176,36 @@ nix run .#updateCharts
 
 The script runs every chart's update script sequentially, continues past individual failures, and exits non-zero if any chart failed to update.
 
-??? note "Using nixidy without flakes"
+/// details | Using nixidy without flakes
+    type: note
+Create a small derivation file and build it:
 
-    Create a small derivation file and build it:
+```nix title="update-charts.nix"
+let
+  sources = import ./npins;
+  nixidy = import sources.nixidy {};
+in
+  nixidy.mkChartsUpdateScript (nixidy.mkChartAttrs ./charts)
+```
 
-    ```nix title="update-charts.nix"
-    let
-      sources = import ./npins;
-      nixidy = import sources.nixidy {};
-    in
-      nixidy.mkChartsUpdateScript (nixidy.mkChartAttrs ./charts)
-    ```
-
-    ```sh
-    nix-build update-charts.nix && ./result/bin/update-all-charts
-    ```
+```sh
+nix-build update-charts.nix && ./result/bin/update-all-charts
+```
+///
 
 ### Optional fields
 
 Two optional fields can be set in a chart's `default.nix` to control update behaviour:
 
+/// define
 `versionConstraint`
-:   A semver range (e.g. `">=4.7.0 <5.0.0"`) passed to `helm show chart --version`. The updater resolves the latest version matching the constraint instead of the absolute latest.
+
+- A semver range (e.g. `">=4.7.0 <5.0.0"`) passed to `helm show chart --version`. The updater resolves the latest version matching the constraint instead of the absolute latest.
 
 `freeze`
-:   When `true`, the updater skips this chart entirely. Useful for charts you want to pin manually.
+
+- When `true`, the updater skips this chart entirely. Useful for charts you want to pin manually.
+///
 
 ```nix title="./charts/argoproj/argo-cd/default.nix"
 {

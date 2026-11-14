@@ -1,4 +1,9 @@
-# Assertions & Warnings
+---
+title: "Assertions & Warnings"
+nav:
+  section: user-guide
+  order: 120
+---
 
 Nixidy supports build-time assertions and warnings, similar to the NixOS module system. These allow you to define invariants that are checked during evaluation, catching misconfigurations early with clear error messages.
 

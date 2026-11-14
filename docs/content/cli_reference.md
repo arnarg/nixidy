@@ -1,4 +1,9 @@
-# CLI Reference
+---
+title: "CLI Reference"
+nav:
+  section: reference
+  order: 10
+---
 
 This page provides documentation for the nixidy command line tool.
 
@@ -7,3 +12,4 @@ This page provides documentation for the nixidy command line tool.
     :command: cli
     :prog_name: nixidy
     :list_subcommands: True
+    :depth: 1

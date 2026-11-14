@@ -1,4 +1,9 @@
-# Git Strategies
+---
+title: "Git Strategies"
+nav:
+  section: user-guide
+  order: 50
+---
 
 When it comes to planning out how to structure the git repositories for your environments some options are available.
 
@@ -40,8 +45,9 @@ And in a module that's specific to each environment the target root path needs t
 }
 ```
 
-!!! tip
-    When using `mkEnvs` from nixidy, each environment's `rootPath` is automatically set to `./manifests/${dev}`.
+/// tip
+When using `mkEnvs` from nixidy, each environment's `rootPath` is automatically set to `./manifests/${dev}`.
+///
 
 ## Environment branches
 
@@ -79,16 +85,17 @@ And in a module that's specific to each environment the target branch needs to b
 }
 ```
 
-!!! info
-    The environment branches need to be created manually and they _need_ to be created as orphan branches.
+/// note
+The environment branches need to be created manually and they _need_ to be created as orphan branches.
 
-    ```sh
-    git checkout --orphan env/dev
-    echo "# env/dev" > README.md
-    git add README.md
-    git commit -m "Initial commmit"
-    git push -u origin env/dev
-    ```
+```sh
+git checkout --orphan env/dev
+echo "# env/dev" > README.md
+git add README.md
+git commit -m "Initial commmit"
+git push -u origin env/dev
+```
+///
 
 ## Environment repositories
 

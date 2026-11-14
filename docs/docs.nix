@@ -1,200 +1,176 @@
 {
   pkgs,
   lib ? pkgs.lib,
-  mkSearch,
+  nixtml,
 }:
 let
   optionsMd = import ./build-options-doc.nix { inherit pkgs lib; };
 
-  buildSearch = import ./build-options-search.nix {
-    inherit pkgs lib mkSearch;
-  };
-
   libraryMd = import ./build-library-doc.nix { inherit pkgs lib; };
 
-  docsHtml =
+  python3Packages = pkgs.python3Packages;
+
+  # Make a python package of the CLI for mkdocs-click to find it.
+  cli-package =
     let
-      # Make a python package of the CLI for mkdocs-click to find it.
-      cli-package =
-        let
-          src = ../cli;
-          pyproject = lib.importTOML "${src}/pyproject.toml";
-        in
-        pkgs.python3Packages.buildPythonPackage {
-          inherit src;
-
-          pname = "nixidy";
-          version = pyproject.project.version;
-          pyproject = true;
-
-          build-system = with pkgs.python3Packages; [
-            setuptools
-          ];
-
-          dependencies = with pkgs.python3Packages; [
-            click
-          ];
-
-          doCheck = false;
-        };
-
-      # Package mkdocs-click to automatically generate CLI reference
-      # from click definitions.
-      mkdocs-click =
-        let
-          pname = "mkdocs_click";
-          version = "0.9.0";
-
-          src = pkgs.fetchPypi {
-            inherit pname version;
-            hash = "sha256-YFCRdijUdAUXVBQitgdATQRBF7wxt3DE+enhk5pQyQg=";
-          };
-        in
-        pkgs.python3Packages.buildPythonPackage {
-          inherit pname version src;
-          pyproject = true;
-
-          build-system = with pkgs.python3Packages; [
-            setuptools
-            setuptools-scm
-            hatchling
-          ];
-
-          dependencies = with pkgs.python3Packages; [
-            click
-            markdown
-          ];
-
-          doCheck = false;
-        };
+      src = ../cli;
+      pyproject = lib.importTOML "${src}/pyproject.toml";
     in
-    pkgs.stdenv.mkDerivation {
-      inherit optionsMd;
+    python3Packages.buildPythonPackage {
+      inherit src;
 
-      passAsFile = [ "optionsMd" ];
+      pname = "nixidy";
+      version = pyproject.project.version;
+      pyproject = true;
 
-      name = "nixidy-html-docs";
-
-      src = lib.cleanSource ./..;
-
-      buildInputs = with pkgs.python3.pkgs; [
-        mkdocs-material
-        mkdocs-material-extensions
-        mkdocs-click
-        cli-package
+      build-system = with python3Packages; [
+        setuptools
       ];
 
-      phases = [
-        "unpackPhase"
-        "patchPhase"
-        "buildPhase"
+      dependencies = with python3Packages; [
+        click
       ];
 
-      patchPhase = ''
-        cat $optionsMdPath > docs/options.md
-        cp ${libraryMd}/lib.md docs/library.md
-        cp ${../logo.svg} docs/logo.svg
-
-        cat <<EOF > docs/index.md
-        ---
-        template: home.html
-        ---
-        EOF
-        cat ${../README.md} >> docs/index.md
-
-        cat <<EOF > mkdocs.yml
-          site_name: nixidy
-          site_url: https://nixidy.dev/
-          site_dir: $out
-
-          repo_url: https://github.com/arnarg/nixidy/
-
-          exclude_docs: |
-            *.nix
-            /npins/
-            /overrides/
-
-          extra_css:
-          - stylesheets/extra.css
-
-          theme:
-            name: material
-            custom_dir: docs/overrides
-
-            logo: images/icon.svg
-            favicon: images/icon.svg
-
-            palette:
-            - media: "(prefers-color-scheme: light)"
-              scheme: default
-              primary: custom
-              toggle:
-                icon: material/brightness-7
-                name: Switch to dark mode
-            - media: "(prefers-color-scheme: dark)"
-              scheme: slate
-              primary: custom
-              toggle:
-                icon: material/brightness-4
-                name: Switch to light mode
-
-            features:
-            - navigation.footer
-            - content.tabs.link
-
-          markdown_extensions:
-          - def_list
-          - toc:
-              permalink: "#"
-              toc_depth: 3
-          - admonition
-          - pymdownx.highlight
-          - pymdownx.inlinehilite
-          - pymdownx.superfences:
-              custom_fences:
-              - name: mermaid
-                class: mermaid
-                format: !!python/name:pymdownx.superfences.fence_code_format
-          - pymdownx.details
-          - pymdownx.tabbed:
-              alternate_style: true
-          - attr_list
-          - mkdocs-click
-
-          nav:
-          - Home: index.md
-          - 'User Guide':
-            - 'Getting Started': user_guide/getting_started.md
-            - 'Using Helm Charts': user_guide/helm_charts.md
-            - 'Typed Resource Options': user_guide/typed_resources.md
-            - 'Templates': user_guide/templates.md
-            - 'Git Strategies': user_guide/git_strategies.md
-            - 'GitHub Actions': user_guide/github_actions.md
-            - 'Transformers': user_guide/transformers.md
-            - 'Object Transforms': user_guide/object_transforms.md
-            - 'Post-processing': user_guide/postprocessing.md
-            - 'Using nixhelm': user_guide/using_nixhelm.md
-            - 'Directly Apply Manifests': user_guide/direct_apply.md
-            - 'Assertions & Warnings': user_guide/assertions.md
-          - 'Developer Guide':
-            - 'Architecture Guide': developer_guide/architecture.md
-          - Reference:
-            - 'CLI Reference': cli_reference.md
-            - 'Library Functions': library.md
-            - 'Configuration Options': options.md
-        EOF
-      '';
-
-      buildPhase = ''
-        mkdir -p $out
-        python -m mkdocs build
-
-        cp ${./llms.txt} $out/llms.txt
-        cp -r ${buildSearch "/options/search/"} $out/options/search
-      '';
+      doCheck = false;
     };
+
+  # Package mkdocs-click to automatically generate CLI reference
+  # from click definitions. Despite its name it's a regular
+  # Python-Markdown extension and works without mkdocs.
+  mkdocs-click =
+    let
+      pname = "mkdocs_click";
+      version = "0.9.0";
+
+      src = pkgs.fetchPypi {
+        inherit pname version;
+        hash = "sha256-YFCRdijUdAUXVBQitgdATQRBF7wxt3DE+enhk5pQyQg=";
+      };
+    in
+    python3Packages.buildPythonPackage {
+      inherit pname version src;
+      pyproject = true;
+
+      build-system = with python3Packages; [
+        hatchling
+      ];
+
+      dependencies = with python3Packages; [
+        click
+        markdown
+      ];
+
+      doCheck = false;
+    };
+
+  website = nixtml.lib.evalModules {
+    inherit pkgs;
+    modules = [
+      nixtml.themes.docs
+      {
+        website = {
+          name = "nixidy-docs";
+          baseURL = "https://nixidy.dev";
+
+          metadata = {
+            lang = "en";
+            title = "nixidy";
+            description = "Kubernetes GitOps with nix and Argo CD.";
+          };
+
+          content = {
+            dir = ./content;
+
+            pages = {
+              options.text = optionsMd;
+              library.source = "${libraryMd}/lib.md";
+            };
+
+            processors.md = {
+              settings = {
+                # Resolve links like `./helm_charts.md` against the markdown
+                # file, as on GitHub.
+                relativeLinks.enable = true;
+                toc = {
+                  permalink = "#";
+                  permalinkClass = "headerlink mx-2";
+                };
+                extensions.mkdocs_click = { };
+              };
+              extraPythonPackages = [
+                mkdocs-click
+                cli-package
+              ];
+            };
+          };
+
+          static.dir = ./static;
+
+          files."llms.txt".source = ./llms.txt;
+        };
+
+        themes.docs = {
+          logo = {
+            source = ../logo.svg;
+            # Only the helmet, displayed in front of the site title in the
+            # bar and used as the favicon.
+            compact.source = ./logo-compact.svg;
+          };
+
+          # The badges from the README.
+          hero.content = ''
+            <p>
+              <a href="https://github.com/arnarg/nixidy/blob/main/LICENSE"><img src="https://img.shields.io/github/license/arnarg/nixidy?style=flat" alt="License Badge" /></a>
+              <a href="https://github.com/arnarg/nixidy/releases"><img src="https://img.shields.io/github/v/tag/arnarg/nixidy?style=flat&label=release&color=0a7cbd" alt="Latest Release Badge" /></a>
+              <img src="https://img.shields.io/github/check-runs/arnarg/nixidy/main?style=flat" alt="Checks Passing Badge" />
+            </p>
+          '';
+
+          # A larger logo than the theme's default.
+          extraScss = ''
+            @use "bulma/sass/utilities/mixins";
+
+            .docs-hero-logo {
+              width: min(100%, 26rem);
+            }
+
+            @include mixins.mobile {
+              .docs-hero-logo {
+                width: min(100%, 18rem);
+              }
+            }
+          '';
+
+          # Colors from the logo.
+          colors = {
+            primary = "#1d5184";
+            link = "#2173bd";
+            warning = "#f0b022";
+          };
+
+          repository.url = "https://github.com/arnarg/nixidy";
+          editLink.baseURL = "https://github.com/arnarg/nixidy/edit/main/docs/content/";
+
+          navigation.sections = [
+            {
+              id = "user-guide";
+              title = "User Guide";
+              pager = true;
+            }
+            {
+              id = "developer-guide";
+              title = "Developer Guide";
+            }
+            {
+              id = "reference";
+              title = "Reference";
+            }
+          ];
+        };
+      }
+    ];
+  };
 in
 {
-  html = docsHtml;
-  search = buildSearch "/";
+  html = website;
 }

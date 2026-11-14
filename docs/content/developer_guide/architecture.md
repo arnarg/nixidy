@@ -1,4 +1,10 @@
-# Nixidy Architecture Guide for Contributors
+---
+title: "Nixidy Architecture Guide for Contributors"
+nav:
+  section: developer-guide
+  order: 10
+  label: "Architecture Guide"
+---
 
 This guide provides a comprehensive overview of the nixidy codebase to help new contributors understand the project structure, key concepts, and development workflow.
 
@@ -474,8 +480,9 @@ fromChartCRD {
 
 The `*Module` variants take the same arguments and return a module value (no file); `crdObjects`/`crdObjectsFromChart` return the raw `CustomResourceDefinition` manifests as values.
 
-!!! note "Renamed arguments"
-    The overloaded `crds` argument was split: source-based accessors now take `crdFiles` (the list of YAML files) and chart-based accessors take `kindFilter` (the kind filter). `crds` remains as a deprecated alias on every accessor (resolved by the shared `renamedArg` helper, which warns and points at the new name).
+/// note | Renamed arguments
+The overloaded `crds` argument was split: source-based accessors now take `crdFiles` (the list of YAML files) and chart-based accessors take `kindFilter` (the kind filter). `crds` remains as a deprecated alias on every accessor (resolved by the shared `renamedArg` helper, which warns and points at the new name).
+///
 
 ### CRD Processing (`crd2jsonschema.py`)
 

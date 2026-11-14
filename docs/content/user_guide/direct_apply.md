@@ -1,4 +1,9 @@
-# Directly Apply Manifests
+---
+title: "Directly Apply Manifests"
+nav:
+  section: user-guide
+  order: 110
+---
 
 The `nixidy apply` sub-command provides a way to directly apply the manifests to a Kubernetes cluster. This is an alternative to using a GitOps controller like Argo CD.
 
@@ -12,10 +17,11 @@ When you run `nixidy apply`, it builds a nix package that contains all your Kube
 
 It uses `kubectl apply --prune` to apply the manifests. The `--prune` flag is used to remove any resources from the cluster that are no longer defined in your nixidy configuration. Specific labels are added to all resources to make pruning safe and effective.
 
-If you use [Post-processing](postprocessing.md), any post-processing rules run here too, so `nixidy apply` deploys the same manifests as `nixidy switch`. Each object is streamed through its post-process command before being applied.
+If you use [Post-processing](./postprocessing.md), any post-processing rules run here too, so `nixidy apply` deploys the same manifests as `nixidy switch`. Each object is streamed through its post-process command before being applied.
 
-!!! warning
-    A post-processor command's output must be a valid Kubernetes manifest for `nixidy apply` to deploy it; a post-processor whose output only a GitOps controller can consume is `switch`-only. See [Post-processing](postprocessing.md) for details.
+/// warning
+A post-processor command's output must be a valid Kubernetes manifest for `nixidy apply` to deploy it; a post-processor whose output only a GitOps controller can consume is `switch`-only. See [Post-processing](./postprocessing.md) for details.
+///
 
 ## Usage
 
@@ -27,5 +33,6 @@ nixidy apply .#dev
 
 This will build the manifests for the `dev` environment and apply them to the currently configured Kubernetes cluster.
 
-!!! info
-    Make sure to set `#!nix createNamespace = true;` in all nixidy applications using namespaces that do not already exist in your Kubernetes cluster.
+/// note
+Make sure to set `#!nix createNamespace = true;` in all nixidy applications using namespaces that do not already exist in your Kubernetes cluster.
+///

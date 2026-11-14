@@ -43,7 +43,7 @@ let
           description = ''
             Kubernetes resources for the application.
 
-            The entire list of available resource options is too large for the current documentation setup but can be searched in the [nixidy options search](search) powered by [NüschtOS](https://github.com/NuschtOS/search).
+            The resource options are generated from the Kubernetes API and are too many to list here. They follow `resources.<group>.<version>.<kind>.<name>` (e.g. `resources.apps.v1.Deployment.nginx`) and their fields match the [Kubernetes API reference](https://kubernetes.io/docs/reference/kubernetes-api/).
           '';
         };
     };
@@ -86,9 +86,12 @@ let
     concatStringsSep "\n" (
       [
         ''
-          # Configuration Options
-
-          To see all available resources options, use the [nixidy options search](search) powered by [NüschtOS](https://github.com/NuschtOS/search).
+          ---
+          title: Configuration Options
+          nav:
+            section: reference
+            order: 30
+          ---
         ''
       ]
       ++ (mapAttrsToList (

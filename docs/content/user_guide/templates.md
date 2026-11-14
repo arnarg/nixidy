@@ -1,4 +1,9 @@
-# Templates
+---
+title: "Templates"
+nav:
+  section: user-guide
+  order: 40
+---
 
 Templates provide a powerful way to define reusable configurations for your applications, reducing duplication and promoting consistency. A template encapsulates a set of configurable options and a function to generate Kubernetes resources based on those options.
 

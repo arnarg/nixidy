@@ -1,10 +1,14 @@
 {
   pkgs ? null,
+  system ? builtins.currentSystem,
+  # Path to nixtml's source, defaults to the version pinned with npins.
+  nixtml ? null,
 }:
 let
   # Get some sources from npins.
   sources = import ./npins;
-  npkgs = if pkgs == null then import sources.nixpkgs { } else pkgs;
+  npkgs = if pkgs == null then import sources.nixpkgs { inherit system; } else pkgs;
+  nixtmlSrc = if nixtml == null then sources.nixtml else nixtml;
 
   # Some inputs from the root flake need
   # be available to the docs generation.
@@ -20,23 +24,14 @@ let
       inherit (lock) owner repo rev;
       hash = lock.narHash;
     };
-
-  # Setup nuschtos without using a flake.
-  nuschtos = sources.search;
-  ixx = sources.ixx;
-  ixxPkgs = {
-    ixx = npkgs.callPackage "${ixx}/ixx/derivation.nix" { };
-    fixx = npkgs.callPackage "${ixx}/fixx/derivation.nix" { };
-    libixx = npkgs.callPackage "${ixx}/libixx/derivation.nix" { };
-  };
-  nuscht-search = npkgs.callPackage "${nuschtos}/nix/frontend.nix" { };
-  mkSearch =
-    (npkgs.callPackage "${nuschtos}/nix/wrapper.nix" { inherit nuscht-search ixxPkgs; }).mkSearch;
 in
 # Build docs!
 import ./docs.nix {
-  inherit mkSearch;
   pkgs = npkgs;
+  nixtml = {
+    lib = import "${nixtmlSrc}/lib.nix";
+    themes.docs = import "${nixtmlSrc}/themes/docs";
+  };
   lib = import ../lib {
     inherit kubelib;
     pkgs = npkgs;

@@ -1,4 +1,9 @@
-# GitHub Actions
+---
+title: "GitHub Actions"
+nav:
+  section: user-guide
+  order: 60
+---
 
 Nixidy offers two GitHub Actions to build and switch to an environment.
 

@@ -177,12 +177,13 @@
               '').outPath;
           };
 
-          # Serve docs
+          # Serve docs, built with the nixpkgs pinned in docs/npins
+          # as nixtml needs a newer nixpkgs than the flake's.
           docsServe = {
             type = "app";
             program =
               (pkgs.writeShellScript "serve-docs" ''
-                ${pkgs.python3}/bin/python -m http.server -d ${(import ./docs { inherit pkgs; }).html} 8080
+                ${pkgs.python3}/bin/python -m http.server -d ${(import ./docs { inherit system; }).html} 8080
               '').outPath;
           };
         };

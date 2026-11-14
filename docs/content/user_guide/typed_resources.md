@@ -1,4 +1,9 @@
-# Typed Resource Options
+---
+title: "Typed Resource Options"
+nav:
+  section: user-guide
+  order: 30
+---
 
 [Kubenix](https://github.com/hall/kubenix/) has done a great work with generating nix options definitions from official JSON schemas and nixidy builds on top of this.
 
@@ -27,8 +32,9 @@ applications.my-app = {
 
 Each file's basename becomes the output filename. Basenames must be unique within an application and must not collide with typed-resource output filenames (e.g. `Secret-<name>.yaml`); both cases produce build-time assertion failures.
 
-!!! warning
-    `extraRawYamls` is only included in the ArgoCD-targeted environment output. The `kubectl apply --prune` flow produced by [`direct_apply`](./direct_apply.md) only handles typed `objects` and skips raw files. SOPS-encrypted manifests aren't valid Kubernetes objects until decrypted, so they are expected to be applied by ArgoCD (with a SOPS plugin) rather than `kubectl apply`.
+/// warning
+`extraRawYamls` is only included in the ArgoCD-targeted environment output. The `kubectl apply --prune` flow produced by [`direct_apply`](./direct_apply.md) only handles typed `objects` and skips raw files. SOPS-encrypted manifests aren't valid Kubernetes objects until decrypted, so they are expected to be applied by ArgoCD (with a SOPS plugin) rather than `kubectl apply`.
+///
 
 ## Generating your own resource options from CRDs
 
@@ -100,44 +106,45 @@ Then running `nix build .#generators.cilium` will produce a nix file that can be
 }
 ```
 
-??? note "Using nixidy without flakes"
+/// details | Using nixidy without flakes
+    type: note
+If you prefer not to use flakes, you can write the following in `generate.nix`.
 
-    If you prefer not to use flakes, you can write the following in `generate.nix`.
+```nix title="generate.nix"
+let
+  # With npins
+  sources = import ./npins;
+  # With niv
+  # sources = import ./nix/sources.nix;
 
-    ```nix title="generate.nix"
-    let
-      # With npins
-      sources = import ./npins;
-      # With niv
-      # sources = import ./nix/sources.nix;
+  # nixpkgs added with:
+  #   npins: `npins add --name nixpkgs channel nixos-unstable`
+  #   niv: `niv add github nixos/nixpkgs -b nixos-unstable`
+  nixpkgs = sources.nixpkgs;
+  pkgs = import nixpkgs {};
 
-      # nixpkgs added with:
-      #   npins: `npins add --name nixpkgs channel nixos-unstable`
-      #   niv: `niv add github nixos/nixpkgs -b nixos-unstable`
-      nixpkgs = sources.nixpkgs;
-      pkgs = import nixpkgs {};
+  # Import nixidy
+  nixidy = import sources.nixidy {inherit nixpkgs;};
+in
+  {
+    cilium = nixidy.generators.fromCRD {
+      name = "cilium";
+      src = pkgs.fetchFromGitHub {
+        owner = "cilium";
+        repo = "cilium";
+        rev = "v1.15.6";
+        hash = "sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=";
+      };
+      crdFiles = [
+        "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
+        "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml"
+      ];
+    };
+  }
+```
 
-      # Import nixidy
-      nixidy = import sources.nixidy {inherit nixpkgs;};
-    in
-      {
-        cilium = nixidy.generators.fromCRD {
-          name = "cilium";
-          src = pkgs.fetchFromGitHub {
-            owner = "cilium";
-            repo = "cilium";
-            rev = "v1.15.6";
-            hash = "sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=";
-          };
-          crdFiles = [
-            "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
-            "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml"
-          ];
-        };
-      }
-    ```
-
-    Then running `nix-build generate.nix -A cilium` will produce a nix file that can be copied into place in your repository and imported using `nixidy.applicationImports` in a nixidy module.
+Then running `nix-build generate.nix -A cilium` will produce a nix file that can be copied into place in your repository and imported using `nixidy.applicationImports` in a nixidy module.
+///
 
 ### From Helm Chart CRDs (`fromChartCRD`)
 
@@ -192,42 +199,43 @@ As an example, to generate resource options for cert-manager's `Certificate` CRD
 
 Then running `nix build .#generators.certManager` will produce a nix file that can be copied into place in your repository.
 
-??? note "Using nixidy without flakes"
+/// details | Using nixidy without flakes
+    type: note
+If you prefer not to use flakes, you can write the following in `generate.nix`.
 
-    If you prefer not to use flakes, you can write the following in `generate.nix`.
+```nix title="generate.nix"
+let
+  # With npins
+  sources = import ./npins;
+  # With niv
+  # sources = import ./nix/sources.nix;
 
-    ```nix title="generate.nix"
-    let
-      # With npins
-      sources = import ./npins;
-      # With niv
-      # sources = import ./nix/sources.nix;
+  # nixpkgs added with:
+  #   npins: `npins add --name nixpkgs channel nixos-unstable`
+  #   niv: `niv add github nixos/nixpkgs -b nixos-unstable`
+  nixpkgs = sources.nixpkgs;
+  pkgs = import nixpkgs {};
 
-      # nixpkgs added with:
-      #   npins: `npins add --name nixpkgs channel nixos-unstable`
-      #   niv: `niv add github nixos/nixpkgs -b nixos-unstable`
-      nixpkgs = sources.nixpkgs;
-      pkgs = import nixpkgs {};
+  # Import nixidy
+  nixidy = import sources.nixidy {inherit nixpkgs;};
+in
+  {
+    certManager = nixidy.generators.fromChartCRD {
+      name = "cert-manager";
+      chartAttrs = {
+        repo = "https://charts.jetstack.io";
+        chart = "cert-manager";
+        version = "v1.19.1";
+        chartHash = "sha256-fs14wuKK+blC0l+pRfa//oBV2X+Dr3nNX+Z94nrQVrA=";
+      };
+      kindFilter = [ "Certificate" ];  # Optional: filter by specific CRD kinds
+      extraOpts = [ "--set", "crds.enabled=true"]; # Optional: pass extra options to helm template generation
+    };
+  }
+```
 
-      # Import nixidy
-      nixidy = import sources.nixidy {inherit nixpkgs;};
-    in
-      {
-        certManager = nixidy.generators.fromChartCRD {
-          name = "cert-manager";
-          chartAttrs = {
-            repo = "https://charts.jetstack.io";
-            chart = "cert-manager";
-            version = "v1.19.1";
-            chartHash = "sha256-fs14wuKK+blC0l+pRfa//oBV2X+Dr3nNX+Z94nrQVrA=";
-          };
-          kindFilter = [ "Certificate" ];  # Optional: filter by specific CRD kinds
-          extraOpts = [ "--set", "crds.enabled=true"]; # Optional: pass extra options to helm template generation
-        };
-      }
-    ```
-
-    Then running `nix-build generate.nix -A certManager` will produce a nix file that can be copied into place in your repository and imported using `nixidy.applicationImports` in a nixidy module.
+Then running `nix-build generate.nix -A certManager` will produce a nix file that can be copied into place in your repository and imported using `nixidy.applicationImports` in a nixidy module.
+///
 
 The `fromChartCRD` function accepts the same optional arguments as `fromCRD` (`namePrefix`, `attrNameOverrides`, and `skipCoerceToList`) for customization of the generated options. Additionally, it accepts:
 
@@ -238,8 +246,9 @@ The `fromChartCRD` function accepts the same optional arguments as `fromCRD` (`n
 - `kubeVersion`: Kubernetes version to template the chart against (`helm template --kube-version`). Defaults to the version in nixidy's nixpkgs; set it to match the cluster the CRDs are destined for.
 - `extraOpts`: List of extra arguments to pass through to helm template
 
-!!! note "Renamed argument"
-    `kindFilter` was previously called `crds`. The old name still works as a deprecated alias (it emits a warning pointing at `kindFilter`); prefer `kindFilter` in new code. Note that on `fromCRD` the `crds` argument instead became `crdFiles` (the two used to share a name despite meaning different things: a kind filter vs. a list of YAML files).
+/// note | Renamed argument
+`kindFilter` was previously called `crds`. The old name still works as a deprecated alias (it emits a warning pointing at `kindFilter`); prefer `kindFilter` in new code. Note that on `fromCRD` the `crds` argument instead became `crdFiles` (the two used to share a name despite meaning different things: a kind filter vs. a list of YAML files).
+///
 
 ### As a module value (`fromCRDModule` / `fromChartCRDModule`)
 

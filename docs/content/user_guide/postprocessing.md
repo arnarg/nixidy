@@ -1,4 +1,10 @@
-# Post-processing rendered files
+---
+title: "Post-processing rendered files"
+nav:
+  section: user-guide
+  order: 90
+  label: "Post-processing"
+---
 
 Post-processors attach a stage that runs when the environment is applied, _after_ the object has been rendered to its file. They are a **stdin → stdout filter**: the rendered manifest is fed in on stdin and whatever they write to stdout becomes the final content.
 
@@ -38,8 +44,9 @@ The command body is arbitrary shell, so a tool that needs a real file path (`sop
 }
 ```
 
-!!! info
-    Post-processors run **outside** the evaluation sandbox on purpose, so they can reach things a `replace` cannot such as the network, a hardware key, or host tools. That is the whole reason it is a separate stage and not a `replace`. `$TARGET_PATH` (the absolute destination path) is available at runtime on `switch`.
+/// note
+Post-processors run **outside** the evaluation sandbox on purpose, so they can reach things a `replace` cannot such as the network, a hardware key, or host tools. That is the whole reason it is a separate stage and not a `replace`. `$TARGET_PATH` (the absolute destination path) is available at runtime on `switch`.
+///
 
 ## Visibility and safety
 
@@ -57,15 +64,17 @@ A piped, CI or pre-commit run is non-interactive and proceeds without prompting,
 - `NIXIDY_POST_PROCESS_APPROVE=1` skips the prompt for trusted, repeated interactive use.
 - `NIXIDY_SKIP_POST_PROCESS=1` reuses the already-rendered target files without running anything. This can be useful in an environment that lacks the post-process toolchain or secrets (for example, CI re-rendering manifests).
 
-!!! warning
-    These are visibility aids, **not** a security boundary and a configuration that defines a `postProcessors` rule can also set the approval variable. The point is to surface arbitrary execution to a human, not to sandbox it.
+/// warning
+These are visibility aids, **not** a security boundary and a configuration that defines a `postProcessors` rule can also set the approval variable. The point is to surface arbitrary execution to a human, not to sandbox it.
+///
 
 ## Applying directly
 
-[`nixidy apply`](direct_apply.md) runs `postProcessors` too, so applying directly deploys the same manifests as `nixidy switch`. Each object is streamed through its post-process command and piped to `kubectl apply`. The same notice and confirmation prompt run before anything is applied, and `NIXIDY_POST_PROCESS_APPROVE=1` skips it.
+[`nixidy apply`](./direct_apply.md) runs `postProcessors` too, so applying directly deploys the same manifests as `nixidy switch`. Each object is streamed through its post-process command and piped to `kubectl apply`. The same notice and confirmation prompt run before anything is applied, and `NIXIDY_POST_PROCESS_APPROVE=1` skips it.
 
-!!! warning
-    A command's output must be a valid Kubernetes manifest for `nixidy apply` to deploy it. A post-processor whose output only a GitOps controller can consume (for example a ksops, fully-encrypted file) is `switch`-only and `kubectl apply` will reject it. `NIXIDY_SKIP_POST_PROCESS` is not honoured on `apply`, since there is no rendered target to fall back to; the command always runs. `$TARGET_PATH` is set only on `switch`.
+/// warning
+A command's output must be a valid Kubernetes manifest for `nixidy apply` to deploy it. A post-processor whose output only a GitOps controller can consume (for example a ksops, fully-encrypted file) is `switch`-only and `kubectl apply` will reject it. `NIXIDY_SKIP_POST_PROCESS` is not honoured on `apply`, since there is no rendered target to fall back to; the command always runs. `$TARGET_PATH` is set only on `switch`.
+///
 
 ## Ordering and scoping
 

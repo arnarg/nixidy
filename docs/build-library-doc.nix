@@ -31,7 +31,12 @@ let
     installPhase = ''
       mkdir -p $out
       cat <<EOF > $out/lib.md
-      # Libary Functions
+      ---
+      title: Library Functions
+      nav:
+        section: reference
+        order: 20
+      ---
 
       The argument ''\\`lib''\\` is passed to each module in nixidy. This is the [standard nixpkgs library](https://nixos.org/manual/nixpkgs/stable/#id-1.4) extended with the following functions.
 

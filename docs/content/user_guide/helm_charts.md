@@ -1,4 +1,9 @@
-# Using Helm Charts
+---
+title: "Using Helm Charts"
+nav:
+  section: user-guide
+  order: 20
+---
 
 For better or for worse majority of software that's deployable to Kubernetes is packaged using Helm by developers or its community. It would be a waste not to use them and having to define all of its manifest yourself in nixidy.
 

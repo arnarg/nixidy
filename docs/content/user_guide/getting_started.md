@@ -1,4 +1,9 @@
-# Getting Started
+---
+title: "Getting Started"
+nav:
+  section: user-guide
+  order: 10
+---
 
 This guide walks you through setting up your first nixidy project step by step.
 
@@ -68,87 +73,89 @@ Create a `flake.nix` file in your project root:
 }
 ```
 
-??? note "Using nixidy without flakes"
+//// details | Using nixidy without flakes
+    type: note
+If you prefer not to use flakes, you can use [npins](https://github.com/andir/npins), [niv](https://github.com/nmattia/niv) or [devenv](https://devenv.sh/) for dependency management.
 
-    If you prefer not to use flakes, you can use [npins](https://github.com/andir/npins), [niv](https://github.com/nmattia/niv) or [devenv](https://devenv.sh/) for dependency management.
+/// tab | npins
+```sh
+npins init --bare
+npins add github arnarg nixidy
+```
 
-    === "npins"
+Then create `default.nix`:
 
-        ```sh
-        npins init --bare
-        npins add github arnarg nixidy
-        ```
+```nix title="default.nix"
+let
+  pins = import ./npins;
+  nixidy = import pins.nixidy {};
+in
+  nixidy.lib.mkEnvs {
+    envs = {
+      dev.modules = [./env/dev.nix];
+    };
+  }
+```
+///
 
-        Then create `default.nix`:
+/// tab | niv
+```sh
+niv init --no-nixpkgs
+niv add github arnarg/nixidy --branch main
+```
 
-        ```nix title="default.nix"
-        let
-          pins = import ./npins;
-          nixidy = import pins.nixidy {};
-        in
-          nixidy.lib.mkEnvs {
-            envs = {
-              dev.modules = [./env/dev.nix];
-            };
-          }
-        ```
+Then create `default.nix`:
 
-    === "niv"
+```nix title="default.nix"
+let
+  sources = import ./nix/sources.nix;
+  nixidy = import sources.nixidy {};
+in
+  nixidy.lib.mkEnvs {
+    envs = {
+      dev.modules = [./env/dev.nix];
+    };
+  }
+```
+///
 
-        ```sh
-        niv init --no-nixpkgs
-        niv add github arnarg/nixidy --branch main
-        ```
+/// tab | devenv
+```sh
+devenv init
+devenv inputs add nixidy github:arnarg/nixidy/latest
+```
 
-        Then create `default.nix`:
+Then create `devenv.nix`:
 
-        ```nix title="default.nix"
-        let
-          sources = import ./nix/sources.nix;
-          nixidy = import sources.nixidy {};
-        in
-          nixidy.lib.mkEnvs {
-            envs = {
-              dev.modules = [./env/dev.nix];
-            };
-          }
-        ```
+```nix title="devenv.nix"
+{
+ inputs,
+ pkgs,
+ ...
+}: {
+  outputs = {
+    nixidyEnvs = inputs.nixidy.lib.mkEnvs {
+      inherit pkgs;
 
-    === "devenv"
+      envs = {
+        dev.modules = [ ./env/dev.nix ];
+      };
+    };
+  };
 
-        ```sh
-        devenv init
-        devenv inputs add nixidy github:arnarg/nixidy/latest
-        ```
+  packages = [
+    inputs.nixidy.packages.${pkgs.stdenv.system}.default
+  ];
+}
+```
+///
 
-        Then create `devenv.nix`:
+/// warning | Command syntax
+The rest of this guide uses flake syntax (e.g., `nixidy build .#dev`). Without flakes, omit the `.#` prefix (e.g., `nixidy build dev`).
 
-        ```nix title="devenv.nix"
-        {
-         inputs,
-         pkgs,
-         ...
-        }: {
-          outputs = {
-            nixidyEnvs = inputs.nixidy.lib.mkEnvs {
-              inherit pkgs;
-        
-              envs = {
-                dev.modules = [ ./env/dev.nix ];
-              };
-            };
-          };
-        
-          packages = [
-            inputs.nixidy.packages.${pkgs.stdenv.system}.default
-          ];
-        }
-        ```
-
-    !!! warning "Command syntax"
-        The rest of this guide uses flake syntax (e.g., `nixidy build .#dev`). Without flakes, omit the `.#` prefix (e.g., `nixidy build dev`).
-
-        nixidy cli will automatically use devenv if it detects `devenv.nix` and neither `flake.nix` or `default.nix` exists. To force it, use `--devenv` flag with every command (e.g. `nixidy build --devenv dev`).
+nixidy cli will automatically use devenv if it detects `devenv.nix` and neither `flake.nix` or `default.nix` exists. To force it, use `--devenv` flag with every command (e.g. `nixidy build --devenv dev`).
+///
+////
 
 ## Step 3: Create Your Environment Configuration
 
@@ -167,8 +174,9 @@ mkdir -p env
 }
 ```
 
-!!! tip "Replace the repository URL"
-    Change `YOUR_USERNAME` to your actual GitHub username, or use your preferred Git hosting URL.
+/// tip | Replace the repository URL
+Change `YOUR_USERNAME` to your actual GitHub username, or use your preferred Git hosting URL.
+///
 
 ## Step 4: Verify Your Setup
 
