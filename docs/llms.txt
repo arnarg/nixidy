@@ -29,7 +29,7 @@ Key concepts:
 
 - [CLI Reference](https://nixidy.dev/cli_reference/): Every `nixidy` command and its options: apply, bootstrap, build, diff, info, resources and switch
 - [Library Functions](https://nixidy.dev/library/): The `lib.helm`, `lib.kustomize` and `lib.kube` functions available in modules, e.g. `lib.helm.downloadHelmChart`
-- [Configuration Options](https://nixidy.dev/options/): All options except the resource options, i.e. `nixidy.*`, `applications.<name>.*` and `templates.*`
+- [Configuration Options](https://nixidy.dev/options/): All options except the resource options, i.e. `nixidy.*`, `applications.<name>.*` and `templates.*`. Browse the resource options with `nixidy resources <env> [path]`, e.g. `nixidy resources .#prod deployments.spec`
 
 ## Optional
 

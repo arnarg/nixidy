@@ -44,6 +44,8 @@ let
             Kubernetes resources for the application.
 
             The resource options are generated from the Kubernetes API and are too many to list here. They follow `resources.<group>.<version>.<kind>.<name>` (e.g. `resources.apps.v1.Deployment.nginx`) and their fields match the [Kubernetes API reference](https://kubernetes.io/docs/reference/kubernetes-api/).
+
+            To browse them, including the ones generated from CRDs, use [`nixidy resources`](cli_reference.md#nixidy-resources), e.g. `nixidy resources .#prod deployments.spec.template.spec`.
           '';
         };
     };
@@ -92,6 +94,16 @@ let
             section: reference
             order: 30
           ---
+
+          The resource options under `applications.<name>.resources` are too many to list here. To browse all available resource types and their options, including the ones generated from CRDs, use the [`nixidy resources`](cli_reference.md#nixidy-resources) command:
+
+          ```sh
+          # List all resource types.
+          nixidy resources .#prod
+
+          # Show the options at a path.
+          nixidy resources .#prod deployments.spec.template.spec
+          ```
         ''
       ]
       ++ (mapAttrsToList (
