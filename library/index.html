@@ -1,1060 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="/css/main.css">
+		<meta name="theme-color" content="#1d5184">
+		<link rel="icon" href="/logo-compact.svg" type="image/svg+xml">
+		<script>
+			(function () {
+				try {
+					var scheme = window.localStorage.getItem("nixidy-docs-color-scheme");
+					if (scheme === "system") {
+						document.documentElement.removeAttribute("data-theme");
+					} else if (scheme === "light" || scheme === "dark") {
+						document.documentElement.setAttribute("data-theme", scheme);
+					}
+				} catch (error) {}
+			})();
+		</script>
+		<script src="/js/docs.js" defer="">
+		</script>
+		<title>
+			Library Functions | nixidy
+		</title>
+		<meta name="description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta property="og:title" content="Library Functions | nixidy">
+		<meta name="twitter:title" content="Library Functions | nixidy">
+		<meta itemprop="name" content="Library Functions | nixidy">
+		<meta property="og:description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta name="twitter:description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta name="application-name" content="nixidy">
+		<meta property="og:site_name" content="nixidy">
+		<meta property="og:locale" content="en">
+		<meta property="og:type" content="article">
+	</head>
+	<body>
+		<header class="docs-topbar">
+			<div class="docs-container">
+				<button type="button" class="navbar-burger docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
+					<span aria-hidden="true">
+					</span>
+					<span aria-hidden="true">
+					</span>
+					<span aria-hidden="true">
+					</span>
+					<span aria-hidden="true">
+					</span>
+				</button>
+				<a class="docs-brand" href="/">
+					<img src="/logo-compact.svg" alt="">
+					<span class="docs-brand-title">
+						nixidy
+					</span>
+				</a>
+				<div class="docs-topbar-end">
+					<a class="docs-repo button is-small" href="https://github.com/arnarg/nixidy" data-provider="github" data-api="https://api.github.com/repos/arnarg/nixidy" data-storage-key="nixidy-docs-repository" data-version="true">
+						<span class="docs-icon is-github" aria-hidden="true">
+						</span>
+						<span class="docs-repo-name">
+							arnarg/nixidy
+						</span>
+						<span class="docs-repo-facts" hidden="">
+							<span class="docs-repo-fact" data-fact="version" hidden="">
+								<span class="docs-icon is-version" aria-hidden="true">
+								</span>
+								<span class="docs-visually-hidden">
+									Latest release
+								</span>
+								<span class="docs-repo-fact-value">
+								</span>
+							</span>
+							<span class="docs-repo-fact" data-fact="stars" hidden="">
+								<span class="docs-icon is-stars" aria-hidden="true">
+								</span>
+								<span class="docs-visually-hidden">
+									Stars
+								</span>
+								<span class="docs-repo-fact-value">
+								</span>
+							</span>
+							<span class="docs-repo-fact" data-fact="forks" hidden="">
+								<span class="docs-icon is-forks" aria-hidden="true">
+								</span>
+								<span class="docs-visually-hidden">
+									Forks
+								</span>
+								<span class="docs-repo-fact-value">
+								</span>
+							</span>
+						</span>
+					</a>
+					<div class="docs-color-scheme" role="group" aria-label="Color scheme" data-storage-key="nixidy-docs-color-scheme" data-default="system" hidden="">
+						<button type="button" class="button is-small" data-color-scheme="system" data-label-system="System color scheme" data-label-light="Light color scheme" data-label-dark="Dark color scheme" aria-label="System color scheme" title="System color scheme">
+							<span class="docs-icon is-system" aria-hidden="true">
+							</span>
+						</button>
+					</div>
+				</div>
+			</div>
+		</header>
 
-<!doctype html>
-<html lang="en" class="no-js">
-  <head>
-    
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width,initial-scale=1">
-      
-      
-      
-        <link rel="canonical" href="https://nixidy.dev/library/">
-      
-      
-        <link rel="prev" href="../cli_reference/">
-      
-      
-        <link rel="next" href="../options/">
-      
-      
-      <link rel="icon" href="../images/icon.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
-    
-    
-      
-        <title>Library Functions - nixidy</title>
-      
-    
-    
-      <link rel="stylesheet" href="../assets/stylesheets/main.342714a4.min.css">
-      
-        
-        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
-      
-      
+		<section class="section docs-section">
+			<div class="docs-container">
+				<div class="docs-mobile-nav is-hidden-desktop">
+					<div class="docs-mobile-nav-overlay" aria-hidden="true">
+					</div>
+					<aside class="docs-mobile-nav-panel" id="docs-mobile-navigation">
+						<div class="docs-mobile-nav-header">
+							<a class="docs-repo button is-small" href="https://github.com/arnarg/nixidy" data-provider="github" data-api="https://api.github.com/repos/arnarg/nixidy" data-storage-key="nixidy-docs-repository" data-version="true">
+								<span class="docs-icon is-github" aria-hidden="true">
+								</span>
+								<span class="docs-repo-name">
+									arnarg/nixidy
+								</span>
+								<span class="docs-repo-facts" hidden="">
+									<span class="docs-repo-fact" data-fact="version" hidden="">
+										<span class="docs-icon is-version" aria-hidden="true">
+										</span>
+										<span class="docs-visually-hidden">
+											Latest release
+										</span>
+										<span class="docs-repo-fact-value">
+										</span>
+									</span>
+									<span class="docs-repo-fact" data-fact="stars" hidden="">
+										<span class="docs-icon is-stars" aria-hidden="true">
+										</span>
+										<span class="docs-visually-hidden">
+											Stars
+										</span>
+										<span class="docs-repo-fact-value">
+										</span>
+									</span>
+									<span class="docs-repo-fact" data-fact="forks" hidden="">
+										<span class="docs-icon is-forks" aria-hidden="true">
+										</span>
+										<span class="docs-visually-hidden">
+											Forks
+										</span>
+										<span class="docs-repo-fact-value">
+										</span>
+									</span>
+								</span>
+							</a>
+							<button type="button" class="navbar-burger is-active docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
+								<span aria-hidden="true">
+								</span>
+								<span aria-hidden="true">
+								</span>
+								<span aria-hidden="true">
+								</span>
+								<span aria-hidden="true">
+								</span>
+							</button>
+						</div>
+						<nav class="menu" aria-label="Documentation">
+							<p class="menu-label">
+								User Guide
+							</p>
+							<ul class="menu-list">
+								<li>
+									<a href="/">
+										Introduction
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/getting_started/">
+										Getting Started
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/helm_charts/">
+										Using Helm Charts
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/typed_resources/">
+										Typed Resource Options
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/templates/">
+										Templates
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/git_strategies/">
+										Git Strategies
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/github_actions/">
+										GitHub Actions
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/transformers/">
+										Transformers
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/object_transforms/">
+										Object Transforms
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/postprocessing/">
+										Post-processing
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/using_nixhelm/">
+										Using nixhelm
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/direct_apply/">
+										Directly Apply Manifests
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/assertions/">
+										Assertions & Warnings
+									</a>
+								</li>
+							</ul>
+							<p class="menu-label">
+								Developer Guide
+							</p>
+							<ul class="menu-list">
+								<li>
+									<a href="/developer_guide/architecture/">
+										Architecture Guide
+									</a>
+								</li>
+							</ul>
+							<p class="menu-label">
+								Reference
+							</p>
+							<ul class="menu-list">
+								<li>
+									<a href="/cli_reference/">
+										CLI Reference
+									</a>
+								</li>
+								<li>
+									<a href="/library/" class="is-active" aria-current="page">
+										Library Functions
+									</a>
+								</li>
+								<li>
+									<a href="/options/">
+										Configuration Options
+									</a>
+								</li>
+							</ul>
+						</nav>
+					</aside>
+				</div>
+				<div class="columns">
+					<aside class="docs-sidebar column is-hidden-touch">
+						<nav class="menu" aria-label="Documentation">
+							<p class="menu-label">
+								User Guide
+							</p>
+							<ul class="menu-list">
+								<li>
+									<a href="/">
+										Introduction
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/getting_started/">
+										Getting Started
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/helm_charts/">
+										Using Helm Charts
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/typed_resources/">
+										Typed Resource Options
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/templates/">
+										Templates
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/git_strategies/">
+										Git Strategies
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/github_actions/">
+										GitHub Actions
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/transformers/">
+										Transformers
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/object_transforms/">
+										Object Transforms
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/postprocessing/">
+										Post-processing
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/using_nixhelm/">
+										Using nixhelm
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/direct_apply/">
+										Directly Apply Manifests
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/assertions/">
+										Assertions & Warnings
+									</a>
+								</li>
+							</ul>
+							<p class="menu-label">
+								Developer Guide
+							</p>
+							<ul class="menu-list">
+								<li>
+									<a href="/developer_guide/architecture/">
+										Architecture Guide
+									</a>
+								</li>
+							</ul>
+							<p class="menu-label">
+								Reference
+							</p>
+							<ul class="menu-list">
+								<li>
+									<a href="/cli_reference/">
+										CLI Reference
+									</a>
+								</li>
+								<li>
+									<a href="/library/" class="is-active" aria-current="page">
+										Library Functions
+									</a>
+								</li>
+								<li>
+									<a href="/options/">
+										Configuration Options
+									</a>
+								</li>
+							</ul>
+						</nav>
+					</aside>
+					<main class="docs-main column">
+						<h1 class="title">
+							Library Functions
+						</h1>
 
-
-    
-    
-      
-    
-    
-      
-        
-        
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
-        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
-      
-    
-    
-      <link rel="stylesheet" href="../stylesheets/extra.css">
-    
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
-    
-      
-
-    
-    
-    
-  </head>
-  
-  
-    
-    
-      
-    
-    
-    
-    
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo">
-  
-    
-    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
-    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" for="__drawer"></label>
-    <div data-md-component="skip">
-      
-        
-        <a href="#libary-functions" class="md-skip">
-          Skip to content
-        </a>
-      
-    </div>
-    <div data-md-component="announce">
-      
-    </div>
-    
-    
-      
-
-  
-
-<header class="md-header md-header--shadow" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="nixidy" class="md-header__button md-logo" aria-label="nixidy" data-md-component="logo">
-      
-  <img src="../images/icon.svg" alt="logo">
-
-    </a>
-    <label class="md-header__button md-icon" for="__drawer">
-      
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
-    </label>
-    <div class="md-header__title" data-md-component="header-title">
-      <div class="md-header__ellipsis">
-        <div class="md-header__topic">
-          <span class="md-ellipsis">
-            nixidy
-          </span>
-        </div>
-        <div class="md-header__topic" data-md-component="header-topic">
-          <span class="md-ellipsis">
-            
-              Library Functions
-            
-          </span>
-        </div>
-      </div>
-    </div>
-    
-      
-        <form class="md-header__option" data-md-component="palette">
-  
-    
-    
-    
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
-    
-      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
-      </label>
-    
-  
-    
-    
-    
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
-    
-      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
-      </label>
-    
-  
-</form>
-      
-    
-    
-      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
-    
-    
-    
-      
-      
-        <label class="md-header__button md-icon" for="__search">
-          
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
-        </label>
-        <div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="__search"></label>
-  <div class="md-search__inner" role="search">
-    <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
-      <label class="md-search__icon md-icon" for="__search">
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-      </label>
-      <nav class="md-search__options" aria-label="Search">
-        
-        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
-          
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
-      </nav>
-      
-    </form>
-    <div class="md-search__output">
-      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="search-result">
-          <div class="md-search-result__meta">
-            Initializing search
-          </div>
-          <ol class="md-search-result__list" role="presentation"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-      
-    
-    
-      <div class="md-header__source">
-        <a href="https://github.com/arnarg/nixidy/" title="Go to repository" class="md-source" data-md-component="source">
-  <div class="md-source__icon md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
-  </div>
-  <div class="md-source__repository">
-    GitHub
-  </div>
-</a>
-      </div>
-    
-  </nav>
-  
-</header>
-    
-    <div class="md-container" data-md-component="container">
-      
-      
-        
-          
-        
-      
-      <main class="md-main" data-md-component="main">
-        <div class="md-main__inner md-grid">
-          
-            
-              
-              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-
-
-<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
-  <label class="md-nav__title" for="__drawer">
-    <a href=".." title="nixidy" class="md-nav__button md-logo" aria-label="nixidy" data-md-component="logo">
-      
-  <img src="../images/icon.svg" alt="logo">
-
-    </a>
-    nixidy
-  </label>
-  
-    <div class="md-nav__source">
-      <a href="https://github.com/arnarg/nixidy/" title="Go to repository" class="md-source" data-md-component="source">
-  <div class="md-source__icon md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
-  </div>
-  <div class="md-source__repository">
-    GitHub
-  </div>
-</a>
-    </div>
-  
-  <ul class="md-nav__list" data-md-scrollfix>
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Home
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
-        
-          
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    User Guide
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2">
-            <span class="md-nav__icon md-icon"></span>
-            User Guide
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guide/getting_started/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Getting Started
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guide/helm_charts/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Using Helm Charts
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guide/typed_resources/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Typed Resource Options
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guide/templates/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Templates
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guide/git_strategies/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Git Strategies
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guide/github_actions/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    GitHub Actions
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guide/transformers/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Transformers
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guide/object_transforms/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Object Transforms
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guide/postprocessing/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Post-processing
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guide/using_nixhelm/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Using nixhelm
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guide/direct_apply/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Directly Apply Manifests
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guide/assertions/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Assertions & Warnings
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Developer Guide
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
-            <span class="md-nav__icon md-icon"></span>
-            Developer Guide
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../developer_guide/architecture/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Architecture Guide
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-    
-  
-  
-  
-    
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Reference
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            Reference
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../cli_reference/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    CLI Reference
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Library Functions
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    Library Functions
-    
-  </span>
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#libhelmdownloadhelmchart" class="md-nav__link">
-    <span class="md-ellipsis">
-      lib.helm.downloadHelmChart
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libhelmbuildhelmchart" class="md-nav__link">
-    <span class="md-ellipsis">
-      lib.helm.buildHelmChart
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libhelmgetchartvalues" class="md-nav__link">
-    <span class="md-ellipsis">
-      lib.helm.getChartValues
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libhelmmkchartattrs" class="md-nav__link">
-    <span class="md-ellipsis">
-      lib.helm.mkChartAttrs
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libhelmmkchartsupdatescript" class="md-nav__link">
-    <span class="md-ellipsis">
-      lib.helm.mkChartsUpdateScript
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libkustomizebuildkustomization" class="md-nav__link">
-    <span class="md-ellipsis">
-      lib.kustomize.buildKustomization
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libkubefromyaml" class="md-nav__link">
-    <span class="md-ellipsis">
-      lib.kube.fromYAML
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libkubefromoctal" class="md-nav__link">
-    <span class="md-ellipsis">
-      lib.kube.fromOctal
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libkuberemovelabels" class="md-nav__link">
-    <span class="md-ellipsis">
-      lib.kube.removeLabels
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../options/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Configuration Options
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-  </ul>
-</nav>
-                  </div>
-                </div>
-              </div>
-            
-            
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#libhelmdownloadhelmchart" class="md-nav__link">
-    <span class="md-ellipsis">
-      lib.helm.downloadHelmChart
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libhelmbuildhelmchart" class="md-nav__link">
-    <span class="md-ellipsis">
-      lib.helm.buildHelmChart
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libhelmgetchartvalues" class="md-nav__link">
-    <span class="md-ellipsis">
-      lib.helm.getChartValues
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libhelmmkchartattrs" class="md-nav__link">
-    <span class="md-ellipsis">
-      lib.helm.mkChartAttrs
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libhelmmkchartsupdatescript" class="md-nav__link">
-    <span class="md-ellipsis">
-      lib.helm.mkChartsUpdateScript
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libkustomizebuildkustomization" class="md-nav__link">
-    <span class="md-ellipsis">
-      lib.kustomize.buildKustomization
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libkubefromyaml" class="md-nav__link">
-    <span class="md-ellipsis">
-      lib.kube.fromYAML
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libkubefromoctal" class="md-nav__link">
-    <span class="md-ellipsis">
-      lib.kube.fromOctal
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#libkuberemovelabels" class="md-nav__link">
-    <span class="md-ellipsis">
-      lib.kube.removeLabels
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
-            
-          
-          
-            <div class="md-content" data-md-component="content">
-              <article class="md-content__inner md-typeset">
-                
-                  
-
-
-  
-  
-
-
-<h1 id="libary-functions">Libary Functions<a class="headerlink" href="#libary-functions" title="Permanent link">#</a></h1>
-<p>The argument <code>lib</code> is passed to each module in nixidy. This is the <a href="https://nixos.org/manual/nixpkgs/stable/#id-1.4">standard nixpkgs library</a> extended with the following functions.</p>
-<h2 id="libhelmdownloadhelmchart">lib.helm.downloadHelmChart<a class="headerlink" href="#libhelmdownloadhelmchart" title="Permanent link">#</a></h2>
-<p><strong>Type</strong>: <code>downloadHelmChart :: AttrSet -&gt; Derivation</code></p>
-<p>Downloads a helm chart from a helm registry.</p>
-<blockquote>
-<p>This is re-exported directly from <a href="https://github.com/farcaller/nix-kube-generators">farcaller/nix-kube-generators</a>.</p>
-</blockquote>
-<h2 id="libhelmbuildhelmchart">lib.helm.buildHelmChart<a class="headerlink" href="#libhelmbuildhelmchart" title="Permanent link">#</a></h2>
-<p><strong>Type</strong>: <code>buildHelmChart :: AttrSet -&gt; Derivation</code></p>
-<p>Templates a helm chart with provided values and creates a derivation
-with the output.</p>
-<blockquote>
-<p>This is re-exported directly from <a href="https://github.com/farcaller/nix-kube-generators">farcaller/nix-kube-generators</a>.</p>
-</blockquote>
-<h2 id="libhelmgetchartvalues">lib.helm.getChartValues<a class="headerlink" href="#libhelmgetchartvalues" title="Permanent link">#</a></h2>
-<p><strong>Type</strong>: <code>getChartValues :: Derivation -&gt; AttrSet</code></p>
-<p>Parse the default values file shipped with the helm chart.</p>
-<dl>
-<dt><code>chart</code></dt>
-<dd>
-<p>Derivation containing helm chart. Usually output of <a href="#libhelmdownloadhelmchart">lib.helm.downloadHelmChart</a>.</p>
-</dd>
-</dl>
-<p><strong>Example:</strong></p>
-<div class="highlight"><pre><span></span><code>getChartValues <span class="p">(</span>lib<span class="o">.</span>helm<span class="o">.</span>downloadHelmChart <span class="p">{</span>
-    <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;https://argoproj.github.io/argo-helm/&quot;</span><span class="p">;</span>
-    <span class="ss">chart</span> <span class="o">=</span> <span class="s2">&quot;argo-cd&quot;</span><span class="p">;</span>
-    <span class="ss">version</span> <span class="o">=</span> <span class="s2">&quot;5.51.4&quot;</span><span class="p">;</span>
-    <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">&quot;sha256-LOEJ5mYaHEA0RztDkgM9DGTA0P5eNd0SzSlwJIgpbWY=&quot;</span><span class="p">;</span>
+						<div class="content">
+							<p>The argument <code>lib</code> is passed to each module in nixidy. This is the <a href="https://nixos.org/manual/nixpkgs/stable/#id-1.4">standard nixpkgs library</a> extended with the following functions.</p>
+							<h2 id="libhelmdownloadhelmchart">lib.helm.downloadHelmChart<a class="headerlink mx-2" href="#libhelmdownloadhelmchart" title="Permanent link">#</a></h2>
+							<p><strong>Type</strong>: <code>downloadHelmChart :: AttrSet -&gt; Derivation</code></p>
+							<p>Downloads a helm chart from a helm registry.</p>
+							<blockquote>
+								<p>This is re-exported directly from <a href="https://github.com/farcaller/nix-kube-generators">farcaller/nix-kube-generators</a>.</p>
+							</blockquote>
+							<h2 id="libhelmbuildhelmchart">lib.helm.buildHelmChart<a class="headerlink mx-2" href="#libhelmbuildhelmchart" title="Permanent link">#</a></h2>
+							<p><strong>Type</strong>: <code>buildHelmChart :: AttrSet -&gt; Derivation</code></p>
+							<p>Templates a helm chart with provided values and creates a derivation
+								with the output.</p>
+							<blockquote>
+								<p>This is re-exported directly from <a href="https://github.com/farcaller/nix-kube-generators">farcaller/nix-kube-generators</a>.</p>
+							</blockquote>
+							<h2 id="libhelmgetchartvalues">lib.helm.getChartValues<a class="headerlink mx-2" href="#libhelmgetchartvalues" title="Permanent link">#</a></h2>
+							<p><strong>Type</strong>: <code>getChartValues :: Derivation -&gt; AttrSet</code></p>
+							<p>Parse the default values file shipped with the helm chart.</p>
+							<p><code>chart</code></p>
+							<p>: Derivation containing helm chart. Usually output of <a href="#libhelmdownloadhelmchart">lib.helm.downloadHelmChart</a>.</p>
+							<p><strong>Example:</strong></p>
+							<div class="highlight"><pre><span></span><code>getChartValues <span class="p">(</span>lib<span class="o">.</span>helm<span class="o">.</span>downloadHelmChart <span class="p">{</span>
+    <span class="ss">repo</span> <span class="o">=</span> <span class="s2">"https://argoproj.github.io/argo-helm/"</span><span class="p">;</span>
+    <span class="ss">chart</span> <span class="o">=</span> <span class="s2">"argo-cd"</span><span class="p">;</span>
+    <span class="ss">version</span> <span class="o">=</span> <span class="s2">"5.51.4"</span><span class="p">;</span>
+    <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">"sha256-LOEJ5mYaHEA0RztDkgM9DGTA0P5eNd0SzSlwJIgpbWY="</span><span class="p">;</span>
 <span class="p">})</span>
 <span class="o">=&gt;</span> <span class="p">{</span>
   server<span class="o">.</span><span class="ss">replicas</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
@@ -1062,115 +401,91 @@ with the output.</p>
   <span class="c1"># ...</span>
 <span class="p">}</span>
 </code></pre></div>
-<h2 id="libhelmmkchartattrs">lib.helm.mkChartAttrs<a class="headerlink" href="#libhelmmkchartattrs" title="Permanent link">#</a></h2>
-<p><strong>Type</strong>: <code>mkChartAttrs :: Path -&gt; AttrSet</code></p>
-<p>Walk a directory tree and import all <code>default.nix</code> to download helm charts.</p>
-<p>The <code>default.nix</code> needs to have the following format:</p>
-<div class="highlight"><span class="filename">./charts/kubernetes-csi/csi-driver-nfs/default.nix</span><pre><span></span><code><span class="p">{</span>
-  <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts&quot;</span><span class="p">;</span>
-  <span class="ss">chart</span> <span class="o">=</span> <span class="s2">&quot;csi-driver-nfs&quot;</span><span class="p">;</span>
-  <span class="ss">version</span> <span class="o">=</span> <span class="s2">&quot;4.7.0&quot;</span><span class="p">;</span>
-  <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">&quot;sha256-EU2qaZglUU3vxa41l1p/2yBscksIhYMr8kSgH8t0vL8=&quot;</span><span class="p">;</span>
+							<h2 id="libhelmmkchartattrs">lib.helm.mkChartAttrs<a class="headerlink mx-2" href="#libhelmmkchartattrs" title="Permanent link">#</a></h2>
+							<p><strong>Type</strong>: <code>mkChartAttrs :: Path -&gt; AttrSet</code></p>
+							<p>Walk a directory tree and import all <code>default.nix</code> to download helm charts.</p>
+							<p>The <code>default.nix</code> needs to have the following format:</p>
+							<div class="highlight"><span class="filename">./charts/kubernetes-csi/csi-driver-nfs/default.nix</span><pre><span></span><code><span class="p">{</span>
+  <span class="ss">repo</span> <span class="o">=</span> <span class="s2">"https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts"</span><span class="p">;</span>
+  <span class="ss">chart</span> <span class="o">=</span> <span class="s2">"csi-driver-nfs"</span><span class="p">;</span>
+  <span class="ss">version</span> <span class="o">=</span> <span class="s2">"4.7.0"</span><span class="p">;</span>
+  <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">"sha256-EU2qaZglUU3vxa41l1p/2yBscksIhYMr8kSgH8t0vL8="</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Two optional fields are recognised by the update script:</p>
-<ul>
-<li><code>versionConstraint</code>: a semver range (e.g. <code>"&gt;=4.7.0 &lt;5.0.0"</code>) passed to
-  <code>helm show chart --version</code> so the updater resolves the latest matching
-  release instead of the absolute latest.</li>
-<li><code>freeze</code>: when <code>true</code>, the update script skips this chart entirely.</li>
-</ul>
-<p>Each chart derivation carries a <code>passthru.updateScript</code> that resolves the
-latest upstream version (honouring <code>versionConstraint</code> and <code>freeze</code>) and
-rewrites the chart's <code>default.nix</code> in place. Use
-<a href="#libhelmmkchartsupdatescript">mkChartsUpdateScript</a> to run every chart's
-update script at once.</p>
-<dl>
-<dt><code>rootDir</code></dt>
-<dd>
-<p>Path to a directory containing the correct directory structure described above.</p>
-</dd>
-</dl>
-<p><strong>Example:</strong></p>
-<div class="highlight"><pre><span></span><code>mkChartAttrs <span class="l">./charts</span>
+							<p>Two optional fields are recognised by the update script:</p>
+							<ul>
+								<li><code>versionConstraint</code>: a semver range (e.g. <code>"&gt;=4.7.0 &lt;5.0.0"</code>) passed to
+								<code>helm show chart --version</code> so the updater resolves the latest matching
+								release instead of the absolute latest.</li>
+								<li><code>freeze</code>: when <code>true</code>, the update script skips this chart entirely.</li>
+							</ul>
+							<p>Each chart derivation carries a <code>passthru.updateScript</code> that resolves the
+								latest upstream version (honouring <code>versionConstraint</code> and <code>freeze</code>) and
+								rewrites the chart's <code>default.nix</code> in place. Use
+								<a href="#libhelmmkchartsupdatescript">mkChartsUpdateScript</a> to run every chart's
+								update script at once.</p>
+							<p><code>rootDir</code></p>
+							<p>: Path to a directory containing the correct directory structure described above.</p>
+							<p><strong>Example:</strong></p>
+							<div class="highlight"><pre><span></span><code>mkChartAttrs <span class="l">./charts</span>
 <span class="o">=&gt;</span> <span class="p">{</span>
   <span class="ss">kubernetes-csi</span> <span class="o">=</span> <span class="p">{</span>
     <span class="ss">csi-driver-nfs</span> <span class="o">=</span> lib<span class="o">.</span>helm<span class="o">.</span>downloadHelmChart <span class="p">{</span>
-      <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts&quot;</span><span class="p">;</span>
-      <span class="ss">chart</span> <span class="o">=</span> <span class="s2">&quot;csi-driver-nfs&quot;</span><span class="p">;</span>
-      <span class="ss">version</span> <span class="o">=</span> <span class="s2">&quot;4.7.0&quot;</span><span class="p">;</span>
-      <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">&quot;sha256-EU2qaZglUU3vxa41l1p/2yBscksIhYMr8kSgH8t0vL8=&quot;</span><span class="p">;</span>
+      <span class="ss">repo</span> <span class="o">=</span> <span class="s2">"https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts"</span><span class="p">;</span>
+      <span class="ss">chart</span> <span class="o">=</span> <span class="s2">"csi-driver-nfs"</span><span class="p">;</span>
+      <span class="ss">version</span> <span class="o">=</span> <span class="s2">"4.7.0"</span><span class="p">;</span>
+      <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">"sha256-EU2qaZglUU3vxa41l1p/2yBscksIhYMr8kSgH8t0vL8="</span><span class="p">;</span>
     <span class="p">};</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<h2 id="libhelmmkchartsupdatescript">lib.helm.mkChartsUpdateScript<a class="headerlink" href="#libhelmmkchartsupdatescript" title="Permanent link">#</a></h2>
-<p><strong>Type</strong>: <code>mkChartsUpdateScript :: AttrSet -&gt; Derivation</code></p>
-<p>Build a single shell script that runs every chart's <code>updateScript</code>
-sequentially. The script keeps going when an individual chart fails and
-exits non-zero at the end if any chart failed.</p>
-<dl>
-<dt><code>tree</code></dt>
-<dd>
-<p>Tree of helm chart derivations, as produced by <a href="#libhelmmkchartattrs">lib.helm.mkChartAttrs</a>.</p>
-</dd>
-</dl>
-<p><strong>Example:</strong></p>
-<div class="highlight"><pre><span></span><code>mkChartsUpdateScript <span class="p">(</span>mkChartAttrs <span class="l">./charts</span><span class="p">)</span>
+							<h2 id="libhelmmkchartsupdatescript">lib.helm.mkChartsUpdateScript<a class="headerlink mx-2" href="#libhelmmkchartsupdatescript" title="Permanent link">#</a></h2>
+							<p><strong>Type</strong>: <code>mkChartsUpdateScript :: AttrSet -&gt; Derivation</code></p>
+							<p>Build a single shell script that runs every chart's <code>updateScript</code>
+								sequentially. The script keeps going when an individual chart fails and
+								exits non-zero at the end if any chart failed.</p>
+							<p><code>tree</code></p>
+							<p>: Tree of helm chart derivations, as produced by <a href="#libhelmmkchartattrs">lib.helm.mkChartAttrs</a>.</p>
+							<p><strong>Example:</strong></p>
+							<div class="highlight"><pre><span></span><code>mkChartsUpdateScript <span class="p">(</span>mkChartAttrs <span class="l">./charts</span><span class="p">)</span>
 <span class="o">=&gt;</span> <span class="o">&lt;</span><span class="nb">derivation</span> update-all-charts<span class="o">&gt;</span>
 </code></pre></div>
-<h2 id="libkustomizebuildkustomization">lib.kustomize.buildKustomization<a class="headerlink" href="#libkustomizebuildkustomization" title="Permanent link">#</a></h2>
-<p><strong>Type</strong>: <code>buildKustomization :: AttrSet -&gt; Derivation</code></p>
-<p>Builds a kustomization and creates a derivation with the output.</p>
-<dl>
-<dt>structured function argument</dt>
-<dd>
-<p><code>name</code></p>
-</dd>
-<dd>
-<p>Name is only used for derivation name.</p>
-</dd>
-<dt><code>src</code></dt>
-<dd>
-<p>Derivation containing the kustomization entrypoint and all relative bases that it might reference.</p>
-</dd>
-<dt><code>path</code></dt>
-<dd>
-<p>Relative path from the base of <code>src</code> to the kustomization folder to render.</p>
-</dd>
-<dt><code>namespace</code></dt>
-<dd>
-<p>Override namespace in kustomization.yaml.</p>
-</dd>
-</dl>
-<p><strong>Example:</strong></p>
-<div class="highlight"><pre><span></span><code>buildKustomization <span class="p">{</span>
-  <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;argocd&quot;</span><span class="p">;</span>
+							<h2 id="libkustomizebuildkustomization">lib.kustomize.buildKustomization<a class="headerlink mx-2" href="#libkustomizebuildkustomization" title="Permanent link">#</a></h2>
+							<p><strong>Type</strong>: <code>buildKustomization :: AttrSet -&gt; Derivation</code></p>
+							<p>Builds a kustomization and creates a derivation with the output.</p>
+							<p>structured function argument</p>
+							<p>: <code>name</code></p>
+							<p>: Name is only used for derivation name.</p>
+							<p><code>src</code></p>
+							<p>: Derivation containing the kustomization entrypoint and all relative bases that it might reference.</p>
+							<p><code>path</code></p>
+							<p>: Relative path from the base of <code>src</code> to the kustomization folder to render.</p>
+							<p><code>namespace</code></p>
+							<p>: Override namespace in kustomization.yaml.</p>
+							<p><strong>Example:</strong></p>
+							<div class="highlight"><pre><span></span><code>buildKustomization <span class="p">{</span>
+  <span class="ss">name</span> <span class="o">=</span> <span class="s2">"argocd"</span><span class="p">;</span>
   <span class="ss">src</span> <span class="o">=</span> pkgs<span class="o">.</span>fetchFromGitHub <span class="p">{</span>
-    <span class="ss">owner</span> <span class="o">=</span> <span class="s2">&quot;argoproj&quot;</span><span class="p">;</span>
-    <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;argo-cd&quot;</span><span class="p">;</span>
-    <span class="ss">rev</span> <span class="o">=</span> <span class="s2">&quot;v2.9.3&quot;</span><span class="p">;</span>
-    <span class="ss">hash</span> <span class="o">=</span> <span class="s2">&quot;sha256-GaY4Cw/LlSwy35umbB4epXt6ev8ya19UjHRwhDwilqU=&quot;</span><span class="p">;</span>
+    <span class="ss">owner</span> <span class="o">=</span> <span class="s2">"argoproj"</span><span class="p">;</span>
+    <span class="ss">repo</span> <span class="o">=</span> <span class="s2">"argo-cd"</span><span class="p">;</span>
+    <span class="ss">rev</span> <span class="o">=</span> <span class="s2">"v2.9.3"</span><span class="p">;</span>
+    <span class="ss">hash</span> <span class="o">=</span> <span class="s2">"sha256-GaY4Cw/LlSwy35umbB4epXt6ev8ya19UjHRwhDwilqU="</span><span class="p">;</span>
   <span class="p">};</span>
-  <span class="ss">path</span> <span class="o">=</span> <span class="s2">&quot;manifests/cluster-install&quot;</span><span class="p">;</span>
-  <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;argocd&quot;</span><span class="p">;</span>
+  <span class="ss">path</span> <span class="o">=</span> <span class="s2">"manifests/cluster-install"</span><span class="p">;</span>
+  <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">"argocd"</span><span class="p">;</span>
 <span class="p">}</span>
 <span class="o">=&gt;</span> <span class="l">/nix/store/7i52...7pww-kustomize-argocd</span>
 </code></pre></div>
-<h2 id="libkubefromyaml">lib.kube.fromYAML<a class="headerlink" href="#libkubefromyaml" title="Permanent link">#</a></h2>
-<p><strong>Type</strong>: <code>fromYAML :: String -&gt; [AttrSet]</code></p>
-<p>Parses a YAML document string into a list of attribute sets.</p>
-<blockquote>
-<p>This is re-exported directly from <a href="https://github.com/farcaller/nix-kube-generators">farcaller/nix-kube-generators</a>.</p>
-</blockquote>
-<dl>
-<dt><code>yaml</code></dt>
-<dd>
-<p>String with a yaml document.</p>
-</dd>
-</dl>
-<p><strong>Example:</strong></p>
-<div class="highlight"><pre><span></span><code>fromYAML <span class="s s-Multiline">&#39;&#39;</span>
+							<h2 id="libkubefromyaml">lib.kube.fromYAML<a class="headerlink mx-2" href="#libkubefromyaml" title="Permanent link">#</a></h2>
+							<p><strong>Type</strong>: <code>fromYAML :: String -&gt; [AttrSet]</code></p>
+							<p>Parses a YAML document string into a list of attribute sets.</p>
+							<blockquote>
+								<p>This is re-exported directly from <a href="https://github.com/farcaller/nix-kube-generators">farcaller/nix-kube-generators</a>.</p>
+							</blockquote>
+							<p><code>yaml</code></p>
+							<p>: String with a yaml document.</p>
+							<p><strong>Example:</strong></p>
+							<div class="highlight"><pre><span></span><code>fromYAML <span class="s s-Multiline">''</span>
 <span class="s s-Multiline">  apiVersion: v1</span>
 <span class="s s-Multiline">  kind: Namespace</span>
 <span class="s s-Multiline">  metadata:</span>
@@ -1180,164 +495,70 @@ exits non-zero at the end if any chart failed.</p>
 <span class="s s-Multiline">  kind: Namespace</span>
 <span class="s s-Multiline">  metadata:</span>
 <span class="s s-Multiline">    name: kube-system</span>
-<span class="s s-Multiline">&#39;&#39;</span>
+<span class="s s-Multiline">''</span>
 <span class="o">=&gt;</span> <span class="p">[</span>
   <span class="p">{</span>
-    <span class="ss">apiVersion</span> <span class="o">=</span> <span class="s2">&quot;v1&quot;</span><span class="p">;</span>
-    <span class="ss">kind</span> <span class="o">=</span> <span class="s2">&quot;Namespace&quot;</span><span class="p">;</span>
-    metadata<span class="o">.</span><span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">;</span>
+    <span class="ss">apiVersion</span> <span class="o">=</span> <span class="s2">"v1"</span><span class="p">;</span>
+    <span class="ss">kind</span> <span class="o">=</span> <span class="s2">"Namespace"</span><span class="p">;</span>
+    metadata<span class="o">.</span><span class="ss">name</span> <span class="o">=</span> <span class="s2">"default"</span><span class="p">;</span>
   <span class="p">}</span>
   <span class="p">{</span>
-    <span class="ss">apiVersion</span> <span class="o">=</span> <span class="s2">&quot;v1&quot;</span><span class="p">;</span>
-    <span class="ss">kind</span> <span class="o">=</span> <span class="s2">&quot;Namespace&quot;</span><span class="p">;</span>
-    metadata<span class="o">.</span><span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;kube-system&quot;</span><span class="p">;</span>
+    <span class="ss">apiVersion</span> <span class="o">=</span> <span class="s2">"v1"</span><span class="p">;</span>
+    <span class="ss">kind</span> <span class="o">=</span> <span class="s2">"Namespace"</span><span class="p">;</span>
+    metadata<span class="o">.</span><span class="ss">name</span> <span class="o">=</span> <span class="s2">"kube-system"</span><span class="p">;</span>
   <span class="p">}</span>
 <span class="p">]</span>
 </code></pre></div>
-<h2 id="libkubefromoctal">lib.kube.fromOctal<a class="headerlink" href="#libkubefromoctal" title="Permanent link">#</a></h2>
-<p><strong>Type</strong>: <code>fromOctal :: String -&gt; Integer</code></p>
-<p>Parse an octal representation of a number and convert into a decimal number. This can be useful when having to represent permission bits in a resource as nix has no support for representing octal numbers.</p>
-<dl>
-<dt><code>octal</code></dt>
-<dd>
-<p>String representation of the octal number to parse.</p>
-</dd>
-</dl>
-<p><strong>Example:</strong></p>
-<div class="highlight"><pre><span></span><code>fromOctal <span class="s2">&quot;0555&quot;</span>
+							<h2 id="libkubefromoctal">lib.kube.fromOctal<a class="headerlink mx-2" href="#libkubefromoctal" title="Permanent link">#</a></h2>
+							<p><strong>Type</strong>: <code>fromOctal :: String -&gt; Integer</code></p>
+							<p>Parse an octal representation of a number and convert into a decimal number. This can be useful when having to represent permission bits in a resource as nix has no support for representing octal numbers.</p>
+							<p><code>octal</code></p>
+							<p>: String representation of the octal number to parse.</p>
+							<p><strong>Example:</strong></p>
+							<div class="highlight"><pre><span></span><code>fromOctal <span class="s2">"0555"</span>
 <span class="o">=&gt;</span> <span class="mi">365</span>
 </code></pre></div>
-<h2 id="libkuberemovelabels">lib.kube.removeLabels<a class="headerlink" href="#libkuberemovelabels" title="Permanent link">#</a></h2>
-<p><strong>Type</strong>: <code>removeLabels :: [String] -&gt; AttrSet -&gt; AttrSet</code></p>
-<p>Removes labels from a Kubernetes manifest.</p>
-<dl>
-<dt><code>labels</code></dt>
-<dd>
-<p>List of labels that should be removed</p>
-</dd>
-<dt><code>manifest</code></dt>
-<dd>
-<p>Kubernetes manifest</p>
-</dd>
-</dl>
-<p><strong>Example:</strong></p>
-<div class="highlight"><pre><span></span><code>removeLabels <span class="p">[</span><span class="s2">&quot;helm.sh/chart&quot;</span><span class="p">]</span> <span class="p">{</span>
-  <span class="ss">apiVersion</span> <span class="o">=</span> <span class="s2">&quot;v1&quot;</span><span class="p">;</span>
-  <span class="ss">kind</span> <span class="o">=</span> <span class="s2">&quot;ConfigMap&quot;</span><span class="p">;</span>
+							<h2 id="libkuberemovelabels">lib.kube.removeLabels<a class="headerlink mx-2" href="#libkuberemovelabels" title="Permanent link">#</a></h2>
+							<p><strong>Type</strong>: <code>removeLabels :: [String] -&gt; AttrSet -&gt; AttrSet</code></p>
+							<p>Removes labels from a Kubernetes manifest.</p>
+							<p><code>labels</code></p>
+							<p>: List of labels that should be removed</p>
+							<p><code>manifest</code></p>
+							<p>: Kubernetes manifest</p>
+							<p><strong>Example:</strong></p>
+							<div class="highlight"><pre><span></span><code>removeLabels <span class="p">[</span><span class="s2">"helm.sh/chart"</span><span class="p">]</span> <span class="p">{</span>
+  <span class="ss">apiVersion</span> <span class="o">=</span> <span class="s2">"v1"</span><span class="p">;</span>
+  <span class="ss">kind</span> <span class="o">=</span> <span class="s2">"ConfigMap"</span><span class="p">;</span>
   <span class="ss">metadata</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;argocd-cm&quot;</span><span class="p">;</span>
+    <span class="ss">name</span> <span class="o">=</span> <span class="s2">"argocd-cm"</span><span class="p">;</span>
     <span class="ss">labels</span> <span class="o">=</span> <span class="p">{</span>
-      <span class="s2">&quot;app.kubernetes.io/name&quot;</span> <span class="o">=</span> <span class="s2">&quot;argocd-cm&quot;</span><span class="p">;</span>
-      <span class="s2">&quot;helm.sh/chart&quot;</span> <span class="o">=</span> <span class="s2">&quot;argo-cd-5.51.6&quot;</span><span class="p">;</span>
+      <span class="s2">"app.kubernetes.io/name"</span> <span class="o">=</span> <span class="s2">"argocd-cm"</span><span class="p">;</span>
+      <span class="s2">"helm.sh/chart"</span> <span class="o">=</span> <span class="s2">"argo-cd-5.51.6"</span><span class="p">;</span>
     <span class="p">};</span>
   <span class="p">};</span>
 <span class="p">}</span>
 <span class="o">=&gt;</span> <span class="p">{</span>
-  <span class="ss">apiVersion</span> <span class="o">=</span> <span class="s2">&quot;v1&quot;</span><span class="p">;</span>
-  <span class="ss">kind</span> <span class="o">=</span> <span class="s2">&quot;ConfigMap&quot;</span><span class="p">;</span>
+  <span class="ss">apiVersion</span> <span class="o">=</span> <span class="s2">"v1"</span><span class="p">;</span>
+  <span class="ss">kind</span> <span class="o">=</span> <span class="s2">"ConfigMap"</span><span class="p">;</span>
   <span class="ss">metadata</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;argocd-cm&quot;</span><span class="p">;</span>
+    <span class="ss">name</span> <span class="o">=</span> <span class="s2">"argocd-cm"</span><span class="p">;</span>
     <span class="ss">labels</span> <span class="o">=</span> <span class="p">{</span>
-      <span class="s2">&quot;app.kubernetes.io/name&quot;</span> <span class="o">=</span> <span class="s2">&quot;argocd-cm&quot;</span><span class="p">;</span>
+      <span class="s2">"app.kubernetes.io/name"</span> <span class="o">=</span> <span class="s2">"argocd-cm"</span><span class="p">;</span>
     <span class="p">};</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-
-
-
-
-
-
-
-
-
-
-
-
-                
-              </article>
-            </div>
-          
-          
-  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
-
-<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
-        </div>
-        
-      </main>
-      
-        <footer class="md-footer">
-  
-    
-      
-      <nav class="md-footer__inner md-grid" aria-label="Footer" >
-        
-          
-          <a href="../cli_reference/" class="md-footer__link md-footer__link--prev" aria-label="Previous: CLI Reference">
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-            </div>
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              <div class="md-ellipsis">
-                CLI Reference
-              </div>
-            </div>
-          </a>
-        
-        
-          
-          <a href="../options/" class="md-footer__link md-footer__link--next" aria-label="Next: Configuration Options">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              <div class="md-ellipsis">
-                Configuration Options
-              </div>
-            </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
-            </div>
-          </a>
-        
-      </nav>
-    
-  
-  <div class="md-footer-meta md-typeset">
-    <div class="md-footer-meta__inner md-grid">
-      <div class="md-copyright">
-  
-  
-    Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-      Material for MkDocs
-    </a>
-  
-</div>
-      
-    </div>
-  </div>
-</footer>
-      
-    </div>
-    <div class="md-dialog" data-md-component="dialog">
-      <div class="md-dialog__inner md-typeset"></div>
-    </div>
-    
-    
-    
-      
-      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.footer", "content.tabs.link"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
-    
-    
-      <script src="../assets/javascripts/bundle.56ea9cef.min.js"></script>
-      
-    
-  </body>
+						</div>
+					</main>
+				</div>
+			</div>
+		</section>
+		<footer class="footer">
+			<div class="container content is-max-desktop has-text-centered">
+				<p>
+					Generated with <a href="https://github.com/arnarg/nixtml">nixtml</a>.
+				</p>
+			</div>
+		</footer>
+	</body>
 </html>

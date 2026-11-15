@@ -1,1767 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="/css/main.css">
+		<meta name="theme-color" content="#1d5184">
+		<link rel="icon" href="/logo-compact.svg" type="image/svg+xml">
+		<script>
+			(function () {
+				try {
+					var scheme = window.localStorage.getItem("nixidy-docs-color-scheme");
+					if (scheme === "system") {
+						document.documentElement.removeAttribute("data-theme");
+					} else if (scheme === "light" || scheme === "dark") {
+						document.documentElement.setAttribute("data-theme", scheme);
+					}
+				} catch (error) {}
+			})();
+		</script>
+		<script src="/js/docs.js" defer="">
+		</script>
+		<title>
+			Nixidy Architecture Guide for Contributors | nixidy
+		</title>
+		<meta name="description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta property="og:title" content="Nixidy Architecture Guide for Contributors | nixidy">
+		<meta name="twitter:title" content="Nixidy Architecture Guide for Contributors | nixidy">
+		<meta itemprop="name" content="Nixidy Architecture Guide for Contributors | nixidy">
+		<meta property="og:description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta name="twitter:description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta name="application-name" content="nixidy">
+		<meta property="og:site_name" content="nixidy">
+		<meta property="og:locale" content="en">
+		<meta property="og:type" content="article">
+	</head>
+	<body>
+		<header class="docs-topbar">
+			<div class="docs-container">
+				<button type="button" class="navbar-burger docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
+					<span aria-hidden="true">
+					</span>
+					<span aria-hidden="true">
+					</span>
+					<span aria-hidden="true">
+					</span>
+					<span aria-hidden="true">
+					</span>
+				</button>
+				<a class="docs-brand" href="/">
+					<img src="/logo-compact.svg" alt="">
+					<span class="docs-brand-title">
+						nixidy
+					</span>
+				</a>
+				<div class="docs-topbar-end">
+					<a class="docs-repo button is-small" href="https://github.com/arnarg/nixidy" data-provider="github" data-api="https://api.github.com/repos/arnarg/nixidy" data-storage-key="nixidy-docs-repository" data-version="true">
+						<span class="docs-icon is-github" aria-hidden="true">
+						</span>
+						<span class="docs-repo-name">
+							arnarg/nixidy
+						</span>
+						<span class="docs-repo-facts" hidden="">
+							<span class="docs-repo-fact" data-fact="version" hidden="">
+								<span class="docs-icon is-version" aria-hidden="true">
+								</span>
+								<span class="docs-visually-hidden">
+									Latest release
+								</span>
+								<span class="docs-repo-fact-value">
+								</span>
+							</span>
+							<span class="docs-repo-fact" data-fact="stars" hidden="">
+								<span class="docs-icon is-stars" aria-hidden="true">
+								</span>
+								<span class="docs-visually-hidden">
+									Stars
+								</span>
+								<span class="docs-repo-fact-value">
+								</span>
+							</span>
+							<span class="docs-repo-fact" data-fact="forks" hidden="">
+								<span class="docs-icon is-forks" aria-hidden="true">
+								</span>
+								<span class="docs-visually-hidden">
+									Forks
+								</span>
+								<span class="docs-repo-fact-value">
+								</span>
+							</span>
+						</span>
+					</a>
+					<div class="docs-color-scheme" role="group" aria-label="Color scheme" data-storage-key="nixidy-docs-color-scheme" data-default="system" hidden="">
+						<button type="button" class="button is-small" data-color-scheme="system" data-label-system="System color scheme" data-label-light="Light color scheme" data-label-dark="Dark color scheme" aria-label="System color scheme" title="System color scheme">
+							<span class="docs-icon is-system" aria-hidden="true">
+							</span>
+						</button>
+					</div>
+				</div>
+			</div>
+		</header>
 
-<!doctype html>
-<html lang="en" class="no-js">
-  <head>
-    
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width,initial-scale=1">
-      
-      
-      
-        <link rel="canonical" href="https://nixidy.dev/developer_guide/architecture/">
-      
-      
-        <link rel="prev" href="../../user_guide/assertions/">
-      
-      
-        <link rel="next" href="../../cli_reference/">
-      
-      
-      <link rel="icon" href="../../images/icon.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
-    
-    
-      
-        <title>Architecture Guide - nixidy</title>
-      
-    
-    
-      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
-      
-        
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
-      
-      
+		<section class="section docs-section">
+			<div class="docs-container">
+				<div class="docs-mobile-nav is-hidden-desktop">
+					<div class="docs-mobile-nav-overlay" aria-hidden="true">
+					</div>
+					<aside class="docs-mobile-nav-panel" id="docs-mobile-navigation">
+						<div class="docs-mobile-nav-header">
+							<a class="docs-repo button is-small" href="https://github.com/arnarg/nixidy" data-provider="github" data-api="https://api.github.com/repos/arnarg/nixidy" data-storage-key="nixidy-docs-repository" data-version="true">
+								<span class="docs-icon is-github" aria-hidden="true">
+								</span>
+								<span class="docs-repo-name">
+									arnarg/nixidy
+								</span>
+								<span class="docs-repo-facts" hidden="">
+									<span class="docs-repo-fact" data-fact="version" hidden="">
+										<span class="docs-icon is-version" aria-hidden="true">
+										</span>
+										<span class="docs-visually-hidden">
+											Latest release
+										</span>
+										<span class="docs-repo-fact-value">
+										</span>
+									</span>
+									<span class="docs-repo-fact" data-fact="stars" hidden="">
+										<span class="docs-icon is-stars" aria-hidden="true">
+										</span>
+										<span class="docs-visually-hidden">
+											Stars
+										</span>
+										<span class="docs-repo-fact-value">
+										</span>
+									</span>
+									<span class="docs-repo-fact" data-fact="forks" hidden="">
+										<span class="docs-icon is-forks" aria-hidden="true">
+										</span>
+										<span class="docs-visually-hidden">
+											Forks
+										</span>
+										<span class="docs-repo-fact-value">
+										</span>
+									</span>
+								</span>
+							</a>
+							<button type="button" class="navbar-burger is-active docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
+								<span aria-hidden="true">
+								</span>
+								<span aria-hidden="true">
+								</span>
+								<span aria-hidden="true">
+								</span>
+								<span aria-hidden="true">
+								</span>
+							</button>
+						</div>
+						<nav class="menu" aria-label="Documentation">
+							<p class="menu-label">
+								User Guide
+							</p>
+							<ul class="menu-list">
+								<li>
+									<a href="/">
+										Introduction
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/getting_started/">
+										Getting Started
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/helm_charts/">
+										Using Helm Charts
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/typed_resources/">
+										Typed Resource Options
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/templates/">
+										Templates
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/git_strategies/">
+										Git Strategies
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/github_actions/">
+										GitHub Actions
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/transformers/">
+										Transformers
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/object_transforms/">
+										Object Transforms
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/postprocessing/">
+										Post-processing
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/using_nixhelm/">
+										Using nixhelm
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/direct_apply/">
+										Directly Apply Manifests
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/assertions/">
+										Assertions & Warnings
+									</a>
+								</li>
+							</ul>
+							<p class="menu-label">
+								Developer Guide
+							</p>
+							<ul class="menu-list">
+								<li>
+									<a href="/developer_guide/architecture/" class="is-active" aria-current="page">
+										Architecture Guide
+									</a>
+								</li>
+							</ul>
+							<p class="menu-label">
+								Reference
+							</p>
+							<ul class="menu-list">
+								<li>
+									<a href="/cli_reference/">
+										CLI Reference
+									</a>
+								</li>
+								<li>
+									<a href="/library/">
+										Library Functions
+									</a>
+								</li>
+								<li>
+									<a href="/options/">
+										Configuration Options
+									</a>
+								</li>
+							</ul>
+						</nav>
+					</aside>
+				</div>
+				<div class="columns">
+					<aside class="docs-sidebar column is-hidden-touch">
+						<nav class="menu" aria-label="Documentation">
+							<p class="menu-label">
+								User Guide
+							</p>
+							<ul class="menu-list">
+								<li>
+									<a href="/">
+										Introduction
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/getting_started/">
+										Getting Started
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/helm_charts/">
+										Using Helm Charts
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/typed_resources/">
+										Typed Resource Options
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/templates/">
+										Templates
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/git_strategies/">
+										Git Strategies
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/github_actions/">
+										GitHub Actions
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/transformers/">
+										Transformers
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/object_transforms/">
+										Object Transforms
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/postprocessing/">
+										Post-processing
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/using_nixhelm/">
+										Using nixhelm
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/direct_apply/">
+										Directly Apply Manifests
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/assertions/">
+										Assertions & Warnings
+									</a>
+								</li>
+							</ul>
+							<p class="menu-label">
+								Developer Guide
+							</p>
+							<ul class="menu-list">
+								<li>
+									<a href="/developer_guide/architecture/" class="is-active" aria-current="page">
+										Architecture Guide
+									</a>
+								</li>
+							</ul>
+							<p class="menu-label">
+								Reference
+							</p>
+							<ul class="menu-list">
+								<li>
+									<a href="/cli_reference/">
+										CLI Reference
+									</a>
+								</li>
+								<li>
+									<a href="/library/">
+										Library Functions
+									</a>
+								</li>
+								<li>
+									<a href="/options/">
+										Configuration Options
+									</a>
+								</li>
+							</ul>
+						</nav>
+					</aside>
+					<main class="docs-main column">
+						<h1 class="title">
+							Nixidy Architecture Guide for Contributors
+						</h1>
 
-
-    
-    
-      
-    
-    
-      
-        
-        
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
-        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
-      
-    
-    
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
-    
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
-    
-      
-
-    
-    
-    
-  </head>
-  
-  
-    
-    
-      
-    
-    
-    
-    
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo">
-  
-    
-    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
-    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" for="__drawer"></label>
-    <div data-md-component="skip">
-      
-        
-        <a href="#nixidy-architecture-guide-for-contributors" class="md-skip">
-          Skip to content
-        </a>
-      
-    </div>
-    <div data-md-component="announce">
-      
-    </div>
-    
-    
-      
-
-  
-
-<header class="md-header md-header--shadow" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="nixidy" class="md-header__button md-logo" aria-label="nixidy" data-md-component="logo">
-      
-  <img src="../../images/icon.svg" alt="logo">
-
-    </a>
-    <label class="md-header__button md-icon" for="__drawer">
-      
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
-    </label>
-    <div class="md-header__title" data-md-component="header-title">
-      <div class="md-header__ellipsis">
-        <div class="md-header__topic">
-          <span class="md-ellipsis">
-            nixidy
-          </span>
-        </div>
-        <div class="md-header__topic" data-md-component="header-topic">
-          <span class="md-ellipsis">
-            
-              Architecture Guide
-            
-          </span>
-        </div>
-      </div>
-    </div>
-    
-      
-        <form class="md-header__option" data-md-component="palette">
-  
-    
-    
-    
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
-    
-      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
-      </label>
-    
-  
-    
-    
-    
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
-    
-      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
-      </label>
-    
-  
-</form>
-      
-    
-    
-      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
-    
-    
-    
-      
-      
-        <label class="md-header__button md-icon" for="__search">
-          
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
-        </label>
-        <div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="__search"></label>
-  <div class="md-search__inner" role="search">
-    <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
-      <label class="md-search__icon md-icon" for="__search">
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-      </label>
-      <nav class="md-search__options" aria-label="Search">
-        
-        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
-          
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
-      </nav>
-      
-    </form>
-    <div class="md-search__output">
-      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="search-result">
-          <div class="md-search-result__meta">
-            Initializing search
-          </div>
-          <ol class="md-search-result__list" role="presentation"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-      
-    
-    
-      <div class="md-header__source">
-        <a href="https://github.com/arnarg/nixidy/" title="Go to repository" class="md-source" data-md-component="source">
-  <div class="md-source__icon md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
-  </div>
-  <div class="md-source__repository">
-    GitHub
-  </div>
-</a>
-      </div>
-    
-  </nav>
-  
-</header>
-    
-    <div class="md-container" data-md-component="container">
-      
-      
-        
-          
-        
-      
-      <main class="md-main" data-md-component="main">
-        <div class="md-main__inner md-grid">
-          
-            
-              
-              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-
-
-<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
-  <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="nixidy" class="md-nav__button md-logo" aria-label="nixidy" data-md-component="logo">
-      
-  <img src="../../images/icon.svg" alt="logo">
-
-    </a>
-    nixidy
-  </label>
-  
-    <div class="md-nav__source">
-      <a href="https://github.com/arnarg/nixidy/" title="Go to repository" class="md-source" data-md-component="source">
-  <div class="md-source__icon md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
-  </div>
-  <div class="md-source__repository">
-    GitHub
-  </div>
-</a>
-    </div>
-  
-  <ul class="md-nav__list" data-md-scrollfix>
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Home
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
-        
-          
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    User Guide
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2">
-            <span class="md-nav__icon md-icon"></span>
-            User Guide
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../user_guide/getting_started/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Getting Started
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../user_guide/helm_charts/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Using Helm Charts
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../user_guide/typed_resources/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Typed Resource Options
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../user_guide/templates/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Templates
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../user_guide/git_strategies/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Git Strategies
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../user_guide/github_actions/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    GitHub Actions
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../user_guide/transformers/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Transformers
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../user_guide/object_transforms/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Object Transforms
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../user_guide/postprocessing/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Post-processing
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../user_guide/using_nixhelm/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Using nixhelm
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../user_guide/direct_apply/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Directly Apply Manifests
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../user_guide/assertions/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Assertions & Warnings
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-    
-  
-  
-  
-    
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Developer Guide
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
-            <span class="md-nav__icon md-icon"></span>
-            Developer Guide
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Architecture Guide
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    Architecture Guide
-    
-  </span>
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#table-of-contents" class="md-nav__link">
-    <span class="md-ellipsis">
-      Table of Contents
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#project-structure" class="md-nav__link">
-    <span class="md-ellipsis">
-      Project Structure
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#core-concepts" class="md-nav__link">
-    <span class="md-ellipsis">
-      Core Concepts
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Core Concepts">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-nixos-module-system" class="md-nav__link">
-    <span class="md-ellipsis">
-      1. NixOS Module System
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-application-lifecycle" class="md-nav__link">
-    <span class="md-ellipsis">
-      2. Application Lifecycle
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-resource-type-system" class="md-nav__link">
-    <span class="md-ellipsis">
-      3. Resource Type System
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-processing-pipeline" class="md-nav__link">
-    <span class="md-ellipsis">
-      4. Processing Pipeline
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#module-system-deep-dive" class="md-nav__link">
-    <span class="md-ellipsis">
-      Module System Deep Dive
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Module System Deep Dive">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#main-modules" class="md-nav__link">
-    <span class="md-ellipsis">
-      Main Modules
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#helper-functions-modulesapplicationslibnix" class="md-nav__link">
-    <span class="md-ellipsis">
-      Helper Functions (modules/applications/lib.nix)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#library-functions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Library Functions
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Library Functions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#entry-point-libdefaultnix" class="md-nav__link">
-    <span class="md-ellipsis">
-      Entry Point (lib/default.nix)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#helm-functions-libhelmnix" class="md-nav__link">
-    <span class="md-ellipsis">
-      Helm Functions (lib/helm.nix)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#kube-functions-libkubenix" class="md-nav__link">
-    <span class="md-ellipsis">
-      Kube Functions (lib/kube.nix)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#kustomize-functions-libkustomizenix" class="md-nav__link">
-    <span class="md-ellipsis">
-      Kustomize Functions (lib/kustomize.nix)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#code-generators" class="md-nav__link">
-    <span class="md-ellipsis">
-      Code Generators
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Code Generators">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#overview-pkgsgenerators" class="md-nav__link">
-    <span class="md-ellipsis">
-      Overview (pkgs/generators/)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#kubernetes-schema-generation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Kubernetes Schema Generation
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#shared-schema-walk-and-backends" class="md-nav__link">
-    <span class="md-ellipsis">
-      Shared schema walk and backends
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#crd-generation" class="md-nav__link">
-    <span class="md-ellipsis">
-      CRD Generation
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#crd-processing-crd2jsonschemapy" class="md-nav__link">
-    <span class="md-ellipsis">
-      CRD Processing (crd2jsonschema.py)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#testing-framework" class="md-nav__link">
-    <span class="md-ellipsis">
-      Testing Framework
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Testing Framework">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#module-tests-tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      Module Tests (tests/)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#library-tests-libtestsnix" class="md-nav__link">
-    <span class="md-ellipsis">
-      Library Tests (lib/tests.nix)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#development-workflow" class="md-nav__link">
-    <span class="md-ellipsis">
-      Development Workflow
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Development Workflow">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      Prerequisites
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#common-commands" class="md-nav__link">
-    <span class="md-ellipsis">
-      Common Commands
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#development-cycle" class="md-nav__link">
-    <span class="md-ellipsis">
-      Development Cycle
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#manual-testing" class="md-nav__link">
-    <span class="md-ellipsis">
-      Manual Testing
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#adding-new-features" class="md-nav__link">
-    <span class="md-ellipsis">
-      Adding New Features
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Adding New Features">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#adding-a-new-application-option" class="md-nav__link">
-    <span class="md-ellipsis">
-      Adding a New Application Option
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#adding-a-new-library-function" class="md-nav__link">
-    <span class="md-ellipsis">
-      Adding a New Library Function
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#adding-a-new-resource-processor" class="md-nav__link">
-    <span class="md-ellipsis">
-      Adding a New Resource Processor
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#common-tasks" class="md-nav__link">
-    <span class="md-ellipsis">
-      Common Tasks
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Common Tasks">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#updating-kubernetes-versions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Updating Kubernetes Versions
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#adding-a-new-sync-option" class="md-nav__link">
-    <span class="md-ellipsis">
-      Adding a New Sync Option
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#debugging-module-evaluation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Debugging Module Evaluation
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#code-style" class="md-nav__link">
-    <span class="md-ellipsis">
-      Code Style
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Code Style">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#nix" class="md-nav__link">
-    <span class="md-ellipsis">
-      Nix
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#python-cli" class="md-nav__link">
-    <span class="md-ellipsis">
-      Python (CLI)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Documentation
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getting-help" class="md-nav__link">
-    <span class="md-ellipsis">
-      Getting Help
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      Summary
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
-        
-          
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Reference
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            Reference
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../cli_reference/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    CLI Reference
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../library/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Library Functions
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../options/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Configuration Options
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-  </ul>
-</nav>
-                  </div>
-                </div>
-              </div>
-            
-            
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#table-of-contents" class="md-nav__link">
-    <span class="md-ellipsis">
-      Table of Contents
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#project-structure" class="md-nav__link">
-    <span class="md-ellipsis">
-      Project Structure
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#core-concepts" class="md-nav__link">
-    <span class="md-ellipsis">
-      Core Concepts
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Core Concepts">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-nixos-module-system" class="md-nav__link">
-    <span class="md-ellipsis">
-      1. NixOS Module System
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-application-lifecycle" class="md-nav__link">
-    <span class="md-ellipsis">
-      2. Application Lifecycle
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-resource-type-system" class="md-nav__link">
-    <span class="md-ellipsis">
-      3. Resource Type System
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-processing-pipeline" class="md-nav__link">
-    <span class="md-ellipsis">
-      4. Processing Pipeline
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#module-system-deep-dive" class="md-nav__link">
-    <span class="md-ellipsis">
-      Module System Deep Dive
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Module System Deep Dive">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#main-modules" class="md-nav__link">
-    <span class="md-ellipsis">
-      Main Modules
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#helper-functions-modulesapplicationslibnix" class="md-nav__link">
-    <span class="md-ellipsis">
-      Helper Functions (modules/applications/lib.nix)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#library-functions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Library Functions
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Library Functions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#entry-point-libdefaultnix" class="md-nav__link">
-    <span class="md-ellipsis">
-      Entry Point (lib/default.nix)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#helm-functions-libhelmnix" class="md-nav__link">
-    <span class="md-ellipsis">
-      Helm Functions (lib/helm.nix)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#kube-functions-libkubenix" class="md-nav__link">
-    <span class="md-ellipsis">
-      Kube Functions (lib/kube.nix)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#kustomize-functions-libkustomizenix" class="md-nav__link">
-    <span class="md-ellipsis">
-      Kustomize Functions (lib/kustomize.nix)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#code-generators" class="md-nav__link">
-    <span class="md-ellipsis">
-      Code Generators
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Code Generators">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#overview-pkgsgenerators" class="md-nav__link">
-    <span class="md-ellipsis">
-      Overview (pkgs/generators/)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#kubernetes-schema-generation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Kubernetes Schema Generation
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#shared-schema-walk-and-backends" class="md-nav__link">
-    <span class="md-ellipsis">
-      Shared schema walk and backends
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#crd-generation" class="md-nav__link">
-    <span class="md-ellipsis">
-      CRD Generation
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#crd-processing-crd2jsonschemapy" class="md-nav__link">
-    <span class="md-ellipsis">
-      CRD Processing (crd2jsonschema.py)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#testing-framework" class="md-nav__link">
-    <span class="md-ellipsis">
-      Testing Framework
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Testing Framework">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#module-tests-tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      Module Tests (tests/)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#library-tests-libtestsnix" class="md-nav__link">
-    <span class="md-ellipsis">
-      Library Tests (lib/tests.nix)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#development-workflow" class="md-nav__link">
-    <span class="md-ellipsis">
-      Development Workflow
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Development Workflow">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      Prerequisites
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#common-commands" class="md-nav__link">
-    <span class="md-ellipsis">
-      Common Commands
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#development-cycle" class="md-nav__link">
-    <span class="md-ellipsis">
-      Development Cycle
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#manual-testing" class="md-nav__link">
-    <span class="md-ellipsis">
-      Manual Testing
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#adding-new-features" class="md-nav__link">
-    <span class="md-ellipsis">
-      Adding New Features
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Adding New Features">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#adding-a-new-application-option" class="md-nav__link">
-    <span class="md-ellipsis">
-      Adding a New Application Option
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#adding-a-new-library-function" class="md-nav__link">
-    <span class="md-ellipsis">
-      Adding a New Library Function
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#adding-a-new-resource-processor" class="md-nav__link">
-    <span class="md-ellipsis">
-      Adding a New Resource Processor
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#common-tasks" class="md-nav__link">
-    <span class="md-ellipsis">
-      Common Tasks
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Common Tasks">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#updating-kubernetes-versions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Updating Kubernetes Versions
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#adding-a-new-sync-option" class="md-nav__link">
-    <span class="md-ellipsis">
-      Adding a New Sync Option
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#debugging-module-evaluation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Debugging Module Evaluation
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#code-style" class="md-nav__link">
-    <span class="md-ellipsis">
-      Code Style
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Code Style">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#nix" class="md-nav__link">
-    <span class="md-ellipsis">
-      Nix
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#python-cli" class="md-nav__link">
-    <span class="md-ellipsis">
-      Python (CLI)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Documentation
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getting-help" class="md-nav__link">
-    <span class="md-ellipsis">
-      Getting Help
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      Summary
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
-            
-          
-          
-            <div class="md-content" data-md-component="content">
-              <article class="md-content__inner md-typeset">
-                
-                  
-
-
-  
-  
-
-
-<h1 id="nixidy-architecture-guide-for-contributors">Nixidy Architecture Guide for Contributors<a class="headerlink" href="#nixidy-architecture-guide-for-contributors" title="Permanent link">#</a></h1>
-<p>This guide provides a comprehensive overview of the nixidy codebase to help new contributors understand the project structure, key concepts, and development workflow.</p>
-<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">#</a></h2>
-<ul>
-<li><a href="#project-structure">Project Structure</a></li>
-<li><a href="#core-concepts">Core Concepts</a></li>
-<li><a href="#module-system-deep-dive">Module System Deep Dive</a></li>
-<li><a href="#library-functions">Library Functions</a></li>
-<li><a href="#code-generators">Code Generators</a></li>
-<li><a href="#testing-framework">Testing Framework</a></li>
-<li><a href="#development-workflow">Development Workflow</a></li>
-<li><a href="#adding-new-features">Adding New Features</a></li>
-<li><a href="#common-tasks">Common Tasks</a></li>
-<li><a href="#code-style">Code Style</a></li>
-</ul>
-<h2 id="project-structure">Project Structure<a class="headerlink" href="#project-structure" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code>nixidy/
+						<div class="content">
+							<p>This guide provides a comprehensive overview of the nixidy codebase to help new contributors understand the project structure, key concepts, and development workflow.</p>
+							<h2 id="table-of-contents">Table of Contents<a class="headerlink mx-2" href="#table-of-contents" title="Permanent link">#</a></h2>
+							<ul>
+								<li><a href="#project-structure">Project Structure</a></li>
+								<li><a href="#core-concepts">Core Concepts</a></li>
+								<li><a href="#module-system-deep-dive">Module System Deep Dive</a></li>
+								<li><a href="#library-functions">Library Functions</a></li>
+								<li><a href="#code-generators">Code Generators</a></li>
+								<li><a href="#testing-framework">Testing Framework</a></li>
+								<li><a href="#development-workflow">Development Workflow</a></li>
+								<li><a href="#adding-new-features">Adding New Features</a></li>
+								<li><a href="#common-tasks">Common Tasks</a></li>
+								<li><a href="#code-style">Code Style</a></li>
+							</ul>
+							<h2 id="project-structure">Project Structure<a class="headerlink mx-2" href="#project-structure" title="Permanent link">#</a></h2>
+							<div class="highlight"><pre><span></span><code>nixidy/
 ├── actions/                # GitHub Actions (build, switch)
 ├── cli/                    # Python-based CLI tool
 ├── docs/                   # Documentation (MkDocs)
@@ -1830,43 +453,43 @@
 ├── flake.nix               # Nix flake definition
 └── default.nix             # Non-flake entry point
 </code></pre></div>
-<h2 id="core-concepts">Core Concepts<a class="headerlink" href="#core-concepts" title="Permanent link">#</a></h2>
-<h3 id="1-nixos-module-system">1. NixOS Module System<a class="headerlink" href="#1-nixos-module-system" title="Permanent link">#</a></h3>
-<p>Nixidy is built on top of the NixOS module system. If you're unfamiliar with it, read the <a href="https://nixos.org/manual/nixos/stable/#sec-writing-modules">NixOS Module System documentation</a> first.</p>
-<p>Key concepts:</p>
-<ul>
-<li><strong>Options</strong>: Define the configuration interface with types, defaults, and descriptions</li>
-<li><strong>Config</strong>: Contains the actual configuration values after module evaluation</li>
-<li><strong>Imports</strong>: Modules can import other modules to extend functionality</li>
-<li><strong>Special Args</strong>: Additional arguments passed to all modules (<code>lib</code>, <code>pkgs</code>, <code>config</code>, etc.)</li>
-</ul>
-<h3 id="2-application-lifecycle">2. Application Lifecycle<a class="headerlink" href="#2-application-lifecycle" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code>User Config → Module Evaluation → Resource Processing → Manifest Generation → Output
+							<h2 id="core-concepts">Core Concepts<a class="headerlink mx-2" href="#core-concepts" title="Permanent link">#</a></h2>
+							<h3 id="1-nixos-module-system">1. NixOS Module System<a class="headerlink mx-2" href="#1-nixos-module-system" title="Permanent link">#</a></h3>
+							<p>Nixidy is built on top of the NixOS module system. If you're unfamiliar with it, read the <a href="https://nixos.org/manual/nixos/stable/#sec-writing-modules">NixOS Module System documentation</a> first.</p>
+							<p>Key concepts:</p>
+							<ul>
+								<li><strong>Options</strong>: Define the configuration interface with types, defaults, and descriptions</li>
+								<li><strong>Config</strong>: Contains the actual configuration values after module evaluation</li>
+								<li><strong>Imports</strong>: Modules can import other modules to extend functionality</li>
+								<li><strong>Special Args</strong>: Additional arguments passed to all modules (<code>lib</code>, <code>pkgs</code>, <code>config</code>, etc.)</li>
+							</ul>
+							<h3 id="2-application-lifecycle">2. Application Lifecycle<a class="headerlink mx-2" href="#2-application-lifecycle" title="Permanent link">#</a></h3>
+							<div class="highlight"><pre><span></span><code>User Config → Module Evaluation → Resource Processing → Manifest Generation → Output
 </code></pre></div>
-<ol>
-<li><strong>User Configuration</strong>: Nix files defining applications and resources</li>
-<li><strong>Module Evaluation</strong>: NixOS module system merges all configurations</li>
-<li><strong>Resource Processing</strong>: Helm/Kustomize/YAML converted to typed resources</li>
-<li><strong>Manifest Generation</strong>: Resources serialized to YAML files</li>
-<li><strong>Output</strong>: Packages created for different deployment strategies</li>
-</ol>
-<h3 id="3-resource-type-system">3. Resource Type System<a class="headerlink" href="#3-resource-type-system" title="Permanent link">#</a></h3>
-<p>Resources are organized by Group/Version/Kind (GVK):</p>
-<div class="highlight"><pre><span></span><code>resources<span class="o">.</span><span class="l">&lt;group&gt;</span><span class="o">.</span><span class="l">&lt;version&gt;</span><span class="o">.</span><span class="l">&lt;kind&gt;</span><span class="o">.</span><span class="l">&lt;name&gt;</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
+							<ol type="1">
+								<li><strong>User Configuration</strong>: Nix files defining applications and resources</li>
+								<li><strong>Module Evaluation</strong>: NixOS module system merges all configurations</li>
+								<li><strong>Resource Processing</strong>: Helm/Kustomize/YAML converted to typed resources</li>
+								<li><strong>Manifest Generation</strong>: Resources serialized to YAML files</li>
+								<li><strong>Output</strong>: Packages created for different deployment strategies</li>
+							</ol>
+							<h3 id="3-resource-type-system">3. Resource Type System<a class="headerlink mx-2" href="#3-resource-type-system" title="Permanent link">#</a></h3>
+							<p>Resources are organized by Group/Version/Kind (GVK):</p>
+							<div class="highlight"><pre><span></span><code>resources<span class="o">.</span><span class="l">&lt;group&gt;</span><span class="o">.</span><span class="l">&lt;version&gt;</span><span class="o">.</span><span class="l">&lt;kind&gt;</span><span class="o">.</span><span class="l">&lt;name&gt;</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
 
 <span class="c1"># Examples:</span>
 resources<span class="o">.</span>core<span class="o">.</span>v1<span class="o">.</span>ConfigMap<span class="o">.</span><span class="ss">my-config</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
 resources<span class="o">.</span>apps<span class="o">.</span>v1<span class="o">.</span>Deployment<span class="o">.</span><span class="ss">nginx</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
-resources<span class="o">.</span><span class="s2">&quot;networking.k8s.io&quot;</span><span class="o">.</span>v1<span class="o">.</span>Ingress<span class="o">.</span><span class="ss">main</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
+resources<span class="o">.</span><span class="s2">"networking.k8s.io"</span><span class="o">.</span>v1<span class="o">.</span>Ingress<span class="o">.</span><span class="ss">main</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
 </code></pre></div>
-<p>Aliases provide convenient access:
-<div class="highlight"><pre><span></span><code>resources<span class="o">.</span>configMaps<span class="o">.</span><span class="ss">my-config</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>      <span class="c1"># → core.v1.ConfigMap</span>
+							<p>Aliases provide convenient access:
+								<div class="highlight"><pre><span></span><code>resources<span class="o">.</span>configMaps<span class="o">.</span><span class="ss">my-config</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>      <span class="c1"># → core.v1.ConfigMap</span>
 resources<span class="o">.</span>deployments<span class="o">.</span><span class="ss">nginx</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>          <span class="c1"># → apps.v1.Deployment</span>
 resources<span class="o">.</span>ingresses<span class="o">.</span><span class="ss">main</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>             <span class="c1"># → networking.k8s.io.v1.Ingress</span>
 </code></pre></div></p>
-<h3 id="4-processing-pipeline">4. Processing Pipeline<a class="headerlink" href="#4-processing-pipeline" title="Permanent link">#</a></h3>
-<p>All input sources are normalized to typed nix resources:</p>
-<div class="highlight"><pre><span></span><code>┌─────────────────┐
+							<h3 id="4-processing-pipeline">4. Processing Pipeline<a class="headerlink mx-2" href="#4-processing-pipeline" title="Permanent link">#</a></h3>
+							<p>All input sources are normalized to typed nix resources:</p>
+							<div class="highlight"><pre><span></span><code>┌─────────────────┐
 │  Helm Charts    │──┐
 ├─────────────────┤  │
 │  Kustomize      │──┤──→ [GVK Classification] ──→ [Typed Nix Resources] ──→ [YAML Output]
@@ -1874,11 +497,11 @@ resources<span class="o">.</span>ingresses<span class="o">.</span><span class="s
 │  Raw YAML       │──┘
 └─────────────────┘
 </code></pre></div>
-<h2 id="module-system-deep-dive">Module System Deep Dive<a class="headerlink" href="#module-system-deep-dive" title="Permanent link">#</a></h2>
-<h3 id="main-modules">Main Modules<a class="headerlink" href="#main-modules" title="Permanent link">#</a></h3>
-<h4 id="modulesapplicationsnix"><code>modules/applications.nix</code><a class="headerlink" href="#modulesapplicationsnix" title="Permanent link">#</a></h4>
-<p>Defines the top-level <code>applications</code> option:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+							<h2 id="module-system-deep-dive">Module System Deep Dive<a class="headerlink mx-2" href="#module-system-deep-dive" title="Permanent link">#</a></h2>
+							<h3 id="main-modules">Main Modules<a class="headerlink mx-2" href="#main-modules" title="Permanent link">#</a></h3>
+							<h4 id="modulesapplicationsnix"><code>modules/applications.nix</code><a class="headerlink mx-2" href="#modulesapplicationsnix" title="Permanent link">#</a></h4>
+							<p>Defines the top-level <code>applications</code> option:</p>
+							<div class="highlight"><pre><span></span><code><span class="p">{</span>
   options<span class="o">.</span><span class="ss">applications</span> <span class="o">=</span> mkOption <span class="p">{</span>
     <span class="ss">type</span> <span class="o">=</span> attrsOf <span class="p">(</span>submoduleWith <span class="p">{</span>
       <span class="ss">modules</span> <span class="o">=</span> <span class="p">[</span> <span class="l">./applications</span> <span class="p">]</span> <span class="o">++</span> config<span class="o">.</span>nixidy<span class="o">.</span>applicationImports<span class="p">;</span>
@@ -1887,16 +510,16 @@ resources<span class="o">.</span>ingresses<span class="o">.</span><span class="s
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Key responsibilities:</p>
-<ul>
-<li>Creates application submodules</li>
-<li>Manages Kubernetes version selection (<code>nixidy.k8sVersion</code>)</li>
-<li>Imports generated resource options</li>
-</ul>
-<h4 id="modulesnixidy"><code>modules/nixidy/</code><a class="headerlink" href="#modulesnixidy" title="Permanent link">#</a></h4>
-<p>Core nixidy configuration, split across several files. <code>default.nix</code> defines the
-main options and imports the rest:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+							<p>Key responsibilities:</p>
+							<ul>
+								<li>Creates application submodules</li>
+								<li>Manages Kubernetes version selection (<code>nixidy.k8sVersion</code>)</li>
+								<li>Imports generated resource options</li>
+							</ul>
+							<h4 id="modulesnixidy"><code>modules/nixidy/</code><a class="headerlink mx-2" href="#modulesnixidy" title="Permanent link">#</a></h4>
+							<p>Core nixidy configuration, split across several files. <code>default.nix</code> defines the
+								main options and imports the rest:</p>
+							<div class="highlight"><pre><span></span><code><span class="p">{</span>
   options<span class="o">.</span><span class="ss">nixidy</span> <span class="o">=</span> <span class="p">{</span>
     <span class="ss">env</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>                    <span class="c1"># Environment name</span>
     target<span class="o">.</span><span class="ss">repository</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>      <span class="c1"># Git repository URL</span>
@@ -1910,22 +533,22 @@ main options and imports the rest:</p>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>The directory also contains:</p>
-<ul>
-<li><code>defaults.nix</code>: default settings (<code>nixidy.defaults</code>, e.g. default transformers)</li>
-<li><code>app-of-apps.nix</code>: bootstrap app-of-apps pattern generation</li>
-<li><code>extra-files.nix</code>: extra files (<code>nixidy.extraFiles</code>) rendered into the output</li>
-<li><code>transforms.nix</code>: the <code>objectTransforms</code> and <code>postProcessors</code> rule types, matcher, and assertions</li>
-</ul>
-<p>Also handled here:</p>
-<ul>
-<li>Chart attribute set building (from <code>nixidy.chartsDir</code>)</li>
-<li>Public apps list management</li>
-<li>Global assertions and warnings</li>
-</ul>
-<h4 id="modulesapplicationsdefaultnix"><code>modules/applications/default.nix</code><a class="headerlink" href="#modulesapplicationsdefaultnix" title="Permanent link">#</a></h4>
-<p>Defines individual application options:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+							<p>The directory also contains:</p>
+							<ul>
+								<li><code>defaults.nix</code>: default settings (<code>nixidy.defaults</code>, e.g. default transformers)</li>
+								<li><code>app-of-apps.nix</code>: bootstrap app-of-apps pattern generation</li>
+								<li><code>extra-files.nix</code>: extra files (<code>nixidy.extraFiles</code>) rendered into the output</li>
+								<li><code>transforms.nix</code>: the <code>objectTransforms</code> and <code>postProcessors</code> rule types, matcher, and assertions</li>
+							</ul>
+							<p>Also handled here:</p>
+							<ul>
+								<li>Chart attribute set building (from <code>nixidy.chartsDir</code>)</li>
+								<li>Public apps list management</li>
+								<li>Global assertions and warnings</li>
+							</ul>
+							<h4 id="modulesapplicationsdefaultnix"><code>modules/applications/default.nix</code><a class="headerlink mx-2" href="#modulesapplicationsdefaultnix" title="Permanent link">#</a></h4>
+							<p>Defines individual application options:</p>
+							<div class="highlight"><pre><span></span><code><span class="p">{</span>
   <span class="ss">options</span> <span class="o">=</span> <span class="p">{</span>
     <span class="ss">name</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
     <span class="ss">namespace</span> <span class="o">=</span> mkOption <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
@@ -1939,22 +562,22 @@ main options and imports the rest:</p>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Related options live in sibling modules:</p>
-<ul>
-<li><code>modules/applications/argocd.nix</code>: ArgoCD-specific options (<code>syncPolicy</code>,
-  <code>destination</code>, <code>compareOptions</code>, <code>finalizer</code>)</li>
-<li><code>modules/applications/objects.nix</code>: the resource type registry (<code>types</code>),
-  typed <code>resources</code>, and the internal final <code>objects</code> list</li>
-</ul>
-<p>Key responsibilities:</p>
-<ul>
-<li>Application metadata and settings</li>
-<li>Resource type registration</li>
-<li>Final object list generation</li>
-</ul>
-<h4 id="modulesapplicationshelmnix"><code>modules/applications/helm.nix</code><a class="headerlink" href="#modulesapplicationshelmnix" title="Permanent link">#</a></h4>
-<p>Helm chart integration:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+							<p>Related options live in sibling modules:</p>
+							<ul>
+								<li><code>modules/applications/argocd.nix</code>: ArgoCD-specific options (<code>syncPolicy</code>,
+								<code>destination</code>, <code>compareOptions</code>, <code>finalizer</code>)</li>
+								<li><code>modules/applications/objects.nix</code>: the resource type registry (<code>types</code>),
+								typed <code>resources</code>, and the internal final <code>objects</code> list</li>
+							</ul>
+							<p>Key responsibilities:</p>
+							<ul>
+								<li>Application metadata and settings</li>
+								<li>Resource type registration</li>
+								<li>Final object list generation</li>
+							</ul>
+							<h4 id="modulesapplicationshelmnix"><code>modules/applications/helm.nix</code><a class="headerlink mx-2" href="#modulesapplicationshelmnix" title="Permanent link">#</a></h4>
+							<p>Helm chart integration:</p>
+							<div class="highlight"><pre><span></span><code><span class="p">{</span>
   options<span class="o">.</span>helm<span class="o">.</span><span class="ss">releases</span> <span class="o">=</span> mkOption <span class="p">{</span>
     <span class="ss">type</span> <span class="o">=</span> attrsOf <span class="p">(</span>submodule <span class="p">{</span>
       <span class="ss">options</span> <span class="o">=</span> <span class="p">{</span>
@@ -1966,18 +589,18 @@ main options and imports the rest:</p>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Processing flow:</p>
-<ol>
-<li><code>helm.buildHelmChart</code> templates the chart</li>
-<li><code>builtins.readFile</code> reads output</li>
-<li><code>kube.fromYAML</code> parses to attribute sets</li>
-<li><code>transformer</code> function applied</li>
-<li><code>partitionObjects</code> (from <code>lib.nix</code>) groups objects by GVK</li>
-<li>Added to <code>resources</code> or <code>objects</code></li>
-</ol>
-<h4 id="modulesapplicationskustomizenix"><code>modules/applications/kustomize.nix</code><a class="headerlink" href="#modulesapplicationskustomizenix" title="Permanent link">#</a></h4>
-<p>Kustomize integration (similar pattern to Helm):</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+							<p>Processing flow:</p>
+							<ol type="1">
+								<li><code>helm.buildHelmChart</code> templates the chart</li>
+								<li><code>builtins.readFile</code> reads output</li>
+								<li><code>kube.fromYAML</code> parses to attribute sets</li>
+								<li><code>transformer</code> function applied</li>
+								<li><code>partitionObjects</code> (from <code>lib.nix</code>) groups objects by GVK</li>
+								<li>Added to <code>resources</code> or <code>objects</code></li>
+							</ol>
+							<h4 id="modulesapplicationskustomizenix"><code>modules/applications/kustomize.nix</code><a class="headerlink mx-2" href="#modulesapplicationskustomizenix" title="Permanent link">#</a></h4>
+							<p>Kustomize integration (similar pattern to Helm):</p>
+							<div class="highlight"><pre><span></span><code><span class="p">{</span>
   options<span class="o">.</span>kustomize<span class="o">.</span><span class="ss">applications</span> <span class="o">=</span> mkOption <span class="p">{</span>
     <span class="ss">type</span> <span class="o">=</span> attrsOf <span class="p">(</span>submodule <span class="p">{</span>
       <span class="ss">options</span> <span class="o">=</span> <span class="p">{</span>
@@ -1989,64 +612,64 @@ main options and imports the rest:</p>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<h4 id="modulesapplicationsyamlsnix"><code>modules/applications/yamls.nix</code><a class="headerlink" href="#modulesapplicationsyamlsnix" title="Permanent link">#</a></h4>
-<p>Raw YAML manifest support:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+							<h4 id="modulesapplicationsyamlsnix"><code>modules/applications/yamls.nix</code><a class="headerlink mx-2" href="#modulesapplicationsyamlsnix" title="Permanent link">#</a></h4>
+							<p>Raw YAML manifest support:</p>
+							<div class="highlight"><pre><span></span><code><span class="p">{</span>
   options<span class="o">.</span><span class="ss">yamls</span> <span class="o">=</span> mkOption <span class="p">{</span>
     <span class="ss">type</span> <span class="o">=</span> listOf str<span class="p">;</span>
-    <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;List of YAML manifest strings&quot;</span><span class="p">;</span>
+    <span class="ss">description</span> <span class="o">=</span> <span class="s2">"List of YAML manifest strings"</span><span class="p">;</span>
   <span class="p">};</span>
 
   <span class="c1"># Also: extraRawYamls that are YAML files copied verbatim into</span>
-  <span class="c1"># the output directory (not parsed into Nix, so they can&#39;t be patched)</span>
+  <span class="c1"># the output directory (not parsed into Nix, so they can't be patched)</span>
 <span class="p">}</span>
 </code></pre></div>
-<h4 id="modulesbuild"><code>modules/build/</code><a class="headerlink" href="#modulesbuild" title="Permanent link">#</a></h4>
-<p>Creates output packages:</p>
-<ul>
-<li><code>environmentPackage</code>: All application manifests combined</li>
-<li><code>extrasPackage</code>: Extra files from <code>nixidy.extraFiles</code></li>
-<li><code>activationPackage</code>: For <code>nixidy switch</code> operations</li>
-<li><code>declarativePackage</code>: For <code>kubectl apply --prune</code>. Emits an <code>apply</code> script that consumes <code>environmentPackage</code> and runs <code>nixidy.postProcessors</code> rules at apply time; it no longer renders standalone manifest files.</li>
-<li><code>bootstrapPackage</code>: App-of-apps manifest</li>
-</ul>
-<p>Everything is derived from one seam: <code>layout.nix</code> turns each application into a
-list of FileSpec (one per output file), exposed as the internal
-<code>config.build.layout</code>, keyed by the <code>config.applications</code> attribute name. The
-emitters consume that list and never re-derive file paths:</p>
-<table>
-<thead>
-<tr>
-<th>File</th>
-<th>Responsibility</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>layout.nix</code></td>
-<td>Pure core: eval-time <code>replace</code>/<code>update</code> transforms, object grouping, file classification, per-app <code>[FileSpec]</code></td>
-</tr>
-<tr>
-<td><code>render.nix</code></td>
-<td>One FileSpec to the shell fragment that writes it</td>
-</tr>
-<tr>
-<td><code>emit-environment.nix</code></td>
-<td><code>environmentPackage</code>, <code>activationPackage</code>, <code>bootstrapPackage</code>, <code>extrasPackage</code></td>
-</tr>
-<tr>
-<td><code>apply.nix</code></td>
-<td><code>declarativePackage</code>'s <code>apply</code> script and the shared activation post-process fragments</td>
-</tr>
-<tr>
-<td><code>default.nix</code></td>
-<td>Option surface, <code>layout</code> wiring, environment-scope assertions</td>
-</tr>
-</tbody>
-</table>
-<h4 id="modulestemplatesnix"><code>modules/templates.nix</code><a class="headerlink" href="#modulestemplatesnix" title="Permanent link">#</a></h4>
-<p>Template system for reusable patterns:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+							<h4 id="modulesbuild"><code>modules/build/</code><a class="headerlink mx-2" href="#modulesbuild" title="Permanent link">#</a></h4>
+							<p>Creates output packages:</p>
+							<ul>
+								<li><code>environmentPackage</code>: All application manifests combined</li>
+								<li><code>extrasPackage</code>: Extra files from <code>nixidy.extraFiles</code></li>
+								<li><code>activationPackage</code>: For <code>nixidy switch</code> operations</li>
+								<li><code>declarativePackage</code>: For <code>kubectl apply --prune</code>. Emits an <code>apply</code> script that consumes <code>environmentPackage</code> and runs <code>nixidy.postProcessors</code> rules at apply time; it no longer renders standalone manifest files.</li>
+								<li><code>bootstrapPackage</code>: App-of-apps manifest</li>
+							</ul>
+							<p>Everything is derived from one seam: <code>layout.nix</code> turns each application into a
+								list of FileSpec (one per output file), exposed as the internal
+								<code>config.build.layout</code>, keyed by the <code>config.applications</code> attribute name. The
+								emitters consume that list and never re-derive file paths:</p>
+							<table>
+								<thead>
+									<tr>
+										<th>File</th>
+										<th>Responsibility</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td><code>layout.nix</code></td>
+										<td>Pure core: eval-time <code>replace</code>/<code>update</code> transforms, object grouping, file classification, per-app <code>[FileSpec]</code></td>
+									</tr>
+									<tr>
+										<td><code>render.nix</code></td>
+										<td>One FileSpec to the shell fragment that writes it</td>
+									</tr>
+									<tr>
+										<td><code>emit-environment.nix</code></td>
+										<td><code>environmentPackage</code>, <code>activationPackage</code>, <code>bootstrapPackage</code>, <code>extrasPackage</code></td>
+									</tr>
+									<tr>
+										<td><code>apply.nix</code></td>
+										<td><code>declarativePackage</code>'s <code>apply</code> script and the shared activation post-process fragments</td>
+									</tr>
+									<tr>
+										<td><code>default.nix</code></td>
+										<td>Option surface, <code>layout</code> wiring, environment-scope assertions</td>
+									</tr>
+								</tbody>
+							</table>
+							<h4 id="modulestemplatesnix"><code>modules/templates.nix</code><a class="headerlink mx-2" href="#modulestemplatesnix" title="Permanent link">#</a></h4>
+							<p>Template system for reusable patterns:</p>
+							<div class="highlight"><pre><span></span><code><span class="p">{</span>
   options<span class="o">.</span><span class="ss">templates</span> <span class="o">=</span> mkOption <span class="p">{</span>
     <span class="ss">type</span> <span class="o">=</span> attrsOf <span class="p">(</span>submodule <span class="p">{</span>
       <span class="ss">options</span> <span class="o">=</span> <span class="p">{</span>
@@ -2057,17 +680,17 @@ emitters consume that list and never re-derive file paths:</p>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Templates become application imports, allowing:
-<div class="highlight"><pre><span></span><code>applications<span class="o">.</span>myapp<span class="o">.</span>templates<span class="o">.</span>webApp<span class="o">.</span><span class="ss">frontend</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="ss">image</span> <span class="o">=</span> <span class="s2">&quot;nginx:latest&quot;</span><span class="p">;</span>
+							<p>Templates become application imports, allowing:
+								<div class="highlight"><pre><span></span><code>applications<span class="o">.</span>myapp<span class="o">.</span>templates<span class="o">.</span>webApp<span class="o">.</span><span class="ss">frontend</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="ss">image</span> <span class="o">=</span> <span class="s2">"nginx:latest"</span><span class="p">;</span>
   <span class="ss">replicas</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
 <span class="p">};</span>
 </code></pre></div></p>
-<h3 id="helper-functions-modulesapplicationslibnix">Helper Functions (<code>modules/applications/lib.nix</code>)<a class="headerlink" href="#helper-functions-modulesapplicationslibnix" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+							<h3 id="helper-functions-modulesapplicationslibnix">Helper Functions (<code>modules/applications/lib.nix</code>)<a class="headerlink mx-2" href="#helper-functions-modulesapplicationslibnix" title="Permanent link">#</a></h3>
+							<div class="highlight"><pre><span></span><code><span class="p">{</span>
   <span class="c1"># Extract Group/Version/Kind from Kubernetes object</span>
   <span class="ss">getGVK</span> <span class="o">=</span> object<span class="p">:</span> <span class="p">{</span>
-    <span class="ss">group</span> <span class="o">=</span> <span class="o">...</span><span class="p">;</span>   <span class="c1"># &quot;core&quot; for v1, otherwise first part of apiVersion</span>
+    <span class="ss">group</span> <span class="o">=</span> <span class="o">...</span><span class="p">;</span>   <span class="c1"># "core" for v1, otherwise first part of apiVersion</span>
     <span class="ss">version</span> <span class="o">=</span> <span class="o">...</span><span class="p">;</span> <span class="c1"># Version string</span>
     <span class="ss">kind</span> <span class="o">=</span> <span class="o">...</span><span class="p">;</span>    <span class="c1"># Kind string</span>
   <span class="p">};</span>
@@ -2085,174 +708,174 @@ emitters consume that list and never re-derive file paths:</p>
   <span class="ss">objectBaseName</span> <span class="o">=</span> <span class="o">...</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
-<h2 id="library-functions">Library Functions<a class="headerlink" href="#library-functions" title="Permanent link">#</a></h2>
-<h3 id="entry-point-libdefaultnix">Entry Point (<code>lib/default.nix</code>)<a class="headerlink" href="#entry-point-libdefaultnix" title="Permanent link">#</a></h3>
-<p>Extends <code>nixpkgs.lib</code> with nixidy functions:</p>
-<div class="highlight"><pre><span></span><code>lib<span class="o">.</span>extend <span class="p">(</span>self<span class="p">:</span> old<span class="p">:</span> <span class="p">{</span>
+							<h2 id="library-functions">Library Functions<a class="headerlink mx-2" href="#library-functions" title="Permanent link">#</a></h2>
+							<h3 id="entry-point-libdefaultnix">Entry Point (<code>lib/default.nix</code>)<a class="headerlink mx-2" href="#entry-point-libdefaultnix" title="Permanent link">#</a></h3>
+							<p>Extends <code>nixpkgs.lib</code> with nixidy functions:</p>
+							<div class="highlight"><pre><span></span><code>lib<span class="o">.</span>extend <span class="p">(</span>self<span class="p">:</span> old<span class="p">:</span> <span class="p">{</span>
   <span class="ss">kustomize</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./kustomize.nix</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
   <span class="ss">helm</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./helm.nix</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
   <span class="ss">kube</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./kube.nix</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
 <span class="p">})</span>
 </code></pre></div>
-<h3 id="helm-functions-libhelmnix">Helm Functions (<code>lib/helm.nix</code>)<a class="headerlink" href="#helm-functions-libhelmnix" title="Permanent link">#</a></h3>
-<table>
-<thead>
-<tr>
-<th>Function</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>downloadHelmChart</code></td>
-<td>Downloads chart from Helm registry</td>
-</tr>
-<tr>
-<td><code>buildHelmChart</code></td>
-<td>Templates chart with values</td>
-</tr>
-<tr>
-<td><code>getChartValues</code></td>
-<td>Parses chart's default values.yaml</td>
-</tr>
-<tr>
-<td><code>mkChartAttrs</code></td>
-<td>Creates chart attrset from directory structure</td>
-</tr>
-<tr>
-<td><code>mkChartsUpdateScript</code></td>
-<td>Builds a script that runs every chart's <code>updateScript</code></td>
-</tr>
-</tbody>
-</table>
-<h3 id="kube-functions-libkubenix">Kube Functions (<code>lib/kube.nix</code>)<a class="headerlink" href="#kube-functions-libkubenix" title="Permanent link">#</a></h3>
-<table>
-<thead>
-<tr>
-<th>Function</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>fromYAML</code></td>
-<td>Parses YAML string to attribute sets</td>
-</tr>
-<tr>
-<td><code>fromOctal</code></td>
-<td>Converts octal string to integer</td>
-</tr>
-<tr>
-<td><code>removeLabels</code></td>
-<td>Removes specified labels from manifests</td>
-</tr>
-</tbody>
-</table>
-<h3 id="kustomize-functions-libkustomizenix">Kustomize Functions (<code>lib/kustomize.nix</code>)<a class="headerlink" href="#kustomize-functions-libkustomizenix" title="Permanent link">#</a></h3>
-<table>
-<thead>
-<tr>
-<th>Function</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>buildKustomization</code></td>
-<td>Builds kustomize application</td>
-</tr>
-</tbody>
-</table>
-<h2 id="code-generators">Code Generators<a class="headerlink" href="#code-generators" title="Permanent link">#</a></h2>
-<h3 id="overview-pkgsgenerators">Overview (<code>pkgs/generators/</code>)<a class="headerlink" href="#overview-pkgsgenerators" title="Permanent link">#</a></h3>
-<p>Nixidy generates typed Nix options from:</p>
-<ol>
-<li>Kubernetes OpenAPI schemas</li>
-<li>Custom Resource Definitions (CRDs)</li>
-</ol>
-<h3 id="kubernetes-schema-generation">Kubernetes Schema Generation<a class="headerlink" href="#kubernetes-schema-generation" title="Permanent link">#</a></h3>
-<p><code>pkgs/generators/default.nix</code> wires everything together and acquisition lives in <code>pkgs/generators/sources/</code>:</p>
-<ol>
-<li><code>sources/versions.nix</code> lists the Kubernetes versions and their source hashes</li>
-<li><code>sources/k8s.nix</code> fetches the Kubernetes source for each version and extracts
-   the OpenAPI swagger spec</li>
-<li>Generates namespaced resource info</li>
-<li>Produces Nix options via <code>compile/generator.nix</code></li>
-</ol>
-<p>Output: <code>modules/generated/k8s/v1.XX.nix</code></p>
-<h3 id="shared-schema-walk-and-backends">Shared schema walk and backends<a class="headerlink" href="#shared-schema-walk-and-backends" title="Permanent link">#</a></h3>
-<p>The schema-to-options logic lives in one place, <code>compile/walk.nix</code>, parameterized over a <em>backend</em> so the same traversal can produce either Nix <strong>source text</strong> or live module <strong>values</strong>:</p>
-<ul>
-<li><code>compile/walk.nix</code> - the single traversal of the (JSON) schema. All type/coercion branch logic (int-or-string, <code>additionalProperties</code>→<code>attrsOf</code>, coerce-by-name lists, patch-merge-key, <code>skipCoerceToList</code>, <code>specialMapKeys</code>, nested submodules, etc.) lives here, expressed against an abstract backend <code>b</code>.</li>
-<li><code>compile/backend-text.nix</code> - emits Nix <strong>source</strong>. Used by the file generators; it also inlines the runtime helpers (see below) as source so committed standalone files stay self-contained.</li>
-<li><code>compile/backend-value.nix</code> - produces live module <strong>values</strong> using <code>runtime.nix</code>.</li>
-<li><code>compile/generator.nix</code> - thin assembler over the text backend (renders + <code>nixfmt</code> + writes a <code>.nix</code> file).</li>
-<li><code>compile/module.nix</code> - thin assembler over the value backend (returns a module function).</li>
-<li><code>compile/runtime.nix</code> - the per-generated-module runtime helpers (<code>coercedTo</code>, <code>mergeValuesByKey</code>, <code>submoduleForDefinition</code>, …) as <strong>values</strong>, imported by the value backend. The text backend inlines source-form equivalents of these same helpers. Only the <em>walk</em> is single-sourced; the helpers must exist in both forms because live values can't be serialized back to source and committed files can't reference nixidy internals.</li>
-</ul>
-<h3 id="crd-generation">CRD Generation<a class="headerlink" href="#crd-generation" title="Permanent link">#</a></h3>
-<p>CRD accessors form a matrix over output shape × source, all built on the shared walk:</p>
-<table>
-<thead>
-<tr>
-<th>output</th>
-<th>source files (<code>src</code>)</th>
-<th>Helm chart</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>generated file</td>
-<td><code>fromCRD</code></td>
-<td><code>fromChartCRD</code></td>
-</tr>
-<tr>
-<td>module value</td>
-<td><code>fromCRDModule</code></td>
-<td><code>fromChartCRDModule</code></td>
-</tr>
-<tr>
-<td>raw objects</td>
-<td><code>crdObjects</code></td>
-<td><code>crdObjectsFromChart</code></td>
-</tr>
-</tbody>
-</table>
-<div class="highlight"><pre><span></span><code>fromCRD <span class="p">{</span>
-  <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;cilium&quot;</span><span class="p">;</span>
+							<h3 id="helm-functions-libhelmnix">Helm Functions (<code>lib/helm.nix</code>)<a class="headerlink mx-2" href="#helm-functions-libhelmnix" title="Permanent link">#</a></h3>
+							<table>
+								<thead>
+									<tr>
+										<th>Function</th>
+										<th>Description</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td><code>downloadHelmChart</code></td>
+										<td>Downloads chart from Helm registry</td>
+									</tr>
+									<tr>
+										<td><code>buildHelmChart</code></td>
+										<td>Templates chart with values</td>
+									</tr>
+									<tr>
+										<td><code>getChartValues</code></td>
+										<td>Parses chart's default values.yaml</td>
+									</tr>
+									<tr>
+										<td><code>mkChartAttrs</code></td>
+										<td>Creates chart attrset from directory structure</td>
+									</tr>
+									<tr>
+										<td><code>mkChartsUpdateScript</code></td>
+										<td>Builds a script that runs every chart's <code>updateScript</code></td>
+									</tr>
+								</tbody>
+							</table>
+							<h3 id="kube-functions-libkubenix">Kube Functions (<code>lib/kube.nix</code>)<a class="headerlink mx-2" href="#kube-functions-libkubenix" title="Permanent link">#</a></h3>
+							<table>
+								<thead>
+									<tr>
+										<th>Function</th>
+										<th>Description</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td><code>fromYAML</code></td>
+										<td>Parses YAML string to attribute sets</td>
+									</tr>
+									<tr>
+										<td><code>fromOctal</code></td>
+										<td>Converts octal string to integer</td>
+									</tr>
+									<tr>
+										<td><code>removeLabels</code></td>
+										<td>Removes specified labels from manifests</td>
+									</tr>
+								</tbody>
+							</table>
+							<h3 id="kustomize-functions-libkustomizenix">Kustomize Functions (<code>lib/kustomize.nix</code>)<a class="headerlink mx-2" href="#kustomize-functions-libkustomizenix" title="Permanent link">#</a></h3>
+							<table>
+								<thead>
+									<tr>
+										<th>Function</th>
+										<th>Description</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td><code>buildKustomization</code></td>
+										<td>Builds kustomize application</td>
+									</tr>
+								</tbody>
+							</table>
+							<h2 id="code-generators">Code Generators<a class="headerlink mx-2" href="#code-generators" title="Permanent link">#</a></h2>
+							<h3 id="overview-pkgsgenerators">Overview (<code>pkgs/generators/</code>)<a class="headerlink mx-2" href="#overview-pkgsgenerators" title="Permanent link">#</a></h3>
+							<p>Nixidy generates typed Nix options from:</p>
+							<ol type="1">
+								<li>Kubernetes OpenAPI schemas</li>
+								<li>Custom Resource Definitions (CRDs)</li>
+							</ol>
+							<h3 id="kubernetes-schema-generation">Kubernetes Schema Generation<a class="headerlink mx-2" href="#kubernetes-schema-generation" title="Permanent link">#</a></h3>
+							<p><code>pkgs/generators/default.nix</code> wires everything together and acquisition lives in <code>pkgs/generators/sources/</code>:</p>
+							<ol type="1">
+								<li><code>sources/versions.nix</code> lists the Kubernetes versions and their source hashes</li>
+								<li><code>sources/k8s.nix</code> fetches the Kubernetes source for each version and extracts
+								the OpenAPI swagger spec</li>
+								<li>Generates namespaced resource info</li>
+								<li>Produces Nix options via <code>compile/generator.nix</code></li>
+							</ol>
+							<p>Output: <code>modules/generated/k8s/v1.XX.nix</code></p>
+							<h3 id="shared-schema-walk-and-backends">Shared schema walk and backends<a class="headerlink mx-2" href="#shared-schema-walk-and-backends" title="Permanent link">#</a></h3>
+							<p>The schema-to-options logic lives in one place, <code>compile/walk.nix</code>, parameterized over a <em>backend</em> so the same traversal can produce either Nix <strong>source text</strong> or live module <strong>values</strong>:</p>
+							<ul>
+								<li><code>compile/walk.nix</code> - the single traversal of the (JSON) schema. All type/coercion branch logic (int-or-string, <code>additionalProperties</code>→<code>attrsOf</code>, coerce-by-name lists, patch-merge-key, <code>skipCoerceToList</code>, <code>specialMapKeys</code>, nested submodules, etc.) lives here, expressed against an abstract backend <code>b</code>.</li>
+								<li><code>compile/backend-text.nix</code> - emits Nix <strong>source</strong>. Used by the file generators; it also inlines the runtime helpers (see below) as source so committed standalone files stay self-contained.</li>
+								<li><code>compile/backend-value.nix</code> - produces live module <strong>values</strong> using <code>runtime.nix</code>.</li>
+								<li><code>compile/generator.nix</code> - thin assembler over the text backend (renders + <code>nixfmt</code> + writes a <code>.nix</code> file).</li>
+								<li><code>compile/module.nix</code> - thin assembler over the value backend (returns a module function).</li>
+								<li><code>compile/runtime.nix</code> - the per-generated-module runtime helpers (<code>coercedTo</code>, <code>mergeValuesByKey</code>, <code>submoduleForDefinition</code>, …) as <strong>values</strong>, imported by the value backend. The text backend inlines source-form equivalents of these same helpers. Only the <em>walk</em> is single-sourced; the helpers must exist in both forms because live values can't be serialized back to source and committed files can't reference nixidy internals.</li>
+							</ul>
+							<h3 id="crd-generation">CRD Generation<a class="headerlink mx-2" href="#crd-generation" title="Permanent link">#</a></h3>
+							<p>CRD accessors form a matrix over output shape × source, all built on the shared walk:</p>
+							<table>
+								<thead>
+									<tr>
+										<th>output</th>
+										<th>source files (<code>src</code>)</th>
+										<th>Helm chart</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>generated file</td>
+										<td><code>fromCRD</code></td>
+										<td><code>fromChartCRD</code></td>
+									</tr>
+									<tr>
+										<td>module value</td>
+										<td><code>fromCRDModule</code></td>
+										<td><code>fromChartCRDModule</code></td>
+									</tr>
+									<tr>
+										<td>raw objects</td>
+										<td><code>crdObjects</code></td>
+										<td><code>crdObjectsFromChart</code></td>
+									</tr>
+								</tbody>
+							</table>
+							<div class="highlight"><pre><span></span><code>fromCRD <span class="p">{</span>
+  <span class="ss">name</span> <span class="o">=</span> <span class="s2">"cilium"</span><span class="p">;</span>
   <span class="ss">src</span> <span class="o">=</span> pkgs<span class="o">.</span>fetchFromGitHub <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
-  <span class="ss">crdFiles</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;path/to/crd.yaml&quot;</span> <span class="p">];</span>  <span class="c1"># list of YAML files under `src`</span>
+  <span class="ss">crdFiles</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">"path/to/crd.yaml"</span> <span class="p">];</span>  <span class="c1"># list of YAML files under `src`</span>
   <span class="ss">kindFilter</span> <span class="o">=</span> <span class="p">[</span> <span class="p">];</span>          <span class="c1"># Optional: only these CRD kinds (default: all)</span>
-  <span class="ss">namePrefix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>           <span class="c1"># Optional prefix for attribute names</span>
+  <span class="ss">namePrefix</span> <span class="o">=</span> <span class="s2">""</span><span class="p">;</span>           <span class="c1"># Optional prefix for attribute names</span>
   <span class="ss">attrNameOverrides</span> <span class="o">=</span> <span class="p">{</span> <span class="p">};</span>   <span class="c1"># Manual name overrides</span>
   <span class="ss">skipCoerceToList</span> <span class="o">=</span> <span class="p">{</span> <span class="p">};</span>    <span class="c1"># Skip list coercion for specific fields</span>
 <span class="p">}</span>
 
 fromChartCRD <span class="p">{</span>
-  <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;cert-manager&quot;</span><span class="p">;</span>
-  <span class="ss">chartAttrs</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;...&quot;</span><span class="p">;</span> <span class="ss">chart</span> <span class="o">=</span> <span class="s2">&quot;...&quot;</span><span class="p">;</span> <span class="ss">version</span> <span class="o">=</span> <span class="s2">&quot;...&quot;</span><span class="p">;</span> <span class="p">};</span>
-  <span class="ss">kindFilter</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;Certificate&quot;</span> <span class="p">];</span>  <span class="c1"># Optional: only these CRD kinds (default: all)</span>
-  <span class="ss">kubeVersion</span> <span class="o">=</span> <span class="s2">&quot;v1.31.0&quot;</span><span class="p">;</span>         <span class="c1"># Optional: helm template --kube-version</span>
+  <span class="ss">name</span> <span class="o">=</span> <span class="s2">"cert-manager"</span><span class="p">;</span>
+  <span class="ss">chartAttrs</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">repo</span> <span class="o">=</span> <span class="s2">"..."</span><span class="p">;</span> <span class="ss">chart</span> <span class="o">=</span> <span class="s2">"..."</span><span class="p">;</span> <span class="ss">version</span> <span class="o">=</span> <span class="s2">"..."</span><span class="p">;</span> <span class="p">};</span>
+  <span class="ss">kindFilter</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">"Certificate"</span> <span class="p">];</span>  <span class="c1"># Optional: only these CRD kinds (default: all)</span>
+  <span class="ss">kubeVersion</span> <span class="o">=</span> <span class="s2">"v1.31.0"</span><span class="p">;</span>         <span class="c1"># Optional: helm template --kube-version</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>The <code>*Module</code> variants take the same arguments and return a module value (no file); <code>crdObjects</code>/<code>crdObjectsFromChart</code> return the raw <code>CustomResourceDefinition</code> manifests as values.</p>
-<div class="admonition note">
-<p class="admonition-title">Renamed arguments</p>
-<p>The overloaded <code>crds</code> argument was split: source-based accessors now take <code>crdFiles</code> (the list of YAML files) and chart-based accessors take <code>kindFilter</code> (the kind filter). <code>crds</code> remains as a deprecated alias on every accessor (resolved by the shared <code>renamedArg</code> helper, which warns and points at the new name).</p>
-</div>
-<h3 id="crd-processing-crd2jsonschemapy">CRD Processing (<code>crd2jsonschema.py</code>)<a class="headerlink" href="#crd-processing-crd2jsonschemapy" title="Permanent link">#</a></h3>
-<p>Python script that:</p>
-<ol>
-<li>Reads CRD YAML files</li>
-<li>Extracts OpenAPI v3 schemas</li>
-<li>Flattens <code>$ref</code> references</li>
-<li>Outputs JSON schema for the shared walk (<code>compile/walk.nix</code>)</li>
-</ol>
-<h2 id="testing-framework">Testing Framework<a class="headerlink" href="#testing-framework" title="Permanent link">#</a></h2>
-<h3 id="module-tests-tests">Module Tests (<code>tests/</code>)<a class="headerlink" href="#module-tests-tests" title="Permanent link">#</a></h3>
-<p>Located in <code>tests/</code>, using nixidy's testing framework.</p>
-<h4 id="test-structure">Test Structure<a class="headerlink" href="#test-structure" title="Permanent link">#</a></h4>
-<div class="highlight"><pre><span></span><code><span class="c1"># tests/my-feature.nix</span>
+							<p>The <code>*Module</code> variants take the same arguments and return a module value (no file); <code>crdObjects</code>/<code>crdObjectsFromChart</code> return the raw <code>CustomResourceDefinition</code> manifests as values.</p>
+							<div class="admonition note">
+								<p class="admonition-title">Renamed arguments</p>
+								<p>The overloaded <code>crds</code> argument was split: source-based accessors now take <code>crdFiles</code> (the list of YAML files) and chart-based accessors take <code>kindFilter</code> (the kind filter). <code>crds</code> remains as a deprecated alias on every accessor (resolved by the shared <code>renamedArg</code> helper, which warns and points at the new name).</p>
+							</div>
+							<h3 id="crd-processing-crd2jsonschemapy">CRD Processing (<code>crd2jsonschema.py</code>)<a class="headerlink mx-2" href="#crd-processing-crd2jsonschemapy" title="Permanent link">#</a></h3>
+							<p>Python script that:</p>
+							<ol type="1">
+								<li>Reads CRD YAML files</li>
+								<li>Extracts OpenAPI v3 schemas</li>
+								<li>Flattens <code>$ref</code> references</li>
+								<li>Outputs JSON schema for the shared walk (<code>compile/walk.nix</code>)</li>
+							</ol>
+							<h2 id="testing-framework">Testing Framework<a class="headerlink mx-2" href="#testing-framework" title="Permanent link">#</a></h2>
+							<h3 id="module-tests-tests">Module Tests (<code>tests/</code>)<a class="headerlink mx-2" href="#module-tests-tests" title="Permanent link">#</a></h3>
+							<p>Located in <code>tests/</code>, using nixidy's testing framework.</p>
+							<h4 id="test-structure">Test Structure<a class="headerlink mx-2" href="#test-structure" title="Permanent link">#</a></h4>
+							<div class="highlight"><pre><span></span><code><span class="c1"># tests/my-feature.nix</span>
 <span class="p">{</span>
   lib<span class="p">,</span>
   config<span class="p">,</span>
@@ -2264,22 +887,22 @@ fromChartCRD <span class="p">{</span>
 <span class="p">{</span>
   <span class="c1"># Define test configuration</span>
   applications<span class="o">.</span><span class="ss">test1</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;test&quot;</span><span class="p">;</span>
-    resources<span class="o">.</span>configMaps<span class="o">.</span>cm<span class="o">.</span>data<span class="o">.</span><span class="ss">FOO</span> <span class="o">=</span> <span class="s2">&quot;bar&quot;</span><span class="p">;</span>
+    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">"test"</span><span class="p">;</span>
+    resources<span class="o">.</span>configMaps<span class="o">.</span>cm<span class="o">.</span>data<span class="o">.</span><span class="ss">FOO</span> <span class="o">=</span> <span class="s2">"bar"</span><span class="p">;</span>
   <span class="p">};</span>
 
   <span class="c1"># Define test assertions</span>
   <span class="ss">test</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;my feature test&quot;</span><span class="p">;</span>
-    <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;Description of what&#39;s being tested&quot;</span><span class="p">;</span>
+    <span class="ss">name</span> <span class="o">=</span> <span class="s2">"my feature test"</span><span class="p">;</span>
+    <span class="ss">description</span> <span class="o">=</span> <span class="s2">"Description of what's being tested"</span><span class="p">;</span>
     <span class="ss">assertions</span> <span class="o">=</span> <span class="p">[</span>
       <span class="p">{</span>
-        <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;ConfigMap should have FOO key&quot;</span><span class="p">;</span>
+        <span class="ss">description</span> <span class="o">=</span> <span class="s2">"ConfigMap should have FOO key"</span><span class="p">;</span>
         <span class="ss">expression</span> <span class="o">=</span> <span class="p">(</span>elemAt apps<span class="o">.</span>test1<span class="o">.</span>objects <span class="mi">0</span><span class="p">)</span><span class="o">.</span>data<span class="p">;</span>
-        <span class="ss">expected</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">FOO</span> <span class="o">=</span> <span class="s2">&quot;bar&quot;</span><span class="p">;</span> <span class="p">};</span>
+        <span class="ss">expected</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">FOO</span> <span class="o">=</span> <span class="s2">"bar"</span><span class="p">;</span> <span class="p">};</span>
       <span class="p">}</span>
       <span class="p">{</span>
-        <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;Custom assertion function&quot;</span><span class="p">;</span>
+        <span class="ss">description</span> <span class="o">=</span> <span class="s2">"Custom assertion function"</span><span class="p">;</span>
         <span class="ss">expression</span> <span class="o">=</span> apps<span class="o">.</span>test1<span class="o">.</span>objects<span class="p">;</span>
         <span class="ss">assertion</span> <span class="o">=</span> objs<span class="p">:</span> length <span class="ss">objs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">;</span>
       <span class="p">}</span>
@@ -2287,17 +910,17 @@ fromChartCRD <span class="p">{</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<h4 id="running-tests">Running Tests<a class="headerlink" href="#running-tests" title="Permanent link">#</a></h4>
-<div class="highlight"><pre><span></span><code><span class="c1"># Run module tests</span>
+							<h4 id="running-tests">Running Tests<a class="headerlink mx-2" href="#running-tests" title="Permanent link">#</a></h4>
+							<div class="highlight"><pre><span></span><code><span class="c1"># Run module tests</span>
 nix<span class="w"> </span>run<span class="w"> </span>.#moduleTests
 
 <span class="c1"># Run library tests</span>
 nix<span class="w"> </span>run<span class="w"> </span>.#libTests
 </code></pre></div>
-<h4 id="test-registration-testsdefaultnix">Test Registration (<code>tests/default.nix</code>)<a class="headerlink" href="#test-registration-testsdefaultnix" title="Permanent link">#</a></h4>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+							<h4 id="test-registration-testsdefaultnix">Test Registration (<code>tests/default.nix</code>)<a class="headerlink mx-2" href="#test-registration-testsdefaultnix" title="Permanent link">#</a></h4>
+							<div class="highlight"><pre><span></span><code><span class="p">{</span>
   <span class="ss">testing</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;nixidy modules&quot;</span><span class="p">;</span>
+    <span class="ss">name</span> <span class="o">=</span> <span class="s2">"nixidy modules"</span><span class="p">;</span>
     <span class="ss">tests</span> <span class="o">=</span> <span class="p">[</span>
       <span class="l">./configmap.nix</span>
       <span class="l">./create-namespace.nix</span>
@@ -2307,33 +930,33 @@ nix<span class="w"> </span>run<span class="w"> </span>.#libTests
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="library-tests-libtestsnix">Library Tests (<code>lib/tests.nix</code>)<a class="headerlink" href="#library-tests-libtestsnix" title="Permanent link">#</a></h3>
-<p>Uses <code>lib.runTests</code> pattern:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+							<h3 id="library-tests-libtestsnix">Library Tests (<code>lib/tests.nix</code>)<a class="headerlink mx-2" href="#library-tests-libtestsnix" title="Permanent link">#</a></h3>
+							<p>Uses <code>lib.runTests</code> pattern:</p>
+							<div class="highlight"><pre><span></span><code><span class="p">{</span>
   <span class="ss">kube</span> <span class="o">=</span> <span class="p">{</span>
     <span class="ss">fromYAML</span> <span class="o">=</span> <span class="p">{</span>
       <span class="ss">testSingleObject</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="ss">expr</span> <span class="o">=</span> lib<span class="o">.</span>kube<span class="o">.</span>fromYAML <span class="s2">&quot;...&quot;</span><span class="p">;</span>
+        <span class="ss">expr</span> <span class="o">=</span> lib<span class="o">.</span>kube<span class="o">.</span>fromYAML <span class="s2">"..."</span><span class="p">;</span>
         <span class="ss">expected</span> <span class="o">=</span> <span class="p">[</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}</span> <span class="p">];</span>
       <span class="p">};</span>
     <span class="p">};</span>
     <span class="ss">removeLabels</span> <span class="o">=</span> <span class="p">{</span>
       <span class="ss">testLabelPresent</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="ss">expr</span> <span class="o">=</span> lib<span class="o">.</span>kube<span class="o">.</span>removeLabels <span class="p">[</span><span class="s2">&quot;helm.sh/chart&quot;</span><span class="p">]</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
+        <span class="ss">expr</span> <span class="o">=</span> lib<span class="o">.</span>kube<span class="o">.</span>removeLabels <span class="p">[</span><span class="s2">"helm.sh/chart"</span><span class="p">]</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
         <span class="ss">expected</span> <span class="o">=</span> <span class="p">{</span> <span class="o">...</span> <span class="p">};</span>
       <span class="p">};</span>
     <span class="p">};</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<h2 id="development-workflow">Development Workflow<a class="headerlink" href="#development-workflow" title="Permanent link">#</a></h2>
-<h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h3>
-<ul>
-<li>Nix with flakes enabled</li>
-<li>Basic understanding of NixOS module system</li>
-</ul>
-<h3 id="common-commands">Common Commands<a class="headerlink" href="#common-commands" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># Format code</span>
+							<h2 id="development-workflow">Development Workflow<a class="headerlink mx-2" href="#development-workflow" title="Permanent link">#</a></h2>
+							<h3 id="prerequisites">Prerequisites<a class="headerlink mx-2" href="#prerequisites" title="Permanent link">#</a></h3>
+							<ul>
+								<li>Nix with flakes enabled</li>
+								<li>Basic understanding of NixOS module system</li>
+							</ul>
+							<h3 id="common-commands">Common Commands<a class="headerlink mx-2" href="#common-commands" title="Permanent link">#</a></h3>
+							<div class="highlight"><pre><span></span><code><span class="c1"># Format code</span>
 nix<span class="w"> </span>fmt
 
 <span class="c1"># Run static linter</span>
@@ -2357,70 +980,70 @@ nix<span class="w"> </span>run<span class="w"> </span>.#generate
 <span class="c1"># Serve documentation locally</span>
 nix<span class="w"> </span>run<span class="w"> </span>.#docsServe
 </code></pre></div>
-<h3 id="development-cycle">Development Cycle<a class="headerlink" href="#development-cycle" title="Permanent link">#</a></h3>
-<ol>
-<li><strong>Make changes</strong> to modules or library</li>
-<li><strong>Write tests</strong> for new functionality</li>
-<li><strong>Run tests</strong> to verify changes</li>
-<li><strong>Format code</strong> with <code>nix fmt</code></li>
-<li><strong>Run linter</strong> with <code>nix run .#staticCheck</code></li>
-<li><strong>Test manually</strong> with a sample configuration</li>
-</ol>
-<h3 id="manual-testing">Manual Testing<a class="headerlink" href="#manual-testing" title="Permanent link">#</a></h3>
-<p>Create a test configuration:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># test-config.nix</span>
+							<h3 id="development-cycle">Development Cycle<a class="headerlink mx-2" href="#development-cycle" title="Permanent link">#</a></h3>
+							<ol type="1">
+								<li><strong>Make changes</strong> to modules or library</li>
+								<li><strong>Write tests</strong> for new functionality</li>
+								<li><strong>Run tests</strong> to verify changes</li>
+								<li><strong>Format code</strong> with <code>nix fmt</code></li>
+								<li><strong>Run linter</strong> with <code>nix run .#staticCheck</code></li>
+								<li><strong>Test manually</strong> with a sample configuration</li>
+							</ol>
+							<h3 id="manual-testing">Manual Testing<a class="headerlink mx-2" href="#manual-testing" title="Permanent link">#</a></h3>
+							<p>Create a test configuration:</p>
+							<div class="highlight"><pre><span></span><code><span class="c1"># test-config.nix</span>
 <span class="p">{</span>
   nixidy<span class="o">.</span><span class="ss">target</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">repository</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/test/repo.git&quot;</span><span class="p">;</span>
-    <span class="ss">branch</span> <span class="o">=</span> <span class="s2">&quot;main&quot;</span><span class="p">;</span>
+    <span class="ss">repository</span> <span class="o">=</span> <span class="s2">"https://github.com/test/repo.git"</span><span class="p">;</span>
+    <span class="ss">branch</span> <span class="o">=</span> <span class="s2">"main"</span><span class="p">;</span>
   <span class="p">};</span>
 
   applications<span class="o">.</span><span class="ss">test</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;test&quot;</span><span class="p">;</span>
+    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">"test"</span><span class="p">;</span>
     <span class="ss">createNamespace</span> <span class="o">=</span> <span class="no">true</span><span class="p">;</span>
     resources<span class="o">.</span>deployments<span class="o">.</span>nginx<span class="o">.</span><span class="ss">spec</span> <span class="o">=</span> <span class="p">{</span>
-      selector<span class="o">.</span>matchLabels<span class="o">.</span><span class="ss">app</span> <span class="o">=</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
+      selector<span class="o">.</span>matchLabels<span class="o">.</span><span class="ss">app</span> <span class="o">=</span> <span class="s2">"nginx"</span><span class="p">;</span>
       <span class="ss">template</span> <span class="o">=</span> <span class="p">{</span>
-        metadata<span class="o">.</span>labels<span class="o">.</span><span class="ss">app</span> <span class="o">=</span> <span class="s2">&quot;nginx&quot;</span><span class="p">;</span>
-        spec<span class="o">.</span>containers<span class="o">.</span>nginx<span class="o">.</span><span class="ss">image</span> <span class="o">=</span> <span class="s2">&quot;nginx:latest&quot;</span><span class="p">;</span>
+        metadata<span class="o">.</span>labels<span class="o">.</span><span class="ss">app</span> <span class="o">=</span> <span class="s2">"nginx"</span><span class="p">;</span>
+        spec<span class="o">.</span>containers<span class="o">.</span>nginx<span class="o">.</span><span class="ss">image</span> <span class="o">=</span> <span class="s2">"nginx:latest"</span><span class="p">;</span>
       <span class="p">};</span>
     <span class="p">};</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Build and inspect:</p>
-<div class="highlight"><pre><span></span><code>nix<span class="w"> </span>run<span class="w"> </span>.#cli<span class="w"> </span>--<span class="w"> </span>build<span class="w"> </span>.#test
+							<p>Build and inspect:</p>
+							<div class="highlight"><pre><span></span><code>nix<span class="w"> </span>run<span class="w"> </span>.#cli<span class="w"> </span>--<span class="w"> </span>build<span class="w"> </span>.#test
 tree<span class="w"> </span>result/
 cat<span class="w"> </span>result/test/Deployment-nginx.yaml
 </code></pre></div>
-<h2 id="adding-new-features">Adding New Features<a class="headerlink" href="#adding-new-features" title="Permanent link">#</a></h2>
-<h3 id="adding-a-new-application-option">Adding a New Application Option<a class="headerlink" href="#adding-a-new-application-option" title="Permanent link">#</a></h3>
-<ol>
-<li>
-<p><strong>Define the option</strong> in <code>modules/applications/default.nix</code>:
-  <div class="highlight"><pre><span></span><code><span class="p">{</span>
+							<h2 id="adding-new-features">Adding New Features<a class="headerlink mx-2" href="#adding-new-features" title="Permanent link">#</a></h2>
+							<h3 id="adding-a-new-application-option">Adding a New Application Option<a class="headerlink mx-2" href="#adding-a-new-application-option" title="Permanent link">#</a></h3>
+							<ol type="1">
+								<li>
+									<p><strong>Define the option</strong> in <code>modules/applications/default.nix</code>:
+									<div class="highlight"><pre><span></span><code><span class="p">{</span>
   <span class="ss">options</span> <span class="o">=</span> <span class="p">{</span>
     <span class="ss">myNewOption</span> <span class="o">=</span> mkOption <span class="p">{</span>
       <span class="ss">type</span> <span class="o">=</span> types<span class="o">.</span>bool<span class="p">;</span>
       <span class="ss">default</span> <span class="o">=</span> <span class="no">false</span><span class="p">;</span>
-      <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;Description of the option.&quot;</span><span class="p">;</span>
+      <span class="ss">description</span> <span class="o">=</span> <span class="s2">"Description of the option."</span><span class="p">;</span>
     <span class="p">};</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div></p>
-</li>
-<li>
-<p><strong>Use the option</strong> in config:
-  <div class="highlight"><pre><span></span><code><span class="p">{</span>
+								</li>
+								<li>
+									<p><strong>Use the option</strong> in config:
+									<div class="highlight"><pre><span></span><code><span class="p">{</span>
   <span class="ss">config</span> <span class="o">=</span> lib<span class="o">.</span>mkIf config<span class="o">.</span>myNewOption <span class="p">{</span>
     <span class="c1"># Configuration when option is enabled</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div></p>
-</li>
-<li>
-<p><strong>Write tests</strong> in <code>tests/</code>:
-  <div class="highlight"><pre><span></span><code><span class="c1"># tests/my-new-option.nix</span>
+								</li>
+								<li>
+									<p><strong>Write tests</strong> in <code>tests/</code>:
+									<div class="highlight"><pre><span></span><code><span class="c1"># tests/my-new-option.nix</span>
 <span class="p">{</span>
   applications<span class="o">.</span><span class="ss">test1</span> <span class="o">=</span> <span class="p">{</span>
     <span class="ss">myNewOption</span> <span class="o">=</span> <span class="no">true</span><span class="p">;</span>
@@ -2428,25 +1051,25 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
   <span class="p">};</span>
 
   <span class="ss">test</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">name</span> <span class="o">=</span> <span class="s2">&quot;my new option&quot;</span><span class="p">;</span>
-    <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;Test the new option&quot;</span><span class="p">;</span>
+    <span class="ss">name</span> <span class="o">=</span> <span class="s2">"my new option"</span><span class="p">;</span>
+    <span class="ss">description</span> <span class="o">=</span> <span class="s2">"Test the new option"</span><span class="p">;</span>
     <span class="ss">assertions</span> <span class="o">=</span> <span class="p">[</span> <span class="o">...</span> <span class="p">];</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div></p>
-</li>
-<li>
-<p><strong>Register test</strong> in <code>tests/default.nix</code></p>
-</li>
-<li>
-<p><strong>Document</strong> in <code>docs/user_guide/</code></p>
-</li>
-</ol>
-<h3 id="adding-a-new-library-function">Adding a New Library Function<a class="headerlink" href="#adding-a-new-library-function" title="Permanent link">#</a></h3>
-<ol>
-<li>
-<p><strong>Add function</strong> to appropriate file in <code>lib/</code>:
-  <div class="highlight"><pre><span></span><code><span class="c1"># lib/kube.nix</span>
+								</li>
+								<li>
+									<p><strong>Register test</strong> in <code>tests/default.nix</code></p>
+								</li>
+								<li>
+									<p><strong>Document</strong> in <code>docs/user_guide/</code></p>
+								</li>
+							</ol>
+							<h3 id="adding-a-new-library-function">Adding a New Library Function<a class="headerlink mx-2" href="#adding-a-new-library-function" title="Permanent link">#</a></h3>
+							<ol type="1">
+								<li>
+									<p><strong>Add function</strong> to appropriate file in <code>lib/</code>:
+									<div class="highlight"><pre><span></span><code><span class="c1"># lib/kube.nix</span>
 <span class="p">{</span>
   <span class="ss">myNewFunction</span> <span class="o">=</span>
     <span class="c1"># Parameter description</span>
@@ -2455,43 +1078,44 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
     <span class="o">...</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></p>
-</li>
-<li>
-<p><strong>Add documentation</strong> as comments:
-  <div class="highlight"><pre><span></span><code><span class="cm">/*</span>
+								</li>
+								<li>
+									<p><strong>Add documentation</strong> as comments:
+									<div class="highlight"><pre><span></span><code><span class="cm">/*</span>
 <span class="cm">  Description of function.</span>
 
 <span class="cm">  Type:</span>
 <span class="cm">    myNewFunction :: ParamType -&gt; ReturnType</span>
 
 <span class="cm">  Example:</span>
-<span class="cm">    myNewFunction &quot;input&quot;</span>
-<span class="cm">    =&gt; &quot;output&quot;</span>
+<span class="cm">    myNewFunction "input"</span>
+<span class="cm">    =&gt; "output"</span>
 <span class="cm">*/</span>
 <span class="ss">myNewFunction</span> <span class="o">=</span> <span class="o">...</span><span class="p">;</span>
 </code></pre></div></p>
-</li>
-<li>
-<p><strong>Write tests</strong> in <code>lib/tests.nix</code>:
-  <div class="highlight"><pre><span></span><code><span class="p">{</span>
+								</li>
+								<li>
+									<p><strong>Write tests</strong> in <code>lib/tests.nix</code>:
+									<div class="highlight"><pre><span></span><code><span class="p">{</span>
   <span class="ss">kube</span> <span class="o">=</span> <span class="p">{</span>
     <span class="ss">myNewFunction</span> <span class="o">=</span> <span class="p">{</span>
       <span class="ss">testBasicCase</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="ss">expr</span> <span class="o">=</span> lib<span class="o">.</span>kube<span class="o">.</span>myNewFunction <span class="s2">&quot;input&quot;</span><span class="p">;</span>
-        <span class="ss">expected</span> <span class="o">=</span> <span class="s2">&quot;output&quot;</span><span class="p">;</span>
+        <span class="ss">expr</span> <span class="o">=</span> lib<span class="o">.</span>kube<span class="o">.</span>myNewFunction <span class="s2">"input"</span><span class="p">;</span>
+        <span class="ss">expected</span> <span class="o">=</span> <span class="s2">"output"</span><span class="p">;</span>
       <span class="p">};</span>
     <span class="p">};</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div></p>
-</li>
-</ol>
-<h3 id="adding-a-new-resource-processor">Adding a New Resource Processor<a class="headerlink" href="#adding-a-new-resource-processor" title="Permanent link">#</a></h3>
-<p>Similar to Helm/Kustomize, create a new module:</p>
-<ol>
-<li>
-<p><strong>Create module</strong> <code>modules/applications/myprocessor.nix</code>:
-  <div class="highlight"><pre><span></span><code><span class="p">{</span>
+								</li>
+							</ol>
+							<h3 id="adding-a-new-resource-processor">Adding a New Resource Processor<a class="headerlink mx-2" href="#adding-a-new-resource-processor" title="Permanent link">#</a></h3>
+							<p>Similar to Helm/Kustomize, create a new module:</p>
+							<ol type="1">
+								<li>
+									<p><strong>Create module</strong>
+									<code>modules/applications/myprocessor.nix</code>:
+									<div class="highlight"><pre><span></span><code><span class="p">{</span>
   nixidyDefaults<span class="p">,</span>
   lib<span class="p">,</span>
   config<span class="p">,</span>
@@ -2512,10 +1136,10 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div></p>
-</li>
-<li>
-<p><strong>Import</strong> in <code>modules/applications/default.nix</code>:
-  <div class="highlight"><pre><span></span><code><span class="p">{</span>
+								</li>
+								<li>
+									<p><strong>Import</strong> in <code>modules/applications/default.nix</code>:
+									<div class="highlight"><pre><span></span><code><span class="p">{</span>
   <span class="ss">imports</span> <span class="o">=</span> <span class="p">[</span>
     <span class="l">./helm.nix</span>
     <span class="l">./kustomize.nix</span>
@@ -2526,82 +1150,82 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
   <span class="p">];</span>
 <span class="p">}</span>
 </code></pre></div></p>
-</li>
-</ol>
-<h2 id="common-tasks">Common Tasks<a class="headerlink" href="#common-tasks" title="Permanent link">#</a></h2>
-<h3 id="updating-kubernetes-versions">Updating Kubernetes Versions<a class="headerlink" href="#updating-kubernetes-versions" title="Permanent link">#</a></h3>
-<ol>
-<li>
-<p>Edit <code>pkgs/generators/sources/versions.nix</code>:
-  <div class="highlight"><pre><span></span><code><span class="p">{</span>
-  <span class="s2">&quot;1.37.0&quot;</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">hash</span> <span class="o">=</span> <span class="s2">&quot;sha256-...&quot;</span><span class="p">;</span>
-    <span class="ss">spec</span> <span class="o">=</span> <span class="s2">&quot;api/openapi-spec/swagger.json&quot;</span><span class="p">;</span>
+								</li>
+							</ol>
+							<h2 id="common-tasks">Common Tasks<a class="headerlink mx-2" href="#common-tasks" title="Permanent link">#</a></h2>
+							<h3 id="updating-kubernetes-versions">Updating Kubernetes Versions<a class="headerlink mx-2" href="#updating-kubernetes-versions" title="Permanent link">#</a></h3>
+							<ol type="1">
+								<li>
+									<p>Edit <code>pkgs/generators/sources/versions.nix</code>:
+										<div class="highlight"><pre><span></span><code><span class="p">{</span>
+  <span class="s2">"1.37.0"</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ss">hash</span> <span class="o">=</span> <span class="s2">"sha256-..."</span><span class="p">;</span>
+    <span class="ss">spec</span> <span class="o">=</span> <span class="s2">"api/openapi-spec/swagger.json"</span><span class="p">;</span>
     <span class="ss">discovery</span> <span class="o">=</span> <span class="p">{</span>
-      <span class="ss">core</span> <span class="o">=</span> <span class="s2">&quot;api/discovery/api__v1.json&quot;</span><span class="p">;</span>
-      <span class="ss">aggregated</span> <span class="o">=</span> <span class="s2">&quot;api/discovery/aggregated_v2.json&quot;</span><span class="p">;</span>
+      <span class="ss">core</span> <span class="o">=</span> <span class="s2">"api/discovery/api__v1.json"</span><span class="p">;</span>
+      <span class="ss">aggregated</span> <span class="o">=</span> <span class="s2">"api/discovery/aggregated_v2.json"</span><span class="p">;</span>
     <span class="p">};</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div></p>
-</li>
-<li>
-<p>Regenerate:
-  <div class="highlight"><pre><span></span><code>nix<span class="w"> </span>run<span class="w"> </span>.#generate
+								</li>
+								<li>
+									<p>Regenerate:
+										<div class="highlight"><pre><span></span><code>nix<span class="w"> </span>run<span class="w"> </span>.#generate
 </code></pre></div></p>
-</li>
-<li>
-<p>Update default version in <code>modules/applications.nix</code> if needed (the
-   <code>nixidy.k8sVersion</code> enum is derived automatically from the generated files
-   in <code>modules/generated/k8s/</code>)</p>
-</li>
-</ol>
-<h3 id="adding-a-new-sync-option">Adding a New Sync Option<a class="headerlink" href="#adding-a-new-sync-option" title="Permanent link">#</a></h3>
-<ol>
-<li>
-<p>Add option in <code>modules/applications/argocd.nix</code> under <code>syncPolicy.syncOptions</code>:
-  <div class="highlight"><pre><span></span><code><span class="p">{</span>
+								</li>
+								<li>
+									<p>Update default version in <code>modules/applications.nix</code> if needed (the
+										<code>nixidy.k8sVersion</code> enum is derived automatically from the generated files
+										in <code>modules/generated/k8s/</code>)</p>
+								</li>
+							</ol>
+							<h3 id="adding-a-new-sync-option">Adding a New Sync Option<a class="headerlink mx-2" href="#adding-a-new-sync-option" title="Permanent link">#</a></h3>
+							<ol type="1">
+								<li>
+									<p>Add option in <code>modules/applications/argocd.nix</code> under <code>syncPolicy.syncOptions</code>:
+										<div class="highlight"><pre><span></span><code><span class="p">{</span>
   syncPolicy<span class="o">.</span>syncOptions<span class="o">.</span><span class="ss">myOption</span> <span class="o">=</span> mkOption <span class="p">{</span>
     <span class="ss">type</span> <span class="o">=</span> types<span class="o">.</span>bool<span class="p">;</span>
     <span class="ss">default</span> <span class="o">=</span> <span class="no">false</span><span class="p">;</span>
-    <span class="ss">apply</span> <span class="o">=</span> val<span class="p">:</span> <span class="k">if</span> val <span class="k">then</span> <span class="s2">&quot;MyOption=true&quot;</span> <span class="k">else</span> <span class="no">null</span><span class="p">;</span>
-    <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;Description&quot;</span><span class="p">;</span>
+    <span class="ss">apply</span> <span class="o">=</span> val<span class="p">:</span> <span class="k">if</span> val <span class="k">then</span> <span class="s2">"MyOption=true"</span> <span class="k">else</span> <span class="no">null</span><span class="p">;</span>
+    <span class="ss">description</span> <span class="o">=</span> <span class="s2">"Description"</span><span class="p">;</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div></p>
-</li>
-<li>
-<p>The <code>apply</code> function converts to ArgoCD sync option format</p>
-</li>
-<li>
-<p><code>convertSyncOptionsList</code> automatically collects non-null options</p>
-</li>
-</ol>
-<h3 id="debugging-module-evaluation">Debugging Module Evaluation<a class="headerlink" href="#debugging-module-evaluation" title="Permanent link">#</a></h3>
-<p>Use <code>builtins.trace</code> for debugging:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+								</li>
+								<li>
+									<p>The <code>apply</code> function converts to ArgoCD sync option format</p>
+								</li>
+								<li>
+									<p><code>convertSyncOptionsList</code> automatically collects non-null options</p>
+								</li>
+							</ol>
+							<h3 id="debugging-module-evaluation">Debugging Module Evaluation<a class="headerlink mx-2" href="#debugging-module-evaluation" title="Permanent link">#</a></h3>
+							<p>Use <code>builtins.trace</code> for debugging:</p>
+							<div class="highlight"><pre><span></span><code><span class="p">{</span>
   <span class="ss">config</span> <span class="o">=</span> lib<span class="o">.</span>mkMerge <span class="p">[</span>
-    <span class="p">(</span><span class="nb">builtins</span><span class="o">.</span>trace <span class="s2">&quot;Processing </span><span class="si">${</span>config<span class="o">.</span>name<span class="si">}</span><span class="s2">&quot;</span> <span class="p">{</span>
+    <span class="p">(</span><span class="nb">builtins</span><span class="o">.</span>trace <span class="s2">"Processing </span><span class="si">${</span>config<span class="o">.</span>name<span class="si">}</span><span class="s2">"</span> <span class="p">{</span>
       <span class="c1"># ...</span>
     <span class="p">})</span>
   <span class="p">];</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Or use <code>lib.debug.traceValSeqN</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+							<p>Or use <code>lib.debug.traceValSeqN</code>:</p>
+							<div class="highlight"><pre><span></span><code><span class="p">{</span>
   <span class="ss">objects</span> <span class="o">=</span> lib<span class="o">.</span>debug<span class="o">.</span>traceValSeqN <span class="mi">2</span> config<span class="o">.</span>resources<span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
-<h2 id="code-style">Code Style<a class="headerlink" href="#code-style" title="Permanent link">#</a></h2>
-<h3 id="nix">Nix<a class="headerlink" href="#nix" title="Permanent link">#</a></h3>
-<ul>
-<li><strong>Format</strong>: Use <code>nix fmt</code> (nixfmt)</li>
-<li><strong>Sorting</strong>: Keep attribute sets alphabetically sorted</li>
-<li><strong>Inherit</strong>: Use <code>inherit</code> where possible to reduce verbosity</li>
-<li><strong>Imports</strong>: Group imports logically</li>
-<li><strong>Types</strong>: Use specific types over <code>types.anything</code> when possible</li>
-</ul>
-<div class="highlight"><pre><span></span><code><span class="c1"># Good</span>
+							<h2 id="code-style">Code Style<a class="headerlink mx-2" href="#code-style" title="Permanent link">#</a></h2>
+							<h3 id="nix">Nix<a class="headerlink mx-2" href="#nix" title="Permanent link">#</a></h3>
+							<ul>
+								<li><strong>Format</strong>: Use <code>nix fmt</code> (nixfmt)</li>
+								<li><strong>Sorting</strong>: Keep attribute sets alphabetically sorted</li>
+								<li><strong>Inherit</strong>: Use <code>inherit</code> where possible to reduce verbosity</li>
+								<li><strong>Imports</strong>: Group imports logically</li>
+								<li><strong>Types</strong>: Use specific types over <code>types.anything</code> when possible</li>
+							</ul>
+							<div class="highlight"><pre><span></span><code><span class="c1"># Good</span>
 <span class="p">{</span>
   lib<span class="p">,</span>
   config<span class="p">,</span>
@@ -2615,7 +1239,7 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
 <span class="p">{</span>
   options<span class="o">.</span><span class="ss">myOption</span> <span class="o">=</span> mkOption <span class="p">{</span>
     <span class="ss">type</span> <span class="o">=</span> types<span class="o">.</span>str<span class="p">;</span>
-    <span class="ss">default</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+    <span class="ss">default</span> <span class="o">=</span> <span class="s2">""</span><span class="p">;</span>
   <span class="p">};</span>
 <span class="p">}</span>
 
@@ -2625,173 +1249,94 @@ cat<span class="w"> </span>result/test/Deployment-nginx.yaml
 <span class="k">in</span> <span class="p">{</span>
   options<span class="o">.</span><span class="ss">myOption</span> <span class="o">=</span> lib<span class="o">.</span>mkOption <span class="p">{</span>
     <span class="ss">type</span> <span class="o">=</span> lib<span class="o">.</span>types<span class="o">.</span>str<span class="p">;</span>
-    <span class="ss">default</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+    <span class="ss">default</span> <span class="o">=</span> <span class="s2">""</span><span class="p">;</span>
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="python-cli">Python (CLI)<a class="headerlink" href="#python-cli" title="Permanent link">#</a></h3>
-<ul>
-<li>Follow PEP 8 guidelines</li>
-<li>Use type hints for all function signatures</li>
-<li>Document public functions with docstrings</li>
-</ul>
-<h3 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">#</a></h3>
-<ul>
-<li>Use MkDocs syntax</li>
-<li>Include code examples with syntax highlighting</li>
-<li>Cross-reference related documentation</li>
-<li>Keep language clear and concise</li>
-</ul>
-<h2 id="getting-help">Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">#</a></h2>
-<ul>
-<li><strong>Issues</strong>: <a href="https://github.com/arnarg/nixidy/issues">GitHub Issues</a></li>
-<li><strong>Discussions</strong>: <a href="https://github.com/arnarg/nixidy/discussions">GitHub Discussions</a></li>
-<li><strong>Documentation</strong>: <a href="https://nixidy.dev">nixidy.dev</a></li>
-</ul>
-<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">#</a></h2>
-<p>Key files for different tasks:</p>
-<table>
-<thead>
-<tr>
-<th>Task</th>
-<th>Files</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Add application option</td>
-<td><code>modules/applications/default.nix</code></td>
-</tr>
-<tr>
-<td>Add nixidy option</td>
-<td><code>modules/nixidy/</code></td>
-</tr>
-<tr>
-<td>Add library function</td>
-<td><code>lib/*.nix</code></td>
-</tr>
-<tr>
-<td>Add resource processor</td>
-<td><code>modules/applications/</code></td>
-</tr>
-<tr>
-<td>Add template feature</td>
-<td><code>modules/templates.nix</code></td>
-</tr>
-<tr>
-<td>Modify build output</td>
-<td><code>modules/build/</code></td>
-</tr>
-<tr>
-<td>Add K8s version</td>
-<td><code>pkgs/generators/sources/versions.nix</code></td>
-</tr>
-<tr>
-<td>Write module test</td>
-<td><code>tests/*.nix</code>, <code>tests/default.nix</code></td>
-</tr>
-<tr>
-<td>Write library test</td>
-<td><code>lib/tests.nix</code></td>
-</tr>
-</tbody>
-</table>
-<p>Welcome to the nixidy project! We look forward to your contributions.</p>
-
-
-
-
-
-
-
-
-
-
-
-
-                
-              </article>
-            </div>
-          
-          
-  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
-
-<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
-        </div>
-        
-      </main>
-      
-        <footer class="md-footer">
-  
-    
-      
-      <nav class="md-footer__inner md-grid" aria-label="Footer" >
-        
-          
-          <a href="../../user_guide/assertions/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Assertions &amp; Warnings">
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-            </div>
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              <div class="md-ellipsis">
-                Assertions & Warnings
-              </div>
-            </div>
-          </a>
-        
-        
-          
-          <a href="../../cli_reference/" class="md-footer__link md-footer__link--next" aria-label="Next: CLI Reference">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              <div class="md-ellipsis">
-                CLI Reference
-              </div>
-            </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
-            </div>
-          </a>
-        
-      </nav>
-    
-  
-  <div class="md-footer-meta md-typeset">
-    <div class="md-footer-meta__inner md-grid">
-      <div class="md-copyright">
-  
-  
-    Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-      Material for MkDocs
-    </a>
-  
-</div>
-      
-    </div>
-  </div>
-</footer>
-      
-    </div>
-    <div class="md-dialog" data-md-component="dialog">
-      <div class="md-dialog__inner md-typeset"></div>
-    </div>
-    
-    
-    
-      
-      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.footer", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
-    
-    
-      <script src="../../assets/javascripts/bundle.56ea9cef.min.js"></script>
-      
-    
-  </body>
+							<h3 id="python-cli">Python (CLI)<a class="headerlink mx-2" href="#python-cli" title="Permanent link">#</a></h3>
+							<ul>
+								<li>Follow PEP 8 guidelines</li>
+								<li>Use type hints for all function signatures</li>
+								<li>Document public functions with docstrings</li>
+							</ul>
+							<h3 id="documentation">Documentation<a class="headerlink mx-2" href="#documentation" title="Permanent link">#</a></h3>
+							<ul>
+								<li>Use MkDocs syntax</li>
+								<li>Include code examples with syntax highlighting</li>
+								<li>Cross-reference related documentation</li>
+								<li>Keep language clear and concise</li>
+							</ul>
+							<h2 id="getting-help">Getting Help<a class="headerlink mx-2" href="#getting-help" title="Permanent link">#</a></h2>
+							<ul>
+								<li><strong>Issues</strong>: <a href="https://github.com/arnarg/nixidy/issues">GitHub Issues</a></li>
+								<li><strong>Discussions</strong>: <a href="https://github.com/arnarg/nixidy/discussions">GitHub Discussions</a></li>
+								<li><strong>Documentation</strong>: <a href="https://nixidy.dev">nixidy.dev</a></li>
+							</ul>
+							<h2 id="summary">Summary<a class="headerlink mx-2" href="#summary" title="Permanent link">#</a></h2>
+							<p>Key files for different tasks:</p>
+							<table>
+								<thead>
+									<tr>
+										<th>Task</th>
+										<th>Files</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>Add application option</td>
+										<td><code>modules/applications/default.nix</code></td>
+									</tr>
+									<tr>
+										<td>Add nixidy option</td>
+										<td><code>modules/nixidy/</code></td>
+									</tr>
+									<tr>
+										<td>Add library function</td>
+										<td><code>lib/*.nix</code></td>
+									</tr>
+									<tr>
+										<td>Add resource processor</td>
+										<td><code>modules/applications/</code></td>
+									</tr>
+									<tr>
+										<td>Add template feature</td>
+										<td><code>modules/templates.nix</code></td>
+									</tr>
+									<tr>
+										<td>Modify build output</td>
+										<td><code>modules/build/</code></td>
+									</tr>
+									<tr>
+										<td>Add K8s version</td>
+										<td><code>pkgs/generators/sources/versions.nix</code></td>
+									</tr>
+									<tr>
+										<td>Write module test</td>
+										<td><code>tests/*.nix</code>, <code>tests/default.nix</code></td>
+									</tr>
+									<tr>
+										<td>Write library test</td>
+										<td><code>lib/tests.nix</code></td>
+									</tr>
+								</tbody>
+							</table>
+							<p>Welcome to the nixidy project! We look forward to your contributions.</p>
+						</div>
+						<p class="docs-edit-link">
+							<a href="https://github.com/arnarg/nixidy/edit/main/docs/content/developer_guide/architecture.md">
+								Edit this page
+							</a>
+						</p>
+					</main>
+				</div>
+			</div>
+		</section>
+		<footer class="footer">
+			<div class="container content is-max-desktop has-text-centered">
+				<p>
+					Generated with <a href="https://github.com/arnarg/nixtml">nixtml</a>.
+				</p>
+			</div>
+		</footer>
+	</body>
 </html>

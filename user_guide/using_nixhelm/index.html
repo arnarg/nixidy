@@ -1,966 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="/css/main.css">
+		<meta name="theme-color" content="#1d5184">
+		<link rel="icon" href="/logo-compact.svg" type="image/svg+xml">
+		<script>
+			(function () {
+				try {
+					var scheme = window.localStorage.getItem("nixidy-docs-color-scheme");
+					if (scheme === "system") {
+						document.documentElement.removeAttribute("data-theme");
+					} else if (scheme === "light" || scheme === "dark") {
+						document.documentElement.setAttribute("data-theme", scheme);
+					}
+				} catch (error) {}
+			})();
+		</script>
+		<script src="/js/docs.js" defer="">
+		</script>
+		<title>
+			Using nixhelm | nixidy
+		</title>
+		<meta name="description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta property="og:title" content="Using nixhelm | nixidy">
+		<meta name="twitter:title" content="Using nixhelm | nixidy">
+		<meta itemprop="name" content="Using nixhelm | nixidy">
+		<meta property="og:description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta name="twitter:description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta name="application-name" content="nixidy">
+		<meta property="og:site_name" content="nixidy">
+		<meta property="og:locale" content="en">
+		<meta property="og:type" content="article">
+	</head>
+	<body>
+		<header class="docs-topbar">
+			<div class="docs-container">
+				<button type="button" class="navbar-burger docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
+					<span aria-hidden="true">
+					</span>
+					<span aria-hidden="true">
+					</span>
+					<span aria-hidden="true">
+					</span>
+					<span aria-hidden="true">
+					</span>
+				</button>
+				<a class="docs-brand" href="/">
+					<img src="/logo-compact.svg" alt="">
+					<span class="docs-brand-title">
+						nixidy
+					</span>
+				</a>
+				<div class="docs-topbar-end">
+					<a class="docs-repo button is-small" href="https://github.com/arnarg/nixidy" data-provider="github" data-api="https://api.github.com/repos/arnarg/nixidy" data-storage-key="nixidy-docs-repository" data-version="true">
+						<span class="docs-icon is-github" aria-hidden="true">
+						</span>
+						<span class="docs-repo-name">
+							arnarg/nixidy
+						</span>
+						<span class="docs-repo-facts" hidden="">
+							<span class="docs-repo-fact" data-fact="version" hidden="">
+								<span class="docs-icon is-version" aria-hidden="true">
+								</span>
+								<span class="docs-visually-hidden">
+									Latest release
+								</span>
+								<span class="docs-repo-fact-value">
+								</span>
+							</span>
+							<span class="docs-repo-fact" data-fact="stars" hidden="">
+								<span class="docs-icon is-stars" aria-hidden="true">
+								</span>
+								<span class="docs-visually-hidden">
+									Stars
+								</span>
+								<span class="docs-repo-fact-value">
+								</span>
+							</span>
+							<span class="docs-repo-fact" data-fact="forks" hidden="">
+								<span class="docs-icon is-forks" aria-hidden="true">
+								</span>
+								<span class="docs-visually-hidden">
+									Forks
+								</span>
+								<span class="docs-repo-fact-value">
+								</span>
+							</span>
+						</span>
+					</a>
+					<div class="docs-color-scheme" role="group" aria-label="Color scheme" data-storage-key="nixidy-docs-color-scheme" data-default="system" hidden="">
+						<button type="button" class="button is-small" data-color-scheme="system" data-label-system="System color scheme" data-label-light="Light color scheme" data-label-dark="Dark color scheme" aria-label="System color scheme" title="System color scheme">
+							<span class="docs-icon is-system" aria-hidden="true">
+							</span>
+						</button>
+					</div>
+				</div>
+			</div>
+		</header>
 
-<!doctype html>
-<html lang="en" class="no-js">
-  <head>
-    
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width,initial-scale=1">
-      
-      
-      
-        <link rel="canonical" href="https://nixidy.dev/user_guide/using_nixhelm/">
-      
-      
-        <link rel="prev" href="../postprocessing/">
-      
-      
-        <link rel="next" href="../direct_apply/">
-      
-      
-      <link rel="icon" href="../../images/icon.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
-    
-    
-      
-        <title>Using nixhelm - nixidy</title>
-      
-    
-    
-      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
-      
-        
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
-      
-      
+		<section class="section docs-section">
+			<div class="docs-container">
+				<div class="docs-mobile-nav is-hidden-desktop">
+					<div class="docs-mobile-nav-overlay" aria-hidden="true">
+					</div>
+					<aside class="docs-mobile-nav-panel" id="docs-mobile-navigation">
+						<div class="docs-mobile-nav-header">
+							<a class="docs-repo button is-small" href="https://github.com/arnarg/nixidy" data-provider="github" data-api="https://api.github.com/repos/arnarg/nixidy" data-storage-key="nixidy-docs-repository" data-version="true">
+								<span class="docs-icon is-github" aria-hidden="true">
+								</span>
+								<span class="docs-repo-name">
+									arnarg/nixidy
+								</span>
+								<span class="docs-repo-facts" hidden="">
+									<span class="docs-repo-fact" data-fact="version" hidden="">
+										<span class="docs-icon is-version" aria-hidden="true">
+										</span>
+										<span class="docs-visually-hidden">
+											Latest release
+										</span>
+										<span class="docs-repo-fact-value">
+										</span>
+									</span>
+									<span class="docs-repo-fact" data-fact="stars" hidden="">
+										<span class="docs-icon is-stars" aria-hidden="true">
+										</span>
+										<span class="docs-visually-hidden">
+											Stars
+										</span>
+										<span class="docs-repo-fact-value">
+										</span>
+									</span>
+									<span class="docs-repo-fact" data-fact="forks" hidden="">
+										<span class="docs-icon is-forks" aria-hidden="true">
+										</span>
+										<span class="docs-visually-hidden">
+											Forks
+										</span>
+										<span class="docs-repo-fact-value">
+										</span>
+									</span>
+								</span>
+							</a>
+							<button type="button" class="navbar-burger is-active docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
+								<span aria-hidden="true">
+								</span>
+								<span aria-hidden="true">
+								</span>
+								<span aria-hidden="true">
+								</span>
+								<span aria-hidden="true">
+								</span>
+							</button>
+						</div>
+						<nav class="menu" aria-label="Documentation">
+							<p class="menu-label">
+								User Guide
+							</p>
+							<ul class="menu-list">
+								<li>
+									<a href="/">
+										Introduction
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/getting_started/">
+										Getting Started
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/helm_charts/">
+										Using Helm Charts
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/typed_resources/">
+										Typed Resource Options
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/templates/">
+										Templates
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/git_strategies/">
+										Git Strategies
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/github_actions/">
+										GitHub Actions
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/transformers/">
+										Transformers
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/object_transforms/">
+										Object Transforms
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/postprocessing/">
+										Post-processing
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/using_nixhelm/" class="is-active" aria-current="page">
+										Using nixhelm
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/direct_apply/">
+										Directly Apply Manifests
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/assertions/">
+										Assertions & Warnings
+									</a>
+								</li>
+							</ul>
+							<p class="menu-label">
+								Developer Guide
+							</p>
+							<ul class="menu-list">
+								<li>
+									<a href="/developer_guide/architecture/">
+										Architecture Guide
+									</a>
+								</li>
+							</ul>
+							<p class="menu-label">
+								Reference
+							</p>
+							<ul class="menu-list">
+								<li>
+									<a href="/cli_reference/">
+										CLI Reference
+									</a>
+								</li>
+								<li>
+									<a href="/library/">
+										Library Functions
+									</a>
+								</li>
+								<li>
+									<a href="/options/">
+										Configuration Options
+									</a>
+								</li>
+							</ul>
+						</nav>
+					</aside>
+				</div>
+				<div class="columns">
+					<aside class="docs-sidebar column is-hidden-touch">
+						<nav class="menu" aria-label="Documentation">
+							<p class="menu-label">
+								User Guide
+							</p>
+							<ul class="menu-list">
+								<li>
+									<a href="/">
+										Introduction
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/getting_started/">
+										Getting Started
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/helm_charts/">
+										Using Helm Charts
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/typed_resources/">
+										Typed Resource Options
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/templates/">
+										Templates
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/git_strategies/">
+										Git Strategies
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/github_actions/">
+										GitHub Actions
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/transformers/">
+										Transformers
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/object_transforms/">
+										Object Transforms
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/postprocessing/">
+										Post-processing
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/using_nixhelm/" class="is-active" aria-current="page">
+										Using nixhelm
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/direct_apply/">
+										Directly Apply Manifests
+									</a>
+								</li>
+								<li>
+									<a href="/user_guide/assertions/">
+										Assertions & Warnings
+									</a>
+								</li>
+							</ul>
+							<p class="menu-label">
+								Developer Guide
+							</p>
+							<ul class="menu-list">
+								<li>
+									<a href="/developer_guide/architecture/">
+										Architecture Guide
+									</a>
+								</li>
+							</ul>
+							<p class="menu-label">
+								Reference
+							</p>
+							<ul class="menu-list">
+								<li>
+									<a href="/cli_reference/">
+										CLI Reference
+									</a>
+								</li>
+								<li>
+									<a href="/library/">
+										Library Functions
+									</a>
+								</li>
+								<li>
+									<a href="/options/">
+										Configuration Options
+									</a>
+								</li>
+							</ul>
+						</nav>
+					</aside>
+					<main class="docs-main column">
+						<h1 class="title">
+							Using nixhelm
+						</h1>
 
-
-    
-    
-      
-    
-    
-      
-        
-        
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
-        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
-      
-    
-    
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
-    
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
-    
-      
-
-    
-    
-    
-  </head>
-  
-  
-    
-    
-      
-    
-    
-    
-    
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo">
-  
-    
-    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
-    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" for="__drawer"></label>
-    <div data-md-component="skip">
-      
-        
-        <a href="#using-nixhelm" class="md-skip">
-          Skip to content
-        </a>
-      
-    </div>
-    <div data-md-component="announce">
-      
-    </div>
-    
-    
-      
-
-  
-
-<header class="md-header md-header--shadow" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="nixidy" class="md-header__button md-logo" aria-label="nixidy" data-md-component="logo">
-      
-  <img src="../../images/icon.svg" alt="logo">
-
-    </a>
-    <label class="md-header__button md-icon" for="__drawer">
-      
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
-    </label>
-    <div class="md-header__title" data-md-component="header-title">
-      <div class="md-header__ellipsis">
-        <div class="md-header__topic">
-          <span class="md-ellipsis">
-            nixidy
-          </span>
-        </div>
-        <div class="md-header__topic" data-md-component="header-topic">
-          <span class="md-ellipsis">
-            
-              Using nixhelm
-            
-          </span>
-        </div>
-      </div>
-    </div>
-    
-      
-        <form class="md-header__option" data-md-component="palette">
-  
-    
-    
-    
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
-    
-      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
-      </label>
-    
-  
-    
-    
-    
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
-    
-      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
-      </label>
-    
-  
-</form>
-      
-    
-    
-      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
-    
-    
-    
-      
-      
-        <label class="md-header__button md-icon" for="__search">
-          
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
-        </label>
-        <div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="__search"></label>
-  <div class="md-search__inner" role="search">
-    <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
-      <label class="md-search__icon md-icon" for="__search">
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-      </label>
-      <nav class="md-search__options" aria-label="Search">
-        
-        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
-          
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
-      </nav>
-      
-    </form>
-    <div class="md-search__output">
-      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="search-result">
-          <div class="md-search-result__meta">
-            Initializing search
-          </div>
-          <ol class="md-search-result__list" role="presentation"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-      
-    
-    
-      <div class="md-header__source">
-        <a href="https://github.com/arnarg/nixidy/" title="Go to repository" class="md-source" data-md-component="source">
-  <div class="md-source__icon md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
-  </div>
-  <div class="md-source__repository">
-    GitHub
-  </div>
-</a>
-      </div>
-    
-  </nav>
-  
-</header>
-    
-    <div class="md-container" data-md-component="container">
-      
-      
-        
-          
-        
-      
-      <main class="md-main" data-md-component="main">
-        <div class="md-main__inner md-grid">
-          
-            
-              
-              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-
-
-<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
-  <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="nixidy" class="md-nav__button md-logo" aria-label="nixidy" data-md-component="logo">
-      
-  <img src="../../images/icon.svg" alt="logo">
-
-    </a>
-    nixidy
-  </label>
-  
-    <div class="md-nav__source">
-      <a href="https://github.com/arnarg/nixidy/" title="Go to repository" class="md-source" data-md-component="source">
-  <div class="md-source__icon md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
-  </div>
-  <div class="md-source__repository">
-    GitHub
-  </div>
-</a>
-    </div>
-  
-  <ul class="md-nav__list" data-md-scrollfix>
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Home
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-    
-  
-  
-  
-    
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    User Guide
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_2">
-            <span class="md-nav__icon md-icon"></span>
-            User Guide
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../getting_started/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Getting Started
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../helm_charts/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Using Helm Charts
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../typed_resources/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Typed Resource Options
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../templates/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Templates
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../git_strategies/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Git Strategies
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../github_actions/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    GitHub Actions
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../transformers/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Transformers
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../object_transforms/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Object Transforms
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../postprocessing/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Post-processing
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Using nixhelm
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    Using nixhelm
-    
-  </span>
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#provide-your-own-charts-not-available-in-nixhelm" class="md-nav__link">
-    <span class="md-ellipsis">
-      Provide your own charts not available in nixhelm
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#updating-charts" class="md-nav__link">
-    <span class="md-ellipsis">
-      Updating Charts
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Updating Charts">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#optional-fields" class="md-nav__link">
-    <span class="md-ellipsis">
-      Optional fields
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#store-path-resolution" class="md-nav__link">
-    <span class="md-ellipsis">
-      Store path resolution
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../direct_apply/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Directly Apply Manifests
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../assertions/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Assertions & Warnings
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Developer Guide
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
-            <span class="md-nav__icon md-icon"></span>
-            Developer Guide
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../developer_guide/architecture/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Architecture Guide
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
-        
-          
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Reference
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            Reference
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../cli_reference/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    CLI Reference
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../library/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Library Functions
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../options/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Configuration Options
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-  </ul>
-</nav>
-                  </div>
-                </div>
-              </div>
-            
-            
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#provide-your-own-charts-not-available-in-nixhelm" class="md-nav__link">
-    <span class="md-ellipsis">
-      Provide your own charts not available in nixhelm
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#updating-charts" class="md-nav__link">
-    <span class="md-ellipsis">
-      Updating Charts
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Updating Charts">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#optional-fields" class="md-nav__link">
-    <span class="md-ellipsis">
-      Optional fields
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#store-path-resolution" class="md-nav__link">
-    <span class="md-ellipsis">
-      Store path resolution
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
-            
-          
-          
-            <div class="md-content" data-md-component="content">
-              <article class="md-content__inner md-typeset">
-                
-                  
-
-
-  
-  
-
-
-<h1 id="using-nixhelm">Using nixhelm<a class="headerlink" href="#using-nixhelm" title="Permanent link">#</a></h1>
-<p><a href="https://github.com/farcaller/nixhelm">nixhelm</a> is a collection of Helm Charts that can be used with <a href="https://github.com/farcaller/nixhelm">nix-kube-generators</a> and as a result also nixidy. The charts are automatically updated to the most recent version by CI regularly.</p>
-<p>To use with nixidy, pass the nixhelm derivation attribute set to nixidy's <code>mkEnv</code> builder like so.</p>
-<div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
-  <span class="ss">description</span> <span class="o">=</span> <span class="s2">&quot;My ArgoCD configuration with nixidy.&quot;</span><span class="p">;</span>
-  inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:nixos/nixpkgs/nixos-unstable&quot;</span><span class="p">;</span>
-  inputs<span class="o">.</span>flake-utils<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:numtide/flake-utils&quot;</span><span class="p">;</span>
+						<div class="content">
+							<p><a href="https://github.com/farcaller/nixhelm">nixhelm</a> is a collection of Helm Charts that can be used with <a href="https://github.com/farcaller/nixhelm">nix-kube-generators</a> and as a result also nixidy. The charts are automatically updated to the most recent version by CI regularly.</p>
+							<p>To use with nixidy, pass the nixhelm derivation attribute set to nixidy's <code>mkEnv</code> builder like so.</p>
+							<div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
+  <span class="ss">description</span> <span class="o">=</span> <span class="s2">"My ArgoCD configuration with nixidy."</span><span class="p">;</span>
+  inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">"github:nixos/nixpkgs/nixos-unstable"</span><span class="p">;</span>
+  inputs<span class="o">.</span>flake-utils<span class="o">.</span><span class="ss">url</span> <span class="o">=</span> <span class="s2">"github:numtide/flake-utils"</span><span class="p">;</span>
   inputs<span class="o">.</span><span class="ss">nixidy</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:arnarg/nixidy/latest&quot;</span><span class="p">;</span>
-    inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">follows</span> <span class="o">=</span> <span class="s2">&quot;nixpkgs&quot;</span><span class="p">;</span>
+    <span class="ss">url</span> <span class="o">=</span> <span class="s2">"github:arnarg/nixidy/latest"</span><span class="p">;</span>
+    inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">follows</span> <span class="o">=</span> <span class="s2">"nixpkgs"</span><span class="p">;</span>
   <span class="p">};</span>
   inputs<span class="o">.</span><span class="ss">nixhelm</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">url</span> <span class="o">=</span> <span class="s2">&quot;github:farcaller/nixhelm&quot;</span><span class="p">;</span>
-    inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">follows</span> <span class="o">=</span> <span class="s2">&quot;nixpkgs&quot;</span><span class="p">;</span>
+    <span class="ss">url</span> <span class="o">=</span> <span class="s2">"github:farcaller/nixhelm"</span><span class="p">;</span>
+    inputs<span class="o">.</span>nixpkgs<span class="o">.</span><span class="ss">follows</span> <span class="o">=</span> <span class="s2">"nixpkgs"</span><span class="p">;</span>
   <span class="p">};</span>
   <span class="ss">outputs</span> <span class="o">=</span> <span class="p">{</span>
     self<span class="p">,</span>
@@ -982,10 +403,10 @@
   <span class="p">}));</span>
 <span class="p">}</span>
 </code></pre></div>
-<details class="note">
-<summary>Using nixidy without flakes</summary>
-<p>If you prefer not to use flakes, the following can be written to <code>default.nix</code> instead.</p>
-<div class="highlight"><span class="filename">default.nix</span><pre><span></span><code><span class="k">let</span>
+							<details class="note">
+								<summary>Using nixidy without flakes</summary>
+								<p>If you prefer not to use flakes, the following can be written to <code>default.nix</code> instead.</p>
+								<div class="highlight"><span class="filename">default.nix</span><pre><span></span><code><span class="k">let</span>
   <span class="c1"># With npins</span>
   <span class="ss">sources</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./npins</span><span class="p">;</span>
   <span class="c1"># With niv</span>
@@ -1003,12 +424,12 @@
     <span class="c1"># These modules get passed to every env.</span>
     <span class="ss">modules</span> <span class="o">=</span> <span class="p">[</span>
       <span class="p">({</span>lib<span class="p">,</span> <span class="o">...</span><span class="p">}:</span> <span class="p">{</span>
-        <span class="c1"># nixhelm is a flake so we can&#39;t just import it</span>
+        <span class="c1"># nixhelm is a flake so we can't just import it</span>
         <span class="c1"># like we do in flakes (as an input).</span>
         <span class="c1"># Thankfully the directory structure in nixhelm</span>
         <span class="c1"># is compatible with the one expected by</span>
         <span class="c1"># `lib.helm.mkChartAttrs`.</span>
-        nixidy<span class="o">.</span><span class="ss">charts</span> <span class="o">=</span> lib<span class="o">.</span>helm<span class="o">.</span>mkChartAttrs <span class="s2">&quot;</span><span class="si">${</span>nixhelm<span class="si">}</span><span class="s2">/charts&quot;</span><span class="p">;</span>
+        nixidy<span class="o">.</span><span class="ss">charts</span> <span class="o">=</span> lib<span class="o">.</span>helm<span class="o">.</span>mkChartAttrs <span class="s2">"</span><span class="si">${</span>nixhelm<span class="si">}</span><span class="s2">/charts"</span><span class="p">;</span>
       <span class="p">})</span>
     <span class="p">];</span>
 
@@ -1019,14 +440,14 @@
     <span class="p">};</span>
   <span class="p">}</span>
 </code></pre></div>
-</details>
-<p>And then the argument <code>charts</code> will be passed to every module in nixidy.</p>
-<div class="highlight"><span class="filename">./env/dev.nix</span><pre><span></span><code><span class="p">{</span>
+							</details>
+							<p>And then the argument <code>charts</code> will be passed to every module in nixidy.</p>
+							<div class="highlight"><span class="filename">./env/dev.nix</span><pre><span></span><code><span class="p">{</span>
   charts<span class="p">,</span>
   <span class="o">...</span>
 <span class="p">}:</span> <span class="p">{</span>
   applications<span class="o">.</span><span class="ss">traefik</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;traefik&quot;</span><span class="p">;</span>
+    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">"traefik"</span><span class="p">;</span>
     <span class="ss">createNamespace</span> <span class="o">=</span> <span class="no">true</span><span class="p">;</span>
 
     helm<span class="o">.</span>releases<span class="o">.</span><span class="ss">traefik</span> <span class="o">=</span> <span class="p">{</span>
@@ -1041,25 +462,25 @@
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<h2 id="provide-your-own-charts-not-available-in-nixhelm">Provide your own charts not available in nixhelm<a class="headerlink" href="#provide-your-own-charts-not-available-in-nixhelm" title="Permanent link">#</a></h2>
-<p>Not all charts are available in nixhelm and in such cases you can contribute an initial version to them or setup a specific folder structure locally to merge with the <code>charts</code> argument passed to modules.</p>
-<p>With the nixidy option <code>nixidy.chartsDir</code> that folder will be walked recursively and look for <code>default.nix</code> files that will build up the charts attribute set.</p>
-<div class="highlight"><span class="filename">./charts/kubernetes-csi/csi-driver-nfs/default.nix</span><pre><span></span><code><span class="p">{</span>
-  <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts&quot;</span><span class="p">;</span>
-  <span class="ss">chart</span> <span class="o">=</span> <span class="s2">&quot;csi-driver-nfs&quot;</span><span class="p">;</span>
-  <span class="ss">version</span> <span class="o">=</span> <span class="s2">&quot;4.7.0&quot;</span><span class="p">;</span>
-  <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">&quot;sha256-EU2qaZglUU3vxa41l1p/2yBscksIhYMr8kSgH8t0vL8=&quot;</span><span class="p">;</span>
+							<h2 id="provide-your-own-charts-not-available-in-nixhelm">Provide your own charts not available in nixhelm<a class="headerlink mx-2" href="#provide-your-own-charts-not-available-in-nixhelm" title="Permanent link">#</a></h2>
+							<p>Not all charts are available in nixhelm and in such cases you can contribute an initial version to them or setup a specific folder structure locally to merge with the <code>charts</code> argument passed to modules.</p>
+							<p>With the nixidy option <code>nixidy.chartsDir</code> that folder will be walked recursively and look for <code>default.nix</code> files that will build up the charts attribute set.</p>
+							<div class="highlight"><span class="filename">./charts/kubernetes-csi/csi-driver-nfs/default.nix</span><pre><span></span><code><span class="p">{</span>
+  <span class="ss">repo</span> <span class="o">=</span> <span class="s2">"https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts"</span><span class="p">;</span>
+  <span class="ss">chart</span> <span class="o">=</span> <span class="s2">"csi-driver-nfs"</span><span class="p">;</span>
+  <span class="ss">version</span> <span class="o">=</span> <span class="s2">"4.7.0"</span><span class="p">;</span>
+  <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">"sha256-EU2qaZglUU3vxa41l1p/2yBscksIhYMr8kSgH8t0vL8="</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>And then in your nixidy modules you pass that <code>./charts</code> folder to <code>nixidy.chartsDir</code>.</p>
-<div class="highlight"><span class="filename">./env/dev.nix</span><pre><span></span><code><span class="p">{</span>charts<span class="p">,</span> <span class="o">...</span><span class="p">}:</span> <span class="p">{</span>
+							<p>And then in your nixidy modules you pass that <code>./charts</code> folder to <code>nixidy.chartsDir</code>.</p>
+							<div class="highlight"><span class="filename">./env/dev.nix</span><pre><span></span><code><span class="p">{</span>charts<span class="p">,</span> <span class="o">...</span><span class="p">}:</span> <span class="p">{</span>
   <span class="c1"># Point nixidy to a directory with charts to add to</span>
   <span class="c1"># the charts attribute set.</span>
   nixidy<span class="o">.</span><span class="ss">chartsDir</span> <span class="o">=</span> <span class="l">../charts</span><span class="p">;</span>
 
   <span class="c1"># Use the nfs chart in an application.</span>
   applications<span class="o">.</span><span class="ss">csi-driver-nfs</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">&quot;kube-system&quot;</span><span class="p">;</span>
+    <span class="ss">namespace</span> <span class="o">=</span> <span class="s2">"kube-system"</span><span class="p">;</span>
 
     helm<span class="o">.</span>releases<span class="o">.</span><span class="ss">csi-driver-nfs</span> <span class="o">=</span> <span class="p">{</span>
       <span class="ss">chart</span> <span class="o">=</span> charts<span class="o">.</span>kubernetes-csi<span class="o">.</span>csi-driver-nfs<span class="p">;</span>
@@ -1070,10 +491,10 @@
   <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div>
-<h2 id="updating-charts">Updating Charts<a class="headerlink" href="#updating-charts" title="Permanent link">#</a></h2>
-<p>Each chart produced by <code>mkChartAttrs</code> carries an <code>updateScript</code> in its <code>passthru</code> that resolves the latest upstream version, recomputes the hash, and rewrites the chart's <code>default.nix</code> in place.</p>
-<p>To update all charts at once, wrap the chart tree with <code>mkChartsUpdateScript</code> and expose it as a flake app:</p>
-<div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
+							<h2 id="updating-charts">Updating Charts<a class="headerlink mx-2" href="#updating-charts" title="Permanent link">#</a></h2>
+							<p>Each chart produced by <code>mkChartAttrs</code> carries an <code>updateScript</code> in its <code>passthru</code> that resolves the latest upstream version, recomputes the hash, and rewrites the chart's <code>default.nix</code> in place.</p>
+							<p>To update all charts at once, wrap the chart tree with <code>mkChartsUpdateScript</code> and expose it as a flake app:</p>
+							<div class="highlight"><span class="filename">flake.nix</span><pre><span></span><code><span class="p">{</span>
   <span class="ss">outputs</span> <span class="o">=</span> <span class="p">{</span> self<span class="p">,</span> nixpkgs<span class="p">,</span> flake-utils<span class="p">,</span> nixidy<span class="p">,</span> <span class="o">...</span> <span class="p">}:</span>
     flake-utils<span class="o">.</span>lib<span class="o">.</span>eachDefaultSystem <span class="p">(</span>system<span class="p">:</span>
       <span class="k">let</span>
@@ -1081,145 +502,84 @@
         <span class="k">inherit</span> <span class="p">(</span>pkgs<span class="p">)</span> lib<span class="p">;</span>
       <span class="k">in</span> <span class="p">{</span>
         apps<span class="o">.</span><span class="ss">updateCharts</span> <span class="o">=</span> <span class="p">{</span>
-          <span class="ss">type</span> <span class="o">=</span> <span class="s2">&quot;app&quot;</span><span class="p">;</span>
+          <span class="ss">type</span> <span class="o">=</span> <span class="s2">"app"</span><span class="p">;</span>
           <span class="ss">program</span> <span class="o">=</span> lib<span class="o">.</span>getExe <span class="p">(</span>nixidy<span class="o">.</span>packages<span class="o">.</span><span class="si">${</span>system<span class="si">}</span><span class="o">.</span>mkChartsUpdateScript
             <span class="p">(</span>nixidy<span class="o">.</span>packages<span class="o">.</span><span class="si">${</span>system<span class="si">}</span><span class="o">.</span>mkChartAttrs <span class="l">./charts</span><span class="p">));</span>
         <span class="p">};</span>
       <span class="p">});</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Then run:</p>
-<div class="highlight"><pre><span></span><code>nix<span class="w"> </span>run<span class="w"> </span>.#updateCharts
+							<p>Then run:</p>
+							<div class="highlight"><pre><span></span><code>nix<span class="w"> </span>run<span class="w"> </span>.#updateCharts
 </code></pre></div>
-<p>The script runs every chart's update script sequentially, continues past individual failures, and exits non-zero if any chart failed to update.</p>
-<details class="note">
-<summary>Using nixidy without flakes</summary>
-<p>Create a small derivation file and build it:</p>
-<div class="highlight"><span class="filename">update-charts.nix</span><pre><span></span><code><span class="k">let</span>
+							<p>The script runs every chart's update script sequentially, continues past individual failures, and exits non-zero if any chart failed to update.</p>
+							<details class="note">
+								<summary>Using nixidy without flakes</summary>
+								<p>Create a small derivation file and build it:</p>
+								<div class="highlight"><span class="filename">update-charts.nix</span><pre><span></span><code><span class="k">let</span>
   <span class="ss">sources</span> <span class="o">=</span> <span class="nb">import</span> <span class="l">./npins</span><span class="p">;</span>
   <span class="ss">nixidy</span> <span class="o">=</span> <span class="nb">import</span> sources<span class="o">.</span>nixidy <span class="p">{};</span>
 <span class="k">in</span>
   nixidy<span class="o">.</span>mkChartsUpdateScript <span class="p">(</span>nixidy<span class="o">.</span>mkChartAttrs <span class="l">./charts</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>nix-build<span class="w"> </span>update-charts.nix<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./result/bin/update-all-charts
+								<div class="highlight"><pre><span></span><code>nix-build<span class="w"> </span>update-charts.nix<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./result/bin/update-all-charts
 </code></pre></div>
-</details>
-<h3 id="optional-fields">Optional fields<a class="headerlink" href="#optional-fields" title="Permanent link">#</a></h3>
-<p>Two optional fields can be set in a chart's <code>default.nix</code> to control update behaviour:</p>
-<dl>
-<dt><code>versionConstraint</code></dt>
-<dd>A semver range (e.g. <code>"&gt;=4.7.0 &lt;5.0.0"</code>) passed to <code>helm show chart --version</code>. The updater resolves the latest version matching the constraint instead of the absolute latest.</dd>
-<dt><code>freeze</code></dt>
-<dd>When <code>true</code>, the updater skips this chart entirely. Useful for charts you want to pin manually.</dd>
-</dl>
-<div class="highlight"><span class="filename">./charts/argoproj/argo-cd/default.nix</span><pre><span></span><code><span class="p">{</span>
-  <span class="ss">repo</span> <span class="o">=</span> <span class="s2">&quot;https://argoproj.github.io/argo-helm/&quot;</span><span class="p">;</span>
-  <span class="ss">chart</span> <span class="o">=</span> <span class="s2">&quot;argo-cd&quot;</span><span class="p">;</span>
-  <span class="ss">version</span> <span class="o">=</span> <span class="s2">&quot;7.7.0&quot;</span><span class="p">;</span>
-  <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">&quot;sha256-...&quot;</span><span class="p">;</span>
-  <span class="ss">versionConstraint</span> <span class="o">=</span> <span class="s2">&quot;&gt;=7.0.0 &lt;8.0.0&quot;</span><span class="p">;</span>
+							</details>
+							<h3 id="optional-fields">Optional fields<a class="headerlink mx-2" href="#optional-fields" title="Permanent link">#</a></h3>
+							<p>Two optional fields can be set in a chart's <code>default.nix</code> to control update behaviour:</p>
+							<dl>
+								<dt><code>versionConstraint</code></dt>
+								<dd>A semver range (e.g. <code>"&gt;=4.7.0 &lt;5.0.0"</code>) passed to <code>helm show chart --version</code>. The updater resolves the latest version matching the constraint instead of the absolute latest.</dd>
+								<dt><code>freeze</code></dt>
+								<dd>When <code>true</code>, the updater skips this chart entirely. Useful for charts you want to pin manually.</dd>
+							</dl>
+							<div class="highlight"><span class="filename">./charts/argoproj/argo-cd/default.nix</span><pre><span></span><code><span class="p">{</span>
+  <span class="ss">repo</span> <span class="o">=</span> <span class="s2">"https://argoproj.github.io/argo-helm/"</span><span class="p">;</span>
+  <span class="ss">chart</span> <span class="o">=</span> <span class="s2">"argo-cd"</span><span class="p">;</span>
+  <span class="ss">version</span> <span class="o">=</span> <span class="s2">"7.7.0"</span><span class="p">;</span>
+  <span class="ss">chartHash</span> <span class="o">=</span> <span class="s2">"sha256-..."</span><span class="p">;</span>
+  <span class="ss">versionConstraint</span> <span class="o">=</span> <span class="s2">"&gt;=7.0.0 &lt;8.0.0"</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="store-path-resolution">Store path resolution<a class="headerlink" href="#store-path-resolution" title="Permanent link">#</a></h3>
-<p>The update script edits files in your working tree. When <code>mkChartAttrs</code> is given a path inside your repository, the script automatically maps the store path back to the corresponding working-tree relative path.</p>
-<p>If the charts directory was copied into the store as a standalone entry, the working-tree path cannot be inferred. In that case set <code>CHARTS_DIR</code> at runtime:</p>
-<div class="highlight"><pre><span></span><code><span class="nv">CHARTS_DIR</span><span class="o">=</span>./charts<span class="w"> </span>nix<span class="w"> </span>run<span class="w"> </span>.#updateCharts
+							<h3 id="store-path-resolution">Store path resolution<a class="headerlink mx-2" href="#store-path-resolution" title="Permanent link">#</a></h3>
+							<p>The update script edits files in your working tree. When <code>mkChartAttrs</code> is given a path inside your repository, the script automatically maps the store path back to the corresponding working-tree relative path.</p>
+							<p>If the charts directory was copied into the store as a standalone entry, the working-tree path cannot be inferred. In that case set <code>CHARTS_DIR</code> at runtime:</p>
+							<div class="highlight"><pre><span></span><code><span class="nv">CHARTS_DIR</span><span class="o">=</span>./charts<span class="w"> </span>nix<span class="w"> </span>run<span class="w"> </span>.#updateCharts
 </code></pre></div>
-
-
-
-
-
-
-
-
-
-
-
-
-                
-              </article>
-            </div>
-          
-          
-  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
-
-<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
-        </div>
-        
-      </main>
-      
-        <footer class="md-footer">
-  
-    
-      
-      <nav class="md-footer__inner md-grid" aria-label="Footer" >
-        
-          
-          <a href="../postprocessing/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Post-processing">
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-            </div>
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              <div class="md-ellipsis">
-                Post-processing
-              </div>
-            </div>
-          </a>
-        
-        
-          
-          <a href="../direct_apply/" class="md-footer__link md-footer__link--next" aria-label="Next: Directly Apply Manifests">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              <div class="md-ellipsis">
-                Directly Apply Manifests
-              </div>
-            </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
-            </div>
-          </a>
-        
-      </nav>
-    
-  
-  <div class="md-footer-meta md-typeset">
-    <div class="md-footer-meta__inner md-grid">
-      <div class="md-copyright">
-  
-  
-    Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-      Material for MkDocs
-    </a>
-  
-</div>
-      
-    </div>
-  </div>
-</footer>
-      
-    </div>
-    <div class="md-dialog" data-md-component="dialog">
-      <div class="md-dialog__inner md-typeset"></div>
-    </div>
-    
-    
-    
-      
-      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.footer", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
-    
-    
-      <script src="../../assets/javascripts/bundle.56ea9cef.min.js"></script>
-      
-    
-  </body>
+						</div>
+						<p class="docs-edit-link">
+							<a href="https://github.com/arnarg/nixidy/edit/main/docs/content/user_guide/using_nixhelm.md">
+								Edit this page
+							</a>
+						</p>
+						<nav class="docs-pager" aria-label="Pagination">
+							<a class="docs-pager-link docs-pager-previous" href="/user_guide/postprocessing/">
+								<span class="docs-pager-label">
+									Previous
+								</span>
+								<span class="docs-pager-title">
+									Post-processing
+								</span>
+							</a>
+							<a class="docs-pager-link docs-pager-next" href="/user_guide/direct_apply/">
+								<span class="docs-pager-label">
+									Next
+								</span>
+								<span class="docs-pager-title">
+									Directly Apply Manifests
+								</span>
+							</a>
+						</nav>
+					</main>
+				</div>
+			</div>
+		</section>
+		<footer class="footer">
+			<div class="container content is-max-desktop has-text-centered">
+				<p>
+					Generated with <a href="https://github.com/arnarg/nixtml">nixtml</a>.
+				</p>
+			</div>
+		</footer>
+	</body>
 </html>
