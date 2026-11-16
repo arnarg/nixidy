@@ -1,11 +1,10 @@
 ---
 title: "GitHub Actions"
+description: "Build environments and push the rendered manifests from CI with nixidy's build and switch actions."
 nav:
   section: user-guide
   order: 60
 ---
-
-Nixidy offers two GitHub Actions to build and switch to an environment.
 
 ## arnarg/nixidy/actions/build
 

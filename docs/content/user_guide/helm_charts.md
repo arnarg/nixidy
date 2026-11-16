@@ -1,5 +1,6 @@
 ---
 title: "Using Helm Charts"
+description: "Render Helm charts as part of an application and patch the resources they produce."
 nav:
   section: user-guide
   order: 20

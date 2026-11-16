@@ -1,5 +1,6 @@
 ---
 title: "Using nixhelm"
+description: "Use the Helm charts packaged and kept up to date by nixhelm."
 nav:
   section: user-guide
   order: 100

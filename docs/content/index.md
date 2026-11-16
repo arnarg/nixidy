@@ -1,12 +1,11 @@
 ---
 title: Kubernetes GitOps with Nix and Argo CD
+description: "nixidy lets you describe everything running in your Kubernetes clusters with Nix and the NixOS module system. It renders your configuration to plain YAML manifests, which you commit to a Git repository for Argo CD to deploy."
 nav:
   section: user-guide
   order: 0
   label: Introduction
 ---
-
-nixidy lets you describe everything running in your Kubernetes clusters with Nix and the NixOS module system. It renders your configuration to plain YAML manifests, which you commit to a Git repository for [Argo CD](https://argo-cd.readthedocs.io/) to deploy.
 
 ## Why nixidy?
 
@@ -17,7 +16,7 @@ nixidy brings the tools NixOS uses to manage a whole operating system to Kuberne
 - **One language for everything.** Your own resources, Helm charts and Kustomize applications are configured in the same place, with the same module system.
 - **Typed resources.** Every Kubernetes resource, and the CRDs you generate options for, is checked when you build, before anything reaches a cluster.
 - **Reusable modules.** Share a base configuration between environments and override only what differs.
-- **Reviewable output.** Every change is a diff of plain YAML in a pull request, so you see exactly what Argo CD will apply.
+- **Reviewable output.** Every change is a diff of plain YAML in a pull request, so you see exactly what [Argo CD](https://argo-cd.readthedocs.io/) will apply.
 - **Reproducible builds.** Charts and sources are pinned, so the same configuration always renders the same manifests.
 
 ## How It Works

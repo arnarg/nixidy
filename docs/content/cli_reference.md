@@ -1,11 +1,10 @@
 ---
 title: "CLI Reference"
+description: "Every nixidy command and its options."
 nav:
   section: reference
   order: 10
 ---
-
-This page provides documentation for the nixidy command line tool.
 
 ::: mkdocs-click
     :module: nixidy.nixidy

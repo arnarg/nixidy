@@ -1,5 +1,6 @@
 ---
 title: "Typed Resource Options"
+description: "Define Kubernetes resources as typed Nix options, and generate options for your CRDs."
 nav:
   section: user-guide
   order: 30

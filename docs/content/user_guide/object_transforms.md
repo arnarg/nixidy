@@ -1,11 +1,12 @@
 ---
 title: "Object Transforms"
+description: "Declarative rules that match objects, or parts of them, across your whole environment and update or replace them."
 nav:
   section: user-guide
   order: 80
 ---
 
-Object transforms are a declarative rule engine for modifying rendered Kubernetes objects across your whole environment. A rule matches objects (or parts of them) and replaces or updates them. They are useful for cluster-wide policy (injecting labels or annotations, rewriting a kind, dropping resources). For runtime stages that post-process a rendered file, such as encrypting secrets on write, see [Post-processing](./postprocessing.md).
+Object transforms are useful for cluster-wide policy (injecting labels or annotations, rewriting a kind, dropping resources). For runtime stages that post-process a rendered file, such as encrypting secrets on write, see [Post-processing](./postprocessing.md).
 
 Rules can be set environment-wide in `#!nix nixidy.objectTransforms`, or per application in `#!nix applications.<name>.objectTransforms`:
 

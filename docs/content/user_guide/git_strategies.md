@@ -1,11 +1,10 @@
 ---
 title: "Git Strategies"
+description: "Structure your environments as a monorepo, as environment branches or as separate repositories."
 nav:
   section: user-guide
   order: 50
 ---
-
-When it comes to planning out how to structure the git repositories for your environments some options are available.
 
 ## Monorepo
 

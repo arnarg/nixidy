@@ -1,5 +1,6 @@
 ---
 title: "Post-processing rendered files"
+description: "Commands that filter rendered files when an environment is applied, for example to encrypt secrets."
 nav:
   section: user-guide
   order: 90

@@ -1,11 +1,10 @@
 ---
 title: "Getting Started"
+description: "Set up a flake, define an environment with an application, build it and deploy it with Argo CD."
 nav:
   section: user-guide
   order: 10
 ---
-
-This guide walks you through setting up your first nixidy project step by step.
 
 ## Prerequisites
 

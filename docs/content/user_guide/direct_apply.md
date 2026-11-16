@@ -1,11 +1,10 @@
 ---
 title: "Directly Apply Manifests"
+description: "Apply an environment directly to a Kubernetes cluster with nixidy apply, as an alternative to a GitOps controller like Argo CD."
 nav:
   section: user-guide
   order: 110
 ---
-
-The `nixidy apply` sub-command provides a way to directly apply the manifests to a Kubernetes cluster. This is an alternative to using a GitOps controller like Argo CD.
 
 ## How it works
 

@@ -1,12 +1,11 @@
 ---
 title: "Nixidy Architecture Guide for Contributors"
+description: "An overview of the nixidy codebase for new contributors: the project structure, key concepts and development workflow."
 nav:
   section: developer-guide
   order: 10
   label: "Architecture Guide"
 ---
-
-This guide provides a comprehensive overview of the nixidy codebase to help new contributors understand the project structure, key concepts, and development workflow.
 
 ## Table of Contents
 
