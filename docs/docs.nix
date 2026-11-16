@@ -142,9 +142,9 @@ let
         themes.docs = {
           logo = {
             source = ../logo.svg;
-            # Only the helmet, displayed in front of the site title in the
-            # bar and used as the favicon.
-            compact.source = ./logo-compact.svg;
+            # The simplified helmet, displayed in front of the site title in
+            # the bar and used as the favicon.
+            compact.source = ./icon.svg;
           };
 
           # The badges from the README.
