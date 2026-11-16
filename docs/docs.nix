@@ -169,6 +169,10 @@ let
                 width: min(100%, 18rem);
               }
             }
+
+            .docs-brand img {
+              height: 3rem;
+            }
           '';
 
           # Light and dark variants of the same style, so every token
