@@ -23,12 +23,12 @@
 		<title>
 			Git Strategies | nixidy
 		</title>
-		<meta name="description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta name="description" content="Structure your environments as a monorepo, as environment branches or as separate repositories.">
 		<meta property="og:title" content="Git Strategies | nixidy">
 		<meta name="twitter:title" content="Git Strategies | nixidy">
 		<meta itemprop="name" content="Git Strategies | nixidy">
-		<meta property="og:description" content="Kubernetes GitOps with nix and Argo CD.">
-		<meta name="twitter:description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta property="og:description" content="Structure your environments as a monorepo, as environment branches or as separate repositories.">
+		<meta name="twitter:description" content="Structure your environments as a monorepo, as environment branches or as separate repositories.">
 		<meta name="application-name" content="nixidy">
 		<meta property="og:site_name" content="nixidy">
 		<meta property="og:locale" content="en">
@@ -37,14 +37,8 @@
 	<body>
 		<header class="docs-topbar">
 			<div class="docs-container">
-				<button type="button" class="navbar-burger docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
+				<button type="button" class="button is-small docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
+					<span class="docs-icon is-menu" aria-hidden="true">
 					</span>
 				</button>
 				<a class="docs-brand" href="/">
@@ -143,14 +137,8 @@
 									</span>
 								</span>
 							</a>
-							<button type="button" class="navbar-burger is-active docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
+							<button type="button" class="button is-small docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
+								<span class="docs-icon is-close" aria-hidden="true">
 								</span>
 							</button>
 						</div>
@@ -367,9 +355,10 @@
 						<h1 class="title">
 							Git Strategies
 						</h1>
-
+						<p class="docs-lede">
+							Structure your environments as a monorepo, as environment branches or as separate repositories.
+						</p>
 						<div class="content">
-							<p>When it comes to planning out how to structure the git repositories for your environments some options are available.</p>
 							<h2 id="monorepo">Monorepo<a class="headerlink mx-2" href="#monorepo" title="Permanent link">#</a></h2>
 							<p>With this strategy everything happens on the <code>main</code>/<code>master</code> branch. With every change to nixidy modules should result in a rebuild and the resulting manifests will be put in a sub-directory on the same branch.</p>
 							<p><img alt="Diagram showing the monorepo strategy." src="../../images/monorepo.jpg"></p>

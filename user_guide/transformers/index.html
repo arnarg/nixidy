@@ -23,12 +23,12 @@
 		<title>
 			Transformers | nixidy
 		</title>
-		<meta name="description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta name="description" content="Functions that modify the manifests rendered by Helm releases and Kustomize applications before nixidy parses them into resources.">
 		<meta property="og:title" content="Transformers | nixidy">
 		<meta name="twitter:title" content="Transformers | nixidy">
 		<meta itemprop="name" content="Transformers | nixidy">
-		<meta property="og:description" content="Kubernetes GitOps with nix and Argo CD.">
-		<meta name="twitter:description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta property="og:description" content="Functions that modify the manifests rendered by Helm releases and Kustomize applications before nixidy parses them into resources.">
+		<meta name="twitter:description" content="Functions that modify the manifests rendered by Helm releases and Kustomize applications before nixidy parses them into resources.">
 		<meta name="application-name" content="nixidy">
 		<meta property="og:site_name" content="nixidy">
 		<meta property="og:locale" content="en">
@@ -37,14 +37,8 @@
 	<body>
 		<header class="docs-topbar">
 			<div class="docs-container">
-				<button type="button" class="navbar-burger docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
+				<button type="button" class="button is-small docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
+					<span class="docs-icon is-menu" aria-hidden="true">
 					</span>
 				</button>
 				<a class="docs-brand" href="/">
@@ -143,14 +137,8 @@
 									</span>
 								</span>
 							</a>
-							<button type="button" class="navbar-burger is-active docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
+							<button type="button" class="button is-small docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
+								<span class="docs-icon is-close" aria-hidden="true">
 								</span>
 							</button>
 						</div>
@@ -367,9 +355,11 @@
 						<h1 class="title">
 							Transformers
 						</h1>
-
+						<p class="docs-lede">
+							Functions that modify the manifests rendered by Helm releases and Kustomize applications before nixidy parses them into resources.
+						</p>
 						<div class="content">
-							<p>Nixidy supports adding a transformers to Helm releases and Kustomize applications. A transformer is only a function that takes in a list of Kubernetes manifests in attribute sets and returns the same (<code>[AttrSet] -&gt; [AttrSet]</code>). It is called <em>after</em> the manifests have been rendered and parsed into nix but <em>before</em> they're transformed into the nixidy form (<code>&lt;group&gt;.&lt;version&gt;.&lt;kind&gt;.&lt;name&gt;</code>) and can be used to modify the resources.</p>
+							<p>A transformer is a function that takes in a list of Kubernetes manifests in attribute sets and returns the same (<code>[AttrSet] -&gt; [AttrSet]</code>). It is called <em>after</em> the manifests have been rendered and parsed into nix but <em>before</em> they're transformed into the nixidy form (<code>&lt;group&gt;.&lt;version&gt;.&lt;kind&gt;.&lt;name&gt;</code>) and can be used to modify the resources.</p>
 							<p>Transformers can be set globally in <code class="highlight">nixidy<span class="o">.</span>defaults<span class="o">.</span>helm<span class="o">.</span>transformer</code> for Helm releases and <code class="highlight">nixidy<span class="o">.</span>defaults<span class="o">.</span>kustomize<span class="o">.</span>transformer</code> for kustomize applications.</p>
 							<div class="admonition tip">
 								<p class="admonition-title">Tip</p>

@@ -23,12 +23,12 @@
 		<title>
 			Assertions & Warnings | nixidy
 		</title>
-		<meta name="description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta name="description" content="Build-time assertions and warnings, like in the NixOS module system, that catch misconfigurations early with clear error messages.">
 		<meta property="og:title" content="Assertions & Warnings | nixidy">
 		<meta name="twitter:title" content="Assertions & Warnings | nixidy">
 		<meta itemprop="name" content="Assertions & Warnings | nixidy">
-		<meta property="og:description" content="Kubernetes GitOps with nix and Argo CD.">
-		<meta name="twitter:description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta property="og:description" content="Build-time assertions and warnings, like in the NixOS module system, that catch misconfigurations early with clear error messages.">
+		<meta name="twitter:description" content="Build-time assertions and warnings, like in the NixOS module system, that catch misconfigurations early with clear error messages.">
 		<meta name="application-name" content="nixidy">
 		<meta property="og:site_name" content="nixidy">
 		<meta property="og:locale" content="en">
@@ -37,14 +37,8 @@
 	<body>
 		<header class="docs-topbar">
 			<div class="docs-container">
-				<button type="button" class="navbar-burger docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
+				<button type="button" class="button is-small docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
+					<span class="docs-icon is-menu" aria-hidden="true">
 					</span>
 				</button>
 				<a class="docs-brand" href="/">
@@ -143,14 +137,8 @@
 									</span>
 								</span>
 							</a>
-							<button type="button" class="navbar-burger is-active docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
+							<button type="button" class="button is-small docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
+								<span class="docs-icon is-close" aria-hidden="true">
 								</span>
 							</button>
 						</div>
@@ -367,9 +355,10 @@
 						<h1 class="title">
 							Assertions & Warnings
 						</h1>
-
+						<p class="docs-lede">
+							Build-time assertions and warnings, like in the NixOS module system, that catch misconfigurations early with clear error messages.
+						</p>
 						<div class="content">
-							<p>Nixidy supports build-time assertions and warnings, similar to the NixOS module system. These allow you to define invariants that are checked during evaluation, catching misconfigurations early with clear error messages.</p>
 							<h2 id="assertions">Assertions<a class="headerlink mx-2" href="#assertions" title="Permanent link">#</a></h2>
 							<p>Assertions are conditions that <strong>must</strong> be true. If any assertion fails, the build will fail with a descriptive message.</p>
 							<h3 id="per-application-assertions">Per-application assertions<a class="headerlink mx-2" href="#per-application-assertions" title="Permanent link">#</a></h3>

@@ -23,12 +23,12 @@
 		<title>
 			Getting Started | nixidy
 		</title>
-		<meta name="description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta name="description" content="Set up a flake, define an environment with an application, build it and deploy it with Argo CD.">
 		<meta property="og:title" content="Getting Started | nixidy">
 		<meta name="twitter:title" content="Getting Started | nixidy">
 		<meta itemprop="name" content="Getting Started | nixidy">
-		<meta property="og:description" content="Kubernetes GitOps with nix and Argo CD.">
-		<meta name="twitter:description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta property="og:description" content="Set up a flake, define an environment with an application, build it and deploy it with Argo CD.">
+		<meta name="twitter:description" content="Set up a flake, define an environment with an application, build it and deploy it with Argo CD.">
 		<meta name="application-name" content="nixidy">
 		<meta property="og:site_name" content="nixidy">
 		<meta property="og:locale" content="en">
@@ -37,14 +37,8 @@
 	<body>
 		<header class="docs-topbar">
 			<div class="docs-container">
-				<button type="button" class="navbar-burger docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
+				<button type="button" class="button is-small docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
+					<span class="docs-icon is-menu" aria-hidden="true">
 					</span>
 				</button>
 				<a class="docs-brand" href="/">
@@ -143,14 +137,8 @@
 									</span>
 								</span>
 							</a>
-							<button type="button" class="navbar-burger is-active docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
+							<button type="button" class="button is-small docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
+								<span class="docs-icon is-close" aria-hidden="true">
 								</span>
 							</button>
 						</div>
@@ -367,9 +355,10 @@
 						<h1 class="title">
 							Getting Started
 						</h1>
-
+						<p class="docs-lede">
+							Set up a flake, define an environment with an application, build it and deploy it with Argo CD.
+						</p>
 						<div class="content">
-							<p>This guide walks you through setting up your first nixidy project step by step.</p>
 							<h2 id="prerequisites">Prerequisites<a class="headerlink mx-2" href="#prerequisites" title="Permanent link">#</a></h2>
 							<ul>
 								<li><a href="https://nixos.org/download.html">Nix</a> installed with flakes enabled</li>

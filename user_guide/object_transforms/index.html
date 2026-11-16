@@ -23,12 +23,12 @@
 		<title>
 			Object Transforms | nixidy
 		</title>
-		<meta name="description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta name="description" content="Declarative rules that match objects, or parts of them, across your whole environment and update or replace them.">
 		<meta property="og:title" content="Object Transforms | nixidy">
 		<meta name="twitter:title" content="Object Transforms | nixidy">
 		<meta itemprop="name" content="Object Transforms | nixidy">
-		<meta property="og:description" content="Kubernetes GitOps with nix and Argo CD.">
-		<meta name="twitter:description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta property="og:description" content="Declarative rules that match objects, or parts of them, across your whole environment and update or replace them.">
+		<meta name="twitter:description" content="Declarative rules that match objects, or parts of them, across your whole environment and update or replace them.">
 		<meta name="application-name" content="nixidy">
 		<meta property="og:site_name" content="nixidy">
 		<meta property="og:locale" content="en">
@@ -37,14 +37,8 @@
 	<body>
 		<header class="docs-topbar">
 			<div class="docs-container">
-				<button type="button" class="navbar-burger docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
+				<button type="button" class="button is-small docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
+					<span class="docs-icon is-menu" aria-hidden="true">
 					</span>
 				</button>
 				<a class="docs-brand" href="/">
@@ -143,14 +137,8 @@
 									</span>
 								</span>
 							</a>
-							<button type="button" class="navbar-burger is-active docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
+							<button type="button" class="button is-small docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
+								<span class="docs-icon is-close" aria-hidden="true">
 								</span>
 							</button>
 						</div>
@@ -367,9 +355,11 @@
 						<h1 class="title">
 							Object Transforms
 						</h1>
-
+						<p class="docs-lede">
+							Declarative rules that match objects, or parts of them, across your whole environment and update or replace them.
+						</p>
 						<div class="content">
-							<p>Object transforms are a declarative rule engine for modifying rendered Kubernetes objects across your whole environment. A rule matches objects (or parts of them) and replaces or updates them. They are useful for cluster-wide policy (injecting labels or annotations, rewriting a kind, dropping resources). For runtime stages that post-process a rendered file, such as encrypting secrets on write, see <a href="../postprocessing/">Post-processing</a>.</p>
+							<p>Object transforms are useful for cluster-wide policy (injecting labels or annotations, rewriting a kind, dropping resources). For runtime stages that post-process a rendered file, such as encrypting secrets on write, see <a href="../postprocessing/">Post-processing</a>.</p>
 							<p>Rules can be set environment-wide in <code class="highlight">nixidy<span class="o">.</span>objectTransforms</code>, or per application in <code class="highlight">applications<span class="o">.</span><span class="l">&lt;name&gt;</span><span class="o">.</span>objectTransforms</code>:</p>
 							<div class="highlight"><pre><span></span><code><span class="p">{</span>
   nixidy<span class="o">.</span><span class="ss">objectTransforms</span> <span class="o">=</span> <span class="p">{</span>

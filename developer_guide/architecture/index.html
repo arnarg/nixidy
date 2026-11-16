@@ -23,12 +23,12 @@
 		<title>
 			Nixidy Architecture Guide for Contributors | nixidy
 		</title>
-		<meta name="description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta name="description" content="An overview of the nixidy codebase for new contributors: the project structure, key concepts and development workflow.">
 		<meta property="og:title" content="Nixidy Architecture Guide for Contributors | nixidy">
 		<meta name="twitter:title" content="Nixidy Architecture Guide for Contributors | nixidy">
 		<meta itemprop="name" content="Nixidy Architecture Guide for Contributors | nixidy">
-		<meta property="og:description" content="Kubernetes GitOps with nix and Argo CD.">
-		<meta name="twitter:description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta property="og:description" content="An overview of the nixidy codebase for new contributors: the project structure, key concepts and development workflow.">
+		<meta name="twitter:description" content="An overview of the nixidy codebase for new contributors: the project structure, key concepts and development workflow.">
 		<meta name="application-name" content="nixidy">
 		<meta property="og:site_name" content="nixidy">
 		<meta property="og:locale" content="en">
@@ -37,14 +37,8 @@
 	<body>
 		<header class="docs-topbar">
 			<div class="docs-container">
-				<button type="button" class="navbar-burger docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
+				<button type="button" class="button is-small docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
+					<span class="docs-icon is-menu" aria-hidden="true">
 					</span>
 				</button>
 				<a class="docs-brand" href="/">
@@ -143,14 +137,8 @@
 									</span>
 								</span>
 							</a>
-							<button type="button" class="navbar-burger is-active docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
+							<button type="button" class="button is-small docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
+								<span class="docs-icon is-close" aria-hidden="true">
 								</span>
 							</button>
 						</div>
@@ -367,9 +355,10 @@
 						<h1 class="title">
 							Nixidy Architecture Guide for Contributors
 						</h1>
-
+						<p class="docs-lede">
+							An overview of the nixidy codebase for new contributors: the project structure, key concepts and development workflow.
+						</p>
 						<div class="content">
-							<p>This guide provides a comprehensive overview of the nixidy codebase to help new contributors understand the project structure, key concepts, and development workflow.</p>
 							<h2 id="table-of-contents">Table of Contents<a class="headerlink mx-2" href="#table-of-contents" title="Permanent link">#</a></h2>
 							<ul>
 								<li><a href="#project-structure">Project Structure</a></li>

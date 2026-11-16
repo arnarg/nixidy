@@ -23,12 +23,12 @@
 		<title>
 			Using Helm Charts | nixidy
 		</title>
-		<meta name="description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta name="description" content="Render Helm charts as part of an application and patch the resources they produce.">
 		<meta property="og:title" content="Using Helm Charts | nixidy">
 		<meta name="twitter:title" content="Using Helm Charts | nixidy">
 		<meta itemprop="name" content="Using Helm Charts | nixidy">
-		<meta property="og:description" content="Kubernetes GitOps with nix and Argo CD.">
-		<meta name="twitter:description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta property="og:description" content="Render Helm charts as part of an application and patch the resources they produce.">
+		<meta name="twitter:description" content="Render Helm charts as part of an application and patch the resources they produce.">
 		<meta name="application-name" content="nixidy">
 		<meta property="og:site_name" content="nixidy">
 		<meta property="og:locale" content="en">
@@ -37,14 +37,8 @@
 	<body>
 		<header class="docs-topbar">
 			<div class="docs-container">
-				<button type="button" class="navbar-burger docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
+				<button type="button" class="button is-small docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
+					<span class="docs-icon is-menu" aria-hidden="true">
 					</span>
 				</button>
 				<a class="docs-brand" href="/">
@@ -143,14 +137,8 @@
 									</span>
 								</span>
 							</a>
-							<button type="button" class="navbar-burger is-active docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
+							<button type="button" class="button is-small docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
+								<span class="docs-icon is-close" aria-hidden="true">
 								</span>
 							</button>
 						</div>
@@ -367,7 +355,9 @@
 						<h1 class="title">
 							Using Helm Charts
 						</h1>
-
+						<p class="docs-lede">
+							Render Helm charts as part of an application and patch the resources they produce.
+						</p>
 						<div class="content">
 							<p>For better or for worse majority of software that's deployable to Kubernetes is packaged using Helm by developers or its community. It would be a waste not to use them and having to define all of its manifest yourself in nixidy.</p>
 							<h2 id="adding-a-helm-release-as-part-of-an-application">Adding a Helm release as part of an application<a class="headerlink mx-2" href="#adding-a-helm-release-as-part-of-an-application" title="Permanent link">#</a></h2>

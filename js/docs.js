@@ -75,8 +75,8 @@
   // Mobile navigation.
   //
   // The menu is visible in normal flow until this feature is initialized, so
-  // it remains available when JavaScript is disabled. Once enhanced, Bulma's
-  // navbar burger opens the off-canvas menu, and the close button in its top
+  // it remains available when JavaScript is disabled. Once enhanced, the menu
+  // button opens the off-canvas menu, and the close button in its top
   // right corner, the overlay or the Escape key closes it.
   var setupMobileNavigation = function (container) {
     var root = document.documentElement;

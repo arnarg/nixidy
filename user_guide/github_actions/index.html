@@ -23,12 +23,12 @@
 		<title>
 			GitHub Actions | nixidy
 		</title>
-		<meta name="description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta name="description" content="Build environments and push the rendered manifests from CI with nixidy's build and switch actions.">
 		<meta property="og:title" content="GitHub Actions | nixidy">
 		<meta name="twitter:title" content="GitHub Actions | nixidy">
 		<meta itemprop="name" content="GitHub Actions | nixidy">
-		<meta property="og:description" content="Kubernetes GitOps with nix and Argo CD.">
-		<meta name="twitter:description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta property="og:description" content="Build environments and push the rendered manifests from CI with nixidy's build and switch actions.">
+		<meta name="twitter:description" content="Build environments and push the rendered manifests from CI with nixidy's build and switch actions.">
 		<meta name="application-name" content="nixidy">
 		<meta property="og:site_name" content="nixidy">
 		<meta property="og:locale" content="en">
@@ -37,14 +37,8 @@
 	<body>
 		<header class="docs-topbar">
 			<div class="docs-container">
-				<button type="button" class="navbar-burger docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
+				<button type="button" class="button is-small docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
+					<span class="docs-icon is-menu" aria-hidden="true">
 					</span>
 				</button>
 				<a class="docs-brand" href="/">
@@ -143,14 +137,8 @@
 									</span>
 								</span>
 							</a>
-							<button type="button" class="navbar-burger is-active docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
+							<button type="button" class="button is-small docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
+								<span class="docs-icon is-close" aria-hidden="true">
 								</span>
 							</button>
 						</div>
@@ -367,9 +355,10 @@
 						<h1 class="title">
 							GitHub Actions
 						</h1>
-
+						<p class="docs-lede">
+							Build environments and push the rendered manifests from CI with nixidy's build and switch actions.
+						</p>
 						<div class="content">
-							<p>Nixidy offers two GitHub Actions to build and switch to an environment.</p>
 							<h2 id="arnargnixidyactionsbuild">arnarg/nixidy/actions/build<a class="headerlink mx-2" href="#arnargnixidyactionsbuild" title="Permanent link">#</a></h2>
 							<p>This action will run <code>nixidy build</code> on a specified environment. It will not produce a <code>result</code> symlink and instead will have the output path in it's output <code>out-path</code>.</p>
 							<h3 id="example">Example<a class="headerlink mx-2" href="#example" title="Permanent link">#</a></h3>

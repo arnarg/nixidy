@@ -23,12 +23,12 @@
 		<title>
 			nixidy
 		</title>
-		<meta name="description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta name="description" content="nixidy lets you describe everything running in your Kubernetes clusters with Nix and the NixOS module system. It renders your configuration to plain YAML manifests, which you commit to a Git repository for Argo CD to deploy.">
 		<meta property="og:title" content="nixidy">
 		<meta name="twitter:title" content="nixidy">
 		<meta itemprop="name" content="nixidy">
-		<meta property="og:description" content="Kubernetes GitOps with nix and Argo CD.">
-		<meta name="twitter:description" content="Kubernetes GitOps with nix and Argo CD.">
+		<meta property="og:description" content="nixidy lets you describe everything running in your Kubernetes clusters with Nix and the NixOS module system. It renders your configuration to plain YAML manifests, which you commit to a Git repository for Argo CD to deploy.">
+		<meta name="twitter:description" content="nixidy lets you describe everything running in your Kubernetes clusters with Nix and the NixOS module system. It renders your configuration to plain YAML manifests, which you commit to a Git repository for Argo CD to deploy.">
 		<meta name="application-name" content="nixidy">
 		<meta property="og:site_name" content="nixidy">
 		<meta property="og:locale" content="en">
@@ -37,14 +37,8 @@
 	<body>
 		<header class="docs-topbar">
 			<div class="docs-container">
-				<button type="button" class="navbar-burger docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
-					</span>
-					<span aria-hidden="true">
+				<button type="button" class="button is-small docs-mobile-nav-toggle is-hidden-desktop" aria-label="Browse documentation" aria-expanded="false" aria-controls="docs-mobile-navigation" hidden="">
+					<span class="docs-icon is-menu" aria-hidden="true">
 					</span>
 				</button>
 
@@ -151,14 +145,8 @@
 									</span>
 								</span>
 							</a>
-							<button type="button" class="navbar-burger is-active docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
-								</span>
-								<span aria-hidden="true">
+							<button type="button" class="button is-small docs-mobile-nav-close" aria-label="Close navigation" aria-controls="docs-mobile-navigation" hidden="">
+								<span class="docs-icon is-close" aria-hidden="true">
 								</span>
 							</button>
 						</div>
@@ -375,9 +363,10 @@
 						<h1 class="title">
 							Kubernetes GitOps with Nix and Argo CD
 						</h1>
-
+						<p class="docs-lede">
+							nixidy lets you describe everything running in your Kubernetes clusters with Nix and the NixOS module system. It renders your configuration to plain YAML manifests, which you commit to a Git repository for Argo CD to deploy.
+						</p>
 						<div class="content">
-							<p>nixidy lets you describe everything running in your Kubernetes clusters with Nix and the NixOS module system. It renders your configuration to plain YAML manifests, which you commit to a Git repository for <a href="https://argo-cd.readthedocs.io/">Argo CD</a> to deploy.</p>
 							<h2 id="why-nixidy">Why nixidy?<a class="headerlink mx-2" href="#why-nixidy" title="Permanent link">#</a></h2>
 							<p>Kubernetes configuration tends to sprawl. Helm charts need ever-growing value overrides, Kustomize overlays repeat themselves, and raw YAML is copied between environments until nobody knows which copy is right. Reviewing what a change actually does to a cluster is hard.</p>
 							<p>nixidy brings the tools NixOS uses to manage a whole operating system to Kubernetes:</p>
@@ -385,7 +374,7 @@
 								<li><strong>One language for everything.</strong> Your own resources, Helm charts and Kustomize applications are configured in the same place, with the same module system.</li>
 								<li><strong>Typed resources.</strong> Every Kubernetes resource, and the CRDs you generate options for, is checked when you build, before anything reaches a cluster.</li>
 								<li><strong>Reusable modules.</strong> Share a base configuration between environments and override only what differs.</li>
-								<li><strong>Reviewable output.</strong> Every change is a diff of plain YAML in a pull request, so you see exactly what Argo CD will apply.</li>
+								<li><strong>Reviewable output.</strong> Every change is a diff of plain YAML in a pull request, so you see exactly what <a href="https://argo-cd.readthedocs.io/">Argo CD</a> will apply.</li>
 								<li><strong>Reproducible builds.</strong> Charts and sources are pinned, so the same configuration always renders the same manifests.</li>
 							</ul>
 							<h2 id="how-it-works">How It Works<a class="headerlink mx-2" href="#how-it-works" title="Permanent link">#</a></h2>
