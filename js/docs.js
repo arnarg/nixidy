@@ -1,6 +1,9 @@
 // Scripts for the nixtml docs theme. Each feature is only set up when its
 // markup is present on the page.
 (function () {
+  // Settings are given as data attributes of this script's element.
+  var script = document.currentScript;
+
   var storage = {
     get: function (key) {
       try {
@@ -305,6 +308,90 @@
       function () {}
     );
   };
+
+  // Copy buttons in code blocks.
+  //
+  // The <pre> is wrapped in a container holding the button, which keeps the
+  // button below a code block title, and in place when the code scrolls
+  // horizontally. After a click, its icon shows the result for a moment,
+  // which is also announced to screen readers.
+  var copyResetDelay = 2000;
+
+  var setupCopyCode = function (block) {
+    // With table line numbers, the code is in its own cell.
+    var code = block.querySelector("td.code pre code") || block.querySelector("pre code");
+    if (!code) {
+      return;
+    }
+
+    var labels = {
+      copy: script.dataset.labelCopy,
+      success: script.dataset.labelCopied,
+      error: script.dataset.labelCopyFailed,
+    };
+
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "docs-copy-code";
+    var icon = document.createElement("span");
+    icon.className = "docs-icon";
+    icon.setAttribute("aria-hidden", "true");
+    button.appendChild(icon);
+
+    var status = document.createElement("span");
+    status.className = "docs-visually-hidden";
+    status.setAttribute("role", "status");
+
+    var resetTimer;
+
+    var show = function (state) {
+      icon.className = "docs-icon is-" + (state === "success" ? "check" : state === "error" ? "close" : "copy");
+      button.setAttribute("aria-label", labels[state] || labels.copy);
+      button.title = labels[state] || labels.copy;
+      if (state === "copy") {
+        delete button.dataset.state;
+        status.textContent = "";
+      } else {
+        button.dataset.state = state;
+        status.textContent = labels[state];
+      }
+    };
+
+    button.addEventListener("click", function () {
+      window.clearTimeout(resetTimer);
+
+      // Leave out inline line numbers.
+      var copy = code.cloneNode(true);
+      copy.querySelectorAll(".linenos").forEach(function (element) {
+        element.remove();
+      });
+
+      navigator.clipboard.writeText(copy.textContent).then(
+        function () {
+          show("success");
+        },
+        function () {
+          show("error");
+        }
+      ).then(function () {
+        resetTimer = window.setTimeout(function () {
+          show("copy");
+        }, copyResetDelay);
+      });
+    });
+
+    show("copy");
+    var pre = code.closest("pre");
+    var container = document.createElement("div");
+    container.className = "docs-copy-code-container";
+    pre.parentNode.insertBefore(container, pre);
+    // <pre> stays the last child, keeping its spacing.
+    container.append(button, status, pre);
+  };
+
+  if (script && script.hasAttribute("data-copy-code") && navigator.clipboard && window.isSecureContext) {
+    document.querySelectorAll(".content div.highlight").forEach(setupCopyCode);
+  }
 
   document.querySelectorAll(".docs-mobile-nav").forEach(setupMobileNavigation);
   document.querySelectorAll(".docs-color-scheme").forEach(setupColorScheme);
