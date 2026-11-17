@@ -63,35 +63,6 @@ let
       doCheck = false;
     };
 
-  # Package pygments-styles for the catppuccin code highlighting styles.
-  # See: https://pygments-styles.org/
-  pygments-styles =
-    let
-      pname = "pygments-styles";
-      version = "0.3.0";
-    in
-    python3Packages.buildPythonPackage {
-      inherit pname version;
-      pyproject = true;
-
-      src = pkgs.fetchFromGitHub {
-        owner = "lepture";
-        repo = pname;
-        rev = version;
-        hash = "sha256-3tVbeoDCDwHczst9Z22iVBzXfCDoAPjHBYBFzt+CXDY=";
-      };
-
-      build-system = with python3Packages; [
-        setuptools
-        setuptools-scm
-      ];
-
-      dependencies = with python3Packages; [
-        setuptools
-        pygments
-      ];
-    };
-
   website = nixtml.lib.evalModules {
     inherit pkgs;
     modules = [
@@ -129,7 +100,6 @@ let
               extraPythonPackages = [
                 mkdocs-click
                 cli-package
-                pygments-styles
               ];
             };
           };
@@ -174,13 +144,6 @@ let
               height: 3rem;
             }
           '';
-
-          # Light and dark variants of the same style, so every token
-          # switches with the color scheme.
-          codeStyles = {
-            light = "catppuccin-latte";
-            dark = "catppuccin-mocha";
-          };
 
           # Colors from the logo.
           colors = {

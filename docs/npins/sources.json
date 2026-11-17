@@ -22,9 +22,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "55fd23581f7b9c5795f37b61a684e33063e0ec88",
-      "url": "https://github.com/arnarg/nixtml/archive/55fd23581f7b9c5795f37b61a684e33063e0ec88.tar.gz",
-      "hash": "sha256-95o3eNeup/OJq+MBYOuM+Vr5AyCcedxlBf8MlZsc9S0="
+      "revision": "d3cafd95a56320ca3d514f529c1798a45c9f6e91",
+      "url": "https://github.com/arnarg/nixtml/archive/d3cafd95a56320ca3d514f529c1798a45c9f6e91.tar.gz",
+      "hash": "sha256-2ffGu0cwx/BMu0NzMxNZ/y127NMAMBvX60QSAqXnc3M="
     }
   },
   "version": 7
