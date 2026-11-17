@@ -20,29 +20,30 @@
 
   // Color scheme switcher.
   //
-  // The chosen scheme ("system", "light" or "dark") is saved in localStorage.
-  // "system" follows the reader's system preference by removing `data-theme`
-  // from the root element, while "light" and "dark" set it. An inline script
-  // in <head> applies the saved scheme before the page is rendered.
+  // The chosen scheme ("light" or "dark") is saved in localStorage. Without a
+  // saved choice, the initial scheme follows the reader's system preference.
+  // An inline script in <head> applies the saved scheme before the page is rendered.
   var setupColorScheme = function (switcher) {
     var root = document.documentElement;
     var key = switcher.dataset.storageKey;
     var fallback = switcher.dataset.default;
-    var schemes = ["system", "light", "dark"];
+    var schemes = ["light", "dark"];
     var button = switcher.querySelector("[data-color-scheme]");
     var icon = button.querySelector(".docs-icon");
 
     var load = function () {
       var scheme = storage.get(key);
-      return schemes.indexOf(scheme) === -1 ? fallback : scheme;
+      if (schemes.indexOf(scheme) !== -1) {
+        return scheme;
+      }
+      if (schemes.indexOf(fallback) !== -1) {
+        return fallback;
+      }
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     };
 
     var apply = function (scheme) {
-      if (scheme === "system") {
-        root.removeAttribute("data-theme");
-      } else {
-        root.setAttribute("data-theme", scheme);
-      }
+      root.setAttribute("data-theme", scheme);
 
       var next = schemes[(schemes.indexOf(scheme) + 1) % schemes.length];
 
